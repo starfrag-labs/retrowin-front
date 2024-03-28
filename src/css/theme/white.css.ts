@@ -1,7 +1,7 @@
 import { createTheme } from '@vanilla-extract/css';
 import { vars } from './contract.css';
-import { robotoRegular } from '../font/font.css';
 import { colors } from './global.css';
+import { robotoRegular } from '../fonts/font.css';
 
 export const whiteTheme = createTheme(vars, {
   color: {
