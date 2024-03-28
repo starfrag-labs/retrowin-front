@@ -11,13 +11,13 @@ export const whiteTheme = createTheme(vars, {
   font: {
     default: robotoRegular,
   },
-  margin: {
+  padding: {
     default: '10px',
   },
   backgroundColor: {
     default: colors.grey[50],
   },
   display: {
-    default: 'grid',
+    default: 'flex',
   },
 });

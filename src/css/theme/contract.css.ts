@@ -8,7 +8,7 @@ export const vars = createThemeContract({
   font: {
     default: null,
   },
-  margin: {
+  padding: {
     default: null,
   },
   backgroundColor: {

@@ -13,7 +13,6 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as NaviagtionImport } from './routes/naviagtion.tsx'
 import { Route as AboutImport } from './routes/about.tsx'
 
 // Create Virtual Routes
@@ -21,11 +20,6 @@ import { Route as AboutImport } from './routes/about.tsx'
 const IndexLazyImport = createFileRoute('/')()
 
 // Create/Update Routes
-
-const NaviagtionRoute = NaviagtionImport.update({
-  path: '/naviagtion',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const AboutRoute = AboutImport.update({
   path: '/about',
@@ -49,19 +43,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AboutImport
       parentRoute: typeof rootRoute
     }
-    '/naviagtion': {
-      preLoaderRoute: typeof NaviagtionImport
-      parentRoute: typeof rootRoute
-    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  IndexLazyRoute,
-  AboutRoute,
-  NaviagtionRoute,
-])
+export const routeTree = rootRoute.addChildren([IndexLazyRoute, AboutRoute])
 
 /* prettier-ignore-end */
