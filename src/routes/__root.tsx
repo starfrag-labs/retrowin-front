@@ -1,16 +1,27 @@
 import { Link, Outlet, createRootRoute } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import { whiteTheme } from '../css/theme/white.css';
 import { root } from '../css/style.css';
+import { themes } from '../css/themes/index.css';
 
 export const Route = createRootRoute({
   component: RootComponent,
 });
 
+const setTheme = (theme: string) => {
+  switch (theme) {
+    case 'dark':
+      return themes.dark;
+    case 'light':
+      return themes.light;
+    default:
+      return themes.default;
+  }
+};
+
 function RootComponent() {
   return (
     <>
-      <div className={whiteTheme}>
+      <div className={setTheme('default')}>
         <div className={root}>
           <Link
             to="/"
