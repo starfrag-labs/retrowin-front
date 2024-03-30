@@ -1,6 +1,7 @@
 import { createGlobalTheme } from '@vanilla-extract/css';
 
 export const primaryColor = (hue: number, saturation: number) => {
+  const reverseHue = (hue + 100) % 360;
   return {
     100: `hsl(${hue}, ${saturation}%, 95%)`,
     200: `hsl(${hue}, ${saturation}%, 85%)`,
@@ -11,11 +12,19 @@ export const primaryColor = (hue: number, saturation: number) => {
     700: `hsl(${hue}, ${saturation}%, 35%)`,
     800: `hsl(${hue}, ${saturation}%, 25%)`,
     900: `hsl(${hue}, ${saturation}%, 15%)`,
+    r100: `hsl(${reverseHue}, ${saturation}%, 95%)`,
+    r200: `hsl(${reverseHue}, ${saturation}%, 85%)`,
+    r300: `hsl(${reverseHue}, ${saturation}%, 75%)`,
+    r400: `hsl(${reverseHue}, ${saturation}%, 65%)`,
+    r500: `hsl(${reverseHue}, ${saturation}%, 55%)`,
+    r600: `hsl(${reverseHue}, ${saturation}%, 45%)`,
+    r700: `hsl(${reverseHue}, ${saturation}%, 35%)`,
+    r800: `hsl(${reverseHue}, ${saturation}%, 25%)`,
+    r900: `hsl(${reverseHue}, ${saturation}%, 15%)`,
   }
 }
 
 export const colors = createGlobalTheme(':root', {
-  primary: primaryColor(100, 50),
   grey: {
     50: 'hsl(0 0% 95%)',
     100: 'hsl(0 0% 90%)',
