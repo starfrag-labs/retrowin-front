@@ -21,8 +21,8 @@ export const primaryColor = (hue: number, saturation: number) => {
     r700: `hsl(${reverseHue}, ${saturation}%, 35%)`,
     r800: `hsl(${reverseHue}, ${saturation}%, 25%)`,
     r900: `hsl(${reverseHue}, ${saturation}%, 15%)`,
-  }
-}
+  };
+};
 
 export const colors = createGlobalTheme(':root', {
   grey: {
@@ -44,17 +44,10 @@ export const colors = createGlobalTheme(':root', {
 });
 
 export const margins = createGlobalTheme(':root', {
-  0: '0',
-  1: '4px',
-  2: '8px',
-  3: '12px',
-  4: '16px',
-  5: '20px',
-  6: '24px',
-  7: '28px',
-  8: '32px',
-  9: '36px',
-  10: '40px',
+  default: '1.5rem',
+  small: '1rem',
+  big: '2rem',
+  title: '3rem',
 });
 
 export const fontSizes = createGlobalTheme(':root', {
@@ -70,16 +63,24 @@ export const fontSizes = createGlobalTheme(':root', {
 });
 
 export const paddings = createGlobalTheme(':root', {
-  default: '10px',
-  small: '5px',
-  big: '20px',
-  large: '30px',
-  huge: '40px',
+  default: '1.5rem',
+  small: '1rem',
+  big: '2rem',
+  title: '3rem',
 });
 
 export const boxShadow = createGlobalTheme(':root', {
   shadow1: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
-  shadow2: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-  shadow3: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
-  shadow4: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+  shadow2:
+    '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+  shadow3:
+    '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+  shadow4:
+    '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+});
+
+export const transitionDurations = createGlobalTheme(':root', {
+  default: '0.2s',
+  fast: '0.1s',
+  slow: '0.5s',
 });

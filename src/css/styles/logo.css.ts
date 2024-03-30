@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { fontSizes, paddings } from '../global.css';
+import { fontSizes } from '../global.css';
 import { themeVars } from '../themes/contract.css';
 
 export const logo = style({
@@ -7,7 +7,6 @@ export const logo = style({
   alignItems: 'center',
   display: 'flex',
   fontSize: fontSizes.big,
-  padding: paddings.default,
   fontWeight: 'bold',
 });
 
