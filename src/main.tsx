@@ -2,6 +2,7 @@ import { StrictMode } from 'react';
 import ReactDOM from 'react-dom/client';
 import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { routeTree } from './routeTree.gen';
+import { RecoilRoot } from 'recoil';
 
 const router = createRouter({ routeTree });
 
@@ -16,7 +17,9 @@ if (!rootElement.innerHTML) {
   const root = ReactDOM.createRoot(rootElement);
   root.render(
     <StrictMode>
-      <RouterProvider router={router}/>
+      <RecoilRoot>
+        <RouterProvider router={router} />
+      </RecoilRoot>
     </StrictMode>
   );
 }
