@@ -1,9 +1,10 @@
 import { atom } from "recoil";
-import { Theme, isTheme } from "../types/theme";
+import { Theme, isTheme } from "../../types/theme";
 
 interface UserState {
   theme: Theme;
   loggedIn: boolean;
+  accessToken?: string;
 }
 
 const getThemeFromLocalStorage = (): Theme => {
