@@ -5,18 +5,31 @@ import {
   createFileRoute,
 } from '@tanstack/react-router';
 import { header } from '../css/styles/header.css';
-import { button } from '../css/styles/button.css';
 import { pageContainer } from '../css/styles/container.css';
 import { userState } from '../features/user/userState';
 import { useRecoilState } from 'recoil';
 import { Logo } from '../components/logo';
+import { Profile } from '../components/profile';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/')({
   component: Index,
 });
 
 function Index() {
-  const [user] = useRecoilState(userState);
+  const [user, setUser] = useRecoilState(userState);
+  const [showProfile, setShowProfile] = useState(false);
+
+  const logout = () => {
+    setUser({
+      ...user,
+      loggedIn: false,
+    });
+  };
+
+  const switchShowProfile = () => {
+    setShowProfile(!showProfile);
+  };
 
   if (user.loggedIn === false) {
     return <Navigate to="/login" />;
@@ -26,7 +39,11 @@ function Index() {
     <div>
       <header className={header}>
         <Logo />
-        <button className={button}>logout</button>
+        {showProfile ? (
+          <Profile logout={logout} switchShowProfile={switchShowProfile} />
+        ) : (
+          <button onClick={switchShowProfile}>profile</button>
+        )}
       </header>
       <div className={pageContainer}>
         <Link

@@ -13,9 +13,15 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const auth = import.meta.env.VITE_AUTH_API as string;
+const cloud = import.meta.env.VITE_CLOUD_API as string;
+
 export const api: Api = {
-  auth: import.meta.env.VITE_AUTH_API as string,
-  cloud: import.meta.env.VITE_CLOUD_API as string,
+  auth, 
+  login: `${auth}/auth/local/login`,
+  logout: `${auth}/user/logout`,
+  validate: `${auth}/token/validate`,
+  cloud,
 };
 
 const rootElement = document.getElementById('root')!;

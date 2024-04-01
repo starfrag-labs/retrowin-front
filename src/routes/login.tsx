@@ -10,6 +10,10 @@ import { api } from '../main';
 
 export const Route = createFileRoute('/login')({
   component: Login,
+  // validate user before loading
+  loader: async () => {
+    return false;
+  },
 });
 
 function Login() {
@@ -32,13 +36,22 @@ function Login() {
   };
 
   const login = async (): Promise<boolean> => {
-    const response = await axios.post(api.auth + '/auth/local/login', {
-      email: form.email,
-      password: form.password,
-    });
+    const response = await axios.post(
+      api.login,
+      {
+        email: form.email,
+        password: form.password,
+      },
+      {
+        withCredentials: true,
+      }
+    );
     if (response.status === 200) {
-      console.log(response.headers['authorization'] ?? 'no authorization header');
-      setUser({ ...user, accessToken: response.headers['authorization'] });
+      setUser({
+        ...user,
+        accessToken: response.headers['authorization'],
+        loggedIn: true,
+      });
       return true;
     }
     return false;
@@ -52,7 +65,7 @@ function Login() {
           <input
             name="email"
             type="text"
-            placeholder="example.ifelfi.com"
+            placeholder="example@ifelfi.com"
             value={form.email}
             onChange={handleChange}
           />
