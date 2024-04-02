@@ -2,6 +2,7 @@ import { Navigate, createFileRoute } from '@tanstack/react-router';
 import { useRecoilState } from 'recoil';
 import { userState } from '../features/user/userState';
 import { useEffect } from 'react';
+import { validate } from '../utils/api/auth';
 
 export const Route = createFileRoute('/')({
   component: IndexComponent,
@@ -10,12 +11,23 @@ export const Route = createFileRoute('/')({
 function IndexComponent() {
   const [user, setUser] = useRecoilState(userState);
 
-  const validate = async () => {
+  const updateToken = async () => {
     setUser({
       ...user,
       loading: true,
     });
-    await validate()
+
+    const accessToken = user.accessToken;
+    if (!accessToken) {
+      setUser({
+        ...user,
+        loggedIn: false,
+        loading: false,
+      });
+      return;
+    }
+
+    await validate(accessToken)
       .then((response) => {
         if (response.status === 200) {
           setUser({
@@ -38,7 +50,8 @@ function IndexComponent() {
   };
 
   useEffect(() => {
-    validate();
+    if (user.loading) return;
+    updateToken();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
