@@ -1,61 +1,54 @@
-import {
-  Link,
-  Navigate,
-  Outlet,
-  createFileRoute,
-} from '@tanstack/react-router';
-import { header } from '../css/styles/header.css';
-import { pageContainer } from '../css/styles/container.css';
-import { userState } from '../features/user/userState';
+import { Navigate, createFileRoute } from '@tanstack/react-router';
 import { useRecoilState } from 'recoil';
-import { Logo } from '../components/logo';
-import { Profile } from '../components/profile';
-import { useState } from 'react';
+import { userState } from '../features/user/userState';
+import { useEffect } from 'react';
 
 export const Route = createFileRoute('/')({
-  component: Index,
+  component: IndexComponent,
 });
 
-function Index() {
+function IndexComponent() {
   const [user, setUser] = useRecoilState(userState);
-  const [showProfile, setShowProfile] = useState(false);
 
-  const logout = () => {
+  const validate = async () => {
     setUser({
       ...user,
-      loggedIn: false,
+      loading: true,
     });
+    await validate()
+      .then((response) => {
+        if (response.status === 200) {
+          setUser({
+            ...user,
+            accessToken: response.headers['authorization'],
+            loggedIn: true,
+            loading: false,
+          });
+        }
+      })
+      .catch((error) => {
+        console.error(error);
+        setUser({
+          ...user,
+          accessToken: '',
+          loggedIn: false,
+          loading: false,
+        });
+      });
   };
 
-  const switchShowProfile = () => {
-    setShowProfile(!showProfile);
-  };
+  useEffect(() => {
+    validate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-  if (user.loggedIn === false) {
-    return <Navigate to="/login" />;
+  if (user.loading) {
+    return <div>loading...</div>;
+  } else {
+    if (user.loggedIn) {
+      return <Navigate to="/cloud" />;
+    } else {
+      return <Navigate to="/login" />;
+    }
   }
-
-  return (
-    <div>
-      <header className={header}>
-        <Logo />
-        {showProfile ? (
-          <Profile logout={logout} switchShowProfile={switchShowProfile} />
-        ) : (
-          <button onClick={switchShowProfile}>profile</button>
-        )}
-      </header>
-      <div className={pageContainer}>
-        <Link
-          to={'/about'}
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          About
-        </Link>
-        <Outlet />
-      </div>
-    </div>
-  );
 }

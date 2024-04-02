@@ -6,17 +6,13 @@ import { useRecoilState } from 'recoil';
 import { userState } from '../features/user/userState';
 import { useState } from 'react';
 import axios from 'axios';
-import { api } from '../main';
+import { api } from '../utils/config';
 
 export const Route = createFileRoute('/login')({
-  component: Login,
-  // validate user before loading
-  loader: async () => {
-    return false;
-  },
+  component: LoginComponent,
 });
 
-function Login() {
+function LoginComponent() {
   const [user, setUser] = useRecoilState(userState);
   const [form, setForm] = useState({ email: '', password: '' });
   const router = useRouter();
@@ -25,7 +21,7 @@ function Login() {
     e.preventDefault();
     const result = await login();
     if (result) {
-      router.navigate({ to: '/' });
+      router.navigate({ to: '/cloud' });
     } else {
       console.error('login failed');
     }
@@ -36,6 +32,10 @@ function Login() {
   };
 
   const login = async (): Promise<boolean> => {
+    setUser({
+      ...user,
+      loading: true,
+    });
     const response = await axios.post(
       api.login,
       {
@@ -51,11 +51,20 @@ function Login() {
         ...user,
         accessToken: response.headers['authorization'],
         loggedIn: true,
+        loading: false,
       });
       return true;
     }
+    setUser({
+      ...user,
+      loading: false,
+    });
     return false;
   };
+
+  if (user.loading) {
+    return <div>Loading user...</div>;
+  }
 
   return (
     <div className={centerContainer}>
