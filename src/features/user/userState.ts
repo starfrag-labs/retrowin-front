@@ -5,6 +5,7 @@ interface UserState {
   theme: Theme;
   loggedIn: boolean;
   accessToken?: string;
+  loading: boolean;
 }
 
 const getThemeFromLocalStorage = (): Theme => {
@@ -17,6 +18,7 @@ const getThemeFromLocalStorage = (): Theme => {
 const initialState: UserState = {
   theme: getThemeFromLocalStorage(),
   loggedIn: false,
+  loading: false,
 }
 
 export const userState = atom<UserState>({

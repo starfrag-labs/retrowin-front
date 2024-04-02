@@ -12,8 +12,10 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as LoginImport } from './routes/login.tsx'
-import { Route as AboutImport } from './routes/about.tsx'
+import { Route as MainImport } from './routes/_main.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
+import { Route as MainCloudImport } from './routes/_main/cloud.tsx'
+import { Route as MainAboutImport } from './routes/_main/about.tsx'
 
 // Create/Update Routes
 
@@ -22,14 +24,24 @@ const LoginRoute = LoginImport.update({
   getParentRoute: () => rootRoute,
 } as any)
 
-const AboutRoute = AboutImport.update({
-  path: '/about',
+const MainRoute = MainImport.update({
+  id: '/_main',
   getParentRoute: () => rootRoute,
 } as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const MainCloudRoute = MainCloudImport.update({
+  path: '/cloud',
+  getParentRoute: () => MainRoute,
+} as any)
+
+const MainAboutRoute = MainAboutImport.update({
+  path: '/about',
+  getParentRoute: () => MainRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -40,13 +52,21 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/about': {
-      preLoaderRoute: typeof AboutImport
+    '/_main': {
+      preLoaderRoute: typeof MainImport
       parentRoute: typeof rootRoute
     }
     '/login': {
       preLoaderRoute: typeof LoginImport
       parentRoute: typeof rootRoute
+    }
+    '/_main/about': {
+      preLoaderRoute: typeof MainAboutImport
+      parentRoute: typeof MainImport
+    }
+    '/_main/cloud': {
+      preLoaderRoute: typeof MainCloudImport
+      parentRoute: typeof MainImport
     }
   }
 }
@@ -55,7 +75,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  AboutRoute,
+  MainRoute.addChildren([MainAboutRoute, MainCloudRoute]),
   LoginRoute,
 ])
 
