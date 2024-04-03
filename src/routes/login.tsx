@@ -5,8 +5,7 @@ import { centerContainer } from '../css/styles/container.css';
 import { useRecoilState } from 'recoil';
 import { userState } from '../features/user/userState';
 import { useState } from 'react';
-import axios from 'axios';
-import { api } from '../utils/config';
+import { login } from '../utils/api/auth';
 
 export const Route = createFileRoute('/login')({
   component: LoginComponent,
@@ -19,47 +18,39 @@ function LoginComponent() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const result = await login();
-    if (result) {
+    setUser({
+      ...user,
+      loading: true,
+    })
+    const result = await login(form.email, form.password)
+      .then((response) => {
+        if (response.status === 200) {
+          return response;
+        }
+        return null;
+      })
+      .catch(() => {
+        return null;
+      });
+    if (result && result.headers['authorization']) {
+      setUser({
+        ...user,
+        accessToken: result.headers['authorization'],
+        loggedIn: true,
+        loading: false,
+      });
       router.navigate({ to: '/cloud' });
     } else {
-      console.error('login failed');
+      setUser({
+        ...user,
+        loggedIn: false,
+        loading: false,
+      });
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
-  };
-
-  const login = async (): Promise<boolean> => {
-    setUser({
-      ...user,
-      loading: true,
-    });
-    const response = await axios.post(
-      api.login,
-      {
-        email: form.email,
-        password: form.password,
-      },
-      {
-        withCredentials: true,
-      }
-    );
-    if (response.status === 200) {
-      setUser({
-        ...user,
-        accessToken: response.headers['authorization'],
-        loggedIn: true,
-        loading: false,
-      });
-      return true;
-    }
-    setUser({
-      ...user,
-      loading: false,
-    });
-    return false;
   };
 
   if (user.loading) {
