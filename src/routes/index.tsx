@@ -3,6 +3,9 @@ import { useRecoilState } from 'recoil';
 import { userState } from '../features/user/userState';
 import { useEffect } from 'react';
 import { validate } from '../utils/api/auth';
+import { centerContainer } from '../css/styles/container.css';
+import { Logo } from '../components/logo';
+import { paragraph } from '../css/styles/paragraph.css';
 
 export const Route = createFileRoute('/')({
   component: IndexComponent,
@@ -60,8 +63,18 @@ function IndexComponent() {
   } else {
     if (user.loggedIn) {
       return <Navigate to="/cloud" />;
-    } else {
-      return <Navigate to="/login" />;
     }
   }
+
+  return (
+    <div className={centerContainer}>
+      <Logo fontSize='4rem'/>
+      <div className={paragraph}>
+        Upload and share your files with your friends, family, and the world.
+      </div>
+      <div>
+        what is different
+      </div>
+    </div>
+  )
 }
