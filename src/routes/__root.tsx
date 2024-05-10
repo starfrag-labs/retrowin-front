@@ -1,9 +1,12 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router';
+import { Outlet, createRootRoute, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { themes } from '../css/themes/index.css';
 import { root } from '../css/styles/root.css';
+import { issue } from '../utils/api/auth';
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  accessToken: string;
+}>()({
   component: RootComponent,
 });
 

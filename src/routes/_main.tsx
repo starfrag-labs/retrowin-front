@@ -27,9 +27,7 @@ function MainComponent() {
   };
 
   if (!user.loggedIn) {
-    console.log('not logged in');
-
-    return <Navigate to="/login" />;
+    return <Navigate to="/" />;
   }
 
   return (

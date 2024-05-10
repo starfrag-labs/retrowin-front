@@ -1,7 +1,16 @@
 import axios from 'axios';
 import { api } from '../config';
 
-const authUrls = {
+interface Methods {
+  url: string;
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+}
+
+interface AuthUrls {
+  [key: string]: Methods;
+}
+
+const authUrls: AuthUrls = {
   login: {
     url: `${api.auth}/auth/local/login`,
     method: 'POST',
@@ -18,6 +27,10 @@ const authUrls = {
     url: `${api.auth}/token/refresh`,
     method: 'GET',
   },
+  issue: {
+    url: `${api.auth}/token/issue`,
+    method: 'GET',
+  },
 };
 
 export const isValid = (accessToken: string) => {
@@ -29,7 +42,7 @@ export const isValid = (accessToken: string) => {
     },
     withCredentials: true,
   });
-}
+};
 
 export const refresh = (accessToken: string) => {
   return axios.request({
@@ -40,17 +53,15 @@ export const refresh = (accessToken: string) => {
     },
     withCredentials: true,
   });
-}
+};
 
-export const validate = (accessToken: string) => {
-  return axios.request({
-    method: authUrls.validate.method,
-    url: authUrls.validate.url,
-    headers: {
-      Authorization: accessToken,
-    },
+export const issue = async (code: string) => {
+   const response = await axios.request({
+    method: authUrls.issue.method,
+    url: `${authUrls.issue.url}?code=${code}`,
     withCredentials: true,
-  })
+  });
+  return response;
 };
 
 export const login = (email: string, password: string) => {
