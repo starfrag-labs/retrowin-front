@@ -8,6 +8,7 @@ export const logo = style({
   display: 'flex',
   fontSize: fontSizes.big,
   fontWeight: 'bold',
+  textDecorationLine: 'none',
 });
 
 export const logoFront = style({

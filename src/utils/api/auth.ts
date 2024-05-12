@@ -11,14 +11,6 @@ interface AuthUrls {
 }
 
 const authUrls: AuthUrls = {
-  login: {
-    url: `${api.auth}/auth/local/login`,
-    method: 'POST',
-  },
-  logout: {
-    url: `${api.auth}/auth/local/logout`,
-    method: 'GET',
-  },
   validate: {
     url: `${api.auth}/token/valid`,
     method: 'GET',
@@ -38,7 +30,7 @@ export const isValid = (accessToken: string) => {
     method: authUrls.validate.method,
     url: authUrls.validate.url,
     headers: {
-      Authorization: accessToken,
+      Authorization: `Bearer ${accessToken}`,
     },
     withCredentials: true,
   });
@@ -62,27 +54,4 @@ export const issue = async (code: string) => {
     withCredentials: true,
   });
   return response;
-};
-
-export const login = (email: string, password: string) => {
-  return axios.request({
-    method: authUrls.login.method,
-    url: authUrls.login.url,
-    data: {
-      email,
-      password,
-    },
-    withCredentials: true,
-  });
-};
-
-export const logout = async (accessToken: string) => {
-  return axios.request({
-    method: authUrls.logout.method,
-    url: authUrls.logout.url,
-    headers: {
-      Authorization: accessToken,
-    },
-    withCredentials: true,
-  });
 };
