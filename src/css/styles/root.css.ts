@@ -16,6 +16,7 @@ export const root = style({
   color: themeVars.color.default,
   fontFamily: themeVars.font.default,
   backgroundColor: themeVars.backgroundColor.default,
+  backgroundSize: 'cover',
   display: 'flex-wrap',
   width: '100vw',
   height: '100vh',

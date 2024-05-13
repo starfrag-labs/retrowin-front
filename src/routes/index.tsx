@@ -1,5 +1,4 @@
 import { Navigate, createFileRoute } from '@tanstack/react-router';
-import { centerContainer } from '../css/styles/container.css';
 import { Logo } from '../components/logo';
 import { api } from '../utils/config';
 import { isValid, issue } from '../utils/api/auth';
@@ -7,6 +6,8 @@ import { z } from 'zod';
 import { useEffect } from 'react';
 import { useUserStore } from '../store/userStore';
 import { button } from '../css/styles/button.css';
+import { indexBackground } from '../css/styles/background.css';
+import { blurContainer } from '../css/styles/container.css';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -68,8 +69,8 @@ function IndexComponent() {
   // If the user is not logged in, show the login page
   const loginUrl = `${api.oauth}?redirect_url=${api.redirectUrl}`;
   return (
-    <div className={centerContainer}>
-      <div>
+    <div className={indexBackground}>
+      <div className={blurContainer}>
         <Logo fontSize="4rem" />
         <div>
           Upload and share your files with your friends, family, and the world.
