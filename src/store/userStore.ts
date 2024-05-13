@@ -8,21 +8,23 @@ const getThemeFromLocalStorage = (): Theme => {
   return 'default';
 };
 
+type UserState = 'pending' | 'loggedIn' | 'loggedOut';
+
 type State = {
   theme: Theme;
-  loggedIn: boolean;
+  loggedIn: UserState;
   accessToken?: string;
 };
 
 type Action = {
   updateTheme: (theme: Theme) => void;
-  updateLoggedIn: (loggedIn: boolean) => void;
+  updateLoggedIn: (userState: UserState) => void;
   updateAccessToken: (accessToken: string) => void;
 };
 
 const initialState: State = {
   theme: getThemeFromLocalStorage(),
-  loggedIn: false,
+  loggedIn: 'pending',
 };
 
 export const useUserStore = create<State & Action>((set) => ({

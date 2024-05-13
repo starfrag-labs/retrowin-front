@@ -13,6 +13,7 @@
 import { Route as rootRoute } from './routes/__root'
 import { Route as MainImport } from './routes/_main.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
+import { Route as MainEnrollImport } from './routes/_main/enroll.tsx'
 import { Route as MainCloudImport } from './routes/_main/cloud.tsx'
 import { Route as MainAboutImport } from './routes/_main/about.tsx'
 
@@ -26,6 +27,11 @@ const MainRoute = MainImport.update({
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const MainEnrollRoute = MainEnrollImport.update({
+  path: '/enroll',
+  getParentRoute: () => MainRoute,
 } as any)
 
 const MainCloudRoute = MainCloudImport.update({
@@ -58,6 +64,10 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainCloudImport
       parentRoute: typeof MainImport
     }
+    '/_main/enroll': {
+      preLoaderRoute: typeof MainEnrollImport
+      parentRoute: typeof MainImport
+    }
   }
 }
 
@@ -65,7 +75,7 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  MainRoute.addChildren([MainAboutRoute, MainCloudRoute]),
+  MainRoute.addChildren([MainAboutRoute, MainCloudRoute, MainEnrollRoute]),
 ])
 
 /* prettier-ignore-end */

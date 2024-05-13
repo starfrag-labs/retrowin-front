@@ -21,7 +21,10 @@ export const Route = createFileRoute('/')({
       code: code,
     };
   },
-  loader: async ({ deps: { code } }) => {
+  loader: async ({ deps: { code }, context: {accessToken: test, setAccessToken} }) => {
+    setAccessToken('test');
+    console.log('test', test);
+    
     if (!code) {
       return;
     }
@@ -44,26 +47,33 @@ function IndexComponent() {
 
   const data = Route.useLoaderData();
   useEffect(() => {
-    if (data) {
+    if (data && data.accessToken) {
       updateAccessToken(data.accessToken);
+    } else {
+      updateLoggedIn('loggedOut');
     }
-  }, [data, updateAccessToken]);
+  }, [data, updateAccessToken, updateLoggedIn]);
 
   useEffect(() => {
     if (accessToken) {
+      updateLoggedIn('pending');
       isValid(accessToken)
         .then(() => {
-          updateLoggedIn(true);
+          updateLoggedIn('loggedIn');
         })
         .catch(() => {
-          updateLoggedIn(false);
-        });
+          updateLoggedIn('loggedOut');
+        })
     }
-  }, [updateLoggedIn, accessToken]);
+  }, [accessToken, updateLoggedIn]);
 
   // If the user is logged in, redirect them to the cloud page
-  if (loggedIn) {
+  if (loggedIn === 'loggedIn') {
     return <Navigate to="./cloud" />;
+  }
+
+  if (loggedIn === 'pending') {
+    return <div>Loading...</div>;
   }
 
   // If the user is not logged in, show the login page

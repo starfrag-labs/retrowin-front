@@ -1,16 +1,8 @@
 import axios from 'axios';
 import { api } from '../config';
+import { Urls } from '../../types/request';
 
-interface Methods {
-  url: string;
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
-}
-
-interface AuthUrls {
-  [key: string]: Methods;
-}
-
-const authUrls: AuthUrls = {
+const authUrls: Urls = {
   validate: {
     url: `${api.auth}/token/valid`,
     method: 'GET',
@@ -32,7 +24,6 @@ export const isValid = (accessToken: string) => {
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    withCredentials: true,
   });
 };
 
@@ -41,14 +32,14 @@ export const refresh = (accessToken: string) => {
     method: authUrls.refresh.method,
     url: authUrls.refresh.url,
     headers: {
-      Authorization: accessToken,
+      Authorization: `Bearer ${accessToken}`,
     },
     withCredentials: true,
   });
 };
 
 export const issue = async (code: string) => {
-   const response = await axios.request({
+  const response = await axios.request({
     method: authUrls.issue.method,
     url: `${authUrls.issue.url}?code=${code}`,
     withCredentials: true,
