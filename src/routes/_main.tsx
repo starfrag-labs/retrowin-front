@@ -9,7 +9,7 @@ import { Profile } from '../components/profile';
 import { useState } from 'react';
 import { pageContainer } from '../css/styles/container.css';
 import { header } from '../css/styles/header.css';
-import { useUserStore } from '../store/userStore';
+import { useTokenStore } from '../store/tokenStore';
 // import { checkUser, enrollUser } from '../utils/api/cloud';
 
 export const Route = createFileRoute('/_main')({
@@ -17,12 +17,11 @@ export const Route = createFileRoute('/_main')({
 });
 
 function MainComponent() {
-  const loggedIn = useUserStore((state) => state.loggedIn);
-  const updateAccessToken = useUserStore((state) => state.updateAccessToken);
-  const updateLoggedIn = useUserStore((state) => state.updateLoggedIn);
+  const accessToken = useTokenStore((state) => state.accessToken);
+  const setAccessToken = useTokenStore((state) => state.setAccessToken);
   const [showProfile, setShowProfile] = useState(false);
 
-  if (loggedIn === 'loggedOut') {
+  if (accessToken === '') {
     return <Navigate to=".." />;
   }
 
@@ -39,8 +38,7 @@ function MainComponent() {
   // };
 
   const logout = () => {
-    updateAccessToken('');
-    updateLoggedIn('loggedOut');
+    setAccessToken('');
   };
 
   const switchShowProfile = () => {

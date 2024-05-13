@@ -3,11 +3,11 @@ import { Logo } from '../components/logo';
 import { api } from '../utils/config';
 import { isValid, issue } from '../utils/api/auth';
 import { z } from 'zod';
-import { useEffect } from 'react';
-import { useUserStore } from '../store/userStore';
+import { useEffect, useState } from 'react';
 import { button } from '../css/styles/button.css';
 import { indexBackground } from '../css/styles/background.css';
 import { blurContainer } from '../css/styles/container.css';
+import { useTokenStore } from '../store/tokenStore';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -21,10 +21,7 @@ export const Route = createFileRoute('/')({
       code: code,
     };
   },
-  loader: async ({ deps: { code }, context: {accessToken: test, setAccessToken} }) => {
-    setAccessToken('test');
-    console.log('test', test);
-    
+  loader: async ({ deps: { code } }) => {
     if (!code) {
       return;
     }
@@ -40,39 +37,38 @@ export const Route = createFileRoute('/')({
 });
 
 function IndexComponent() {
-  const accessToken = useUserStore((state) => state.accessToken);
-  const loggedIn = useUserStore((state) => state.loggedIn);
-  const updateLoggedIn = useUserStore((state) => state.updateLoggedIn);
-  const updateAccessToken = useUserStore((state) => state.updateAccessToken);
+  const accessToken = useTokenStore((state) => state.accessToken);
+  const setAccessToken = useTokenStore((state) => state.setAccessToken);
+  const [status, setStatus] = useState('pending');
 
   const data = Route.useLoaderData();
+
   useEffect(() => {
     if (data && data.accessToken) {
-      updateAccessToken(data.accessToken);
-    } else {
-      updateLoggedIn('loggedOut');
+      setAccessToken(data.accessToken);
     }
-  }, [data, updateAccessToken, updateLoggedIn]);
+  }, [data, setAccessToken]);
 
   useEffect(() => {
-    if (accessToken) {
-      updateLoggedIn('pending');
-      isValid(accessToken)
-        .then(() => {
-          updateLoggedIn('loggedIn');
-        })
-        .catch(() => {
-          updateLoggedIn('loggedOut');
-        })
+    if (!accessToken) {
+      setStatus('done');
+      return;
     }
-  }, [accessToken, updateLoggedIn]);
+    isValid(accessToken)
+      .catch(() => {
+        setAccessToken('');
+      })
+      .finally(() => {
+        setStatus('done');
+      });
+  }, [accessToken, setAccessToken]);
 
   // If the user is logged in, redirect them to the cloud page
-  if (loggedIn === 'loggedIn') {
+  if (status === 'done' && accessToken) {
     return <Navigate to="./cloud" />;
   }
 
-  if (loggedIn === 'pending') {
+  if (status === 'pending') {
     return <div>Loading...</div>;
   }
 
