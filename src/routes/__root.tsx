@@ -1,9 +1,14 @@
-import { Outlet, createRootRoute } from '@tanstack/react-router';
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { themes } from '../css/themes/index.css';
 import { root } from '../css/styles/root.css';
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  accessToken: string;
+  setAccessToken: (accessToken: string) => void;
+  theme: string;
+  setTheme: (theme: string) => void;
+}>()({
   component: RootComponent,
 });
 
@@ -19,9 +24,10 @@ const setTheme = (theme: string) => {
 };
 
 function RootComponent() {
+  const theme = Route.useRouteContext().theme;
   return (
     <>
-      <div className={setTheme('light')}>
+      <div className={setTheme(theme)}>
         <div className={root}>
           <Outlet />
           <TanStackRouterDevtools position="bottom-right" />
