@@ -10,10 +10,12 @@ import { useState } from 'react';
 import { pageContainer } from '../css/styles/container.css';
 import { header } from '../css/styles/header.css';
 import { useTokenStore } from '../store/tokenStore';
-// import { checkUser, enrollUser } from '../utils/api/cloud';
 
 export const Route = createFileRoute('/_main')({
   component: MainComponent,
+  loader: async () => {
+    
+  }
 });
 
 function MainComponent() {
@@ -24,18 +26,6 @@ function MainComponent() {
   if (accessToken === '') {
     return <Navigate to=".." />;
   }
-
-  // const isUser = async (accessToken: string) => {
-  //   const checkUserResponse = await checkUser(accessToken);
-  //   if (checkUserResponse.status === 200) {
-  //     return true;
-  //   }
-  //   const createUserResponse = await enrollUser(accessToken);
-  //   if (createUserResponse.status === 200) {
-  //     return true;
-  //   }
-  //   return false;
-  // };
 
   const logout = () => {
     setAccessToken('');
