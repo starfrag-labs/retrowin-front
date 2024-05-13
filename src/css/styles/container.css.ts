@@ -18,7 +18,8 @@ export const centerContainer = style({
 
 export const blurContainer = style({
   backdropFilter: 'blur(3px)',
-  border: '1px solid black',
+  backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  border: '2px solid black',
   borderRadius: '25px',
   padding: '20px',
   width: '50%',
@@ -27,4 +28,5 @@ export const blurContainer = style({
   flexDirection: 'column',
   justifyContent: 'center',
   alignItems: 'center',
+  color: 'white',
 })
