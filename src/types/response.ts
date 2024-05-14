@@ -13,3 +13,14 @@ export interface ReadFolderData {
   folders: Folder[];
   files: File[];
 }
+
+export type Provider = 'local' | 'google';
+
+export interface Profile {
+  email: string;
+  nickname: string;
+  imageUrl: string | null;
+  joinDate: string;
+  updateDate: string;
+  provider: Provider;
+}

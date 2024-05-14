@@ -3,6 +3,7 @@ import {
   Navigate,
   Outlet,
   createFileRoute,
+  defer,
 } from '@tanstack/react-router';
 import { Logo } from '../components/logo';
 import { Profile } from '../components/profile';
@@ -10,30 +11,64 @@ import { useState } from 'react';
 import { pageContainer } from '../css/styles/container.css';
 import { header } from '../css/styles/header.css';
 import { useTokenStore } from '../store/tokenStore';
+import { useQueryClient } from '@tanstack/react-query';
+import { getProfile } from '../utils/api/auth';
+import { readFolder } from '../utils/api/cloud';
 
 export const Route = createFileRoute('/_main')({
   component: MainComponent,
-  loader: async () => {
-    
-  }
+  loader: async ({ context: { queryClient } }) => {
+    const accessToken = useTokenStore.getState().accessToken;
+    const profile = await queryClient.ensureQueryData({
+      queryKey: ['profile', accessToken],
+      queryFn: async () => {
+        const data = await getProfile(accessToken)
+          .then((response) => {
+            return response.data.data;
+          })
+          .catch(() => {
+            return null;
+          });
+        return data;
+      },
+    });
+    const rootFolderData = queryClient.ensureQueryData({
+      queryKey: ['read', 'folder', 'root'],
+      queryFn: async () => {
+        const data = await readFolder(accessToken, '')
+          .then((response) => {
+            return response.data;
+          })
+          .catch(() => {
+            return null;
+          });
+        return data;
+      },
+    });
+    return {
+      profile,
+      rootFolderData: defer(rootFolderData)
+    };
+  },
 });
 
 function MainComponent() {
-  const accessToken = useTokenStore((state) => state.accessToken);
+  const queryClient = useQueryClient();
   const setAccessToken = useTokenStore((state) => state.setAccessToken);
   const [showProfile, setShowProfile] = useState(false);
-
-  if (accessToken === '') {
-    return <Navigate to=".." />;
-  }
+  const { profile, rootFolderData } = Route.useLoaderData();
 
   const logout = () => {
     setAccessToken('');
+    queryClient.clear();
   };
-
   const switchShowProfile = () => {
     setShowProfile(!showProfile);
   };
+
+  if (!profile) {
+    return <Navigate to=".." />;
+  }
 
   return (
     <div>
@@ -41,7 +76,11 @@ function MainComponent() {
         <Logo />
         <Link to="..">home</Link>
         {showProfile ? (
-          <Profile logout={logout} switchShowProfile={switchShowProfile} />
+          <Profile
+            logout={logout}
+            switchShowProfile={switchShowProfile}
+            profile={profile}
+          />
         ) : (
           <button onClick={switchShowProfile}>profile</button>
         )}

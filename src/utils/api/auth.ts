@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { api } from '../config';
 import { Urls } from '../../types/request';
+import { Profile } from '../../types/response';
 
 const authUrls: Urls = {
   validate: {
@@ -13,6 +14,10 @@ const authUrls: Urls = {
   },
   issue: {
     url: `${api.auth}/token/issue`,
+    method: 'GET',
+  },
+  profile: {
+    url: `${api.auth}/user/profile`,
     method: 'GET',
   },
 };
@@ -45,4 +50,17 @@ export const issue = async (code: string) => {
     withCredentials: true,
   });
   return response;
+};
+
+export const getProfile = (accessToken: string) => {
+  return axios.request<{
+    message: string
+    data: Profile
+  }>({
+    method: authUrls.profile.method,
+    url: authUrls.profile.url,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
 };

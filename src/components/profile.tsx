@@ -1,14 +1,19 @@
+import { Profile as IProfile } from "../types/response"
+
 export function Profile({
   logout,
-  switchShowProfile
+  switchShowProfile,
+  profile
 }: {
   logout: () => void
   switchShowProfile: () => void
+  profile: IProfile 
 }) {
 
   return (
     <div>
-      <h1>Profile</h1>
+      <p>{profile.email}</p>
+      <p>{profile.nickname}</p>
       <button onClick={switchShowProfile}>close</button>
       <button onClick={logout}>logout</button>
     </div>
