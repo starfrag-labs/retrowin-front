@@ -194,7 +194,7 @@ const cloudUrls = {
     },
     enrollUser: {
       url: `${api.cloud}/user/enroll`,
-      method: 'POST',
+      method: 'GET',
     },
     deleteUser: {
       url: `${api.cloud}/user`,

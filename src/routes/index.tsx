@@ -1,13 +1,14 @@
 import { Navigate, createFileRoute } from '@tanstack/react-router';
 import { Logo } from '../components/logo';
 import { api } from '../utils/config';
-import { isValid, issue } from '../utils/api/auth';
+import { getProfile, isValid, issue } from '../utils/api/auth';
 import { z } from 'zod';
-import { useEffect, useState } from 'react';
 import { button } from '../css/styles/button.css';
 import { indexBackground } from '../css/styles/background.css';
 import { blurContainer } from '../css/styles/container.css';
 import { useTokenStore } from '../store/tokenStore';
+import { checkUser, enrollUser } from '../utils/api/cloud';
+import { useUserStore } from '../store/userStore';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -16,60 +17,82 @@ const codeSchema = z.object({
 export const Route = createFileRoute('/')({
   component: IndexComponent,
   validateSearch: codeSchema,
-  loaderDeps: ({ search: { code } }) => {
-    return {
-      code: code,
-    };
-  },
-  loader: async ({ deps: { code } }) => {
+  beforeLoad: async ({ search: { code } }) => {
     if (!code) {
-      return;
+      return {
+        accessToken: null,
+      };
     }
-    const response = await issue(code);
-    if (response.status !== 200) {
-      return;
-    }
-    const accessToken = response.headers['authorization'].split(' ')[1];
+    const accessToken = await issue(code)
+      .then((response) => {
+        const token = response.headers['authorization'].split(' ')[1];
+        return token;
+      })
+      .catch(() => {
+        return null;
+      });
     return {
       accessToken: accessToken,
     };
+  },
+  loader: async ({ context: { accessToken } }) => {
+    const { setIsCloudUser, setProfile } = useUserStore.getState();
+    const setAccessToken = useTokenStore.getState().setAccessToken;
+    if (accessToken) {
+      setAccessToken(accessToken);
+    }
+    let storedToken = '';
+    storedToken = useTokenStore.getState().accessToken;
+    console.log('token' + storedToken);
+    await isValid(storedToken).catch(() => {
+      setAccessToken('');
+      storedToken = '';
+    });
+
+    if (!storedToken) {
+      return;
+    }
+    await checkUser(storedToken)
+      .then(() => {
+        setIsCloudUser(true);
+      })
+      .catch(() => {
+        setIsCloudUser(false);
+      });
+
+    let isCloudUser: boolean = false;
+    isCloudUser = useUserStore.getState().isCloudUser;
+    if (!isCloudUser) {
+      const enrollResult = await enrollUser(storedToken).catch(() => {
+        return false;
+      });
+      if (!enrollResult) {
+        return;
+      }
+      await checkUser(storedToken)
+        .then(() => {
+          setIsCloudUser(true);
+        })
+        .catch(() => {
+          setIsCloudUser(false);
+        });
+    }
+    await getProfile(storedToken)
+      .then((response) => {
+        const profile = response.data.data;
+        setProfile(profile);
+      })
+      .catch(() => {
+        return;
+      });
   },
 });
 
 function IndexComponent() {
   const accessToken = useTokenStore((state) => state.accessToken);
-  const setAccessToken = useTokenStore((state) => state.setAccessToken);
-  const [status, setStatus] = useState('pending');
 
-  const data = Route.useLoaderData();
-
-  useEffect(() => {
-    if (data && data.accessToken) {
-      setAccessToken(data.accessToken);
-    }
-  }, [data, setAccessToken]);
-
-  useEffect(() => {
-    if (!accessToken) {
-      setStatus('done');
-      return;
-    }
-    isValid(accessToken)
-      .catch(() => {
-        setAccessToken('');
-      })
-      .finally(() => {
-        setStatus('done');
-      });
-  }, [accessToken, setAccessToken]);
-
-  // If the user is logged in, redirect them to the cloud page
-  if (status === 'done' && accessToken) {
+  if (accessToken) {
     return <Navigate to="./cloud" />;
-  }
-
-  if (status === 'pending') {
-    return <div>Loading...</div>;
   }
 
   // If the user is not logged in, show the login page
