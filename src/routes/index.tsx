@@ -43,7 +43,6 @@ export const Route = createFileRoute('/')({
     }
     let storedToken = '';
     storedToken = useTokenStore.getState().accessToken;
-    console.log('token' + storedToken);
     await isValid(storedToken).catch(() => {
       setAccessToken('');
       storedToken = '';
@@ -62,6 +61,8 @@ export const Route = createFileRoute('/')({
 
     let isCloudUser: boolean = false;
     isCloudUser = useUserStore.getState().isCloudUser;
+    console.log(isCloudUser);
+    
     if (!isCloudUser) {
       const enrollResult = await enrollUser(storedToken).catch(() => {
         return false;

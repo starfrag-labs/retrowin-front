@@ -19,7 +19,7 @@ export const Route = createFileRoute('/_main')({
   component: MainComponent,
   loader: async ({ context: { queryClient } }) => {
     const accessToken = useTokenStore.getState().accessToken;
-    const {profile, isCloudUser }= useUserStore.getState();
+    const { profile, isCloudUser } = useUserStore.getState();
     if (!accessToken || !isCloudUser || !profile) {
       return;
     }
@@ -30,17 +30,23 @@ export const Route = createFileRoute('/_main')({
           .then((response) => {
             return response.data;
           })
-          .catch(() => {
+          .catch((error) => {
+            console.log(error.response);
+            
             return null;
           });
         if (!data) {
-          const createResult = await createRootFolder(accessToken).catch(() => {
+          const createResult = await createRootFolder(accessToken).catch((error) => {
+            console.log(error.response);
+            
             return false;
           });
           if (createResult) {
-            data = await readFolder(accessToken, profile.uuidKey).then((response) => {
-              return response.data;
-            });
+            data = await readFolder(accessToken, profile.uuidKey).then(
+              (response) => {
+                return response.data;
+              }
+            );
           }
         }
         return data;
@@ -48,7 +54,7 @@ export const Route = createFileRoute('/_main')({
     });
     return {
       profile,
-      rootFolderData: defer(rootFolderData)
+      rootFolderData: defer(rootFolderData),
     };
   },
 });
@@ -57,7 +63,7 @@ function MainComponent() {
   const queryClient = useQueryClient();
   const setAccessToken = useTokenStore((state) => state.setAccessToken);
   const [showProfile, setShowProfile] = useState(false);
-  const { profile, rootFolderData } = Route.useLoaderData();
+  const profile = Route.useLoaderData()?.profile;
 
   const logout = () => {
     setAccessToken('');
