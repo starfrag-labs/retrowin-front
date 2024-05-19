@@ -61,6 +61,8 @@ export const Route = createFileRoute('/')({
 
     let isCloudUser: boolean = false;
     isCloudUser = useUserStore.getState().isCloudUser;
+    console.log(isCloudUser);
+    
     if (!isCloudUser) {
       const enrollResult = await enrollUser(storedToken).catch(() => {
         return false;

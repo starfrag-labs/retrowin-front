@@ -66,6 +66,8 @@ export const createFolder = async (accessToken: string, folderKey: string, folde
 
 export const readFolder = async (accessToken: string, folderKey: string) => {
   const readFolder = cloudUrls.folder.readFolder(folderKey);
+  console.log(readFolder.url);
+  
   const response = await axios.request({
     method: readFolder.method,
     url: readFolder.url,

@@ -16,7 +16,7 @@ export const Route = createFileRoute('/_main')({
   component: MainComponent,
   loader: async () => {
     const accessToken = useTokenStore.getState().accessToken;
-    const {profile, isCloudUser }= useUserStore.getState();
+    const { profile, isCloudUser } = useUserStore.getState();
     if (!accessToken || !isCloudUser || !profile) {
       throw redirect({
         to: '/',
