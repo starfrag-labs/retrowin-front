@@ -61,8 +61,6 @@ export const Route = createFileRoute('/')({
 
     let isCloudUser: boolean = false;
     isCloudUser = useUserStore.getState().isCloudUser;
-    console.log(isCloudUser);
-    
     if (!isCloudUser) {
       const enrollResult = await enrollUser(storedToken).catch(() => {
         return false;
@@ -93,7 +91,7 @@ function IndexComponent() {
   const accessToken = useTokenStore((state) => state.accessToken);
 
   if (accessToken) {
-    return <Navigate to="./cloud" />;
+    return <Navigate to="/cloud/$folderKey" params={{ folderKey: 'home' }} />;
   }
 
   // If the user is not logged in, show the login page
