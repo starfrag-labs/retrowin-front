@@ -14,8 +14,9 @@ import { Route as rootRoute } from './routes/__root'
 import { Route as MainImport } from './routes/_main.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
 import { Route as MainEnrollImport } from './routes/_main/enroll.tsx'
-import { Route as MainCloudImport } from './routes/_main/cloud.tsx'
 import { Route as MainAboutImport } from './routes/_main/about.tsx'
+import { Route as MainCloudIndexImport } from './routes/_main/cloud/index.tsx'
+import { Route as MainCloudFolderKeyImport } from './routes/_main/cloud/$folderKey.tsx'
 
 // Create/Update Routes
 
@@ -34,13 +35,18 @@ const MainEnrollRoute = MainEnrollImport.update({
   getParentRoute: () => MainRoute,
 } as any)
 
-const MainCloudRoute = MainCloudImport.update({
-  path: '/cloud',
+const MainAboutRoute = MainAboutImport.update({
+  path: '/about',
   getParentRoute: () => MainRoute,
 } as any)
 
-const MainAboutRoute = MainAboutImport.update({
-  path: '/about',
+const MainCloudIndexRoute = MainCloudIndexImport.update({
+  path: '/cloud/',
+  getParentRoute: () => MainRoute,
+} as any)
+
+const MainCloudFolderKeyRoute = MainCloudFolderKeyImport.update({
+  path: '/cloud/$folderKey',
   getParentRoute: () => MainRoute,
 } as any)
 
@@ -60,12 +66,16 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MainAboutImport
       parentRoute: typeof MainImport
     }
-    '/_main/cloud': {
-      preLoaderRoute: typeof MainCloudImport
-      parentRoute: typeof MainImport
-    }
     '/_main/enroll': {
       preLoaderRoute: typeof MainEnrollImport
+      parentRoute: typeof MainImport
+    }
+    '/_main/cloud/$folderKey': {
+      preLoaderRoute: typeof MainCloudFolderKeyImport
+      parentRoute: typeof MainImport
+    }
+    '/_main/cloud/': {
+      preLoaderRoute: typeof MainCloudIndexImport
       parentRoute: typeof MainImport
     }
   }
@@ -75,7 +85,12 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  MainRoute.addChildren([MainAboutRoute, MainCloudRoute, MainEnrollRoute]),
+  MainRoute.addChildren([
+    MainAboutRoute,
+    MainEnrollRoute,
+    MainCloudFolderKeyRoute,
+    MainCloudIndexRoute,
+  ]),
 ])
 
 /* prettier-ignore-end */

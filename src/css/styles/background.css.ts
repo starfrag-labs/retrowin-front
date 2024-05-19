@@ -1,7 +1,7 @@
 import { style } from "@vanilla-extract/css";
 
 export const indexBackground = style({
-  backgroundImage: 'url(./src/assets/vault.jpg)',
+  backgroundImage: 'url(/src/assets/vault.jpg)',
   backgroundSize: 'cover',
   height: '100%',
   width: '100%',

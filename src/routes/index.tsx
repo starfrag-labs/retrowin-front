@@ -43,7 +43,6 @@ export const Route = createFileRoute('/')({
     }
     let storedToken = '';
     storedToken = useTokenStore.getState().accessToken;
-    console.log('token' + storedToken);
     await isValid(storedToken).catch(() => {
       setAccessToken('');
       storedToken = '';

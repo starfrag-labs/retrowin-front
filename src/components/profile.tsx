@@ -1,14 +1,22 @@
+import { useQueryClient } from "@tanstack/react-query"
+import { useTokenStore } from "../store/tokenStore"
 import { Profile as IProfile } from "../types/response"
 
 export function Profile({
-  logout,
   switchShowProfile,
   profile
 }: {
-  logout: () => void
   switchShowProfile: () => void
   profile: IProfile 
 }) {
+  const setAccessToken = useTokenStore.getState().setAccessToken
+  const queryClient = useQueryClient()
+
+  const logout = () => {
+    setAccessToken('')
+    queryClient.clear()
+    location.href = '/'
+  }
 
   return (
     <div>

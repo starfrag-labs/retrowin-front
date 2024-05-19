@@ -76,6 +76,18 @@ export const readFolder = async (accessToken: string, folderKey: string) => {
   return response;
 };
 
+export const readRootFolder = async (accessToken: string) => {
+  const readRootFolder = cloudUrls.folder.readRootFolder;
+  const response = await axios.request({
+    method: readRootFolder.method,
+    url: readRootFolder.url,
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  return response;
+}
+
 export const deleteFolder = async (accessToken: string, folderKey: string) => {
   const deleteFolder = cloudUrls.folder.readFolder(folderKey);
   const response = await axios.request({
@@ -203,12 +215,12 @@ const cloudUrls = {
   },
   folder: {
     createRootFolder: {
-      url: `${api.cloud}/folder/create`,
+      url: `${api.cloud}/folder/root`,
       method: 'POST',
     },
     createFolder: (folderKey: string) => {
       return {
-        url: `${api.cloud}/folder/create/${folderKey}`,
+        url: `${api.cloud}/folder/${folderKey}`,
         method: 'POST',
       };
     },
@@ -217,6 +229,10 @@ const cloudUrls = {
         url: `${api.cloud}/folder/${folderKey}`,
         method: 'GET',
       };
+    },
+    readRootFolder: {
+      url: `${api.cloud}/folder/root`,
+      method: 'GET',
     },
     moveFolder: (folderKey: string, targetKey: string) => {
       return {
