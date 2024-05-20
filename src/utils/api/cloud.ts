@@ -1,3 +1,4 @@
+import { ReadFolderData } from '../../types/response';
 import { api } from '../config';
 import axios from 'axios';
 
@@ -39,7 +40,7 @@ export const deleteUser = async (accessToken: string) => {
 
 export const createRootFolder = async (accessToken: string) => {
   const createRootFolder = cloudUrls.folder.createRootFolder;
-  const response = await axios.request({
+  const response = await axios.request<string>({
     method: createRootFolder.method,
     url: createRootFolder.url,
     headers: {
@@ -51,7 +52,7 @@ export const createRootFolder = async (accessToken: string) => {
 
 export const createFolder = async (accessToken: string, folderKey: string, folderName: string) => {
   const createFolder = cloudUrls.folder.createFolder(folderKey);
-  const response = await axios.request({
+  const response = await axios.request<string>({
     method: createFolder.method,
     url: createFolder.url,
     headers: {
@@ -66,9 +67,7 @@ export const createFolder = async (accessToken: string, folderKey: string, folde
 
 export const readFolder = async (accessToken: string, folderKey: string) => {
   const readFolder = cloudUrls.folder.readFolder(folderKey);
-  console.log(readFolder.url);
-  
-  const response = await axios.request({
+  const response = await axios.request<ReadFolderData>({
     method: readFolder.method,
     url: readFolder.url,
     headers: {
@@ -78,11 +77,11 @@ export const readFolder = async (accessToken: string, folderKey: string) => {
   return response;
 };
 
-export const readRootFolder = async (accessToken: string) => {
-  const readRootFolder = cloudUrls.folder.readRootFolder;
-  const response = await axios.request({
-    method: readRootFolder.method,
-    url: readRootFolder.url,
+export const getRootFolderKey = async (accessToken: string) => {
+  const getRootFolderKey = cloudUrls.folder.getRootFolderKey;
+  const response = await axios.request<string>({
+    method: getRootFolderKey.method,
+    url: getRootFolderKey.url,
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
@@ -232,8 +231,8 @@ const cloudUrls = {
         method: 'GET',
       };
     },
-    readRootFolder: {
-      url: `${api.cloud}/folder/root`,
+    getRootFolderKey: {
+      url: `${api.cloud}/folder/rootKey`,
       method: 'GET',
     },
     moveFolder: (folderKey: string, targetKey: string) => {

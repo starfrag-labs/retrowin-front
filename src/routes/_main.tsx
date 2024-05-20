@@ -4,16 +4,15 @@ import {
   createFileRoute,
   redirect,
 } from '@tanstack/react-router';
-import { Logo } from '../components/logo';
-import { Profile } from '../components/profile';
 import { useState } from 'react';
 import { pageContainer } from '../css/styles/container.css';
 import { header } from '../css/styles/header.css';
 import { useTokenStore } from '../store/tokenStore';
 import { useUserStore } from '../store/userStore';
+import { Logo } from '../components/Logo';
+import { Profile } from '../components/Profile';
 
 export const Route = createFileRoute('/_main')({
-  component: MainComponent,
   loader: async () => {
     const accessToken = useTokenStore.getState().accessToken;
     const { profile, isCloudUser } = useUserStore.getState();
@@ -26,6 +25,7 @@ export const Route = createFileRoute('/_main')({
       profile,
     };
   },
+  component: MainComponent,
 });
 
 function MainComponent() {

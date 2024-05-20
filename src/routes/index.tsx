@@ -1,5 +1,5 @@
 import { Navigate, createFileRoute } from '@tanstack/react-router';
-import { Logo } from '../components/logo';
+import { Logo } from '../components/Logo';
 import { api } from '../utils/config';
 import { getProfile, isValid, issue } from '../utils/api/auth';
 import { z } from 'zod';
@@ -15,7 +15,6 @@ const codeSchema = z.object({
 });
 
 export const Route = createFileRoute('/')({
-  component: IndexComponent,
   validateSearch: codeSchema,
   beforeLoad: async ({ search: { code } }) => {
     if (!code) {
@@ -24,13 +23,13 @@ export const Route = createFileRoute('/')({
       };
     }
     const accessToken = await issue(code)
-      .then((response) => {
-        const token = response.headers['authorization'].split(' ')[1];
-        return token;
-      })
-      .catch(() => {
-        return null;
-      });
+    .then((response) => {
+      const token = response.headers['authorization'].split(' ')[1];
+      return token;
+    })
+    .catch(() => {
+      return null;
+    });
     return {
       accessToken: accessToken,
     };
@@ -47,18 +46,18 @@ export const Route = createFileRoute('/')({
       setAccessToken('');
       storedToken = '';
     });
-
+    
     if (!storedToken) {
       return;
     }
     await checkUser(storedToken)
-      .then(() => {
-        setIsCloudUser(true);
-      })
-      .catch(() => {
-        setIsCloudUser(false);
-      });
-
+    .then(() => {
+      setIsCloudUser(true);
+    })
+    .catch(() => {
+      setIsCloudUser(false);
+    });
+    
     let isCloudUser: boolean = false;
     isCloudUser = useUserStore.getState().isCloudUser;
     if (!isCloudUser) {
@@ -69,29 +68,31 @@ export const Route = createFileRoute('/')({
         return;
       }
       await checkUser(storedToken)
-        .then(() => {
-          setIsCloudUser(true);
-        })
-        .catch(() => {
-          setIsCloudUser(false);
-        });
-    }
-    await getProfile(storedToken)
-      .then((response) => {
-        const profile = response.data.data;
-        setProfile(profile);
+      .then(() => {
+        setIsCloudUser(true);
       })
       .catch(() => {
-        return;
+        setIsCloudUser(false);
       });
+    }
+    await getProfile(storedToken)
+    .then((response) => {
+      const profile = response.data.data;
+      setProfile(profile);
+    })
+    .catch(() => {
+      return;
+    });
   },
+  pendingComponent: () => <div>Loading...</div>,
+  component: IndexComponent,
 });
 
 function IndexComponent() {
   const accessToken = useTokenStore((state) => state.accessToken);
 
   if (accessToken) {
-    return <Navigate to="/cloud/$folderKey" params={{ folderKey: 'home' }} />;
+    return <Navigate to="/cloud" />;
   }
 
   // If the user is not logged in, show the login page
