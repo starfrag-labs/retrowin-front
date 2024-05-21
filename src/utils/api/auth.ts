@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { api } from '../config';
 import { Urls } from '../../types/request';
-import { Profile } from '../../types/response';
+import { IProfile } from '../../types/response';
 
 const authUrls: Urls = {
   validate: {
@@ -54,8 +54,8 @@ export const issue = async (code: string) => {
 
 export const getProfile = (accessToken: string) => {
   return axios.request<{
-    message: string
-    data: Profile
+    message: string;
+    data: IProfile;
   }>({
     method: authUrls.profile.method,
     url: authUrls.profile.url,

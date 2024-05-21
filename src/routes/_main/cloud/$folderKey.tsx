@@ -5,6 +5,8 @@ import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import z from 'zod';
 import { FolderReader } from '../../../components/FolderReader';
 import { createFolder } from '../../../utils/api/cloud';
+import { useEffect, useState } from 'react';
+import { StoreElement, useElementStore } from '../../../store/elementStore';
 
 export const Route = createFileRoute('/_main/cloud/$folderKey')({
   parseParams: (params) => {
@@ -21,6 +23,8 @@ export const Route = createFileRoute('/_main/cloud/$folderKey')({
 });
 
 function CloudComponent() {
+  const [elements, setElements] = useState<StoreElement[]>([]);
+  const elementStore = useElementStore();
   const queryClient = useQueryClient();
   const accessToken = useTokenStore.getState().accessToken;
   const params = Route.useParams();
@@ -35,12 +39,40 @@ function CloudComponent() {
     );
   };
 
+  useEffect(() => {
+    const data = readFolderQuery.data;
+    if (!data) {
+      return;
+    }
+    const folderElements: StoreElement[] = data.folders.map((folder) => {
+      return {
+        key: folder.key,
+        name: folder.name,
+        type: 'folder',
+        parentKey: params.folderKey,
+      };
+    });
+    const fileElements: StoreElement[] = data.files.map((file) => {
+      return {
+        key: file.key,
+        name: file.name,
+        type: 'file',
+        parentKey: params.folderKey,
+      };
+    });
+    setElements([...folderElements, ...fileElements]);
+  }, [params.folderKey, readFolderQuery.data]);
+
+  useEffect(() => {
+    elementStore.setElements(elements);
+  }, [elementStore, elements]);
+
   return (
     <div>
       <div>
         <button onClick={create}>create folder</button>
       </div>
-      <FolderReader data={readFolderQuery.data} folderKey={params.folderKey} />
+      <FolderReader elements={elements} />
     </div>
   );
 }

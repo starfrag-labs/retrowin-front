@@ -1,27 +1,24 @@
-export interface File {
-  fileKey: string;
-  fileName: string;
+import { IElement } from './element';
+
+export interface IFile extends IElement {
   enabled: boolean;
 }
 
-export interface Folder {
-  folderKey: string;
-  folderName: string;
-}
+export interface IFolder extends IElement {}
 
 export interface ReadFolderData {
-  folders: Folder[];
-  files: File[];
+  folders: IFolder[];
+  files: IFile[];
 }
 
-export type Provider = 'local' | 'google';
+export type ProviderType = 'local' | 'google';
 
-export interface Profile {
+export interface IProfile {
   uuidKey: string;
   email: string;
   nickname: string;
   imageUrl: string | null;
   joinDate: string;
   updateDate: string;
-  provider: Provider;
+  provider: ProviderType;
 }

@@ -1,22 +1,22 @@
-import { useQueryClient } from "@tanstack/react-query"
-import { useTokenStore } from "../store/tokenStore"
-import { Profile as IProfile } from "../types/response"
+import { useQueryClient } from '@tanstack/react-query';
+import { useTokenStore } from '../store/tokenStore';
+import { IProfile as IProfile } from '../types/response';
 
 export function Profile({
   switchShowProfile,
-  profile
+  profile,
 }: {
-  switchShowProfile: () => void
-  profile: IProfile 
+  switchShowProfile: () => void;
+  profile: IProfile;
 }) {
-  const setAccessToken = useTokenStore.getState().setAccessToken
-  const queryClient = useQueryClient()
+  const setAccessToken = useTokenStore.getState().setAccessToken;
+  const queryClient = useQueryClient();
 
   const logout = () => {
-    setAccessToken('')
-    queryClient.clear()
-    location.href = '/'
-  }
+    setAccessToken('');
+    queryClient.clear();
+    location.href = '/';
+  };
 
   return (
     <div>
@@ -25,5 +25,5 @@ export function Profile({
       <button onClick={switchShowProfile}>close</button>
       <button onClick={logout}>logout</button>
     </div>
-  )
+  );
 }

@@ -1,9 +1,4 @@
-export type ElementType = 'folder' | 'file';
-
-export interface Element {
+export interface IElement {
   name: string;
   key: string;
-  type: ElementType;
-  enabled?: boolean;
-  parentKey?: string;
 }

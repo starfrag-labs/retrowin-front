@@ -1,19 +1,19 @@
-import { create } from "zustand";
-import { Profile } from "../types/response";
+import { create } from 'zustand';
+import { IProfile } from '../types/response';
 
 type State = {
   isCloudUser: boolean;
-  profile: Profile | null
+  profile: IProfile | null;
 };
 
 type Action = {
   setIsCloudUser: (isCloudUser: boolean) => void;
-  setProfile: (profile: Profile) => void;
+  setProfile: (profile: IProfile) => void;
 };
 
 const initialState: State = {
   isCloudUser: false,
-  profile: null
+  profile: null,
 };
 
 export const useUserStore = create<State & Action>((set) => ({
