@@ -90,7 +90,7 @@ export const getRootFolderKey = async (accessToken: string) => {
 }
 
 export const deleteFolder = async (accessToken: string, folderKey: string) => {
-  const deleteFolder = cloudUrls.folder.readFolder(folderKey);
+  const deleteFolder = cloudUrls.folder.deleteFolder(folderKey);
   const response = await axios.request({
     method: deleteFolder.method,
     url: deleteFolder.url,
@@ -129,10 +129,21 @@ export const renameFolder = async (accessToken: string, folderKey: string, folde
 }
 
 
-export const uploadFile = async (accessToken: string, folderKey: string, file: File) => {
+export const uploadChunk = async (
+  accessToken: string,
+  folderKey: string,
+  chunk: File | Blob,
+  fileName: string,
+  totalChunks: number,
+  chunkNumber: number
+) => {
   const uploadFile = cloudUrls.file.uploadFile(folderKey);
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('file', chunk, fileName);
+  formData.append('fileName', fileName);
+  formData.append('totalChunks', totalChunks.toString());
+  formData.append('chunkNumber', chunkNumber.toString());
+
   const response = await axios.request({
     method: uploadFile.method,
     url: uploadFile.url,
@@ -147,12 +158,13 @@ export const uploadFile = async (accessToken: string, folderKey: string, file: F
 
 export const downloadFile = async (accessToken: string, folderKey: string, fileKey: string) => {
   const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
-  const response = await axios.request({
+  const response = await axios.request<Blob>({
     method: downloadFile.method,
     url: downloadFile.url,
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
+    responseType: 'blob'
   });
   return response;
 };
@@ -223,6 +235,12 @@ const cloudUrls = {
       return {
         url: `${api.cloud}/folder/${folderKey}`,
         method: 'POST',
+      };
+    },
+    deleteFolder: (folderKey: string) => {
+      return {
+        url: `${api.cloud}/folder/${folderKey}`,
+        method: 'DELETE',
       };
     },
     readFolder: (folderKey: string) => {

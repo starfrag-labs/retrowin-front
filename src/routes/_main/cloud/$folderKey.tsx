@@ -7,6 +7,7 @@ import { FolderReader } from '../../../components/FolderReader';
 import { createFolder } from '../../../utils/api/cloud';
 import { useEffect, useState } from 'react';
 import { StoreElement, useElementStore } from '../../../store/elementStore';
+import { UploadForm } from '../../../components/UploadForm';
 
 export const Route = createFileRoute('/_main/cloud/$folderKey')({
   parseParams: (params) => {
@@ -24,7 +25,7 @@ export const Route = createFileRoute('/_main/cloud/$folderKey')({
 
 function CloudComponent() {
   const [elements, setElements] = useState<StoreElement[]>([]);
-  const elementStore = useElementStore();
+  const setElementsStore = useElementStore().setElements;
   const queryClient = useQueryClient();
   const accessToken = useTokenStore.getState().accessToken;
   const params = Route.useParams();
@@ -32,7 +33,9 @@ function CloudComponent() {
     readFolderQueryOption(accessToken, params.folderKey)
   );
 
-  const create = async () => {
+  const [showUploadForm, setShowUploadForm] = useState(false);
+
+  const createFolderHandler = async () => {
     await createFolder(accessToken, params.folderKey, 'new-folder');
     queryClient.invalidateQueries(
       readFolderQueryOption(accessToken, params.folderKey)
@@ -61,18 +64,17 @@ function CloudComponent() {
       };
     });
     setElements([...folderElements, ...fileElements]);
-  }, [params.folderKey, readFolderQuery.data]);
-
-  useEffect(() => {
-    elementStore.setElements(elements);
-  }, [elementStore, elements]);
+    setElementsStore([...folderElements, ...fileElements]);
+  }, [params.folderKey, readFolderQuery.data, setElementsStore]);
 
   return (
     <div>
-      <div>
-        <button onClick={create}>create folder</button>
-      </div>
+      <button onClick={createFolderHandler}>create folder</button>
+      <button onClick={() => setShowUploadForm(!showUploadForm)}>
+        upload File
+      </button>
       <FolderReader elements={elements} />
+      {showUploadForm && <UploadForm folderKey={params.folderKey} />}
     </div>
   );
 }

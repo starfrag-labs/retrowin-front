@@ -7,6 +7,7 @@ import { QueryClient } from '@tanstack/react-query';
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
+  pendingComponent: () => <div>Loading...</div>,
   component: RootComponent,
 });
 

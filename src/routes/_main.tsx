@@ -25,6 +25,7 @@ export const Route = createFileRoute('/_main')({
       profile,
     };
   },
+  pendingComponent: () => <div>Loading...</div>,
   component: MainComponent,
 });
 
