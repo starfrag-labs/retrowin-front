@@ -23,13 +23,13 @@ export const Route = createFileRoute('/')({
       };
     }
     const accessToken = await issue(code)
-    .then((response) => {
-      const token = response.headers['authorization'].split(' ')[1];
-      return token;
-    })
-    .catch(() => {
-      return null;
-    });
+      .then((response) => {
+        const token = response.headers['authorization'].split(' ')[1];
+        return token;
+      })
+      .catch(() => {
+        return null;
+      });
     return {
       accessToken: accessToken,
     };
@@ -46,18 +46,18 @@ export const Route = createFileRoute('/')({
       setAccessToken('');
       storedToken = '';
     });
-    
+
     if (!storedToken) {
       return;
     }
     await checkUser(storedToken)
-    .then(() => {
-      setIsCloudUser(true);
-    })
-    .catch(() => {
-      setIsCloudUser(false);
-    });
-    
+      .then(() => {
+        setIsCloudUser(true);
+      })
+      .catch(() => {
+        setIsCloudUser(false);
+      });
+
     let isCloudUser: boolean = false;
     isCloudUser = useUserStore.getState().isCloudUser;
     if (!isCloudUser) {
@@ -68,21 +68,21 @@ export const Route = createFileRoute('/')({
         return;
       }
       await checkUser(storedToken)
-      .then(() => {
-        setIsCloudUser(true);
-      })
-      .catch(() => {
-        setIsCloudUser(false);
-      });
+        .then(() => {
+          setIsCloudUser(true);
+        })
+        .catch(() => {
+          setIsCloudUser(false);
+        });
     }
     await getProfile(storedToken)
-    .then((response) => {
-      const profile = response.data.data;
-      setProfile(profile);
-    })
-    .catch(() => {
-      return;
-    });
+      .then((response) => {
+        const profile = response.data.data;
+        setProfile(profile);
+      })
+      .catch(() => {
+        return;
+      });
   },
   pendingComponent: () => <div>Loading...</div>,
   component: IndexComponent,

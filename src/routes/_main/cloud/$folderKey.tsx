@@ -8,6 +8,7 @@ import { createFolder } from '../../../utils/api/cloud';
 import { useEffect, useState } from 'react';
 import { StoreElement, useElementStore } from '../../../store/elementStore';
 import { UploadForm } from '../../../components/UploadForm';
+import { VideoPlayer } from '../../../components/VideoPlayer';
 
 export const Route = createFileRoute('/_main/cloud/$folderKey')({
   parseParams: (params) => {
@@ -73,6 +74,10 @@ function CloudComponent() {
       <button onClick={() => setShowUploadForm(!showUploadForm)}>
         upload File
       </button>
+      <VideoPlayer
+        folderKey="42a5dac4-8409-43a7-8456-271c463883d1"
+        fileKey="604f22d2-5c0a-4498-9a8f-0fee9e8fc201"
+      />
       <FolderReader elements={elements} />
       {showUploadForm && <UploadForm folderKey={params.folderKey} />}
     </div>
