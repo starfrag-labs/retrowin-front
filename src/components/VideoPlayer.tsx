@@ -11,8 +11,8 @@ export function VideoPlayer({
   fileKey: string;
 }) {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const url = `${api.cloud}/video/stream/${folderKey}/${fileKey}/master.m3u8`;
   const accessToken = useTokenStore.getState().accessToken;
+  const url = `${api.cloud}/videos/stream/${folderKey}/${fileKey}/master.m3u8`;
   useEffect(() => {
     if (Hls.isSupported() && videoRef.current) {
       const hls = new Hls({
