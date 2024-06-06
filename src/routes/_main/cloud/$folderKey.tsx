@@ -3,12 +3,12 @@ import { useTokenStore } from '../../../store/tokenStore';
 import { readFolderQueryOption } from '../../../utils/queryOptions';
 import { useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import z from 'zod';
-import { FolderReader } from '../../../components/FolderReader';
 import { createFolder } from '../../../utils/api/cloud';
 import { useEffect, useState } from 'react';
 import { StoreElement, useElementStore } from '../../../store/elementStore';
 import { UploadForm } from '../../../components/UploadForm';
-import { VideoPlayer } from '../../../components/VideoPlayer';
+import { Element } from '../../../components/Element';
+import { gridContainer, navContainer } from '../../../css/styles/container.css';
 
 export const Route = createFileRoute('/_main/cloud/$folderKey')({
   parseParams: (params) => {
@@ -33,6 +33,7 @@ function CloudComponent() {
   const readFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, params.folderKey)
   );
+  const [deleting, setDeleting] = useState<boolean>(false);
 
   const [showUploadForm, setShowUploadForm] = useState(false);
 
@@ -70,16 +71,37 @@ function CloudComponent() {
 
   return (
     <div>
-      <button onClick={createFolderHandler}>create folder</button>
-      <button onClick={() => setShowUploadForm(!showUploadForm)}>
-        upload File
-      </button>
-      <VideoPlayer
-        folderKey="42a5dac4-8409-43a7-8456-271c463883d1"
-        fileKey="604f22d2-5c0a-4498-9a8f-0fee9e8fc201"
-      />
-      <FolderReader elements={elements} />
-      {showUploadForm && <UploadForm folderKey={params.folderKey} />}
+      <div className={navContainer}>
+        <button onClick={createFolderHandler}>create folder</button>
+        {showUploadForm ? (
+          <div>
+            <UploadForm folderKey={params.folderKey} />
+            <button onClick={() => setShowUploadForm(!showUploadForm)}>
+              cancel
+            </button>
+          </div>
+        ) : (
+          <button onClick={() => setShowUploadForm(!showUploadForm)}>
+            upload File
+          </button>
+        )}
+        {deleting ? (
+          <button onClick={() => setDeleting(!deleting)}>cancel</button>
+        ) : (
+          <button onClick={() => setDeleting(!deleting)}>delete</button>
+        )}
+      </div>
+      <div>
+        {elements.length === 0 ? (
+          <div>Empty Folder</div>
+        ) : (
+          <div className={gridContainer}>
+            {elements.map((element) => (
+              <Element key={element.key} element={element} deleting={deleting}/>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

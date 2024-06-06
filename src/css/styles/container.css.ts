@@ -30,3 +30,27 @@ export const blurContainer = style({
   alignItems: 'center',
   color: 'white',
 })
+
+export const gridContainer = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+  gap: '20px',
+  padding: '20px',
+})
+
+export const navContainer = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+  padding: '20px',
+})
+
+export const columnButtonContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+})
+
+export const rowButtonContainer = style({
+  display: 'flex',
+  flexDirection: 'row',
+})
