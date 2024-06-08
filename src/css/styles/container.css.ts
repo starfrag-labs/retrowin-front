@@ -35,19 +35,14 @@ export const gridContainer = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
   gap: '20px',
-  padding: '20px',
 })
 
 export const navContainer = style({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  padding: '20px',
-})
-
-export const columnButtonContainer = style({
-  display: 'flex',
-  flexDirection: 'column',
+  paddingTop: '20px',
+  paddingBottom: '20px',
 })
 
 export const rowButtonContainer = style({

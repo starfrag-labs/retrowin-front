@@ -13,32 +13,28 @@ import { getContentType } from '../utils/contentTypeGetter';
 import { FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { TiDelete } from 'react-icons/ti';
-import { FiDownload } from "react-icons/fi";
+import { CiMenuKebab } from 'react-icons/ci';
 import {
-  IconContainer,
+  BoxContainer,
   fileIcon,
   folderIcon,
-  deleteIcon,
   elementContainer,
-  downloadIcon,
+  IconContainer,
+  menu,
+  menuIcon,
 } from '../css/styles/element.css';
-import { columnButtonContainer } from '../css/styles/container.css';
 import { redirect } from '@tanstack/react-router';
 
-export const Element = ({
-  element,
-  deleting,
-}: {
-  element: StoreElement;
-  deleting: boolean;
-}) => {
+export const Element = ({ element }: { element: StoreElement }) => {
   const accessToken = useTokenStore.getState().accessToken;
   const queryClient = useQueryClient();
   const [isEditing, setIsEditing] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [name, setName] = useState(element.name);
   const elementStore = useElementStore();
   const contentType = getContentType(element.name);
   const renameRef = useRef<HTMLInputElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const deleteHandler = async () => {
     elementStore.removeElement(element.key);
@@ -68,9 +64,9 @@ export const Element = ({
         },
       });
     } else if (element.type === 'file' && contentType) {
-        openImageHandler();
+      openImageHandler();
     } else if (element.type === 'file') {
-        downloadHandler();
+      downloadHandler();
     } else {
       throw new Error('Element type is not supported');
     }
@@ -157,7 +153,7 @@ export const Element = ({
   };
 
   useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
+    function handleRenameClickOutside(event: MouseEvent) {
       if (
         renameRef.current &&
         !renameRef.current.contains(event.target as Node)
@@ -166,33 +162,46 @@ export const Element = ({
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [renameRef]);
+    function handleMenuClickOutside(event: MouseEvent) {
+      if (
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleRenameClickOutside);
+    document.addEventListener('mousedown', handleMenuClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleRenameClickOutside);
+      document.removeEventListener('mousedown', handleMenuClickOutside);
+    }
+  }, [renameRef, menuRef]);
 
   return (
-    <div className={elementContainer} onDoubleClick={clickIconHandler}>
-      {deleting ? (
-        <TiDelete onClick={deleteHandler} className={deleteIcon} />
-      ) : (
-        <FiDownload onClick={downloadHandler} className={downloadIcon} />
-      )}
-      {element.type === 'folder' ? (
-        <div className={IconContainer}>
-          <FaFolder className={folderIcon} />
-        </div>
-      ) : (
-        <div className={IconContainer}>
-          <FaFileAlt className={fileIcon} />
+    <div className={elementContainer}>
+      {menuOpen && (
+        <div className={menu}>
+          <button>download</button>
+          <button>delete</button>
+          <button>rename</button>
         </div>
       )}
-      <div className={columnButtonContainer}>
-        {element.type === 'file' ? (
-          <button onClick={downloadHandler}>download file</button>
-        ) : null}
-        {element.type === 'file' && contentType ? (
-          <button onClick={openImageHandler}>open image</button>
-        ) : null}
+      <div className={BoxContainer} onDoubleClick={clickIconHandler}>
+        <div className={IconContainer}>
+          <div ref={menuRef}>
+            <CiMenuKebab
+              onClick={() => setMenuOpen(!menuOpen)}
+              className={menuIcon}
+            />
+          </div>
+          {element.type === 'folder' ? (
+            <FaFolder className={folderIcon} />
+          ) : (
+            <FaFileAlt className={fileIcon} />
+          )}
+        </div>
       </div>
       <form onSubmit={renameHandler}>
         {isEditing ? (

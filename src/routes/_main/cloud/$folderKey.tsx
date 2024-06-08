@@ -33,7 +33,6 @@ function CloudComponent() {
   const readFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, params.folderKey)
   );
-  const [deleting, setDeleting] = useState<boolean>(false);
 
   const [showUploadForm, setShowUploadForm] = useState(false);
 
@@ -85,11 +84,6 @@ function CloudComponent() {
             upload File
           </button>
         )}
-        {deleting ? (
-          <button onClick={() => setDeleting(!deleting)}>cancel</button>
-        ) : (
-          <button onClick={() => setDeleting(!deleting)}>delete</button>
-        )}
       </div>
       <div>
         {elements.length === 0 ? (
@@ -97,7 +91,7 @@ function CloudComponent() {
         ) : (
           <div className={gridContainer}>
             {elements.map((element) => (
-              <Element key={element.key} element={element} deleting={deleting}/>
+              <Element key={element.key} element={element} />
             ))}
           </div>
         )}
