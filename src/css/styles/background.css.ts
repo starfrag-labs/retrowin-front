@@ -10,3 +10,11 @@ export const indexBackground = style({
   alignItems: 'center',
   flexDirection: 'column',
 })
+
+export const cloudBackground = style({
+  backgroundImage: `url('/src/assets/background.jpg')`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+  height: '100%',
+  width: '100%',
+})

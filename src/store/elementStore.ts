@@ -1,33 +1,31 @@
 import { create } from 'zustand';
 import { IElement } from '../types/element';
 
-export interface StoreElement extends IElement {
-  type: 'folder' | 'file';
-  parentKey: string;
-  enabled?: boolean;
-}
-
 type State = {
-  elements: Map<string, StoreElement>;
+  elements: Map<string, IElement>;
 };
 
 type Action = {
-  setElements: (elements: StoreElement[]) => void;
-  setElement: (element: StoreElement) => void;
+  getElements: () => Map<string, IElement>;
+  setElements: (elements: IElement[]) => void;
+  setElement: (element: IElement) => void;
   removeElement: (key: string) => void;
   findElement: (
     key: string,
-    elements: StoreElement[]
-  ) => StoreElement | undefined;
+    elements: IElement[]
+  ) => IElement | undefined;
   renameElement: (key: string, newName: string) => void;
+  selectElement: (key: string) => void;
+  unselectElement: (key: string) => void;
 };
 
 const initialState: State = {
-  elements: new Map<string, StoreElement>(),
+  elements: new Map<string, IElement>(),
 };
 
-export const useElementStore = create<State & Action>((set) => ({
+export const useElementStore = create<State & Action>((set, get) => ({
   elements: initialState.elements,
+  getElements: () => get().elements,
   setElements: (elements) => {
     set((state) => {
       elements.forEach((element) => {
@@ -60,5 +58,25 @@ export const useElementStore = create<State & Action>((set) => ({
       }
       return { elements: state.elements };
     });
-  }
+  },
+  selectElement: (key) => {
+    set((state) => {
+      const element = state.elements.get(key);
+      if (element) {
+        element.selected = true;
+        state.elements.set(key, element);
+      }
+      return { elements: state.elements };
+    });
+  },
+  unselectElement: (key) => {
+    set((state) => {
+      const element = state.elements.get(key);
+      if (element) {
+        element.selected = false;
+        state.elements.set(key, element);
+      }
+      return { elements: state.elements };
+    });
+  },
 }));

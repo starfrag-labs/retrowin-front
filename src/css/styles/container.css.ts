@@ -1,10 +1,4 @@
 import { style } from "@vanilla-extract/css";
-import { paddings } from "../global.css";
-
-export const pageContainer = style({
-  paddingLeft: paddings.default,
-  paddingRight: paddings.default,
-})
 
 export const centerContainer = style({
   display: 'flex',
@@ -29,12 +23,6 @@ export const blurContainer = style({
   justifyContent: 'center',
   alignItems: 'center',
   color: 'white',
-})
-
-export const gridContainer = style({
-  display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-  gap: '20px',
 })
 
 export const navContainer = style({

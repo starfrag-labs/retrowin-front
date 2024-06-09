@@ -1,51 +1,42 @@
 import { StyleRule, style } from '@vanilla-extract/css';
 
+export const elementsContainer = style({
+  display: 'grid',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))',
+  gap: '1rem',
+});
+
 export const elementContainer = style({
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
-  position: 'relative',
-});
-
-export const BoxContainer = style({
-  position: 'relative',
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-  border: '1px solid black',
-  borderRadius: '10px',
-  width: '80%',
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
   cursor: 'pointer',
-  transition: '0.3s',
-  ':hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
-  },
-  ':before': {
-    content: '""',
-    display: 'block',
-    paddingTop: '100%',
-  },
-});
-
-export const IconContainer = style({
-  position: 'absolute',
-  top: '0px',
-  left: '0px',
-  right: '0px',
-  bottom: '0px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
+  padding: '1rem',
+  borderRadius: '15px',
 });
 
 const defaultIcon: StyleRule = {
-  fontSize: '5rem',
+  fontSize: '3rem',
+  filter: 'drop-shadow(0 0 1px black)',
 } as const;
+
+export const createFolderIcon = style({
+  ...defaultIcon,
+  color: 'lightgreen',
+});
+
+export const uploadFileIcon = style({
+  ...defaultIcon,
+  color: 'lightblue',
+});
 
 export const fileIcon = style({
   ...defaultIcon,
-  color: 'lightblue',
+  color: 'lightgrey',
 });
 
 export const folderIcon = style({
@@ -53,54 +44,27 @@ export const folderIcon = style({
   color: 'orange',
 });
 
-export const menu = style({
-  position: 'absolute',
-  top: '0px',
-  right: '0px',
+export const elementNameText = style({
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textAlign: 'center',
+  color: 'white',
+  filter: 'drop-shadow(0 0 1px black) drop-shadow(0 0 1px black)',
+});
+
+export const elementNameTextarea = style({
+  textAlign: 'center',
+  resize: 'none',
+  scrollbarWidth: 'none',
+  height: 'auto',
+});
+
+export const elementNameContainer = style({
   display: 'flex',
   flexDirection: 'column',
-  backgroundColor: 'rgba(0, 0, 0, 0.1)',
-  borderRadius: '10px',
-  border: '1px solid black',
-  zIndex: 1,
-});
-
-export const menuIcon = style({
-  fontSize: '2rem',
-  color: 'grey',
-  cursor: 'pointer',
-  transition: '0.3s',
-  position: 'absolute',
-  padding: '5px',
-  top: '0px',
-  right: '0px',
-  ':hover': {
-    color: 'black',
-  },
-});
-
-export const buttonIcon = style({
-  fontSize: '3rem',
-  cursor: 'pointer',
-  transition: '0.3s',
-  ':hover': {
-    color: 'black',
-  },
-});
-
-export const deleteIcon = style({
-  fontSize: '3rem',
-  color: 'lightcoral',
-  cursor: 'pointer',
-  position: 'absolute',
-  top: '0px',
-  right: '0px',
-  ':hover': {
-    color: 'red',
-  },
-  transition: '0.3s',
-});
-
-export const elementName = style({
-  textAlign: 'center',
+  width: '100%',
+  boxSizing: 'border-box',
+  marginTop: '0.5rem',
+  fontSize: '1rem',
 });

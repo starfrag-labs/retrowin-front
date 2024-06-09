@@ -2,13 +2,13 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../store/tokenStore';
 import { IProfile as IProfile } from '../types/response';
 
-export function Profile({
+export const Profile = ({
   switchShowProfile,
   profile,
 }: {
   switchShowProfile: () => void;
   profile: IProfile;
-}) {
+}): React.ReactElement => {
   const setAccessToken = useTokenStore.getState().setAccessToken;
   const queryClient = useQueryClient();
 

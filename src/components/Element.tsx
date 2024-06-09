@@ -1,124 +1,59 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useEffect, useRef, useState } from 'react';
-import { StoreElement, useElementStore } from '../store/elementStore';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTokenStore } from '../store/tokenStore';
-import {
-  deleteFile,
-  deleteFolder,
-  downloadFile,
-  renameFile,
-  renameFolder,
-} from '../utils/api/cloud';
+import { downloadFile, renameFile, renameFolder } from '../utils/api/cloud';
 import { getContentType } from '../utils/contentTypeGetter';
-import { FaFolder } from 'react-icons/fa';
+import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
-import { TiDelete } from 'react-icons/ti';
-import { CiMenuKebab } from 'react-icons/ci';
 import {
-  BoxContainer,
   fileIcon,
   folderIcon,
   elementContainer,
-  IconContainer,
-  menu,
-  menuIcon,
+  elementNameText,
+  elementNameContainer,
+  elementNameTextarea,
+  uploadFileIcon,
 } from '../css/styles/element.css';
-import { redirect } from '@tanstack/react-router';
+import { IElement } from '../types/element';
+import { selector } from '../css/styles/selector.css';
+import { useElementStore } from '../store/elementStore';
 
-export const Element = ({ element }: { element: StoreElement }) => {
-  const accessToken = useTokenStore.getState().accessToken;
+export const Element = ({
+  element,
+  uploadFileHandler,
+}: {
+  element: IElement;
+  uploadFileHandler?: () => void;
+}): React.ReactElement => {
   const queryClient = useQueryClient();
+
+  const accessToken = useTokenStore((state) => state.accessToken);
+  const unselectElement = useElementStore((state) => state.unselectElement);
+  const selectElement = useElementStore((state) => state.selectElement);
+
   const [isEditing, setIsEditing] = useState(false);
-  const [menuOpen, setMenuOpen] = useState(false);
   const [name, setName] = useState(element.name);
-  const elementStore = useElementStore();
+  const [newName, setNewName] = useState(element.name);
+
   const contentType = getContentType(element.name);
-  const renameRef = useRef<HTMLInputElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
+  const elementRef = useRef<HTMLDivElement>(null);
+  const nameRef = useRef<HTMLInputElement>(null);
+  const renameRef = useRef<HTMLTextAreaElement>(null);
 
-  const deleteHandler = async () => {
-    elementStore.removeElement(element.key);
-    if (element.type === 'folder') {
-      deleteFolder(accessToken, element.key).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: ['read', 'folder', element.key],
-        });
-        elementStore.removeElement(element.key);
-      });
+  const handleClickIcon = () => {
+    if (element.type === 'file' && contentType) {
+      openImage();
     } else if (element.type === 'file') {
-      deleteFile(accessToken, element.parentKey, element.key).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: ['read', 'folder', element.parentKey],
-        });
-        elementStore.removeElement(element.key);
-      });
+      handleDownload();
     }
   };
 
-  const clickIconHandler = () => {
-    if (element.type === 'folder') {
-      throw redirect({
-        to: `/cloud/$folderKey`,
-        params: {
-          folderKey: element.key,
-        },
-      });
-    } else if (element.type === 'file' && contentType) {
-      openImageHandler();
-    } else if (element.type === 'file') {
-      downloadHandler();
-    } else {
-      throw new Error('Element type is not supported');
-    }
-  };
-
-  const renameHandler = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const newName = new FormData(event.currentTarget)
-      .get('newName')
-      ?.toString()
-      .replace(' ', '-');
-    if (!newName) {
-      return;
-    }
-    const tempName = element.name;
-    setName(newName);
-    setIsEditing(false);
-    if (element.type === 'folder') {
-      renameFolder(accessToken, element.key, newName)
-        .then(() => {
-          queryClient.invalidateQueries({
-            queryKey: ['read', 'folder', element.key],
-          });
-          elementStore.renameElement(element.key, newName);
-        })
-        .catch(() => {
-          elementStore.renameElement(element.key, tempName);
-          setName(tempName);
-        });
-    } else if (element.type === 'file') {
-      renameFile(accessToken, element.parentKey, element.key, newName)
-        .then(() => {
-          queryClient.invalidateQueries({
-            queryKey: ['read', 'folder', element.parentKey],
-          });
-          elementStore.renameElement(element.key, newName);
-        })
-        .catch(() => {
-          elementStore.renameElement(element.key, tempName);
-          setName(tempName);
-        });
-    }
-  };
-
-  const downloadHandler = async () => {
+  const handleDownload = async () => {
     const response = await downloadFile(
       accessToken,
       element.parentKey,
       element.key
-    ).catch((error) => {
-      console.error(error);
-    });
+    );
     if (!response) {
       return;
     }
@@ -132,7 +67,7 @@ export const Element = ({ element }: { element: StoreElement }) => {
     link.remove();
   };
 
-  const openImageHandler = async () => {
+  const openImage = async () => {
     if (!contentType) {
       return;
     }
@@ -152,64 +87,240 @@ export const Element = ({ element }: { element: StoreElement }) => {
     window.open(url);
   };
 
+  const handleClickName = () => {
+    if (
+      element.selected &&
+      (element.type === 'folder' || element.type === 'file')
+    ) {
+      setIsEditing(true);
+    }
+  };
+
+  const handleTextareaChange = (
+    event: React.ChangeEvent<HTMLTextAreaElement>
+  ) => {
+    const textarea = event.currentTarget;
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+    setNewName(textarea.value);
+  };
+
+  const handleEnter = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (event.key === 'Enter' && event.shiftKey === false) {
+      event.preventDefault();
+      event.currentTarget.closest('form')?.submit();
+    }
+  };
+
+  const handleElementHighlight = async () => {
+    if (elementRef.current && nameRef.current && !element.selected) {
+      selectElement(element.key);
+    }
+  };
+
+  const handleMouseOn = () => {
+    if (elementRef.current && nameRef.current && !element.selected) {
+      const backgroundColor = 'rgba(255, 255, 255, 0.1)';
+      elementRef.current.style.backgroundColor = backgroundColor;
+    }
+  };
+
+  const handleMouseOut = () => {
+    if (elementRef.current && nameRef.current && !element.selected) {
+      const backgroundColor = 'rgba(0, 0, 0, 0)';
+      elementRef.current.style.backgroundColor = backgroundColor;
+    }
+  };
+
   useEffect(() => {
-    function handleRenameClickOutside(event: MouseEvent) {
+    if (isEditing && renameRef.current) {
+      renameRef.current.style.height = 'auto';
+      renameRef.current.style.height = `${renameRef.current.scrollHeight}px`;
+      renameRef.current.focus();
+      renameRef.current.value = '';
+      renameRef.current.value = name;
+    }
+  }, [isEditing, name]);
+
+  const highlightElement = useCallback(async () => {
+    if (elementRef.current && nameRef.current && element.selected) {
+      const backgroundColor = 'rgba(255, 255, 255, 0.2)';
+      elementRef.current.style.backgroundColor = backgroundColor;
+      nameRef.current.style.whiteSpace = 'wrap';
+    } else if (elementRef.current && nameRef.current) {
+      const backgroundColor = 'rgba(0, 0, 0, 0)';
+      elementRef.current.style.backgroundColor = backgroundColor;
+      nameRef.current.style.whiteSpace = 'nowrap';
+    }
+  }, [element.selected]);
+
+  useEffect(() => {
+    highlightElement();
+  }, [highlightElement]);
+
+  const renameElement = useCallback(
+    (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsEditing(false);
+      } else if (
+        event.key === 'Enter' &&
+        newName !== element.name &&
+        element.type === 'folder'
+      ) {
+        event.preventDefault();
+        const tempName = element.name;
+        setName(newName);
+        setIsEditing(false);
+        renameFolder(accessToken, element.key, newName)
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ['read', 'folder', element.parentKey],
+            });
+          })
+          .catch(() => {
+            setName(tempName);
+          });
+      } else if (
+        event.key === 'Enter' &&
+        newName !== element.name &&
+        element.type === 'file'
+      ) {
+        event.preventDefault();
+        const tempName = element.name;
+        setName(newName);
+        setIsEditing(false);
+        renameFile(accessToken, element.parentKey, element.key, newName)
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: ['read', 'folder', element.parentKey],
+            });
+          })
+          .catch(() => {
+            setName(tempName);
+          });
+      }
+    },
+    [accessToken, element, newName, queryClient]
+  );
+
+  useEffect(() => {
+    document.addEventListener('keydown', renameElement);
+    return () => {
+      document.removeEventListener('keydown', renameElement);
+    };
+  }, [renameElement]);
+
+  const handleRenameClickOutside = useCallback(
+    (event: MouseEvent) => {
       if (
         renameRef.current &&
         !renameRef.current.contains(event.target as Node)
       ) {
         setIsEditing(false);
       }
-    }
+    },
+    [renameRef]
+  );
 
-    function handleMenuClickOutside(event: MouseEvent) {
-      if (
-        menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
-      ) {
-        setMenuOpen(false);
-      }
-    }
-
+  useEffect(() => {
     document.addEventListener('mousedown', handleRenameClickOutside);
-    document.addEventListener('mousedown', handleMenuClickOutside);
     return () => {
       document.removeEventListener('mousedown', handleRenameClickOutside);
-      document.removeEventListener('mousedown', handleMenuClickOutside);
+    };
+  }, [handleRenameClickOutside]);
+
+  const handleElementClickOutside = useCallback(
+    (event: MouseEvent) => {
+      if (
+        elementRef.current &&
+        !elementRef.current.contains(event.target as Node)
+      ) {
+        unselectElement(element.key);
+      }
+    },
+    [element.key, elementRef, unselectElement]
+  );
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleElementClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleElementClickOutside);
+    };
+  }, [handleElementClickOutside]);
+
+  const handleSelectedByDragBox = useCallback(() => {
+    const box = document.querySelector(`.${selector}`) as HTMLDivElement;
+    if (!box) {
+      return;
     }
-  }, [renameRef, menuRef]);
+    const target = document.getElementById(element.key);
+    if (!target) {
+      return;
+    }
+    const targetRect = target.getBoundingClientRect();
+    const targetCenter = {
+      x: targetRect.left + targetRect.width / 2,
+      y: targetRect.top + targetRect.height / 2,
+    };
+    const boxRect = box.getBoundingClientRect();
+
+    if (
+      targetCenter.x < boxRect.left ||
+      targetCenter.x > boxRect.right ||
+      targetCenter.y < boxRect.top ||
+      targetCenter.y > boxRect.bottom
+    ) {
+      return;
+    }
+    selectElement(element.key);
+  }, [element.key, selectElement]);
+
+  useEffect(() => {
+    document.addEventListener('mouseup', handleSelectedByDragBox);
+    return () => {
+      document.removeEventListener('mouseup', handleSelectedByDragBox);
+    };
+  }, [handleSelectedByDragBox]);
 
   return (
-    <div className={elementContainer}>
-      {menuOpen && (
-        <div className={menu}>
-          <button>download</button>
-          <button>delete</button>
-          <button>rename</button>
-        </div>
+    <div
+      className={elementContainer}
+      onDoubleClick={handleClickIcon}
+      onClick={handleElementHighlight}
+      ref={elementRef}
+      onMouseOver={handleMouseOn}
+      onMouseOut={handleMouseOut}
+      id={element.key}
+    >
+      {element.type === 'uploadFile' && (
+        <FaFileMedical
+          onDoubleClick={uploadFileHandler}
+          className={uploadFileIcon}
+        />
       )}
-      <div className={BoxContainer} onDoubleClick={clickIconHandler}>
-        <div className={IconContainer}>
-          <div ref={menuRef}>
-            <CiMenuKebab
-              onClick={() => setMenuOpen(!menuOpen)}
-              className={menuIcon}
-            />
-          </div>
-          {element.type === 'folder' ? (
-            <FaFolder className={folderIcon} />
-          ) : (
-            <FaFileAlt className={fileIcon} />
-          )}
-        </div>
-      </div>
-      <form onSubmit={renameHandler}>
+      {element.type === 'folder' && <FaFolder className={folderIcon} />}
+      {element.type === 'file' && <FaFileAlt className={fileIcon} />}
+      <div className={elementNameContainer}>
         {isEditing ? (
-          <input name="newName" defaultValue={name} ref={renameRef} />
+          <textarea
+            id="rename"
+            defaultValue={name}
+            ref={renameRef}
+            className={elementNameTextarea}
+            onChange={handleTextareaChange}
+            onKeyDown={handleEnter}
+            spellCheck="false"
+          />
         ) : (
-          <div onDoubleClick={() => setIsEditing(!isEditing)}>{name}</div>
+          <div
+            onClick={handleClickName}
+            className={elementNameText}
+            ref={nameRef}
+          >
+            {name}
+          </div>
         )}
-      </form>
+      </div>
     </div>
   );
 };

@@ -11,43 +11,19 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as MainImport } from './routes/_main.tsx'
+import { Route as CloudImport } from './routes/cloud.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
-import { Route as MainEnrollImport } from './routes/_main/enroll.tsx'
-import { Route as MainAboutImport } from './routes/_main/about.tsx'
-import { Route as MainCloudIndexImport } from './routes/_main/cloud/index.tsx'
-import { Route as MainCloudFolderKeyImport } from './routes/_main/cloud/$folderKey.tsx'
 
 // Create/Update Routes
 
-const MainRoute = MainImport.update({
-  id: '/_main',
+const CloudRoute = CloudImport.update({
+  path: '/cloud',
   getParentRoute: () => rootRoute,
 } as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
-} as any)
-
-const MainEnrollRoute = MainEnrollImport.update({
-  path: '/enroll',
-  getParentRoute: () => MainRoute,
-} as any)
-
-const MainAboutRoute = MainAboutImport.update({
-  path: '/about',
-  getParentRoute: () => MainRoute,
-} as any)
-
-const MainCloudIndexRoute = MainCloudIndexImport.update({
-  path: '/cloud/',
-  getParentRoute: () => MainRoute,
-} as any)
-
-const MainCloudFolderKeyRoute = MainCloudFolderKeyImport.update({
-  path: '/cloud/$folderKey',
-  getParentRoute: () => MainRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -58,39 +34,15 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/_main': {
-      preLoaderRoute: typeof MainImport
+    '/cloud': {
+      preLoaderRoute: typeof CloudImport
       parentRoute: typeof rootRoute
-    }
-    '/_main/about': {
-      preLoaderRoute: typeof MainAboutImport
-      parentRoute: typeof MainImport
-    }
-    '/_main/enroll': {
-      preLoaderRoute: typeof MainEnrollImport
-      parentRoute: typeof MainImport
-    }
-    '/_main/cloud/$folderKey': {
-      preLoaderRoute: typeof MainCloudFolderKeyImport
-      parentRoute: typeof MainImport
-    }
-    '/_main/cloud/': {
-      preLoaderRoute: typeof MainCloudIndexImport
-      parentRoute: typeof MainImport
     }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([
-  IndexRoute,
-  MainRoute.addChildren([
-    MainAboutRoute,
-    MainEnrollRoute,
-    MainCloudFolderKeyRoute,
-    MainCloudIndexRoute,
-  ]),
-])
+export const routeTree = rootRoute.addChildren([IndexRoute, CloudRoute])
 
 /* prettier-ignore-end */
