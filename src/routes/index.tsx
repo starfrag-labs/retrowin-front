@@ -6,9 +6,9 @@ import { z } from 'zod';
 import { button } from '../css/styles/button.css';
 import { indexBackground } from '../css/styles/background.css';
 import { blurContainer } from '../css/styles/container.css';
-import { useTokenStore } from '../store/tokenStore';
+import { useTokenStore } from '../store/token.store';
 import { checkUser, enrollUser } from '../utils/api/cloud';
-import { useUserStore } from '../store/userStore';
+import { useUserStore } from '../store/user.store';
 
 const codeSchema = z.object({
   code: z.string().optional(),

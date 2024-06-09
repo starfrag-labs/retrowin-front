@@ -1,4 +1,4 @@
-export type Theme = 'default' | 'light' | 'dark';
+import { Theme } from "../../types/theme";
 
 export const isTheme = (theme: string): theme is Theme => {
   return ['default', 'light', 'dark'].includes(theme);

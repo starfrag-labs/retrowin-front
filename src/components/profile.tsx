@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useTokenStore } from '../store/tokenStore';
+import { useTokenStore } from '../store/token.store';
 import { IProfile as IProfile } from '../types/response';
 
 export const Profile = ({
@@ -26,4 +26,4 @@ export const Profile = ({
       <button onClick={logout}>logout</button>
     </div>
   );
-}
+};

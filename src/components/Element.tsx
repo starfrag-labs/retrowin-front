@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTokenStore } from '../store/tokenStore';
+import { useTokenStore } from '../store/token.store';
 import { downloadFile, renameFile, renameFolder } from '../utils/api/cloud';
-import { getContentType } from '../utils/contentTypeGetter';
+import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import {
@@ -14,17 +14,18 @@ import {
   elementNameTextarea,
   uploadFileIcon,
 } from '../css/styles/element.css';
-import { IElement } from '../types/element';
-import { selector } from '../css/styles/selector.css';
-import { useElementStore } from '../store/elementStore';
+import { useElementStore } from '../store/element.store';
+import { IStoreElement } from '../types/element';
 
 export const Element = ({
   element,
   uploadFileHandler,
 }: {
-  element: IElement;
+  element: IStoreElement;
   uploadFileHandler?: () => void;
 }): React.ReactElement => {
+  console.log('Element called');
+
   const queryClient = useQueryClient();
 
   const accessToken = useTokenStore((state) => state.accessToken);
@@ -248,40 +249,6 @@ export const Element = ({
     };
   }, [handleElementClickOutside]);
 
-  const handleSelectedByDragBox = useCallback(() => {
-    const box = document.querySelector(`.${selector}`) as HTMLDivElement;
-    if (!box) {
-      return;
-    }
-    const target = document.getElementById(element.key);
-    if (!target) {
-      return;
-    }
-    const targetRect = target.getBoundingClientRect();
-    const targetCenter = {
-      x: targetRect.left + targetRect.width / 2,
-      y: targetRect.top + targetRect.height / 2,
-    };
-    const boxRect = box.getBoundingClientRect();
-
-    if (
-      targetCenter.x < boxRect.left ||
-      targetCenter.x > boxRect.right ||
-      targetCenter.y < boxRect.top ||
-      targetCenter.y > boxRect.bottom
-    ) {
-      return;
-    }
-    selectElement(element.key);
-  }, [element.key, selectElement]);
-
-  useEffect(() => {
-    document.addEventListener('mouseup', handleSelectedByDragBox);
-    return () => {
-      document.removeEventListener('mouseup', handleSelectedByDragBox);
-    };
-  }, [handleSelectedByDragBox]);
-
   return (
     <div
       className={elementContainer}
@@ -292,7 +259,7 @@ export const Element = ({
       onMouseOut={handleMouseOut}
       id={element.key}
     >
-      {element.type === 'uploadFile' && (
+      {element.type === 'upload' && (
         <FaFileMedical
           onDoubleClick={uploadFileHandler}
           className={uploadFileIcon}

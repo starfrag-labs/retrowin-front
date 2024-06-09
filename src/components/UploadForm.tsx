@@ -1,8 +1,12 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useTokenStore } from '../store/tokenStore';
+import { useTokenStore } from '../store/token.store';
 import { uploadChunk } from '../utils/api/cloud';
 
-export function UploadForm({ folderKey }: { folderKey: string }): React.ReactElement {
+export function UploadForm({
+  folderKey,
+}: {
+  folderKey: string;
+}): React.ReactElement {
   const chunkSize = 1024 * 512;
   const accessToken = useTokenStore.getState().accessToken;
   const queryClient = useQueryClient();

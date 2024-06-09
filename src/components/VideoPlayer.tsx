@@ -1,7 +1,7 @@
-import Hls from "hls.js";
-import React, { useEffect, useRef } from "react";
-import { useTokenStore } from "../store/tokenStore";
-import { api } from "../utils/config";
+import Hls from 'hls.js';
+import React, { useEffect, useRef } from 'react';
+import { useTokenStore } from '../store/token.store';
+import { api } from '../utils/config';
 
 export function VideoPlayer({
   folderKey,

@@ -1,15 +1,15 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { useEffect } from 'react';
-import { useTokenStore } from '../store/tokenStore';
-import { useUserStore } from '../store/userStore';
+import { useEffect, useRef } from 'react';
+import { useTokenStore } from '../store/token.store';
+import { useUserStore } from '../store/user.store';
 import { cloudBackground } from '../css/styles/background.css';
 import { createRootFolder, getRootFolderKey } from '../utils/api/cloud';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
-import { IElement } from '../types/element';
+import { IStoreElement } from '../types/element';
 import { Selector } from '../components/Selector';
-import { useElementStore } from '../store/elementStore';
+import { useElementStore } from '../store/element.store';
 
 export const Route = createFileRoute('/cloud')({
   beforeLoad: async () => {
@@ -51,21 +51,29 @@ export const Route = createFileRoute('/cloud')({
 });
 
 function MainComponent() {
+  const { accessToken, rootFolderKey } = Route.useRouteContext();
   const elements = useElementStore((state) =>
-    Array.from(state.elements.values())
+    Array.from(state.getElementsByParentKey(rootFolderKey))
   );
   const setElements = useElementStore((state) => state.setElements);
-  const { accessToken, rootFolderKey } = Route.useRouteContext();
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
+  const backgroundRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const data = rootFolderQuery.data;
     if (!data) {
       return;
     }
-    const folderElements: IElement[] = data.folders.map((folder) => {
+    const rootFolderElement: IStoreElement = {
+      key: rootFolderKey,
+      name: '/',
+      type: 'folder',
+      parentKey: '',
+      selected: false,
+    };    
+    const folderElements: IStoreElement[] = data.folders.map((folder) => {
       return {
         key: folder.key,
         name: folder.name,
@@ -74,7 +82,7 @@ function MainComponent() {
         selected: false,
       };
     });
-    const fileElements: IElement[] = data.files.map((file) => {
+    const fileElements: IStoreElement[] = data.files.map((file) => {
       return {
         key: file.key,
         name: file.name,
@@ -83,12 +91,12 @@ function MainComponent() {
         selected: false,
       };
     });
-    setElements([...folderElements, ...fileElements]);
+    setElements([rootFolderElement, ...folderElements, ...fileElements]);
   }, [rootFolderKey, rootFolderQuery.data, setElements]);
 
   return (
-    <div className={cloudBackground} id="background">
-      <Selector>
+    <div className={cloudBackground} id="background" ref={backgroundRef}>
+      <Selector parentRef={backgroundRef}>
         <Elements elements={elements} folderKey={rootFolderKey} />
       </Selector>
     </div>
