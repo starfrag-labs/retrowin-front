@@ -11,10 +11,8 @@ type Action = {
   setElements: (elements: IStoreElement[]) => void;
   setElement: (element: IStoreElement) => void;
   removeElement: (key: string) => void;
-  findElement: (
-    key: string,
-    elements: IStoreElement[]
-  ) => IStoreElement | undefined;
+  findElement: (key: string) => IStoreElement | undefined;
+  findElementsByParentKey: (parentKey: string) => IStoreElement[];
   renameElement: (key: string, newName: string) => void;
   selectElement: (key: string) => void;
   unselectElement: (key: string) => void;
@@ -37,14 +35,14 @@ export const useElementStore = create<State & Action>((set, get) => ({
   setElements: (elements) => {
     set((state) => {
       elements.forEach((element) => {
-        state.elements.set(element.key, element);
+        state.elements.set(element.elementKey, element);
       });
       return { elements: state.elements };
     });
   },
   setElement: (element) => {
     set((state) => {
-      state.elements.set(element.key, element);
+      state.elements.set(element.elementKey, element);
       return { elements: state.elements };
     });
   },
@@ -54,8 +52,13 @@ export const useElementStore = create<State & Action>((set, get) => ({
       return { elements: state.elements };
     });
   },
-  findElement: (key, elements) => {
-    return elements.find((element) => element.key === key);
+  findElement: (key) => {
+    return get().elements.get(key);
+  },
+  findElementsByParentKey: (parentKey) => {
+    return Array.from(get().elements.values()).filter(
+      (element) => element.parentKey === parentKey
+    );
   },
   renameElement: (key, newName) => {
     set((state) => {

@@ -1,18 +1,22 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../store/token.store';
 import { uploadChunk } from '../utils/api/cloud';
+import { uploaderContainer } from '../css/styles/uploader.css';
 
-export function UploadForm({
+export function Uploader({
   folderKey,
+  hidden = false,
+  setUploading,
 }: {
   folderKey: string;
+  hidden?: boolean;
+  setUploading: (value: boolean) => void;
 }): React.ReactElement {
   const chunkSize = 1024 * 512;
   const accessToken = useTokenStore.getState().accessToken;
   const queryClient = useQueryClient();
-  const uploadFileHandler = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const file = new FormData(event.currentTarget).get('file') as File;
+
+  const uploadFile = async (file: File) => {
     const totalChunks = Math.ceil(file.size / chunkSize);
     const fileName = file.name.replace(/\s/g, '_');
     for (let i = 0; i < totalChunks; i++) {
@@ -41,10 +45,19 @@ export function UploadForm({
       queryKey: ['read', 'folder', folderKey],
     });
   };
+
+  const uploadFileHandler = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const files = Array.from(event.currentTarget.file.files) as File[];
+    files.forEach((file) => {
+      uploadFile(file);
+    });
+    setUploading(false);
+  };
   return (
-    <div>
+    <div className={uploaderContainer} hidden={hidden}>
       <form onSubmit={uploadFileHandler}>
-        <input type="file" name="file" />
+        <input type="file" name="file" multiple />
         <button type="submit">Upload</button>
       </form>
     </div>

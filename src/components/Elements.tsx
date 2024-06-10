@@ -1,30 +1,22 @@
-import { useEffect, useRef } from "react";
-import { elementsContainer } from "../css/styles/element.css";
+import { useEffect, useRef, useState } from 'react';
+import { elementsContainer } from '../css/styles/element.css';
 import { IStoreElement } from '../types/element';
 import { Element } from './Element';
-import { useRefStore } from "../store/ref.store";
+import { useRefStore } from '../store/ref.store';
+import { useElementStore } from '../store/element.store';
+import { Uploader } from './Uploader';
 
 export const Elements = ({
-  elements,
   folderKey,
 }: {
-  elements: IStoreElement[];
   folderKey: string;
 }): React.ReactElement => {
+  const elements = useElementStore((state) =>
+    state.getElementsByParentKey(folderKey)
+  );
+  const [uploading, setUploading] = useState(false);
   const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const setElementsRef = useRefStore((state) => state.setElementsRef);
-
-  const uploadFileHandler = () => {
-    console.log('upload file');
-  };
-
-  const uploadFileElement: IStoreElement = {
-    key: 'upload-file',
-    name: 'upload',
-    type: 'upload',
-    parentKey: folderKey,
-    selected: false,
-  };
 
   useEffect(() => {
     if (elementsRef.current) {
@@ -32,22 +24,32 @@ export const Elements = ({
     }
   }, [setElementsRef]);
 
+  const uploadFileElement: IStoreElement = {
+    elementKey: 'upload-file',
+    name: 'upload',
+    type: 'upload',
+    parentKey: folderKey,
+    selected: false,
+  };
+
   return (
     <div className={elementsContainer}>
-      <Element
-        element={uploadFileElement}
-        uploadFileHandler={uploadFileHandler}
-      />
+      {uploading && (
+        <Uploader folderKey={folderKey} setUploading={setUploading} />
+      )}
+      <div onDoubleClick={() => setUploading(!uploading)}>
+        <Element {...uploadFileElement} selected={false} />
+      </div>
       {elements.map((element) => (
         <div
-          key={element.key}
+          key={element.elementKey}
           ref={(el) => {
             if (el) {
-              elementsRef.current.set(element.key, el);
+              elementsRef.current.set(element.elementKey, el);
             }
           }}
         >
-          <Element element={element} />
+          <Element {...element} selected={element.selected} />
         </div>
       ))}
     </div>

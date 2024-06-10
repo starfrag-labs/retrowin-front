@@ -5,7 +5,6 @@ export const Navigator = ({
 }: {children: React.ReactNode}): React.ReactElement => {
   return (
     <div className={windowContainer}>
-      
       {children}
     </div>
   );

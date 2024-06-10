@@ -14,6 +14,7 @@ export const Selector = ({
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
+  const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const selectorRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRefStore((state) => state.elementsRef);
@@ -34,33 +35,45 @@ export const Selector = ({
         boxRect.left < elRect.right &&
         boxRect.right > elRect.left &&
         boxRect.top < elRect.bottom &&
-        boxRect.bottom > elRect.top
+        boxRect.bottom > elRect.top &&
+        selectedElements.indexOf(key) === -1
       ) {
         selectElement(key);
-      } else {
+        setSelectedElements((prev) => [...prev, key]);
+      } else if (
+        selectedElements.indexOf(key) !== -1 &&
+        (boxRect.left > elRect.right ||
+          boxRect.right < elRect.left ||
+          boxRect.top > elRect.bottom ||
+          boxRect.bottom < elRect.top)
+      ) {
         unselectElement(key);
+        setSelectedElements((prev) => prev.filter((k) => k !== key));
       }
     });
-  }, [elementsRef, selectElement, unselectElement]);
+  }, [elementsRef, selectedElements, selectElement, unselectElement]);
 
-  const onDragStart = useCallback((e: MouseEvent) => {
-    if (
-      selectorRef.current === null ||
-      boxRef.current === null ||
-      parentRef.current === null ||
-      elementsRef.current === null
-    ) {
-      return;
-    }
-    if (parentRef.current !== e.target) {
-      return;
-    }
-    e.preventDefault();
-    setIsDragging(true);
-    setStartX(e.pageX);
-    setStartY(e.pageY);
-    boxRef.current.style.display = 'block';
-  }, [elementsRef, parentRef]);
+  const onDragStart = useCallback(
+    (e: MouseEvent) => {
+      if (
+        selectorRef.current === null ||
+        boxRef.current === null ||
+        parentRef.current === null ||
+        elementsRef.current === null
+      ) {
+        return;
+      }
+      if (parentRef.current !== e.target) {
+        return;
+      }
+      e.preventDefault();
+      setIsDragging(true);
+      setStartX(e.pageX);
+      setStartY(e.pageY);
+      boxRef.current.style.display = 'block';
+    },
+    [elementsRef, parentRef]
+  );
 
   const onDragEnd = useCallback((e: MouseEvent) => {
     if (boxRef.current === null) {
@@ -91,6 +104,33 @@ export const Selector = ({
     [checkElements, isDragging, startX, startY]
   );
 
+  // working on this
+  // same function in element.tsx will be deleted
+  const handleClickElement = useCallback(
+    (key: string) => {
+      if (selectedElements.indexOf(key) !== -1) {
+        unselectElement(key);
+        setSelectedElements((prev) => prev.filter((k) => k !== key));
+      } else {
+        selectElement(key);
+        setSelectedElements((prev) => [...prev, key]);
+      }
+    },
+    [selectedElements, selectElement, unselectElement]
+  );
+
+  const handleClickOutside = useCallback(
+    (e: MouseEvent) => {
+      elementsRef.current?.forEach((el, key) => {
+        if (el.contains(e.target as Node)) {
+          return;
+        }
+        unselectElement(key);
+      });
+    },
+    [elementsRef, unselectElement]
+  );
+
   useEffect(() => {
     console.log('elementsRef', elementsRef);
   }, [elementsRef]);
@@ -99,12 +139,14 @@ export const Selector = ({
     document.addEventListener('mousedown', onDragStart);
     document.addEventListener('mouseup', onDragEnd);
     document.addEventListener('mousemove', onDrag);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', onDragStart);
       document.removeEventListener('mouseup', onDragEnd);
       document.removeEventListener('mousemove', onDrag);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [onDrag, onDragEnd, onDragStart]);
+  }, [handleClickOutside, onDrag, onDragEnd, onDragStart]);
 
   return (
     <div ref={selectorRef}>

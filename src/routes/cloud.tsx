@@ -52,9 +52,6 @@ export const Route = createFileRoute('/cloud')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const elements = useElementStore((state) =>
-    Array.from(state.getElementsByParentKey(rootFolderKey))
-  );
   const setElements = useElementStore((state) => state.setElements);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
@@ -67,15 +64,15 @@ function MainComponent() {
       return;
     }
     const rootFolderElement: IStoreElement = {
-      key: rootFolderKey,
+      elementKey: rootFolderKey,
       name: '/',
       type: 'folder',
       parentKey: '',
       selected: false,
-    };    
+    };
     const folderElements: IStoreElement[] = data.folders.map((folder) => {
       return {
-        key: folder.key,
+        elementKey: folder.key,
         name: folder.name,
         type: 'folder',
         parentKey: rootFolderKey,
@@ -84,7 +81,7 @@ function MainComponent() {
     });
     const fileElements: IStoreElement[] = data.files.map((file) => {
       return {
-        key: file.key,
+        elementKey: file.key,
         name: file.name,
         type: 'file',
         parentKey: rootFolderKey,
@@ -97,7 +94,7 @@ function MainComponent() {
   return (
     <div className={cloudBackground} id="background" ref={backgroundRef}>
       <Selector parentRef={backgroundRef}>
-        <Elements elements={elements} folderKey={rootFolderKey} />
+        <Elements folderKey={rootFolderKey} />
       </Selector>
     </div>
   );

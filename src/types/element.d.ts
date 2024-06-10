@@ -1,11 +1,8 @@
-export interface IElement {
+export interface IStoreElement {
   name: string;
-  key: string;
+  elementKey: string;
   parentKey: string;
   enabled?: boolean;
-}
-
-export interface IStoreElement extends IElement {
   type: 'folder' | 'file' | 'upload';
   selected: boolean;
 }

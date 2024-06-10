@@ -1,10 +1,15 @@
-import { IElement } from './element';
+interface IElementResponse {
+  name: string;
+  key: string;
+  parentKey: string;
+  enabled?: boolean;
+}
 
-export interface IFile extends IElement {
+export interface IFile extends IElementResponse {
   enabled: boolean;
 }
 
-export interface IFolder extends IElement {}
+export interface IFolder extends IElementResponse {}
 
 export interface ReadFolderData {
   folders: IFolder[];
