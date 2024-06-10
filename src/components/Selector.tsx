@@ -1,8 +1,10 @@
-import { createElement, useCallback, useEffect, useRef, useState } from "react";
-import { selector } from "../css/styles/selector.css";
-import React from "react";
-import { useRefStore } from "../store/ref.store";
-import { useElementStore } from "../store/element.store";
+import { createElement, useCallback, useEffect, useRef, useState } from 'react';
+import { selector } from '../css/styles/selector.css';
+import React from 'react';
+import { useRefStore } from '../store/ref.store';
+import { useElementStore } from '../store/element.store';
+import { draggingElementsIcon } from '../css/styles/element.css';
+import { PiFilesFill } from 'react-icons/pi';
 
 export const Selector = ({
   children,
@@ -12,11 +14,13 @@ export const Selector = ({
   parentRef: React.RefObject<HTMLElement>;
 }): React.ReactElement => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isMoving, setIsMoving] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
   const selectorRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const movingElementsRef = useRef<HTMLDivElement>(null);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
@@ -63,30 +67,39 @@ export const Selector = ({
       ) {
         return;
       }
-      if (parentRef.current !== e.target) {
+      if (parentRef.current === e.target) {
+        e.preventDefault();
+        // start selecting
+        setIsDragging(true);
+        setStartX(e.pageX);
+        setStartY(e.pageY);
+        boxRef.current.style.display = 'block';
+        // unselect all elements
+        setSelectedElements([]);
+        elementsRef.current.forEach((_el, key) => {
+          unselectElement(key);
+        });
+        return;
+      }
+    },
+    [elementsRef, parentRef, unselectElement]
+  );
+
+  const onDragEnd = useCallback(
+    (e: MouseEvent) => {
+      if (boxRef.current === null || isDragging === false) {
         return;
       }
       e.preventDefault();
-      setIsDragging(true);
-      setStartX(e.pageX);
-      setStartY(e.pageY);
-      boxRef.current.style.display = 'block';
+      setIsDragging(false);
+      boxRef.current.style.width = '0px';
+      boxRef.current.style.height = '0px';
+      boxRef.current.style.left = '0px';
+      boxRef.current.style.top = '0px';
+      boxRef.current.style.display = 'none';
     },
-    [elementsRef, parentRef]
+    [isDragging]
   );
-
-  const onDragEnd = useCallback((e: MouseEvent) => {
-    if (boxRef.current === null) {
-      return;
-    }
-    e.preventDefault();
-    setIsDragging(false);
-    boxRef.current.style.width = '0px';
-    boxRef.current.style.height = '0px';
-    boxRef.current.style.left = '0px';
-    boxRef.current.style.top = '0px';
-    boxRef.current.style.display = 'none';
-  }, []);
 
   const onDrag = useCallback(
     (e: MouseEvent) => {
@@ -104,53 +117,95 @@ export const Selector = ({
     [checkElements, isDragging, startX, startY]
   );
 
-  // working on this
-  // same function in element.tsx will be deleted
-  const handleClickElement = useCallback(
-    (key: string) => {
-      if (selectedElements.indexOf(key) !== -1) {
-        unselectElement(key);
-        setSelectedElements((prev) => prev.filter((k) => k !== key));
-      } else {
-        selectElement(key);
-        setSelectedElements((prev) => [...prev, key]);
-      }
-    },
-    [selectedElements, selectElement, unselectElement]
-  );
-
-  const handleClickOutside = useCallback(
-    (e: MouseEvent) => {
-      elementsRef.current?.forEach((el, key) => {
-        if (el.contains(e.target as Node)) {
-          return;
-        }
-        unselectElement(key);
-      });
-    },
-    [elementsRef, unselectElement]
-  );
-
-  useEffect(() => {
-    console.log('elementsRef', elementsRef);
-  }, [elementsRef]);
-
   useEffect(() => {
     document.addEventListener('mousedown', onDragStart);
-    document.addEventListener('mouseup', onDragEnd);
-    document.addEventListener('mousemove', onDrag);
-    document.addEventListener('mousedown', handleClickOutside);
     return () => {
       document.removeEventListener('mousedown', onDragStart);
-      document.removeEventListener('mouseup', onDragEnd);
-      document.removeEventListener('mousemove', onDrag);
-      document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [handleClickOutside, onDrag, onDragEnd, onDragStart]);
+  }, [onDragStart]);
+
+  useEffect(() => {
+    document.addEventListener('mouseup', onDragEnd);
+    return () => {
+      document.removeEventListener('mouseup', onDragEnd);
+    };
+  }, [onDragEnd]);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', onDrag);
+    return () => {
+      document.removeEventListener('mousemove', onDrag);
+    };
+  }, [onDrag]);
+
+  const moveElementsStart = useCallback(
+    (e: MouseEvent) => {
+      if (selectedElements.length === 0) {
+        return;
+      }
+      if (elementsRef.current === null || movingElementsRef.current === null) {
+        return;
+      }
+      e.preventDefault();
+      setIsMoving(true);
+      movingElementsRef.current.style.display = 'block';
+      document.body.style.cursor = 'grabbing';
+    },
+    [elementsRef, selectedElements]
+  );
+
+  const moveElementsEnd = useCallback(
+    (e: MouseEvent) => {
+      if (isMoving && movingElementsRef.current) {
+        e.preventDefault();
+        setIsMoving(false);
+        movingElementsRef.current.style.display = 'none';
+        document.body.style.cursor = 'auto';
+      }
+    },
+    [isMoving]
+  );
+
+  const moveElements = useCallback(
+    (e: MouseEvent) => {
+      if (isMoving && movingElementsRef.current) {
+        e.preventDefault();
+        if (elementsRef.current === null) {
+          return;
+        }
+        const x = e.pageX;
+        const y = e.pageY;
+        movingElementsRef.current.style.left = x + 'px';
+        movingElementsRef.current.style.top = y + 'px';
+      }
+    },
+    [isMoving, elementsRef]
+  );
+
+  // useEffect(() => {
+  //   document.addEventListener('mousedown', moveElementsStart);
+  //   return () => {
+  //     document.removeEventListener('mousedown', moveElementsStart);
+  //   };
+  // }, [moveElementsStart]);
+
+  // useEffect(() => {
+  //   document.addEventListener('mouseup', moveElementsEnd);
+  //   return () => {
+  //     document.removeEventListener('mouseup', moveElementsEnd);
+  //   };
+  // }, [moveElementsEnd]);
+
+  // useEffect(() => {
+  //   document.addEventListener('mousemove', moveElements);
+  //   return () => {
+  //     document.removeEventListener('mousemove', moveElements);
+  //   };
+  // }, [moveElements]);
 
   return (
     <div ref={selectorRef}>
-      {createElement('div', { className: selector, ref: boxRef })}
+      <div className={selector} ref={boxRef} />
       {children}
     </div>
   );

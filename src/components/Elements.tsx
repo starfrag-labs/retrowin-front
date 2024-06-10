@@ -49,7 +49,7 @@ export const Elements = ({
             }
           }}
         >
-          <Element {...element} selected={element.selected} />
+          <Element {...element} />
         </div>
       ))}
     </div>

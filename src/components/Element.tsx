@@ -5,6 +5,7 @@ import { downloadFile, renameFile, renameFolder } from '../utils/api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
+import { PiFilesFill } from 'react-icons/pi';
 import {
   fileIcon,
   folderIcon,
@@ -13,9 +14,11 @@ import {
   elementNameContainer,
   elementNameTextarea,
   uploadFileIcon,
+  draggingElementsIcon,
 } from '../css/styles/element.css';
 import { useElementStore } from '../store/element.store';
 import { IStoreElement } from '../types/element';
+import { useRefStore } from '../store/ref.store';
 
 export const Element = memo(
   ({
@@ -34,6 +37,7 @@ export const Element = memo(
     const queryClient = useQueryClient();
 
     const accessToken = useTokenStore((state) => state.accessToken);
+    const elements = useElementStore((state) => state.elements);
     const selectElement = useElementStore((state) => state.selectElement);
 
     const [isEditing, setIsEditing] = useState(false);
@@ -41,6 +45,7 @@ export const Element = memo(
     const [newNameState, setNewNameState] = useState(name);
 
     const contentType = getContentType(name);
+    const elementsRef = useRefStore((state) => state.elementsRef);
     const elementRef = useRef<HTMLDivElement>(null);
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
@@ -192,7 +197,15 @@ export const Element = memo(
             });
         }
       },
-      [accessToken, elementKey, name, newNameState, parentKey, queryClient, type]
+      [
+        accessToken,
+        elementKey,
+        name,
+        newNameState,
+        parentKey,
+        queryClient,
+        type,
+      ]
     );
 
     useEffect(() => {
@@ -221,6 +234,20 @@ export const Element = memo(
       };
     }, [handleRenameClickOutside]);
 
+    const dragElementsEnd = useCallback(
+      (event: DragEvent) => {
+        event.preventDefault();
+        if (elementsRef.current) {
+          elementsRef.current.forEach((el, key) => {
+            if (el.contains(event.target as Node)) {
+              console.log(key);
+            }
+          });
+        }
+      },
+      [elementsRef]
+    );
+
     return (
       <div
         className={elementContainer}
@@ -229,12 +256,9 @@ export const Element = memo(
         ref={elementRef}
         onMouseOver={handleMouseOn}
         onMouseOut={handleMouseOut}
+        draggable={type !== 'upload' ? true : false}
       >
-        {type === 'upload' && (
-          <FaFileMedical
-            className={uploadFileIcon}
-          />
-        )}
+        {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
         {type === 'folder' && <FaFolder className={folderIcon} />}
         {type === 'file' && <FaFileAlt className={fileIcon} />}
         <div className={elementNameContainer}>

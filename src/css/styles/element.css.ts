@@ -68,3 +68,8 @@ export const elementNameContainer = style({
   marginTop: '0.5rem',
   fontSize: '1rem',
 });
+
+export const draggingElementsIcon = style({
+  width: '50px',
+  height: '50px',
+});
