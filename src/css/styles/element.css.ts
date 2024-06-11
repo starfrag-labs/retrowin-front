@@ -24,11 +24,6 @@ const defaultIcon: StyleRule = {
   filter: 'drop-shadow(0 0 1px black)',
 } as const;
 
-export const createFolderIcon = style({
-  ...defaultIcon,
-  color: 'lightgreen',
-});
-
 export const uploadFileIcon = style({
   ...defaultIcon,
   color: 'lightblue',
@@ -70,6 +65,9 @@ export const elementNameContainer = style({
 });
 
 export const draggingElementsIcon = style({
-  width: '50px',
-  height: '50px',
+  ...defaultIcon,
+  position: 'absolute',
+  opacity: 0.5,
+  pointerEvents: 'none',
+  zIndex: 9999,
 });

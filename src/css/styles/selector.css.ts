@@ -1,6 +1,6 @@
-import { style } from "@vanilla-extract/css";
+import { style } from '@vanilla-extract/css';
 
-export const selector = style({
+export const selectBox = style({
   position: 'absolute',
   top: '0',
   left: '0',
@@ -9,4 +9,10 @@ export const selector = style({
   backgroundColor: 'rgba(0, 0, 255, 0.2)',
   border: '1px solid blue',
   transformOrigin: '0 0',
+  zIndex: 9999,
+});
+
+export const selector = style({
+  width: '100%',
+  height: '100%',
 });

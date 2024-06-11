@@ -1,8 +1,7 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { useEffect, useRef } from 'react';
+import { createRef, useEffect } from 'react';
 import { useTokenStore } from '../store/token.store';
 import { useUserStore } from '../store/user.store';
-import { cloudBackground } from '../css/styles/background.css';
 import { createRootFolder, getRootFolderKey } from '../utils/api/cloud';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -10,6 +9,8 @@ import { Elements } from '../components/Elements';
 import { IStoreElement } from '../types/element';
 import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
+import { Background } from '../components/Background';
+import { backgroundSelectorContainer } from '../css/styles/background.css';
 
 export const Route = createFileRoute('/cloud')({
   beforeLoad: async () => {
@@ -56,7 +57,7 @@ function MainComponent() {
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
-  const backgroundRef = useRef<HTMLDivElement>(null);
+  const backgroundSelectorRef = createRef<HTMLDivElement>();
 
   useEffect(() => {
     const data = rootFolderQuery.data;
@@ -92,10 +93,12 @@ function MainComponent() {
   }, [rootFolderKey, rootFolderQuery.data, setElements]);
 
   return (
-    <div className={cloudBackground} id="background" ref={backgroundRef}>
-      <Selector parentRef={backgroundRef}>
-        <Elements folderKey={rootFolderKey} />
-      </Selector>
-    </div>
+    <Background>
+      <div className={backgroundSelectorContainer} ref={backgroundSelectorRef}>
+        <Selector>
+          <Elements folderKey={rootFolderKey} />
+        </Selector>
+      </div>
+    </Background>
   );
 }

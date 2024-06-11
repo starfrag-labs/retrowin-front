@@ -1,73 +1,77 @@
-import { createElement, useCallback, useEffect, useRef, useState } from 'react';
-import { selector } from '../css/styles/selector.css';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { selectBox, selector } from '../css/styles/selector.css';
 import React from 'react';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { draggingElementsIcon } from '../css/styles/element.css';
-import { PiFilesFill } from 'react-icons/pi';
 
 export const Selector = ({
   children,
-  parentRef,
 }: {
   children: React.ReactNode;
-  parentRef: React.RefObject<HTMLElement>;
 }): React.ReactElement => {
   const [isDragging, setIsDragging] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [displayDraggingElements, setDisplayDraggingElements] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [selectedElements, setSelectedElements] = useState<string[]>([]);
+
   const selectorRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
-  const movingElementsRef = useRef<HTMLDivElement>(null);
+  const draggingElementsRef = useRef<HTMLDivElement>(null);
+
   const elementsRef = useRefStore((state) => state.elementsRef);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
 
-  const checkElements = useCallback(() => {
+  const checkElementsInBox = useCallback(() => {
     if (elementsRef.current === null) {
       return;
     }
-    elementsRef.current.forEach((el, key) => {
-      if (boxRef.current === null) {
-        return;
-      }
+    if (boxRef.current && isDragging) {
       const boxRect = boxRef.current.getBoundingClientRect();
-      const elRect = el.getBoundingClientRect();
-      if (
-        boxRect.left < elRect.right &&
-        boxRect.right > elRect.left &&
-        boxRect.top < elRect.bottom &&
-        boxRect.bottom > elRect.top &&
-        selectedElements.indexOf(key) === -1
-      ) {
-        selectElement(key);
-        setSelectedElements((prev) => [...prev, key]);
-      } else if (
-        selectedElements.indexOf(key) !== -1 &&
-        (boxRect.left > elRect.right ||
-          boxRect.right < elRect.left ||
-          boxRect.top > elRect.bottom ||
-          boxRect.bottom < elRect.top)
-      ) {
-        unselectElement(key);
-        setSelectedElements((prev) => prev.filter((k) => k !== key));
-      }
-    });
-  }, [elementsRef, selectedElements, selectElement, unselectElement]);
+      elementsRef.current.forEach((el, key) => {
+        const elRect = el.getBoundingClientRect();
+        if (
+          boxRect.left < elRect.right &&
+          boxRect.right > elRect.left &&
+          boxRect.top < elRect.bottom &&
+          boxRect.bottom > elRect.top &&
+          selectedElements.indexOf(key) === -1
+        ) {
+          selectElement(key);
+          setSelectedElements((prev) => [...prev, key]);
+        } else if (
+          selectedElements.indexOf(key) !== -1 &&
+          (boxRect.left > elRect.right ||
+            boxRect.right < elRect.left ||
+            boxRect.top > elRect.bottom ||
+            boxRect.bottom < elRect.top)
+        ) {
+          unselectElement(key);
+          setSelectedElements((prev) => prev.filter((k) => k !== key));
+        }
+      });
+    }
+  }, [
+    elementsRef,
+    isDragging,
+    selectedElements,
+    selectElement,
+    unselectElement,
+  ]);
 
   const onDragStart = useCallback(
     (e: MouseEvent) => {
       if (
         selectorRef.current === null ||
         boxRef.current === null ||
-        parentRef.current === null ||
         elementsRef.current === null
       ) {
         return;
       }
-      if (parentRef.current === e.target) {
+      if (selectorRef.current === e.target) {
         e.preventDefault();
         // start selecting
         setIsDragging(true);
@@ -82,7 +86,7 @@ export const Selector = ({
         return;
       }
     },
-    [elementsRef, parentRef, unselectElement]
+    [elementsRef, unselectElement]
   );
 
   const onDragEnd = useCallback(
@@ -111,10 +115,10 @@ export const Selector = ({
         boxRef.current.style.top = Math.min(y, startY) + 'px';
         boxRef.current.style.width = Math.abs(x - startX) + 'px';
         boxRef.current.style.height = Math.abs(y - startY) + 'px';
-        checkElements();
+        checkElementsInBox();
       }
     },
-    [checkElements, isDragging, startX, startY]
+    [checkElementsInBox, isDragging, startX, startY]
   );
 
   useEffect(() => {
@@ -138,29 +142,103 @@ export const Selector = ({
     };
   }, [onDrag]);
 
+  const clickElement = useCallback(
+    (e: MouseEvent) => {
+      const currentElements = elementsRef.current;
+      const currentDraggingElements = draggingElementsRef.current;
+      if (currentElements === null) {
+        return;
+      }
+      if (currentDraggingElements === null) {
+        return;
+      }
+      currentElements.forEach((el, key) => {
+        const elRect = el.getBoundingClientRect();
+        if (
+          e.pageX > elRect.left &&
+          e.pageX < elRect.right &&
+          e.pageY > elRect.top &&
+          e.pageY < elRect.bottom
+        ) {
+          if (selectedElements.indexOf(key) === -1 && !e.shiftKey) {
+            selectedElements.forEach((k) => {
+              if (k !== key) {
+                unselectElement(k);
+              }
+            });
+            e.preventDefault();
+            selectElement(key);
+            setSelectedElements([key]);
+            setDisplayDraggingElements(false);
+            setStartX(e.pageX);
+            setStartY(e.pageY);
+            setIsMoving(true);
+
+            // create a clone of the element
+            const clone = el.cloneNode(true) as HTMLElement;
+            clone.style.position = 'absolute';
+            clone.style.left = elRect.left + 'px';
+            clone.style.top = elRect.top + 'px';
+            currentDraggingElements.appendChild(clone);
+          } else if (selectedElements.indexOf(key) === -1 && e.shiftKey) {
+            selectElement(key);
+            setSelectedElements((prev) => [...prev, key]);
+          }
+        }
+      });
+    },
+    [elementsRef, selectedElements, selectElement, unselectElement]
+  );
+
+  useEffect(() => {
+    document.addEventListener('mousedown', clickElement);
+    return () => {
+      document.removeEventListener('mousedown', clickElement);
+    };
+  }, [clickElement]);
+
   const moveElementsStart = useCallback(
     (e: MouseEvent) => {
+      const currentElements = elementsRef.current;
+      const currentDraggingElements = draggingElementsRef.current;
+
+      if (currentElements === null || currentDraggingElements === null) {
+        return;
+      }
       if (selectedElements.length === 0) {
         return;
       }
-      if (elementsRef.current === null || movingElementsRef.current === null) {
-        return;
-      }
-      e.preventDefault();
+      setStartX(e.pageX);
+      setStartY(e.pageY);
       setIsMoving(true);
-      movingElementsRef.current.style.display = 'block';
-      document.body.style.cursor = 'grabbing';
+      e.preventDefault();
+      currentElements.forEach((el, key) => {
+        if (selectedElements.indexOf(key) !== -1) {
+          const clone = el.cloneNode(true) as HTMLElement;
+          clone.style.position = 'absolute';
+          clone.style.left = el.getBoundingClientRect().left + 'px';
+          clone.style.top = el.getBoundingClientRect().top + 'px';
+          currentDraggingElements.appendChild(clone);
+        }
+      });
+      currentDraggingElements.style.left = '0px';
+      currentDraggingElements.style.top = '0px';
     },
     [elementsRef, selectedElements]
   );
 
   const moveElementsEnd = useCallback(
     (e: MouseEvent) => {
-      if (isMoving && movingElementsRef.current) {
+      if (isMoving && draggingElementsRef.current) {
         e.preventDefault();
         setIsMoving(false);
-        movingElementsRef.current.style.display = 'none';
-        document.body.style.cursor = 'auto';
+        setDisplayDraggingElements(false);
+        document.body.style.cursor = 'default';
+        while (draggingElementsRef.current.firstChild) {
+          draggingElementsRef.current.removeChild(
+            draggingElementsRef.current.firstChild
+          );
+        }
       }
     },
     [isMoving]
@@ -168,44 +246,62 @@ export const Selector = ({
 
   const moveElements = useCallback(
     (e: MouseEvent) => {
-      if (isMoving && movingElementsRef.current) {
+      const currentElements = elementsRef.current;
+      const currentDraggingElements = draggingElementsRef.current;
+      if (
+        isMoving &&
+        currentElements !== null &&
+        currentDraggingElements !== null
+      ) {
         e.preventDefault();
-        if (elementsRef.current === null) {
-          return;
-        }
         const x = e.pageX;
         const y = e.pageY;
-        movingElementsRef.current.style.left = x + 'px';
-        movingElementsRef.current.style.top = y + 'px';
+        currentDraggingElements.style.left = x - startX + 'px';
+        currentDraggingElements.style.top = y - startY + 'px';
+
+        if (
+          !displayDraggingElements &&
+          isMoving &&
+          currentElements &&
+          (Math.abs(x - startX) > 10 || Math.abs(y - startY) > 10)
+        ) {
+          document.body.style.cursor = 'grabbing';
+          setDisplayDraggingElements(true);
+        }
       }
     },
-    [isMoving, elementsRef]
+    [elementsRef, displayDraggingElements, isMoving, startX, startY]
   );
 
-  // useEffect(() => {
-  //   document.addEventListener('mousedown', moveElementsStart);
-  //   return () => {
-  //     document.removeEventListener('mousedown', moveElementsStart);
-  //   };
-  // }, [moveElementsStart]);
+  useEffect(() => {
+    document.addEventListener('mousedown', moveElementsStart);
+    return () => {
+      document.removeEventListener('mousedown', moveElementsStart);
+    };
+  }, [moveElementsStart]);
 
-  // useEffect(() => {
-  //   document.addEventListener('mouseup', moveElementsEnd);
-  //   return () => {
-  //     document.removeEventListener('mouseup', moveElementsEnd);
-  //   };
-  // }, [moveElementsEnd]);
+  useEffect(() => {
+    document.addEventListener('mouseup', moveElementsEnd);
+    return () => {
+      document.removeEventListener('mouseup', moveElementsEnd);
+    };
+  }, [moveElementsEnd]);
 
-  // useEffect(() => {
-  //   document.addEventListener('mousemove', moveElements);
-  //   return () => {
-  //     document.removeEventListener('mousemove', moveElements);
-  //   };
-  // }, [moveElements]);
+  useEffect(() => {
+    document.addEventListener('mousemove', moveElements);
+    return () => {
+      document.removeEventListener('mousemove', moveElements);
+    };
+  }, [moveElements]);
 
   return (
-    <div ref={selectorRef}>
-      <div className={selector} ref={boxRef} />
+    <div className={selector} ref={selectorRef}>
+      <div
+        className={draggingElementsIcon}
+        ref={draggingElementsRef}
+        hidden={!displayDraggingElements}
+      />
+      <div className={selectBox} ref={boxRef} />
       {children}
     </div>
   );

@@ -10,6 +10,7 @@ globalStyle('body', {
   margin: 0,
   padding: 0,
   fontSize: fontSizes.default,
+  overflow: 'hidden',
 });
 
 export const root = style({
