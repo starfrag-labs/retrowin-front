@@ -1,10 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ground, meteor, meteorContainer, meteorTail, sky, stars } from '../css/styles/background.css';
+import { backgroundContainer, ground, meteor, meteorContainer, meteorTail, sky, stars } from '../css/styles/background.css';
 
 export const Background = ({ children }: { children: React.ReactNode }) => {
   const [isDay, setIsDay] = useState(
-    new Date().getHours() > 6 && new Date().getHours() < 18
+    false
   );
+  const oneDay = 1000 * 60 * 60 * 24;
+  const [time, setTime] = useState<number>(0);
   const skyRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<HTMLDivElement>(null);
   const meteorContainerRef = useRef<HTMLDivElement>(null);
@@ -23,15 +25,25 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
     preloadImages(groundImage);
   }, [groundImage, preloadImages]);
 
-  useEffect(() => {
-    console.log('render');
-  });
+  const setUpTime = useCallback(() => {
+    const now = new Date()
+    const newTime = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000;
+    setTime(newTime);
+    
+    if (newTime > 6 * 60 * 60 * 1000 && newTime < 18 * 60 * 60 * 1000) {
+      setIsDay(true);
+    } else {
+      setIsDay(false);
+    }
+  }, []);
 
   useEffect(() => {
-    if (groundRef.current) {
-      groundRef.current.style.backgroundImage = `url(${groundImage[0]})`;
-    }
-  }, [groundImage]);
+    setUpTime();
+    const interval = setInterval(() => {
+      setUpTime();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [setUpTime]);
 
   const drawStars = useCallback(() => {
     let startCount = 600;
@@ -74,56 +86,58 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
     if (!sky) {
       return;
     }
-    const month = new Date().getMonth();
-    const day = new Date().getDate();
-    const hour = new Date().getHours();
-    const skyColorScheme = {
-      sunrise: {
-        bottom: [255, 106, 0],
-        top: [39, 120, 235],
-        start: 50,
-        end: 30,
-      },
-      day: {
-        bottom: [187, 217, 245],
-        top: [76, 140, 238],
-        start: 40,
-        end: 0,
-      },
-      sunset: {
-        bottom: [255, 69, 0],
-        top: [255, 165, 0],
-      },
-      night: {
-        bottom: [20, 0, 42],
-        top: [0, 0, 0],
-      },
+    const pickColor = (color1: number[], color2: number[], weight: number) => {
+      const w1 = weight;
+      const w2 = 1 - w1;
+      const rgb = [
+        Math.round(color1[0] * w1 + color2[0] * w2),
+        Math.round(color1[1] * w1 + color2[1] * w2),
+        Math.round(color1[2] * w1 + color2[2] * w2),
+      ];
+      return rgb;
     }
-    const generateRGB = (scheme: number[]) => {
-      return `rgb(${scheme[0]}, ${scheme[1]}, ${scheme[2]})`;
-    }
-    const color = 'rgb(21, 0, 42)'
-    const colorBottom = generateRGB(skyColorScheme.night.bottom);
-    const colorTop = generateRGB(skyColorScheme.night.top);
-    const background = `linear-gradient(180deg, ${colorTop} 30%, ${colorBottom} 100%)`;
-    sky.style.background = background;
-  }, []);
+    const nightSkyHex = {
+      start: [0, 0, 0],
+      end: [0, 0, 20],
+    };
+    const daySkyHex = {
+      start: [135, 206, 235],
+      end: [161, 206, 235],
+    };
+
+    const weight = Math.cos((time / oneDay) * Math.PI * 2) / 2 + 0.5;
+    console.log(weight);
+    
+    
+    const skyStartColor = pickColor(
+      nightSkyHex.start,
+      daySkyHex.start,
+      weight,
+    );
+    const skyEndColor = pickColor(
+      nightSkyHex.end,
+      daySkyHex.end,
+      weight, 
+    );
+
+    sky.style.background = `linear-gradient(to bottom, rgb(${skyStartColor[0]}, ${skyStartColor[1]}, ${skyStartColor[2]}), rgb(${skyEndColor[0]}, ${skyEndColor[1]}, ${skyEndColor[2]}))`;
+  }, [oneDay, time]);
 
   const setGround = useCallback(() => {
     const ground = groundRef.current;
     if (!ground) {
       return;
     }
-    ground.style.filter = 'brightness(0.1) saturate(0.8)';
+    ground.style.filter = 'brightness(0.25)';
   }, []);
 
   useEffect(() => {
     setSky();
   }, [setSky]);
 
-  // useEffect(() => {
-  //   setGround();
-  // }, [setGround]);
+  useEffect(() => {
+    setGround();
+  }, [setGround]);
 
   useEffect(() => {
     removeStars();
@@ -190,16 +204,15 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
   }, [generateMeteor, isDay]);
 
   return (
-    <div>
-      <div ref={skyRef} className={sky}>
-        {isDay ? null : <div ref={starsRef} className={stars} />}
-        {!isDay && (
-          <div ref={meteorContainerRef} className={meteorContainer}>
-            <div className={meteorTail} />
-            <div className={meteor} />
-          </div>
-        )}
-      </div>
+    <div className={backgroundContainer}>
+      <div ref={skyRef} className={sky} />
+      {isDay ? null : <div ref={starsRef} className={stars} />}
+      {!isDay && (
+        <div ref={meteorContainerRef} className={meteorContainer}>
+          <div className={meteorTail} />
+          <div className={meteor} />
+        </div>
+      )}
       <div ref={groundRef} className={ground} />
       {children}
     </div>

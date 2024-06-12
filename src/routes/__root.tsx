@@ -24,13 +24,14 @@ const setTheme = (theme: string) => {
 
 function RootComponent() {
   return (
-    <>
-      <div className={setTheme('light')}>
-        <div className={root}>
-          <Outlet />
-          <TanStackRouterDevtools position="bottom-right" />
-        </div>
+    <div
+      className={setTheme('light')}
+      style={{ width: '100%', height: '100%' }}
+    >
+      <div className={root}>
+        <Outlet />
+        <TanStackRouterDevtools position="bottom-right" />
       </div>
-    </>
+    </div>
   );
 }

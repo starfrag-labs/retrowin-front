@@ -1,4 +1,4 @@
-import { StyleRule, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 export const indexBackground = style({
   backgroundImage: 'url(/src/assets/vault.jpg)',
@@ -12,38 +12,38 @@ export const indexBackground = style({
 });
 
 export const backgroundSelectorContainer = style({
-  height: '100vh',
+  height: '100%',
   width: '100%',
-  position: 'absolute'
-});
-
-export const childContainer = style({
-});
-
-const backgroundDefault: StyleRule = {
   position: 'absolute',
+});
+
+export const backgroundContainer = style({
+  height: '100%',
   width: '100%',
-  backgroundRepeat: 'no-repeat',
-  transition: 'background-image 1s ease-in-out',
-} as const;
+});
 
 export const sky = style({
-  ...backgroundDefault,
-  backgroundSize: 'cover',
+  position: 'absolute',
+  width: '100%',
   height: '100%',
+  backgroundRepeat: 'no-repeat',
+  backgroundSize: 'cover',
 });
 
 export const stars = style({
-  width: '100vw',
-  height: '100vh',
   position: 'absolute',
+  width: '100%',
+  height: '100%',
 });
 
 export const ground = style({
-  ...backgroundDefault,
+  background: 'url(/src/assets/ground.png)',
   backgroundSize: 'cover',
+  position: 'absolute',
+  height: '100%',
+  width: '100%',
+  backgroundRepeat: 'no-repeat',
   bottom: '0',
-  height: '100%'
 });
 
 export const meteorContainer = style({

@@ -34,5 +34,5 @@ export const themeVars = createThemeContract({
     r700: null,
     r800: null,
     r900: null,
-  } 
+  },
 });

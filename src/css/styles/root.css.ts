@@ -4,6 +4,8 @@ import { fontSizes } from '../global.css';
 
 globalStyle('html', {
   fontSize: '100%',
+  width: '100%',
+  height: '100%',
 });
 
 globalStyle('body', {
@@ -11,6 +13,8 @@ globalStyle('body', {
   padding: 0,
   fontSize: fontSizes.default,
   overflow: 'hidden',
+  width: '100%',
+  height: '100%',
 });
 
 export const root = style({
@@ -19,6 +23,6 @@ export const root = style({
   backgroundColor: themeVars.backgroundColor.default,
   backgroundSize: 'cover',
   display: 'flex-wrap',
-  width: '100vw',
-  height: '100vh',
+  width: '100%',
+  height: '100%'
 });
