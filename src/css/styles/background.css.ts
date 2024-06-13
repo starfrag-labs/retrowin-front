@@ -30,6 +30,16 @@ export const sky = style({
   backgroundSize: 'cover',
 });
 
+export const clouds = style({
+  position: 'absolute',
+  background: 'url(/src/assets/clouds.png)',
+  backgroundSize: 'cover',
+  width: '100%',
+  height: '100%',
+  backgroundRepeat: 'no-repeat',
+  top: '0',
+});
+
 export const stars = style({
   position: 'absolute',
   width: '100%',

@@ -1,13 +1,21 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { backgroundContainer, ground, meteor, meteorContainer, meteorTail, sky, stars } from '../css/styles/background.css';
+import {
+  backgroundContainer,
+  clouds,
+  ground,
+  meteor,
+  meteorContainer,
+  meteorTail,
+  sky,
+  stars,
+} from '../css/styles/background.css';
 
 export const Background = ({ children }: { children: React.ReactNode }) => {
-  const [isDay, setIsDay] = useState(
-    false
-  );
+  const [isDay, setIsDay] = useState(false);
   const oneDay = 1000 * 60 * 60 * 24;
   const [time, setTime] = useState<number>(0);
   const skyRef = useRef<HTMLDivElement>(null);
+  const cloudsRef = useRef<HTMLDivElement>(null);
   const starsRef = useRef<HTMLDivElement>(null);
   const meteorContainerRef = useRef<HTMLDivElement>(null);
   const groundRef = useRef<HTMLDivElement>(null);
@@ -20,16 +28,20 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const groundImage = useMemo(() => ['/src/assets/ground.png'], []);
+  const cloudImage = useMemo(() => ['/src/assets/clouds.png'], []);
 
   useEffect(() => {
     preloadImages(groundImage);
-  }, [groundImage, preloadImages]);
+    preloadImages(cloudImage);
+  }, [cloudImage, groundImage, preloadImages]);
 
   const setUpTime = useCallback(() => {
-    const now = new Date()
-    const newTime = now.getHours() * 60 * 60 * 1000 + now.getMinutes() * 60 * 1000 + now.getSeconds() * 1000;
+    const now = new Date();
+    const newTime =
+      now.getHours() * 60 * 60 * 1000 +
+      now.getMinutes() * 60 * 1000 +
+      now.getSeconds() * 1000;
     setTime(newTime);
-    
     if (newTime > 6 * 60 * 60 * 1000 && newTime < 18 * 60 * 60 * 1000) {
       setIsDay(true);
     } else {
@@ -41,7 +53,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
     setUpTime();
     const interval = setInterval(() => {
       setUpTime();
-    }, 10000);
+    }, 60000);
     return () => clearInterval(interval);
   }, [setUpTime]);
 
@@ -95,7 +107,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
         Math.round(color1[2] * w1 + color2[2] * w2),
       ];
       return rgb;
-    }
+    };
     const nightSkyHex = {
       start: [0, 0, 0],
       end: [0, 0, 20],
@@ -105,20 +117,13 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
       end: [161, 206, 235],
     };
 
-    const weight = Math.cos((time / oneDay) * Math.PI * 2) / 2 + 0.5;
-    console.log(weight);
-    
-    
-    const skyStartColor = pickColor(
-      nightSkyHex.start,
-      daySkyHex.start,
-      weight,
+    const weight = Math.min(
+      (Math.cos((time / oneDay) * Math.PI * 2) / 2 + 0.5) * 1.2,
+      1
     );
-    const skyEndColor = pickColor(
-      nightSkyHex.end,
-      daySkyHex.end,
-      weight, 
-    );
+
+    const skyStartColor = pickColor(nightSkyHex.start, daySkyHex.start, weight);
+    const skyEndColor = pickColor(nightSkyHex.end, daySkyHex.end, weight);
 
     sky.style.background = `linear-gradient(to bottom, rgb(${skyStartColor[0]}, ${skyStartColor[1]}, ${skyStartColor[2]}), rgb(${skyEndColor[0]}, ${skyEndColor[1]}, ${skyEndColor[2]}))`;
   }, [oneDay, time]);
@@ -128,8 +133,12 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
     if (!ground) {
       return;
     }
-    ground.style.filter = 'brightness(0.25)';
-  }, []);
+    const weight =
+      1.25 -
+      ((Math.cos((time / oneDay) * Math.PI * 2) / 2 + 0.5) * 0.75 + 0.25);
+
+    ground.style.filter = `brightness(${weight})`;
+  }, [oneDay, time]);
 
   useEffect(() => {
     setSky();
@@ -142,7 +151,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     removeStars();
     drawStars();
-  }, [drawStars, removeStars]);
+  }, [drawStars, removeStars, isDay]);
 
   const generateMeteor = useCallback(() => {
     const meteor = meteorContainerRef.current;
@@ -203,6 +212,46 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
     return () => clearInterval(interval);
   }, [generateMeteor, isDay]);
 
+  const setupClouds = useCallback(() => {
+    const clouds = cloudsRef.current;
+    if (!clouds) {
+      return;
+    }
+    if (!isDay) {
+      clouds.style.display = 'none';
+    } else {
+      const opacityWeight = Math.max(
+        Math.sin((time / oneDay - 0.25) * Math.PI * 2),
+        0
+      );
+      clouds.style.display = 'block';
+      clouds.style.opacity = `${opacityWeight}`;
+    }
+  }, [isDay, oneDay, time]);
+
+  useEffect(() => {
+    setupClouds();
+  }, [setupClouds]);
+
+  const handleStarsOpacity = useCallback(() => {
+    const stars = starsRef.current;
+    if (!stars) {
+      return;
+    }
+    if (isDay) {
+      stars.style.display = 'none';
+    } else {
+      const opacityWeight =
+        1 - Math.abs(Math.cos((time / oneDay - 0.25) * Math.PI * 2));
+      stars.style.opacity = `${opacityWeight}`;
+      stars.style.display = 'block';
+    }
+  }, [isDay, oneDay, time]);
+
+  useEffect(() => {
+    handleStarsOpacity();
+  }, [handleStarsOpacity]);
+
   return (
     <div className={backgroundContainer}>
       <div ref={skyRef} className={sky} />
@@ -213,6 +262,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
           <div className={meteor} />
         </div>
       )}
+      <div ref={cloudsRef} className={clouds} />
       <div ref={groundRef} className={ground} />
       {children}
     </div>
