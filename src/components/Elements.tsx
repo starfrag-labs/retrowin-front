@@ -16,7 +16,6 @@ export const Elements = ({
   );
   const [uploading, setUploading] = useState(false);
   const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
-  const setHtmlElement= useRefStore((state) => state.setHtmlElement);
   const setElementsRef = useRefStore((state) => state.setElementsRef);
 
   useEffect(() => {
@@ -24,7 +23,6 @@ export const Elements = ({
       setElementsRef(elementsRef);
     }
   }, [setElementsRef]);
-
 
   const uploadFileElement: IStoreElement = {
     elementKey: 'upload-file',
@@ -47,7 +45,7 @@ export const Elements = ({
           key={element.elementKey}
           ref={(el) => {
             if (el) {
-              setHtmlElement(element.elementKey, el);
+              elementsRef.current.set(element.elementKey, el);
             }
           }}
         >

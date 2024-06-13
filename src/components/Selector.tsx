@@ -29,10 +29,15 @@ export const Selector = ({
     if (elementsRef.current === null) {
       return;
     }
-    if (boxRef.current && isDragging) {
+    if (boxRef.current && isDragging && selectorRef.current) {
       const boxRect = boxRef.current.getBoundingClientRect();
+      const currentSelectorRef = selectorRef.current;
       
       elementsRef.current.forEach((el, key) => {
+        // check if the element is included in current selector ref
+        if (!currentSelectorRef.contains(el)) {
+          return;
+        }
         const elRect = el.getBoundingClientRect();
         if (
           boxRect.left < elRect.right &&
@@ -147,12 +152,14 @@ export const Selector = ({
     (e: MouseEvent) => {
       const currentElements = elementsRef.current;
       const currentDraggingElements = draggingElementsRef.current;
-      if (currentElements === null) {
+      const currentSelectorRef = selectorRef.current;
+      if (currentElements === null || currentSelectorRef === null || currentDraggingElements === null) {
         return;
       }
-      if (currentDraggingElements === null) {
+      if (!currentSelectorRef.contains(e.target as Node)) {
         return;
       }
+
       currentElements.forEach((el, key) => {
         const elRect = el.getBoundingClientRect();
         if (
@@ -181,6 +188,8 @@ export const Selector = ({
             clone.style.left = elRect.left + 'px';
             clone.style.top = elRect.top + 'px';
             currentDraggingElements.appendChild(clone);
+            console.log('click element');
+            
           } else if (selectedElements.indexOf(key) === -1 && e.shiftKey) {
             selectElement(key);
             setSelectedElements((prev) => [...prev, key]);

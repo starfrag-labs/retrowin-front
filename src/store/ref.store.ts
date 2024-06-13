@@ -7,13 +7,15 @@ type State = {
 
 type Action = {
   setHtmlElement: (key: string, htmlEl: HTMLElement) => void;
-  setElementsRef: (elementsRef: React.RefObject<Map<string, HTMLElement>>) => void;
+  setElementsRef: (
+    elementsRef: React.RefObject<Map<string, HTMLElement>>
+  ) => void;
   getElementByKey: (key: string) => HTMLElement | undefined;
-}
+};
 
 const initialState: State = {
   elementsRef: React.createRef<Map<string, HTMLElement>>(),
-}
+};
 
 export const useRefStore = create<State & Action>((set, get) => ({
   elementsRef: initialState.elementsRef,
@@ -27,9 +29,13 @@ export const useRefStore = create<State & Action>((set, get) => ({
   },
   setElementsRef: (elementsRef) => {
     set((state) => {
-      elementsRef.current?.forEach((value, key) => {
-        state.elementsRef.current?.set(key, value);
-      });
+      if (state.elementsRef.current === null) {
+        state.elementsRef = elementsRef;
+      } else {
+        elementsRef.current?.forEach((el, key) => {
+          state.elementsRef.current?.set(key, el);
+        });
+      }
       return { elementsRef: state.elementsRef };
     });
   },
