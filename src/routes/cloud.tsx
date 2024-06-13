@@ -11,6 +11,8 @@ import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
 import { backgroundSelectorContainer } from '../css/styles/background.css';
+import { useWindowStore } from '../store/window.store';
+import { Window } from '../components/Window';
 
 export const Route = createFileRoute('/cloud')({
   beforeLoad: async () => {
@@ -53,6 +55,7 @@ export const Route = createFileRoute('/cloud')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
+  const windowOrder = useWindowStore((state) => state.order);
   const setElements = useElementStore((state) => state.setElements);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
@@ -99,6 +102,12 @@ function MainComponent() {
           <Elements folderKey={rootFolderKey} />
         </Selector>
       </div>
+      {windowOrder.map((windowKey) => {
+        return (
+          <Window key={windowKey} windowKey={windowKey} />
+        );
+      }
+    )}
     </Background>
   );
 }

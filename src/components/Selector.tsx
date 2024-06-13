@@ -31,6 +31,7 @@ export const Selector = ({
     }
     if (boxRef.current && isDragging) {
       const boxRect = boxRef.current.getBoundingClientRect();
+      
       elementsRef.current.forEach((el, key) => {
         const elRect = el.getBoundingClientRect();
         if (

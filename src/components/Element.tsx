@@ -15,6 +15,7 @@ import {
   uploadFileIcon,
 } from '../css/styles/element.css';
 import { IStoreElement } from '../types/element';
+import { useWindowStore } from '../store/window.store';
 
 export const Element = memo(
   ({
@@ -48,8 +49,20 @@ export const Element = memo(
         openImage();
       } else if (type === 'file') {
         handleDownload();
+      } else if (type === 'folder') {
+        openFolder();
       }
     };
+
+    const openFolder = () => {
+      const windows = useWindowStore.getState().windows;
+      const folderKey = elementKey;
+      if (!windows.get(folderKey)) {
+        useWindowStore.getState().newWindow(folderKey, 'navigator');
+      } else {
+        useWindowStore.getState().moveForward(folderKey);
+      }
+    }
 
     const handleDownload = async () => {
       const response = await downloadFile(accessToken, parentKey, elementKey);

@@ -1,10 +1,10 @@
 import { style } from "@vanilla-extract/css";
 
 export const windowContainer = style({
+  position: 'absolute',
   display: 'flex',
   flexDirection: 'column',
-  height: '100%',
-  width: '100%',
-  overflow: 'hidden',
-  position: 'relative',
+  width: '40%',
+  height: '60%',
+  backgroundColor: 'rgba(0, 0, 0, 0.8)',
 });

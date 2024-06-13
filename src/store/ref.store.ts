@@ -23,12 +23,17 @@ export const useRefStore = create<State & Action>((set, get) => ({
         state.elementsRef.current.set(key, htmlEl);
       }
       return { elementsRef: state.elementsRef };
-    })
+    });
   },
   setElementsRef: (elementsRef) => {
-    set({ elementsRef });
+    set((state) => {
+      elementsRef.current?.forEach((value, key) => {
+        state.elementsRef.current?.set(key, value);
+      });
+      return { elementsRef: state.elementsRef };
+    });
   },
   getElementByKey: (key) => {
     return get().elementsRef.current?.get(key);
-  }
+  },
 }));
