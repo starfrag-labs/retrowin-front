@@ -32,7 +32,7 @@ export const Selector = ({
     if (boxRef.current && isDragging && selectorRef.current) {
       const boxRect = boxRef.current.getBoundingClientRect();
       const currentSelectorRef = selectorRef.current;
-      
+
       elementsRef.current.forEach((el, key) => {
         // check if the element is included in current selector ref
         if (!currentSelectorRef.contains(el)) {
@@ -79,11 +79,13 @@ export const Selector = ({
       }
       if (selectorRef.current === e.target) {
         e.preventDefault();
+
         // start selecting
         setIsDragging(true);
         setStartX(e.pageX);
         setStartY(e.pageY);
         boxRef.current.style.display = 'block';
+
         // unselect all elements
         setSelectedElements([]);
         elementsRef.current.forEach((_el, key) => {
@@ -153,14 +155,25 @@ export const Selector = ({
       const currentElements = elementsRef.current;
       const currentDraggingElements = draggingElementsRef.current;
       const currentSelectorRef = selectorRef.current;
-      if (currentElements === null || currentSelectorRef === null || currentDraggingElements === null) {
+      if (
+        currentElements === null ||
+        currentSelectorRef === null ||
+        currentDraggingElements === null
+      ) {
         return;
       }
       if (!currentSelectorRef.contains(e.target as Node)) {
+        setSelectedElements([]);
+        selectedElements.forEach((key) => {
+          unselectElement(key);
+        });
         return;
       }
 
       currentElements.forEach((el, key) => {
+        if (!currentSelectorRef.contains(el)) {
+          return;
+        }
         const elRect = el.getBoundingClientRect();
         if (
           e.pageX > elRect.left &&
@@ -169,14 +182,16 @@ export const Selector = ({
           e.pageY < elRect.bottom
         ) {
           if (selectedElements.indexOf(key) === -1 && !e.shiftKey) {
+            setSelectedElements([key]);
             selectedElements.forEach((k) => {
               if (k !== key) {
                 unselectElement(k);
-              }
-            });
-            e.preventDefault();
+                }
+                });
             selectElement(key);
-            setSelectedElements([key]);
+
+            // start moving the element
+            e.preventDefault();
             setDisplayDraggingElements(false);
             setStartX(e.pageX);
             setStartY(e.pageY);
@@ -188,8 +203,6 @@ export const Selector = ({
             clone.style.left = elRect.left + 'px';
             clone.style.top = elRect.top + 'px';
             currentDraggingElements.appendChild(clone);
-            console.log('click element');
-            
           } else if (selectedElements.indexOf(key) === -1 && e.shiftKey) {
             selectElement(key);
             setSelectedElements((prev) => [...prev, key]);
