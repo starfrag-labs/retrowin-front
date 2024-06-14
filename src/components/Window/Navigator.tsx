@@ -7,18 +7,24 @@ import { useElementStore } from "../../store/element.store";
 import { useCallback, useEffect, useState } from "react";
 import { readFolderQueryOption } from "../../utils/queryOptions/folder.query";
 import { IStoreElement } from "../../types/element";
-import { useWindowStore } from "../../store/window.store";
 
-export const Navigator = ({ folderKey }: { folderKey: string; }) => {
+export const Navigator = ({
+  folderKey,
+  windowOrder,
+  setWindowOrder,
+}: {
+  folderKey: string;
+  windowOrder: string[];
+  setWindowOrder: (order: string[]) => void;
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const queryClient = useQueryClient();
   const accessToken = useTokenStore.getState().accessToken;
-  const closeWindow = useWindowStore((state) => state.closeWindow);
   const setElements = useElementStore((state) => state.setElements);
 
   const handleCloseWindow = () => {
-    closeWindow(folderKey);
-  }
+    setWindowOrder(windowOrder.filter((key) => key !== folderKey));
+  };
 
   const queryElements = useCallback(async () => {
     await queryClient
@@ -60,4 +66,4 @@ export const Navigator = ({ folderKey }: { folderKey: string; }) => {
       )}
     </div>
   );
-}
+};

@@ -24,12 +24,14 @@ export const Element = memo(
     parentKey,
     type,
     selected,
+    setWindowOrder,
   }: {
     name: string;
     elementKey: string;
     parentKey: string;
     type: IStoreElement['type'];
     selected: boolean;
+    setWindowOrder?: (order: string[]) => void;
   }): React.ReactElement => {
     const queryClient = useQueryClient();
 
@@ -57,10 +59,14 @@ export const Element = memo(
     const openFolder = () => {
       const windows = useWindowStore.getState().windows;
       const folderKey = elementKey;
+      if (!setWindowOrder) {
+        return;
+      }
       if (!windows.get(folderKey)) {
         useWindowStore.getState().newWindow(folderKey, 'navigator');
+        setWindowOrder([folderKey, ...windows.keys()]);
       } else {
-        useWindowStore.getState().moveForward(folderKey);
+        setWindowOrder([folderKey, ...windows.keys()]);
       }
     }
 

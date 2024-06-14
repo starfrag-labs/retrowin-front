@@ -8,8 +8,12 @@ import { Uploader } from './Uploader';
 
 export const Elements = ({
   folderKey,
+  windowOrder,
+  setWindowOrder,
 }: {
   folderKey: string;
+  windowOrder: string[];
+  setWindowOrder?: (order: string[]) => void;
 }): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
@@ -49,7 +53,7 @@ export const Elements = ({
             }
           }}
         >
-          <Element {...element} />
+          <Element {...element} setWindowOrder={setWindowOrder}/>
         </div>
       ))}
     </div>

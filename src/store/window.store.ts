@@ -3,7 +3,6 @@ import { IWindow } from "../types/window";
 
 type State = {
   windows: Map<string, IWindow>;
-  order: string[];
 }
 
 type Action = {
@@ -12,24 +11,20 @@ type Action = {
   minimizeWindow: (key: string) => void;
   maximizeWindow: (key: string) => void;
   closeWindow: (key: string) => void;
-  moveForward: (key: string) => void; 
 }
 
 const initialState: State = {
   windows: new Map<string, IWindow>(),
-  order: [],
 }
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
-  order: initialState.order,
   // Window functions
   getWindow: (key) => get().windows.get(key),
   newWindow: (key, type) => {
     set((state) => {
       state.windows.set(key, { key, type, minimized: false });
-      state.order.push(key);
-      return { windows: state.windows, order: state.order };
+      return { windows: state.windows };
     });
   },
   minimizeWindow: (key) => {
@@ -38,10 +33,8 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       if (window) {
         window.minimized = true;
         state.windows.set(key, window);
-        state.order = state.order.filter((k) => k !== key);
-        state.order.unshift(key);
       }
-      return { windows: state.windows, order: state.order };
+      return { windows: state.windows };
     });
   },
   maximizeWindow: (key) => {
@@ -50,24 +43,14 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       if (window) {
         window.minimized = false;
         state.windows.set(key, window);
-        state.order = state.order.filter((k) => k !== key);
-        state.order.push(key);
       }
-      return { windows: state.windows, order: state.order };
+      return { windows: state.windows };
     });
   },
   closeWindow: (key) => {
     set((state) => {
       state.windows.delete(key);
-      state.order = state.order.filter((k) => k !== key);
-      return { windows: state.windows, order: state.order };
+      return { windows: state.windows };
     });
   },
-  moveForward: (key) => {
-    set((state) => {
-      state.order = state.order.filter((k) => k !== key);
-      state.order.push(key);
-      return { windows: state.windows, order: state.order };
-    });
-  }
 }));

@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { createRef, useEffect } from 'react';
+import { createRef, useEffect, useState } from 'react';
 import { useTokenStore } from '../store/token.store';
 import { useUserStore } from '../store/user.store';
 import { createRootFolder, getRootFolderKey } from '../utils/api/cloud';
@@ -11,7 +11,6 @@ import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
 import { backgroundSelectorContainer } from '../css/styles/background.css';
-import { useWindowStore } from '../store/window.store';
 import { Window } from '../components/Window';
 
 export const Route = createFileRoute('/cloud')({
@@ -55,12 +54,17 @@ export const Route = createFileRoute('/cloud')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const windowOrder = useWindowStore((state) => state.order);
+  const [windowOrder, setWindowOrder] = useState<string[]>([]);
   const setElements = useElementStore((state) => state.setElements);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
   const backgroundSelectorRef = createRef<HTMLDivElement>();
+
+  useEffect(() => {
+    console.log(windowOrder);
+  }, [windowOrder]);
+    
 
   useEffect(() => {
     const data = rootFolderQuery.data;
@@ -99,12 +103,17 @@ function MainComponent() {
     <Background>
       <div className={backgroundSelectorContainer} ref={backgroundSelectorRef}>
         <Selector>
-          <Elements folderKey={rootFolderKey} />
+          <Elements folderKey={rootFolderKey} setWindowOrder={setWindowOrder} />
         </Selector>
       </div>
       {windowOrder.map((windowKey) => {
         return (
-          <Window key={windowKey} windowKey={windowKey} />
+          <Window
+            key={windowKey}
+            windowKey={windowKey}
+            windowOrder={windowOrder}
+            setWindowOrder={setWindowOrder}
+          />
         );
       }
     )}
