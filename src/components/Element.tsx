@@ -54,8 +54,6 @@ export const Element = memo(
     };
 
     const openFolder = () => {
-      console.log('openFolder');
-      
       newWindow(elementKey, 'navigator');
     };
 
