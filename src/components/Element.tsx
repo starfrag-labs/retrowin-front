@@ -1,21 +1,19 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { memo, useCallback, useEffect, useRef, useState } from 'react';
+import {
+  memo,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from 'react';
 import { useTokenStore } from '../store/token.store';
-import { downloadFile, renameFile, renameFolder } from '../utils/api/cloud';
+import { downloadFile, renameFile, renameFolder } from '../api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
-import {
-  fileIcon,
-  folderIcon,
-  elementContainer,
-  elementNameText,
-  elementNameContainer,
-  elementNameTextarea,
-  uploadFileIcon,
-} from '../css/styles/element.css';
-import { IStoreElement } from '../types/element';
 import { useWindowStore } from '../store/window.store';
+import { IStoreElement } from '../types/element';
+import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText } from '../styles/element.css';
 
 export const Element = memo(
   ({
@@ -24,18 +22,17 @@ export const Element = memo(
     parentKey,
     type,
     selected,
-    setWindowOrder,
   }: {
     name: string;
     elementKey: string;
     parentKey: string;
     type: IStoreElement['type'];
     selected: boolean;
-    setWindowOrder?: (order: string[]) => void;
   }): React.ReactElement => {
     const queryClient = useQueryClient();
 
     const accessToken = useTokenStore((state) => state.accessToken);
+    const newWindow = useWindowStore((state) => state.newWindow);
 
     const [isEditing, setIsEditing] = useState(false);
     const [nameState, setNameState] = useState(name);
@@ -57,18 +54,10 @@ export const Element = memo(
     };
 
     const openFolder = () => {
-      const windows = useWindowStore.getState().windows;
-      const folderKey = elementKey;
-      if (!setWindowOrder) {
-        return;
-      }
-      if (!windows.get(folderKey)) {
-        useWindowStore.getState().newWindow(folderKey, 'navigator');
-        setWindowOrder([folderKey, ...windows.keys()]);
-      } else {
-        setWindowOrder([folderKey, ...windows.keys()]);
-      }
-    }
+      console.log('openFolder');
+      
+      newWindow(elementKey, 'navigator');
+    };
 
     const handleDownload = async () => {
       const response = await downloadFile(accessToken, parentKey, elementKey);

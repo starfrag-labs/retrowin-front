@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { selectBox, selector } from '../css/styles/selector.css';
 import React from 'react';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
-import { draggingElementsIcon } from '../css/styles/element.css';
+import { draggingElementsIcon } from '../styles/element.css';
+import { selector, selectBox } from '../styles/selector.css';
 
 export const Selector = ({
   children,
@@ -186,8 +186,8 @@ export const Selector = ({
             selectedElements.forEach((k) => {
               if (k !== key) {
                 unselectElement(k);
-                }
-                });
+              }
+            });
             selectElement(key);
 
             // start moving the element

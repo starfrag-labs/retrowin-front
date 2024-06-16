@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { readFolder } from '../api/cloud';
+import { readFolder } from '../../api/cloud';
 import { ReadFolderData } from '../../types/response';
 
 export const readFolderQueryOption = (accessToken: string, folderKey: string) =>

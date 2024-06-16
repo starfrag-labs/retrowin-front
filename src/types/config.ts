@@ -1,4 +1,4 @@
-export interface Api {
+export interface Config {
   auth: string;
   cloud: string;
   oauth: string;

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../store/token.store';
-import { IProfile as IProfile } from '../types/response';
+import { IProfile } from '../types/response';
 
 export const Profile = ({
   switchShowProfile,

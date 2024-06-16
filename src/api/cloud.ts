@@ -1,6 +1,6 @@
-import { ReadFolderData } from '../../types/response';
-import { api } from '../config';
+import { ReadFolderData } from '../types/response';
 import axios from 'axios';
+import { cloudUrls } from './urls';
 
 export const checkUser = async (accessToken: string) => {
   const checkUser = cloudUrls.user.checkUser;
@@ -48,9 +48,13 @@ export const createRootFolder = async (accessToken: string) => {
     },
   });
   return response;
-}
+};
 
-export const createFolder = async (accessToken: string, folderKey: string, folderName: string) => {
+export const createFolder = async (
+  accessToken: string,
+  folderKey: string,
+  folderName: string
+) => {
   const createFolder = cloudUrls.folder.createFolder(folderKey);
   const response = await axios.request<string>({
     method: createFolder.method,
@@ -87,7 +91,7 @@ export const getRootFolderKey = async (accessToken: string) => {
     },
   });
   return response;
-}
+};
 
 export const deleteFolder = async (accessToken: string, folderKey: string) => {
   const deleteFolder = cloudUrls.folder.deleteFolder(folderKey);
@@ -101,7 +105,11 @@ export const deleteFolder = async (accessToken: string, folderKey: string) => {
   return response;
 };
 
-export const moveFolder = async (accessToken: string, folderKey: string, targetKey: string) => {
+export const moveFolder = async (
+  accessToken: string,
+  folderKey: string,
+  targetKey: string
+) => {
   const moveFolder = cloudUrls.folder.moveFolder(folderKey, targetKey);
   const response = await axios.request({
     method: moveFolder.method,
@@ -111,9 +119,13 @@ export const moveFolder = async (accessToken: string, folderKey: string, targetK
     },
   });
   return response;
-}
+};
 
-export const renameFolder = async (accessToken: string, folderKey: string, folderName: string) => {
+export const renameFolder = async (
+  accessToken: string,
+  folderKey: string,
+  folderName: string
+) => {
   const renameFolder = cloudUrls.folder.renameFolder(folderKey);
   const response = await axios.request({
     method: renameFolder.method,
@@ -126,8 +138,7 @@ export const renameFolder = async (accessToken: string, folderKey: string, folde
     },
   });
   return response;
-}
-
+};
 
 export const uploadChunk = async (
   accessToken: string,
@@ -156,7 +167,11 @@ export const uploadChunk = async (
   return response;
 };
 
-export const downloadFile = async (accessToken: string, folderKey: string, fileKey: string) => {
+export const downloadFile = async (
+  accessToken: string,
+  folderKey: string,
+  fileKey: string
+) => {
   const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
   const response = await axios.request<Blob>({
     method: downloadFile.method,
@@ -164,12 +179,16 @@ export const downloadFile = async (accessToken: string, folderKey: string, fileK
     headers: {
       Authorization: `Bearer ${accessToken}`,
     },
-    responseType: 'blob'
+    responseType: 'blob',
   });
   return response;
 };
 
-export const deleteFile = async (accessToken: string, folderKey: string, fileKey: string) => {
+export const deleteFile = async (
+  accessToken: string,
+  folderKey: string,
+  fileKey: string
+) => {
   const deleteFile = cloudUrls.file.deleteFile(folderKey, fileKey);
   const response = await axios.request({
     method: deleteFile.method,
@@ -181,7 +200,12 @@ export const deleteFile = async (accessToken: string, folderKey: string, fileKey
   return response;
 };
 
-export const renameFile = async (accessToken: string, folderKey: string, fileKey: string, fileName: string) => {
+export const renameFile = async (
+  accessToken: string,
+  folderKey: string,
+  fileKey: string,
+  fileName: string
+) => {
   const renameFile = cloudUrls.file.renameFile(folderKey, fileKey);
   const response = await axios.request({
     method: renameFile.method,
@@ -194,9 +218,14 @@ export const renameFile = async (accessToken: string, folderKey: string, fileKey
     },
   });
   return response;
-}
+};
 
-export const moveFile = async (accessToken: string, folderKey: string, fileKey: string, newFolderKey: string) => {
+export const moveFile = async (
+  accessToken: string,
+  folderKey: string,
+  fileKey: string,
+  newFolderKey: string
+) => {
   const moveFile = cloudUrls.file.moveFile(folderKey, fileKey);
   const response = await axios.request({
     method: moveFile.method,
@@ -209,96 +238,5 @@ export const moveFile = async (accessToken: string, folderKey: string, fileKey: 
     },
   });
   return response;
-}
-
-const cloudUrls = {
-  user: {
-    checkUser: {
-      url: `${api.cloud}/user`,
-      method: 'GET',
-    },
-    enrollUser: {
-      url: `${api.cloud}/user/enroll`,
-      method: 'GET',
-    },
-    deleteUser: {
-      url: `${api.cloud}/user`,
-      method: 'DELETE',
-    },
-  },
-  folder: {
-    createRootFolder: {
-      url: `${api.cloud}/folder/root`,
-      method: 'POST',
-    },
-    createFolder: (folderKey: string) => {
-      return {
-        url: `${api.cloud}/folder/${folderKey}`,
-        method: 'POST',
-      };
-    },
-    deleteFolder: (folderKey: string) => {
-      return {
-        url: `${api.cloud}/folder/${folderKey}`,
-        method: 'DELETE',
-      };
-    },
-    readFolder: (folderKey: string) => {
-      return {
-        url: `${api.cloud}/folder/${folderKey}`,
-        method: 'GET',
-      };
-    },
-    getRootFolderKey: {
-      url: `${api.cloud}/folder/rootKey`,
-      method: 'GET',
-    },
-    moveFolder: (folderKey: string, targetKey: string) => {
-      return {
-        url: `${api.cloud}/folder/move/${folderKey}`,
-        method: 'PATCH',
-        queryOptions: {
-          targetKey: targetKey,
-        }
-      };
-    },
-    renameFolder: (folderKey: string) => {
-      return {
-        url: `${api.cloud}/folder/rename/${folderKey}`,
-        method: 'PATCH',
-      };
-    }
-  },
-  file: {
-    uploadFile: (folderKey: string) => {
-      return {
-        url: `${api.cloud}/file/upload/${folderKey}`,
-        method: 'POST',
-      };
-    },
-    downloadFile: (folderKey: string, fileKey: string) => {
-      return {
-        url: `${api.cloud}/file/download/${folderKey}/${fileKey}`,
-        method: 'GET',
-      };
-    },
-    deleteFile: (folderKey: string, fileKey: string) => {
-      return {
-        url: `${api.cloud}/file/${folderKey}/${fileKey}`,
-        method: 'DELETE',
-      };
-    },
-    renameFile: (folderKey: string, fileKey: string) => {
-      return {
-        url: `${api.cloud}/file/rename/${folderKey}/${fileKey}`,
-        method: 'PATCH',
-      };
-    },
-    moveFile: (folderKey: string, fileKey: string) => {
-      return {
-        url: `${api.cloud}/file/move/${folderKey}/${fileKey}`,
-        method: 'PATCH',
-      };
-    },
-  },
 };
+

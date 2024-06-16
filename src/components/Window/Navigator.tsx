@@ -1,29 +1,23 @@
-import { useQueryClient } from "@tanstack/react-query";
-import { windowContainer } from "../../css/styles/window.css";
-import { Elements } from "../Elements";
-import { Selector } from "../Selector";
-import { useTokenStore } from "../../store/token.store";
-import { useElementStore } from "../../store/element.store";
-import { useCallback, useEffect, useState } from "react";
-import { readFolderQueryOption } from "../../utils/queryOptions/folder.query";
-import { IStoreElement } from "../../types/element";
+import { useQueryClient } from '@tanstack/react-query';
+import { Elements } from '../Elements';
+import { Selector } from '../Selector';
+import { useTokenStore } from '../../store/token.store';
+import { useElementStore } from '../../store/element.store';
+import { useCallback, useEffect, useState } from 'react';
+import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
+import { IStoreElement } from '../../types/element';
+import { useWindowStore } from '../../store/window.store';
+import { windowContainer } from '../../styles/window.css';
 
-export const Navigator = ({
-  folderKey,
-  windowOrder,
-  setWindowOrder,
-}: {
-  folderKey: string;
-  windowOrder: string[];
-  setWindowOrder: (order: string[]) => void;
-}) => {
+export const Navigator = ({ folderKey }: { folderKey: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const queryClient = useQueryClient();
   const accessToken = useTokenStore.getState().accessToken;
+  const closeWindow = useWindowStore((state) => state.closeWindow);
   const setElements = useElementStore((state) => state.setElements);
 
   const handleCloseWindow = () => {
-    setWindowOrder(windowOrder.filter((key) => key !== folderKey));
+    closeWindow(folderKey);
   };
 
   const queryElements = useCallback(async () => {

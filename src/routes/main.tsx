@@ -1,8 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { createRef, useEffect, useState } from 'react';
+import { createRef, useEffect } from 'react';
 import { useTokenStore } from '../store/token.store';
-import { useUserStore } from '../store/user.store';
-import { createRootFolder, getRootFolderKey } from '../utils/api/cloud';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
@@ -10,15 +8,17 @@ import { IStoreElement } from '../types/element';
 import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
-import { backgroundSelectorContainer } from '../css/styles/background.css';
 import { Window } from '../components/Window';
+import { createRootFolder, getRootFolderKey } from '../api/cloud';
+import { useWindowStore } from '../store/window.store';
+import { AuthManager } from '../components/AuthManager';
+import { backgroundSelectorContainer } from '../styles/background.css';
 
-export const Route = createFileRoute('/cloud')({
+export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
     const accessToken = useTokenStore.getState().accessToken;
-    const { profile, isCloudUser } = useUserStore.getState();
-    if (!accessToken || !isCloudUser || !profile) {
-      throw redirect({
+    if (!accessToken) {
+      throw redirect({  
         to: '/',
       });
     }
@@ -33,11 +33,6 @@ export const Route = createFileRoute('/cloud')({
         }
         throw error;
       });
-    if (!rootFolderKey) {
-      throw redirect({
-        to: '/',
-      });
-    }
     return {
       accessToken: accessToken,
       rootFolderKey: rootFolderKey,
@@ -54,7 +49,7 @@ export const Route = createFileRoute('/cloud')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const [windowOrder, setWindowOrder] = useState<string[]>([]);
+  const windowOrder = useWindowStore((state) => state.windowOrder);
   const setElements = useElementStore((state) => state.setElements);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
@@ -64,7 +59,6 @@ function MainComponent() {
   useEffect(() => {
     console.log(windowOrder);
   }, [windowOrder]);
-    
 
   useEffect(() => {
     const data = rootFolderQuery.data;
@@ -100,23 +94,20 @@ function MainComponent() {
   }, [rootFolderKey, rootFolderQuery.data, setElements]);
 
   return (
-    <Background>
-      <div className={backgroundSelectorContainer} ref={backgroundSelectorRef}>
-        <Selector>
-          <Elements folderKey={rootFolderKey} setWindowOrder={setWindowOrder} />
-        </Selector>
-      </div>
-      {windowOrder.map((windowKey) => {
-        return (
-          <Window
-            key={windowKey}
-            windowKey={windowKey}
-            windowOrder={windowOrder}
-            setWindowOrder={setWindowOrder}
-          />
-        );
-      }
-    )}
-    </Background>
+    <AuthManager>
+      <Background>
+        <div
+          className={backgroundSelectorContainer}
+          ref={backgroundSelectorRef}
+        >
+          <Selector>
+            <Elements folderKey={rootFolderKey} />
+          </Selector>
+        </div>
+        {windowOrder.map((windowKey) => {
+          return <Window key={windowKey} windowKey={windowKey} />;
+        })}
+      </Background>
+    </AuthManager>
   );
 }

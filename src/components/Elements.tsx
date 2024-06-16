@@ -1,19 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { elementsContainer } from '../css/styles/element.css';
-import { IStoreElement } from '../types/element';
 import { Element } from './Element';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { Uploader } from './Uploader';
+import { IStoreElement } from '../types/element';
+import { elementsContainer } from '../styles/element.css';
 
 export const Elements = ({
   folderKey,
-  windowOrder,
-  setWindowOrder,
 }: {
   folderKey: string;
-  windowOrder: string[];
-  setWindowOrder?: (order: string[]) => void;
 }): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
@@ -53,7 +49,7 @@ export const Elements = ({
             }
           }}
         >
-          <Element {...element} setWindowOrder={setWindowOrder}/>
+          <Element {...element} />
         </div>
       ))}
     </div>

@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   backgroundContainer,
-  clouds,
-  ground,
-  meteor,
-  meteorContainer,
-  meteorTail,
   sky,
   stars,
-} from '../css/styles/background.css';
+  meteorContainer,
+  meteorTail,
+  meteor,
+  clouds,
+  ground,
+} from '../styles/background.css';
 
-export const Background = ({ children }: { children: React.ReactNode }) => {
+export const Background = ({
+  children,
+}: {
+  children: React.ReactNode;
+}): React.ReactElement => {
   const [isDay, setIsDay] = useState(false);
   const oneDay = 1000 * 60 * 60 * 24;
   const [time, setTime] = useState<number>(0);
@@ -151,7 +155,7 @@ export const Background = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     removeStars();
     drawStars();
-  }, [drawStars, removeStars, isDay]);
+  }, [drawStars, removeStars]);
 
   const generateMeteor = useCallback(() => {
     const meteor = meteorContainerRef.current;

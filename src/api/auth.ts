@@ -1,26 +1,7 @@
 import axios from 'axios';
-import { api } from '../config';
-import { Urls } from '../../types/request';
-import { IProfile } from '../../types/response';
+import { IProfile } from '../types/response';
+import { authUrls } from './urls';
 
-const authUrls: Urls = {
-  validate: {
-    url: `${api.auth}/token/valid`,
-    method: 'GET',
-  },
-  refresh: {
-    url: `${api.auth}/token/refresh`,
-    method: 'GET',
-  },
-  issue: {
-    url: `${api.auth}/token/issue`,
-    method: 'GET',
-  },
-  profile: {
-    url: `${api.auth}/user/profile`,
-    method: 'GET',
-  },
-};
 
 export const isValid = (accessToken: string) => {
   return axios.request({

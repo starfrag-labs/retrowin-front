@@ -6,7 +6,6 @@ type State = {
 };
 
 type Action = {
-  getElements: () => Map<string, IStoreElement>;
   getElementsByParentKey: (parentKey: string) => IStoreElement[];
   setElements: (elements: IStoreElement[]) => void;
   setElement: (element: IStoreElement) => void;
@@ -31,7 +30,6 @@ export const useElementStore = create<State & Action>((set, get) => ({
       (element) => element.parentKey === parentKey
     );
   },
-  getElements: () => get().elements,
   setElements: (elements) => {
     set((state) => {
       elements.forEach((element) => {

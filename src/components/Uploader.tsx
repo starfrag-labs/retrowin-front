@@ -1,7 +1,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../store/token.store';
-import { uploadChunk } from '../utils/api/cloud';
-import { uploaderContainer } from '../css/styles/uploader.css';
+import { uploadChunk } from '../api/cloud';
+import { uploaderContainer } from '../styles/uploader.css';
 
 export function Uploader({
   folderKey,

@@ -1,14 +1,10 @@
-import { Navigate, createFileRoute } from '@tanstack/react-router';
-import { Logo } from '../components/Logo';
-import { api } from '../utils/config';
-import { getProfile, isValid, issue } from '../utils/api/auth';
+import { Navigate, createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
-import { button } from '../css/styles/button.css';
-import { indexBackground } from '../css/styles/background.css';
-import { blurContainer } from '../css/styles/container.css';
 import { useTokenStore } from '../store/token.store';
-import { checkUser, enrollUser } from '../utils/api/cloud';
+import { getProfile, issue } from '../api/auth';
+import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
+import { checkUser, enrollUser } from '../api/cloud';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -17,72 +13,40 @@ const codeSchema = z.object({
 export const Route = createFileRoute('/')({
   validateSearch: codeSchema,
   beforeLoad: async ({ search: { code } }) => {
-    if (!code) {
-      return {
-        accessToken: null,
-      };
-    }
-    const accessToken = await issue(code)
-      .then((response) => {
-        const token = response.headers['authorization'].split(' ')[1];
-        return token;
-      })
-      .catch(() => {
-        return null;
-      });
-    return {
-      accessToken: accessToken,
-    };
-  },
-  loader: async ({ context: { accessToken } }) => {
-    const { setIsCloudUser, setProfile } = useUserStore.getState();
-    const setAccessToken = useTokenStore.getState().setAccessToken;
-    if (accessToken) {
+    if (code) {
+      const setAccessToken = useTokenStore.getState().setAccessToken;
+      const accessToken = await issue(code)
+        .then((response) => {
+          const token = response.headers['authorization'].split(' ')[1];
+          return token;
+        })
+        .catch(() => {
+          return null;
+        });
       setAccessToken(accessToken);
     }
-    let storedToken = '';
-    storedToken = useTokenStore.getState().accessToken;
-    await isValid(storedToken).catch(() => {
-      setAccessToken('');
-      storedToken = '';
-    });
-
-    if (!storedToken) {
-      return;
-    }
-    await checkUser(storedToken)
-      .then(() => {
-        setIsCloudUser(true);
-      })
-      .catch(() => {
-        setIsCloudUser(false);
-      });
-
-    let isCloudUser: boolean = false;
-    isCloudUser = useUserStore.getState().isCloudUser;
-    if (!isCloudUser) {
-      const enrollResult = await enrollUser(storedToken).catch(() => {
-        return false;
-      });
-      if (!enrollResult) {
-        return;
-      }
-      await checkUser(storedToken)
+    const accessToken = useTokenStore.getState().accessToken;
+    const setIsCloudUser = useUserStore.getState().setIsCloudUser;
+    const setProfile = useUserStore.getState().setProfile;
+  
+    if (accessToken) {
+      await checkUser(accessToken)
         .then(() => {
           setIsCloudUser(true);
         })
-        .catch(() => {
-          setIsCloudUser(false);
+        .catch(async () => {
+          await enrollUser(accessToken).then(() => {
+            setIsCloudUser(true);
+          });
         });
-    }
-    await getProfile(storedToken)
-      .then((response) => {
-        const profile = response.data.data;
-        setProfile(profile);
-      })
-      .catch(() => {
-        return;
+      await getProfile(accessToken)
+        .then((response) => {
+          setProfile(response.data.data);
+        })
+      throw redirect({
+        to: '/main',
       });
+    }
   },
   pendingComponent: () => <div>Loading...</div>,
   component: IndexComponent,
@@ -90,24 +54,16 @@ export const Route = createFileRoute('/')({
 
 function IndexComponent() {
   const accessToken = useTokenStore((state) => state.accessToken);
+  const code = Route.useSearch().code;
 
-  if (accessToken) {
-    return <Navigate to="/cloud" />;
+  if (!accessToken && !code) {
+    const loginUrl = `${config.oauth}?redirect_url=${config.redirectUrl}`;
+    window.location.href = loginUrl;
   }
 
-  // If the user is not logged in, show the login page
-  const loginUrl = `${api.oauth}?redirect_url=${api.redirectUrl}`;
-  return (
-    <div className={indexBackground}>
-      <div className={blurContainer}>
-        <Logo fontSize="4rem" />
-        <div>
-          Upload and share your files with your friends, family, and the world.
-        </div>
-        <a href={loginUrl}>
-          <button className={button}>Login</button>
-        </a>
-      </div>
-    </div>
-  );
+  if (accessToken) {
+    return <Navigate to="/main" />;
+  }
+
+  return <div>loading</div>;
 }

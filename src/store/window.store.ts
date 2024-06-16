@@ -3,6 +3,7 @@ import { IWindow } from "../types/window";
 
 type State = {
   windows: Map<string, IWindow>;
+  windowOrder: string[];
 }
 
 type Action = {
@@ -15,16 +16,19 @@ type Action = {
 
 const initialState: State = {
   windows: new Map<string, IWindow>(),
+  windowOrder: [],
 }
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
+  windowOrder: initialState.windowOrder,
   // Window functions
   getWindow: (key) => get().windows.get(key),
   newWindow: (key, type) => {
     set((state) => {
       state.windows.set(key, { key, type, minimized: false });
-      return { windows: state.windows };
+      state.windowOrder = [key, ...state.windowOrder];
+      return { windows: state.windows, windowOrder: state.windowOrder};
     });
   },
   minimizeWindow: (key) => {
@@ -33,8 +37,10 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       if (window) {
         window.minimized = true;
         state.windows.set(key, window);
+        state.windowOrder = state.windowOrder.filter((k) => k !== key);
+        state.windowOrder.push(key);
       }
-      return { windows: state.windows };
+      return { windows: state.windows, windowOrder: state.windowOrder };
     });
   },
   maximizeWindow: (key) => {
@@ -44,13 +50,14 @@ export const useWindowStore = create<State & Action>((set, get) => ({
         window.minimized = false;
         state.windows.set(key, window);
       }
-      return { windows: state.windows };
+      return { windows: state.windows, windowOrder: state.windowOrder};
     });
   },
   closeWindow: (key) => {
     set((state) => {
       state.windows.delete(key);
-      return { windows: state.windows };
+      state.windowOrder = state.windowOrder.filter((k) => k !== key);
+      return { windows: state.windows, windowOrder: state.windowOrder};
     });
   },
 }));

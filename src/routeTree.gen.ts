@@ -11,13 +11,13 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as CloudImport } from './routes/cloud.tsx'
+import { Route as MainImport } from './routes/main.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
 
 // Create/Update Routes
 
-const CloudRoute = CloudImport.update({
-  path: '/cloud',
+const MainRoute = MainImport.update({
+  path: '/main',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -34,8 +34,8 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/cloud': {
-      preLoaderRoute: typeof CloudImport
+    '/main': {
+      preLoaderRoute: typeof MainImport
       parentRoute: typeof rootRoute
     }
   }
@@ -43,6 +43,6 @@ declare module '@tanstack/react-router' {
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([IndexRoute, CloudRoute])
+export const routeTree = rootRoute.addChildren([IndexRoute, MainRoute])
 
 /* prettier-ignore-end */
