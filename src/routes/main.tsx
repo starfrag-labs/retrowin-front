@@ -4,7 +4,6 @@ import { useTokenStore } from '../store/token.store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
-import { IStoreElement } from '../types/element';
 import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
@@ -13,6 +12,7 @@ import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { useWindowStore } from '../store/window.store';
 import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
+import { IElementState } from '../types/store';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -65,25 +65,25 @@ function MainComponent() {
     if (!data) {
       return;
     }
-    const rootFolderElement: IStoreElement = {
-      elementKey: rootFolderKey,
+    const rootFolderElement: IElementState = {
+      key: rootFolderKey,
       name: '/',
       type: 'folder',
       parentKey: '',
       selected: false,
     };
-    const folderElements: IStoreElement[] = data.folders.map((folder) => {
+    const folderElements: IElementState[] = data.folders.map((folder) => {
       return {
-        elementKey: folder.key,
+        key: folder.key,
         name: folder.name,
         type: 'folder',
         parentKey: rootFolderKey,
         selected: false,
       };
     });
-    const fileElements: IStoreElement[] = data.files.map((file) => {
+    const fileElements: IElementState[] = data.files.map((file) => {
       return {
-        elementKey: file.key,
+        key: file.key,
         name: file.name,
         type: 'file',
         parentKey: rootFolderKey,

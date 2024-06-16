@@ -1,17 +1,17 @@
 import { create } from 'zustand';
-import { IStoreElement } from '../types/element';
+import { IElementState } from '../types/store';
 
 type State = {
-  elements: Map<string, IStoreElement>;
+  elements: IElementState[];
 };
 
 type Action = {
-  getElementsByParentKey: (parentKey: string) => IStoreElement[];
-  setElements: (elements: IStoreElement[]) => void;
-  setElement: (element: IStoreElement) => void;
+  getElementsByParentKey: (parentKey: string) => IElementState[];
+  setElements: (elements: IElementState[]) => void;
+  setElement: (element: IElementState) => void;
   removeElement: (key: string) => void;
-  findElement: (key: string) => IStoreElement | undefined;
-  findElementsByParentKey: (parentKey: string) => IStoreElement[];
+  findElement: (key: string) => IElementState | undefined;
+  findElementsByParentKey: (parentKey: string) => IElementState[];
   renameElement: (key: string, newName: string) => void;
   selectElement: (key: string) => void;
   unselectElement: (key: string) => void;
@@ -19,82 +19,90 @@ type Action = {
 };
 
 const initialState: State = {
-  elements: new Map<string, IStoreElement>(),
+  elements: [],
 };
 
 export const useElementStore = create<State & Action>((set, get) => ({
   elements: initialState.elements,
   // Element functions
   getElementsByParentKey: (parentKey) => {
-    return Array.from(get().elements.values()).filter(
-      (element) => element.parentKey === parentKey
-    );
+    return get().elements.filter((element) => element.parentKey === parentKey);
   },
   setElements: (elements) => {
     set((state) => {
-      elements.forEach((element) => {
-        state.elements.set(element.elementKey, element);
-      });
+      const filteredElements = state.elements.filter(
+        (stateElement) => !elements.some((el) => el.key === stateElement.key)
+      );
+      state.elements = [...filteredElements, ...elements];
       return { elements: state.elements };
     });
   },
   setElement: (element) => {
     set((state) => {
-      state.elements.set(element.elementKey, element);
+      const filteredElements = state.elements.filter(
+        (stateElement) => stateElement.key !== element.key
+      );
+      state.elements = [...filteredElements, element];
       return { elements: state.elements };
     });
   },
   removeElement: (key) => {
     set((state) => {
-      state.elements.delete(key);
+      state.elements = state.elements.filter((element) => element.key !== key);
       return { elements: state.elements };
     });
   },
   findElement: (key) => {
-    return get().elements.get(key);
+    return get().elements.find((element) => element.key === key);
   },
   findElementsByParentKey: (parentKey) => {
-    return Array.from(get().elements.values()).filter(
-      (element) => element.parentKey === parentKey
-    );
+    return get().elements.filter((element) => element.parentKey === parentKey);
   },
   renameElement: (key, newName) => {
     set((state) => {
-      const element = state.elements.get(key);
+      const element = state.elements.find((el) => el.key === key);
       if (element) {
         element.name = newName;
-        state.elements.set(key, element);
+        state.elements = state.elements.map((el) =>
+          el.key === key ? element : el
+        );
       }
       return { elements: state.elements };
     });
   },
   selectElement: (key) => {
     set((state) => {
-      const element = state.elements.get(key);
+      const element = state.elements.find((el) => el.key === key);
       if (element) {
         element.selected = true;
-        state.elements.set(key, element);
+        state.elements = state.elements.map((el) =>
+          el.key === key ? element : el
+        );
       }
       return { elements: state.elements };
     });
   },
   unselectElement: (key) => {
     set((state) => {
-      const element = state.elements.get(key);
+      const element = state.elements.find((el) => el.key === key);
       if (element) {
         element.selected = false;
-        state.elements.set(key, element);
+        state.elements = state.elements.map((el) =>
+          el.key === key ? element : el
+        );
       }
       return { elements: state.elements };
     });
   },
   getAbsolutePath: (key) => {
-    const element = get().elements.get(key);
+    const element = get().elements.find((el) => el.key === key);
     let path = '';
-    let currentElement: IStoreElement | undefined = element;
+    let currentElement: IElementState | undefined = element;
     while (currentElement && currentElement.parentKey !== '') {
       path = `${currentElement.name}/${path}`;
-      currentElement = get().elements.get(currentElement.parentKey);
+      currentElement = get().elements.find(
+        (el) => el.key === currentElement?.parentKey
+      );
     }
     path = path.slice(0, -1);
     path = `/${path}`;

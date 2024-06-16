@@ -1,9 +1,6 @@
-interface IElementResponse {
-  name: string;
-  key: string;
-  parentKey: string;
-  enabled?: boolean;
-}
+import { IElement } from "./element";
+
+interface IElementResponse extends IElement {}
 
 export interface IFile extends IElementResponse {
   enabled: boolean;

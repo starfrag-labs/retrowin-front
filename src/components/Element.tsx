@@ -12,8 +12,8 @@ import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { useWindowStore } from '../store/window.store';
-import { IStoreElement } from '../types/element';
 import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText } from '../styles/element.css';
+import { IElementState } from '../types/store';
 
 export const Element = memo(
   ({
@@ -26,7 +26,7 @@ export const Element = memo(
     name: string;
     elementKey: string;
     parentKey: string;
-    type: IStoreElement['type'];
+    type: IElementState['type'];
     selected: boolean;
   }): React.ReactElement => {
     const queryClient = useQueryClient();

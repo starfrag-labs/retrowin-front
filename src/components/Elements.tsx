@@ -3,14 +3,10 @@ import { Element } from './Element';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { Uploader } from './Uploader';
-import { IStoreElement } from '../types/element';
 import { elementsContainer } from '../styles/element.css';
+import { IElementState } from '../types/store';
 
-export const Elements = ({
-  folderKey,
-}: {
-  folderKey: string;
-}): React.ReactElement => {
+export const Elements = ({ folderKey }: { folderKey: string }): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
   );
@@ -24,8 +20,8 @@ export const Elements = ({
     }
   }, [setElementsRef]);
 
-  const uploadFileElement: IStoreElement = {
-    elementKey: 'upload-file',
+  const uploadFileElement: IElementState = {
+    key: 'upload-file',
     name: 'upload',
     type: 'upload',
     parentKey: folderKey,
@@ -38,18 +34,30 @@ export const Elements = ({
         <Uploader folderKey={folderKey} setUploading={setUploading} />
       )}
       <div onDoubleClick={() => setUploading(!uploading)}>
-        <Element {...uploadFileElement} selected={false} />
+        <Element
+          elementKey={uploadFileElement.key}
+          name={uploadFileElement.name}
+          parentKey={uploadFileElement.parentKey}
+          type={uploadFileElement.type}
+          selected={false}
+        />
       </div>
       {elements.map((element) => (
         <div
-          key={element.elementKey}
+          key={element.key}
           ref={(el) => {
             if (el) {
-              elementsRef.current.set(element.elementKey, el);
+              elementsRef.current.set(element.key, el);
             }
           }}
         >
-          <Element {...element} />
+          <Element
+            elementKey={element.key}
+            name={element.name}
+            parentKey={element.parentKey}
+            type={element.type}
+            selected={element.selected}
+          />
         </div>
       ))}
     </div>

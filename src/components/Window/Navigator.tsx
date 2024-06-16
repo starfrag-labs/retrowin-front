@@ -5,9 +5,9 @@ import { useTokenStore } from '../../store/token.store';
 import { useElementStore } from '../../store/element.store';
 import { useCallback, useEffect, useState } from 'react';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
-import { IStoreElement } from '../../types/element';
 import { useWindowStore } from '../../store/window.store';
 import { windowContainer } from '../../styles/window.css';
+import { IElementState } from '../../types/store';
 
 export const Navigator = ({ folderKey }: { folderKey: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);
@@ -24,15 +24,15 @@ export const Navigator = ({ folderKey }: { folderKey: string }) => {
     await queryClient
       .ensureQueryData(readFolderQueryOption(accessToken, folderKey))
       .then((data) => {
-        const folderElements: IStoreElement[] = data.folders.map((folder) => ({
-          elementKey: folder.key,
+        const folderElements: IElementState[] = data.folders.map((folder) => ({
+          key: folder.key,
           name: folder.name,
           type: 'folder',
           parentKey: folderKey,
           selected: false,
         }));
-        const fileElements: IStoreElement[] = data.files.map((file) => ({
-          elementKey: file.key,
+        const fileElements: IElementState[] = data.files.map((file) => ({
+          key: file.key,
           name: file.name,
           type: 'file',
           parentKey: folderKey,
