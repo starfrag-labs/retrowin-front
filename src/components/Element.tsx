@@ -96,7 +96,7 @@ export const Element = memo(
       const textarea = event.currentTarget;
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
-      setNewNameState(textarea.value);
+      setNewNameState(textarea.value.replace(/\s/g, '_'));
     };
 
     const handleEnter = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {

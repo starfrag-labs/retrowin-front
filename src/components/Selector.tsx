@@ -8,7 +8,6 @@ import { moveFile, moveFolder } from '../api/cloud';
 import { useTokenStore } from '../store/token.store';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
-import { useWindowStore } from '../store/window.store';
 
 export const Selector = ({
   children,
@@ -29,12 +28,12 @@ export const Selector = ({
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   const accessToken = useTokenStore((state) => state.accessToken);
-  const windows = useWindowStore((state) => state.windows);
   const findElement = useElementStore((state) => state.findElement);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const windowsRef = useRefStore((state) => state.windowsRef);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
+  const moveElement = useElementStore((state) => state.moveElement);
 
   const checkElementsInBox = useCallback(() => {
     if (elementsRef.current === null) {
@@ -269,7 +268,10 @@ export const Selector = ({
         // search for the target folder from the elements
         if (currentElements) {
           currentElements.forEach((el, key) => {
-            if (el.contains(e.target as Node) && findElement(key)?.type === 'folder'){
+            if (
+              el.contains(e.target as Node) &&
+              findElement(key)?.type === 'folder'
+            ) {
               targetFolderKey = key;
             }
           });
@@ -277,7 +279,10 @@ export const Selector = ({
         // search for the target folder from the windows
         if (currentWindows) {
           currentWindows.forEach((el, key) => {
-            if (el.contains(e.target as Node) && findElement(key)?.type === 'folder') {
+            if (
+              el.contains(e.target as Node) &&
+              findElement(key)?.type === 'folder'
+            ) {
               targetFolderKey = key;
             }
           });
@@ -291,10 +296,11 @@ export const Selector = ({
             }
             if (element && element.type === 'folder') {
               // move the folder
-              moveFolder(accessToken, targetFolderKey, element.key).then(() => {
-                queryClient.invalidateQueries(
-                  readFolderQueryOption(accessToken, targetFolderKey)
-                );
+              moveFolder(accessToken, element.key, targetFolderKey).then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ['read', 'folder'],
+                });
+                moveElement(element.key, targetFolderKey);
               });
             } else if (element && element.type === 'file') {
               // move the file
@@ -307,6 +313,7 @@ export const Selector = ({
                 queryClient.invalidateQueries(
                   readFolderQueryOption(accessToken, targetFolderKey)
                 );
+                moveElement(element.key, element.parentKey);
               });
             }
           });
@@ -328,6 +335,7 @@ export const Selector = ({
       elementsRef,
       findElement,
       isMoving,
+      moveElement,
       queryClient,
       selectedElements,
       windowsRef,

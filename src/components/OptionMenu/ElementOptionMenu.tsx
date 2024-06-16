@@ -4,6 +4,8 @@ import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
 import { useWindowStore } from '../../store/window.store';
+import { useQueryClient } from '@tanstack/react-query';
+import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -12,10 +14,10 @@ export const ElementOptionMenu = ({
   elementKey: string;
   menuRef: React.RefObject<HTMLDivElement>;
 }): React.ReactElement => {
+  const queryClient = useQueryClient();
   const currentMenu = menuRef.current;
   const element = useElementStore((state) => state.findElement(elementKey));
   const accessToken = useTokenStore((state) => state.accessToken);
-  const addElement = useElementStore((state) => state.addElement);
   const startRenaming = useElementStore((state) => state.startRenaming);
   const deleteElement = useElementStore((state) => state.deleteElement);
   const newWindow = useWindowStore((state) => state.newWindow);
@@ -63,15 +65,19 @@ export const ElementOptionMenu = ({
 
   const handleDelete = () => {
     if (!element || !currentMenu) return;
-    const tempElement = element;
-    deleteElement(element.key);
     if (element.type === 'file') {
-      deleteFile(accessToken, element.parentKey, element.key).catch(() => {
-        addElement(tempElement);
+      deleteFile(accessToken, element.parentKey, element.key).then(() => {
+        queryClient.invalidateQueries(
+          readFolderQueryOption(accessToken, element.parentKey)
+        );
+        deleteElement(element.key);
       });
     } else {
-      deleteFolder(accessToken, element.key).catch(() => {
-        addElement(tempElement);
+      deleteFolder(accessToken, element.key).then(() => {
+        queryClient.invalidateQueries(
+          readFolderQueryOption(accessToken, element.parentKey)
+        );
+        deleteElement(element.key);
       });
     }
     currentMenu.style.display = 'none';

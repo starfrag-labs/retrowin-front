@@ -12,6 +12,7 @@ type Action = {
   deleteElement: (key: string) => void;
   findElement: (key: string) => IElementState | undefined;
   findElementsByParentKey: (parentKey: string) => IElementState[];
+  moveElement: (key: string, newParentKey: string) => void;
   renameElement: (key: string, newName: string) => void;
   startRenaming: (key: string) => void;
   endRenaming: (key: string) => void;
@@ -59,6 +60,18 @@ export const useElementStore = create<State & Action>((set, get) => ({
   },
   findElementsByParentKey: (parentKey) => {
     return get().elements.filter((element) => element.parentKey === parentKey);
+  },
+  moveElement: (key, newParentKey) => {
+    set((state) => {
+      const element = state.elements.find((el) => el.key === key);
+      if (element) {
+        element.parentKey = newParentKey;
+        state.elements = state.elements.map((el) =>
+          el.key === key ? element : el
+        );
+      }
+      return { elements: state.elements };
+    });
   },
   renameElement: (key, newName) => {
     set((state) => {
