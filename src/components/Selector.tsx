@@ -34,7 +34,6 @@ export const Selector = ({
       const currentSelectorRef = selectorRef.current;
 
       elementsRef.current.forEach((el, key) => {
-        // check if the element is included in current selector ref
         if (!currentSelectorRef.contains(el)) {
           return;
         }

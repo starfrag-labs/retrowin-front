@@ -62,26 +62,25 @@ export const Background = ({
   }, [setUpTime]);
 
   const drawStars = useCallback(() => {
-    let startCount = 600;
+    let startCount = 1500;
     const stars = starsRef.current;
-    const maxPosition = Math.max(window.innerWidth, window.innerHeight);
     if (!stars) {
       return;
     }
     while (startCount > 0) {
       const star = document.createElement('div');
-      const startSize = Math.random() * 2;
-      const starLeft = Math.random() * maxPosition;
-      const starTop = Math.random() * maxPosition;
+      const starSize = Math.random() * 2;
+      const starLeft = Math.random() * 100;
+      const starTop = Math.random() * 100;
       star.style.position = 'absolute';
-      star.style.width = `${startSize}px`;
-      star.style.height = `${startSize}px`;
+      star.style.width = `${starSize}px`;
+      star.style.height = `${starSize}px`;
       star.style.borderRadius = '50%';
       star.style.backgroundColor = 'white';
-      star.style.boxShadow = `0 0 10px ${startSize * (1 - starTop / maxPosition)}px #fff2cc`;
-      star.style.opacity = `${1 - (starTop / maxPosition) * 2}`;
-      star.style.left = `${starLeft}px`;
-      star.style.top = `${starTop}px`;
+      star.style.boxShadow = `0 0 10px ${starSize * (1 - starTop / 100)}px #fff2cc`;
+      star.style.opacity = `${1 - (starTop / (100 * 2)) * 2}`;
+      star.style.left = `${starLeft}%`;
+      star.style.top = `${starTop}%`;
       stars.appendChild(star);
       startCount--;
     }

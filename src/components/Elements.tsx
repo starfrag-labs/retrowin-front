@@ -26,6 +26,7 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
     type: 'upload',
     parentKey: folderKey,
     selected: false,
+    renaming: false,
   };
 
   return (
@@ -39,7 +40,8 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
           name={uploadFileElement.name}
           parentKey={uploadFileElement.parentKey}
           type={uploadFileElement.type}
-          selected={false}
+          selected={uploadFileElement.selected}
+          renaming={uploadFileElement.renaming}
         />
       </div>
       {elements.map((element) => (
@@ -57,6 +59,7 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
             parentKey={element.parentKey}
             type={element.type}
             selected={element.selected}
+            renaming={element.renaming}
           />
         </div>
       ))}

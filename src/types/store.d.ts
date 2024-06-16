@@ -5,6 +5,7 @@ import { IWindow } from "./window";
 export interface IElementState extends IElement {
   type: 'folder' | 'file' | 'upload';
   selected: boolean;
+  renaming: boolean;
   htmlElement?: HTMLElement;
 }
 

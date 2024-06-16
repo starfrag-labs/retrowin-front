@@ -14,7 +14,7 @@ export const Navigator = ({ folderKey }: { folderKey: string }) => {
   const queryClient = useQueryClient();
   const accessToken = useTokenStore.getState().accessToken;
   const closeWindow = useWindowStore((state) => state.closeWindow);
-  const setElements = useElementStore((state) => state.setElements);
+  const setElements = useElementStore((state) => state.addElements);
 
   const handleCloseWindow = () => {
     closeWindow(folderKey);
@@ -30,6 +30,7 @@ export const Navigator = ({ folderKey }: { folderKey: string }) => {
           type: 'folder',
           parentKey: folderKey,
           selected: false,
+          renaming: false,
         }));
         const fileElements: IElementState[] = data.files.map((file) => ({
           key: file.key,
@@ -37,6 +38,7 @@ export const Navigator = ({ folderKey }: { folderKey: string }) => {
           type: 'file',
           parentKey: folderKey,
           selected: false,
+          renaming: false,
         }));
 
         setElements([...folderElements, ...fileElements]);

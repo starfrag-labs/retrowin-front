@@ -14,6 +14,7 @@ import { FaFileAlt } from 'react-icons/fa';
 import { useWindowStore } from '../store/window.store';
 import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText } from '../styles/element.css';
 import { IElementState } from '../types/store';
+import { useElementStore } from '../store/element.store';
 
 export const Element = memo(
   ({
@@ -22,19 +23,22 @@ export const Element = memo(
     parentKey,
     type,
     selected,
+    renaming,
   }: {
     name: string;
     elementKey: string;
     parentKey: string;
     type: IElementState['type'];
     selected: boolean;
+    renaming: boolean;
   }): React.ReactElement => {
     const queryClient = useQueryClient();
 
     const accessToken = useTokenStore((state) => state.accessToken);
     const newWindow = useWindowStore((state) => state.newWindow);
+    const rename = useElementStore((state) => state.renameElement);
+    const endRenaming = useElementStore((state) => state.endRenaming);
 
-    const [isEditing, setIsEditing] = useState(false);
     const [nameState, setNameState] = useState(name);
     const [newNameState, setNewNameState] = useState(name);
 
@@ -86,12 +90,6 @@ export const Element = memo(
       window.open(url);
     };
 
-    const handleClickName = () => {
-      if (selected && (type === 'folder' || type === 'file')) {
-        setIsEditing(true);
-      }
-    };
-
     const handleTextareaChange = (
       event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
@@ -123,14 +121,14 @@ export const Element = memo(
     };
 
     useEffect(() => {
-      if (isEditing && renameRef.current) {
+      if (renaming && renameRef.current) {
         renameRef.current.style.height = 'auto';
         renameRef.current.style.height = `${renameRef.current.scrollHeight}px`;
         renameRef.current.focus();
         renameRef.current.value = '';
         renameRef.current.value = nameState;
       }
-    }, [isEditing, nameState]);
+    }, [nameState, renaming]);
 
     const highlightElement = useCallback(async () => {
       if (elementRef.current && nameRef.current && selected) {
@@ -151,7 +149,7 @@ export const Element = memo(
     const renameElement = useCallback(
       (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
-          setIsEditing(false);
+          endRenaming(elementKey);
         } else if (
           event.key === 'Enter' &&
           newNameState !== name &&
@@ -160,12 +158,13 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          setIsEditing(false);
+          endRenaming(elementKey);
           renameFolder(accessToken, elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: ['read', 'folder', parentKey],
               });
+              rename(elementKey, newNameState);
             })
             .catch(() => {
               setNameState(tempName);
@@ -178,7 +177,7 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          setIsEditing(false);
+          endRenaming(elementKey);
           renameFile(accessToken, parentKey, elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
@@ -188,15 +187,19 @@ export const Element = memo(
             .catch(() => {
               setNameState(tempName);
             });
+        } else if (event.key === 'Enter' && newNameState === name) {
+          endRenaming(elementKey);
         }
       },
       [
         accessToken,
         elementKey,
+        endRenaming,
         name,
         newNameState,
         parentKey,
         queryClient,
+        rename,
         type,
       ]
     );
@@ -208,24 +211,18 @@ export const Element = memo(
       };
     }, [renameElement]);
 
-    const handleRenameClickOutside = useCallback(
-      (event: MouseEvent) => {
-        if (
-          renameRef.current &&
-          !renameRef.current.contains(event.target as Node)
-        ) {
-          setIsEditing(false);
-        }
-      },
-      [renameRef]
-    );
+    const handleEndRenaming = useCallback((e: MouseEvent) => {
+      if (e.button === 0 && renaming && e.target !== renameRef.current) {
+        endRenaming(elementKey);
+      }
+    }, [elementKey, endRenaming, renaming]);
 
     useEffect(() => {
-      document.addEventListener('mousedown', handleRenameClickOutside);
+      document.addEventListener('mousedown', handleEndRenaming);
       return () => {
-        document.removeEventListener('mousedown', handleRenameClickOutside);
+        document.removeEventListener('mousedown', handleEndRenaming);
       };
-    }, [handleRenameClickOutside]);
+    }, [handleEndRenaming]);
 
     return (
       <div
@@ -239,7 +236,7 @@ export const Element = memo(
         {type === 'folder' && <FaFolder className={folderIcon} />}
         {type === 'file' && <FaFileAlt className={fileIcon} />}
         <div className={elementNameContainer}>
-          {isEditing ? (
+          {renaming ? (
             <textarea
               id="rename"
               defaultValue={nameState}
@@ -250,11 +247,7 @@ export const Element = memo(
               spellCheck="false"
             />
           ) : (
-            <div
-              onClick={handleClickName}
-              className={elementNameText}
-              ref={nameRef}
-            >
+            <div className={elementNameText} ref={nameRef}>
               {nameState}
             </div>
           )}

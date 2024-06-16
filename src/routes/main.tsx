@@ -13,12 +13,13 @@ import { useWindowStore } from '../store/window.store';
 import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
+import { OptionMenu } from '../components/OptionMenu';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
     const accessToken = useTokenStore.getState().accessToken;
     if (!accessToken) {
-      throw redirect({  
+      throw redirect({
         to: '/',
       });
     }
@@ -50,7 +51,7 @@ export const Route = createFileRoute('/main')({
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
   const windowOrder = useWindowStore((state) => state.windowOrder);
-  const setElements = useElementStore((state) => state.setElements);
+  const setElements = useElementStore((state) => state.addElements);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
@@ -71,6 +72,7 @@ function MainComponent() {
       type: 'folder',
       parentKey: '',
       selected: false,
+      renaming: false,
     };
     const folderElements: IElementState[] = data.folders.map((folder) => {
       return {
@@ -79,6 +81,7 @@ function MainComponent() {
         type: 'folder',
         parentKey: rootFolderKey,
         selected: false,
+        renaming: false,
       };
     });
     const fileElements: IElementState[] = data.files.map((file) => {
@@ -88,6 +91,7 @@ function MainComponent() {
         type: 'file',
         parentKey: rootFolderKey,
         selected: false,
+        renaming: false,
       };
     });
     setElements([rootFolderElement, ...folderElements, ...fileElements]);
@@ -96,17 +100,19 @@ function MainComponent() {
   return (
     <AuthManager>
       <Background>
-        <div
-          className={backgroundSelectorContainer}
-          ref={backgroundSelectorRef}
-        >
-          <Selector>
-            <Elements folderKey={rootFolderKey} />
-          </Selector>
-        </div>
-        {windowOrder.map((windowKey) => {
-          return <Window key={windowKey} windowKey={windowKey} />;
-        })}
+        <OptionMenu>
+          <div
+            className={backgroundSelectorContainer}
+            ref={backgroundSelectorRef}
+            >
+            <Selector>
+              <Elements folderKey={rootFolderKey} />
+            </Selector>
+          </div>
+          {windowOrder.map((windowKey) => {
+            return <Window key={windowKey} windowKey={windowKey} />;
+          })}
+        </OptionMenu>
       </Background>
     </AuthManager>
   );
