@@ -14,6 +14,7 @@ import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { OptionMenu } from '../components/OptionMenu';
+import { useRefStore } from '../store/ref.store';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -50,16 +51,13 @@ export const Route = createFileRoute('/main')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const windowOrder = useWindowStore((state) => state.windowOrder);
+  const windows = useWindowStore((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
+  const setWindowRef = useRefStore((state) => state.setWindowRef);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
   const backgroundSelectorRef = createRef<HTMLDivElement>();
-
-  useEffect(() => {
-    console.log(windowOrder);
-  }, [windowOrder]);
 
   useEffect(() => {
     const data = rootFolderQuery.data;
@@ -104,13 +102,24 @@ function MainComponent() {
           <div
             className={backgroundSelectorContainer}
             ref={backgroundSelectorRef}
-            >
+          >
             <Selector>
               <Elements folderKey={rootFolderKey} />
             </Selector>
           </div>
-          {windowOrder.map((windowKey) => {
-            return <Window key={windowKey} windowKey={windowKey} />;
+          {windows.map((window) => {
+            return (
+              <div
+                key={window.key}
+                ref={(el) => {
+                  if (el) {
+                    setWindowRef(window.key, el);
+                  }
+                }}
+              >
+                <Window windowKey={window.key} />;
+              </div>
+            );
           })}
         </OptionMenu>
       </Background>

@@ -44,7 +44,8 @@ export const ElementOptionMenu = ({
       (contentType === 'image/jpg' ||
         contentType === 'image/jpeg' ||
         contentType === 'image/png' ||
-        contentType === 'image/gif')
+        contentType === 'image/gif' ||
+        contentType === 'video/mp4')
     ) {
       downloadFile(accessToken, element.parentKey, element.key).then(
         (response) => {
@@ -65,19 +66,13 @@ export const ElementOptionMenu = ({
     const tempElement = element;
     deleteElement(element.key);
     if (element.type === 'file') {
-      deleteFile(accessToken, element.key, '').catch(() => {
+      deleteFile(accessToken, element.parentKey, element.key).catch(() => {
         addElement(tempElement);
       });
     } else {
-      deleteFolder(accessToken, element.key)
-        .catch((e) => {
-          console.log(e);
-
-          addElement(tempElement);
-        })
-        .then((response) => {
-          console.log(response);
-        });
+      deleteFolder(accessToken, element.key).catch(() => {
+        addElement(tempElement);
+      });
     }
     currentMenu.style.display = 'none';
   };

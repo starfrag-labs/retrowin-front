@@ -64,11 +64,8 @@ export const cloudUrls = {
     },
     moveFolder: (folderKey: string, targetKey: string) => {
       return {
-        url: `${config.cloud}/folder/move/${folderKey}`,
+        url: `${config.cloud}/folder/move/${folderKey}?targetKey=${targetKey}`,
         method: 'PATCH',
-        queryOptions: {
-          targetKey: targetKey,
-        },
       };
     },
     renameFolder: (folderKey: string) => {
@@ -103,9 +100,9 @@ export const cloudUrls = {
         method: 'PATCH',
       };
     },
-    moveFile: (folderKey: string, fileKey: string) => {
+    moveFile: (folderKey: string, fileKey: string, targetKey: string) => {
       return {
-        url: `${config.cloud}/file/move/${folderKey}/${fileKey}`,
+        url: `${config.cloud}/file/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
         method: 'PATCH',
       };
     },

@@ -1,63 +1,64 @@
-import { create } from "zustand";
-import { IWindow } from "../types/window";
+import { create } from 'zustand';
+import { IWindow } from '../types/window';
 
 type State = {
-  windows: Map<string, IWindow>;
-  windowOrder: string[];
-}
+  windows: IWindow[];
+};
 
 type Action = {
-  getWindow: (key: string) => IWindow | undefined;
-  newWindow: (key: string, type: IWindow['type'],) => void;
+  newWindow: (key: string, type: IWindow['type']) => void;
+  findWindow: (key: string) => IWindow | undefined;
   minimizeWindow: (key: string) => void;
-  maximizeWindow: (key: string) => void;
+  highlightWindow: (key: string) => void;
   closeWindow: (key: string) => void;
-}
+};
 
 const initialState: State = {
-  windows: new Map<string, IWindow>(),
-  windowOrder: [],
-}
+  windows: [],
+};
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
-  windowOrder: initialState.windowOrder,
   // Window functions
-  getWindow: (key) => get().windows.get(key),
   newWindow: (key, type) => {
     set((state) => {
-      state.windows.set(key, { key, type, minimized: false });
-      state.windowOrder = [key, ...state.windowOrder];
-      return { windows: state.windows, windowOrder: state.windowOrder};
+      const filteredWindows = state.windows.filter((w) => w.key !== key);
+      const newWindow: IWindow = {
+        key,
+        type,
+        minimized: false,
+      };
+      state.windows = [newWindow, ...filteredWindows];
+      return { windows: state.windows };
     });
+  },
+  findWindow: (key) => {
+    return get().windows.find((w) => w.key === key);
   },
   minimizeWindow: (key) => {
     set((state) => {
-      const window = state.windows.get(key);
+      const window = state.windows.find((w) => w.key === key);
       if (window) {
         window.minimized = true;
-        state.windows.set(key, window);
-        state.windowOrder = state.windowOrder.filter((k) => k !== key);
-        state.windowOrder.push(key);
       }
-      return { windows: state.windows, windowOrder: state.windowOrder };
+      return { windows: state.windows };
     });
   },
-  maximizeWindow: (key) => {
+  highlightWindow: (key) => {
     set((state) => {
-      const window = state.windows.get(key);
+      const window = state.windows.find((w) => w.key === key);
       if (window) {
         window.minimized = false;
-        state.windows.set(key, window);
+        const filteredWindows = state.windows.filter((w) => w.key !== key);
+        state.windows = [window, ...filteredWindows];
       }
-      return { windows: state.windows, windowOrder: state.windowOrder};
+      return { windows: state.windows };
     });
   },
   closeWindow: (key) => {
     set((state) => {
-      state.windows.delete(key);
-      state.windowOrder = state.windowOrder.filter((k) => k !== key);
-      return { windows: state.windows, windowOrder: state.windowOrder};
+      state.windows = state.windows.filter((w) => w.key !== key);
+      return { windows: state.windows };
     });
   },
 }));

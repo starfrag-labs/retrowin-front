@@ -4,12 +4,19 @@ import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { draggingElementsIcon } from '../styles/element.css';
 import { selector, selectBox } from '../styles/selector.css';
+import { moveFile, moveFolder } from '../api/cloud';
+import { useTokenStore } from '../store/token.store';
+import { useQueryClient } from '@tanstack/react-query';
+import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { useWindowStore } from '../store/window.store';
 
 export const Selector = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
+  const queryClient = useQueryClient();
+
   const [isDragging, setIsDragging] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [displayDraggingElements, setDisplayDraggingElements] = useState(false);
@@ -21,7 +28,11 @@ export const Selector = ({
   const boxRef = useRef<HTMLDivElement>(null);
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
+  const accessToken = useTokenStore((state) => state.accessToken);
+  const windows = useWindowStore((state) => state.windows);
+  const findElement = useElementStore((state) => state.findElement);
   const elementsRef = useRefStore((state) => state.elementsRef);
+  const windowsRef = useRefStore((state) => state.windowsRef);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
 
@@ -251,7 +262,56 @@ export const Selector = ({
 
   const moveElementsEnd = useCallback(
     (e: MouseEvent) => {
+      const currentElements = elementsRef.current;
+      const currentWindows = windowsRef.current;
       if (isMoving && draggingElementsRef.current) {
+        let targetFolderKey = '';
+        // search for the target folder from the elements
+        if (currentElements) {
+          currentElements.forEach((el, key) => {
+            if (el.contains(e.target as Node) && findElement(key)?.type === 'folder'){
+              targetFolderKey = key;
+            }
+          });
+        }
+        // search for the target folder from the windows
+        if (currentWindows) {
+          currentWindows.forEach((el, key) => {
+            if (el.contains(e.target as Node) && findElement(key)?.type === 'folder') {
+              targetFolderKey = key;
+            }
+          });
+        }
+        // move the selected elements to the target folder
+        if (targetFolderKey !== '' && currentElements) {
+          selectedElements.forEach((k) => {
+            const element = findElement(k);
+            if (k === targetFolderKey) {
+              return;
+            }
+            if (element && element.type === 'folder') {
+              // move the folder
+              moveFolder(accessToken, targetFolderKey, element.key).then(() => {
+                queryClient.invalidateQueries(
+                  readFolderQueryOption(accessToken, targetFolderKey)
+                );
+              });
+            } else if (element && element.type === 'file') {
+              // move the file
+              moveFile(
+                accessToken,
+                element.parentKey,
+                element.key,
+                targetFolderKey
+              ).then(() => {
+                queryClient.invalidateQueries(
+                  readFolderQueryOption(accessToken, targetFolderKey)
+                );
+              });
+            }
+          });
+        }
+
         e.preventDefault();
         setIsMoving(false);
         setDisplayDraggingElements(false);
@@ -263,7 +323,15 @@ export const Selector = ({
         }
       }
     },
-    [isMoving]
+    [
+      accessToken,
+      elementsRef,
+      findElement,
+      isMoving,
+      queryClient,
+      selectedElements,
+      windowsRef,
+    ]
   );
 
   const moveElements = useCallback(

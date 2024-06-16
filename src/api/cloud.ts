@@ -226,15 +226,12 @@ export const moveFile = async (
   fileKey: string,
   newFolderKey: string
 ) => {
-  const moveFile = cloudUrls.file.moveFile(folderKey, fileKey);
+  const moveFile = cloudUrls.file.moveFile(folderKey, fileKey, newFolderKey);
   const response = await axios.request({
     method: moveFile.method,
     url: moveFile.url,
     headers: {
       Authorization: `Bearer ${accessToken}`,
-    },
-    data: {
-      newFolderKey: newFolderKey,
     },
   });
   return response;
