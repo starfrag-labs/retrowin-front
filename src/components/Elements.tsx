@@ -1,18 +1,22 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { Element } from './Element';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
-import { Uploader } from './Uploader';
 import { elementsContainer } from '../styles/element.css';
 import { IElementState } from '../types/store';
+import { useWindowStore } from '../store/window.store';
 
-export const Elements = ({ folderKey }: { folderKey: string }): React.ReactElement => {
+export const Elements = ({
+  folderKey,
+}: {
+  folderKey: string;
+}): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
   );
-  const [uploading, setUploading] = useState(false);
   const elementsRef = useRef<Map<string, HTMLDivElement>>(new Map());
   const setElementsRef = useRefStore((state) => state.setElementsRef);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   useEffect(() => {
     if (elementsRef.current) {
@@ -29,12 +33,13 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
     renaming: false,
   };
 
+  const handleDoubleClick = () => {
+    newWindow(folderKey, 'uploader');
+  };
+
   return (
     <div className={elementsContainer}>
-      {uploading && (
-        <Uploader folderKey={folderKey} setUploading={setUploading} />
-      )}
-      <div onDoubleClick={() => setUploading(!uploading)}>
+      <div onDoubleClick={handleDoubleClick}>
         <Element
           elementKey={uploadFileElement.key}
           name={uploadFileElement.name}

@@ -3,6 +3,7 @@ import { useTokenStore } from '../../store/token.store';
 import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
+import { useWindowStore } from '../../store/window.store';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -17,6 +18,7 @@ export const ElementOptionMenu = ({
   const addElement = useElementStore((state) => state.addElement);
   const startRenaming = useElementStore((state) => state.startRenaming);
   const deleteElement = useElementStore((state) => state.deleteElement);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleDownload = () => {
     if (!element || !currentMenu) return;
@@ -52,6 +54,8 @@ export const ElementOptionMenu = ({
           window.open(url, '_blank');
         }
       );
+    } else if (element.type === 'folder') {
+      newWindow(element.key, 'navigator');
     }
     currentMenu.style.display = 'none';
   };
@@ -84,7 +88,7 @@ export const ElementOptionMenu = ({
     currentMenu.style.display = 'none';
   };
 
-  const menuList = [
+  const fileMenuList = [
     {
       name: 'Open',
       action: handleOpen,
@@ -107,5 +111,30 @@ export const ElementOptionMenu = ({
     },
   ];
 
-  return <MenuGenerator menuList={menuList} />;
+  const folderMenuList = [
+    {
+      name: 'Open',
+      action: handleOpen,
+    },
+    {
+      name: '/',
+      action: () => {},
+    },
+    {
+      name: 'Delete',
+      action: handleDelete,
+    },
+    {
+      name: 'Rename',
+      action: handleRename,
+    },
+  ];
+
+  if (!element) return <></>;
+
+  return (
+    <MenuGenerator
+      menuList={element.type === 'file' ? fileMenuList : folderMenuList}
+    />
+  );
 };

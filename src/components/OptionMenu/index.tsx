@@ -19,23 +19,19 @@ export const OptionMenu = ({
   const handleContextMenu = (e: React.MouseEvent) => {
     const currentMenu = menuRef.current;
     const currentElements = elementsRef.current;
-    if (currentElements && currentMenu) {
-      e.preventDefault();
-      currentMenu.style.top = `${e.clientY}px`;
-      currentMenu.style.left = `${e.clientX}px`;
-      currentElements.forEach((element, key) => {
-        if (element.contains(e.target as Node)) {
-          setTargetElementKey(key);
-          setMenuType('element');
-          currentMenu.style.display = 'block';
-          return;
-        }
-      });
-    }
     if (currentMenu) {
+      e.preventDefault();
       setMenuType('background');
       currentMenu.style.top = `${e.clientY}px`;
       currentMenu.style.left = `${e.clientX}px`;
+      if (currentElements) {
+        currentElements.forEach((element, key) => {
+          if (element.contains(e.target as Node)) {
+            setTargetElementKey(key);
+            setMenuType('element');
+          }
+        });
+      }
       currentMenu.style.display = 'block';
     }
   };
@@ -45,7 +41,7 @@ export const OptionMenu = ({
       const currentMenu = menuRef.current;
       if (!currentMenu) return;
       if (e.target !== currentMenu && !currentMenu.contains(e.target as Node)) {
-        currentMenu.style.display = 'none'; 
+        currentMenu.style.display = 'none';
       }
     }
   }, []);

@@ -1,5 +1,6 @@
 import { useWindowStore } from "../../store/window.store";
 import { Navigator } from "./Navigator";
+import { Uploader } from "./Uploader";
 
 export const Window = ({
   windowKey,
@@ -12,6 +13,12 @@ export const Window = ({
     case 'navigator':
       return (
         <Navigator
+          folderKey={window.key}
+        />
+      );
+    case 'uploader':
+      return (
+        <Uploader
           folderKey={window.key}
         />
       );
