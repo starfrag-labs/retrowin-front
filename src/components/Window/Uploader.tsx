@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../../store/token.store';
 import { uploadChunk } from '../../api/cloud';
-import { uploaderContainer } from '../../styles/uploader.css';
 import { useWindowStore } from '../../store/window.store';
 
 export function Uploader({
@@ -14,7 +13,6 @@ export function Uploader({
 
   const accessToken = useTokenStore((state) => state.accessToken);
   const closeWindow = useWindowStore((state) => state.closeWindow);
-
 
   const uploadFile = async (file: File) => {
     const totalChunks = Math.ceil(file.size / chunkSize);
@@ -56,14 +54,9 @@ export function Uploader({
   };
 
   return (
-    <div className={uploaderContainer}>
-      <div>
-        <button onClick={() => closeWindow(folderKey)}>X</button>
-      </div>
-      <form onSubmit={uploadFileHandler}>
-        <input type="file" name="file" multiple />
-        <button type="submit">Upload</button>
-      </form>
-    </div>
+    <form onSubmit={uploadFileHandler}>
+      <input type="file" name="file" multiple />
+      <button type="submit">Upload</button>
+    </form>
   );
 }

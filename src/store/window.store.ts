@@ -28,7 +28,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
         type,
         minimized: false,
       };
-      state.windows = [newWindow, ...filteredWindows];
+      state.windows = [...filteredWindows, newWindow];
       return { windows: state.windows };
     });
   },
@@ -50,7 +50,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       if (window) {
         window.minimized = false;
         const filteredWindows = state.windows.filter((w) => w.key !== key);
-        state.windows = [window, ...filteredWindows];
+        state.windows = [...filteredWindows, window];
       }
       return { windows: state.windows };
     });

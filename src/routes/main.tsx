@@ -1,10 +1,9 @@
 import { createFileRoute, redirect } from '@tanstack/react-router';
-import { createRef, useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { useTokenStore } from '../store/token.store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
-import { Selector } from '../components/Selector';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
 import { Window } from '../components/Window';
@@ -14,6 +13,7 @@ import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { OptionMenu } from '../components/OptionMenu';
+import { AdvancedSelector } from '../components/AdvancedSelector';
 import { useRefStore } from '../store/ref.store';
 
 export const Route = createFileRoute('/main')({
@@ -53,12 +53,17 @@ function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
   const windows = useWindowStore((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
-  const setWindowRef = useRefStore((state) => state.setWindowRef);
+  const setBackgroundWindowRef = useRefStore((state) => state.setBackgroundWindowRef);
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
-  const backgroundSelectorRef = createRef<HTMLDivElement>();
+  const backgroundWindowRef = useRef<HTMLDivElement>(null);
 
+  useEffect(() => {
+    if (backgroundWindowRef.current) {
+      setBackgroundWindowRef(backgroundWindowRef.current);
+    }
+  }, [backgroundWindowRef, setBackgroundWindowRef]);
   useEffect(() => {
     const data = rootFolderQuery.data;
     if (!data) {
@@ -97,32 +102,21 @@ function MainComponent() {
 
   return (
     <AuthManager>
-      <Background>
-        <OptionMenu>
-          <div
-            className={backgroundSelectorContainer}
-            ref={backgroundSelectorRef}
-          >
-            <Selector>
+      <AdvancedSelector>
+        <Background>
+          <OptionMenu>
+            <div
+              className={backgroundSelectorContainer}
+              ref={backgroundWindowRef}
+            >
               <Elements folderKey={rootFolderKey} />
-            </Selector>
-          </div>
-          {windows.map((window) => {
-            return (
-              <div
-                key={window.key}
-                ref={(el) => {
-                  if (el) {
-                    setWindowRef(window.key, el);
-                  }
-                }}
-              >
-                <Window windowKey={window.key} />;
-              </div>
-            );
-          })}
-        </OptionMenu>
-      </Background>
+            </div>
+            {windows.map((window) => {
+              return <Window key={window.key} windowKey={window.key} />;
+            })}
+          </OptionMenu>
+        </Background>
+      </AdvancedSelector>
     </AuthManager>
   );
 }

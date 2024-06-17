@@ -15,6 +15,7 @@ import { useWindowStore } from '../store/window.store';
 import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText } from '../styles/element.css';
 import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
+import { useRefStore } from '../store/ref.store';
 
 export const Element = memo(
   ({
@@ -38,6 +39,7 @@ export const Element = memo(
     const newWindow = useWindowStore((state) => state.newWindow);
     const rename = useElementStore((state) => state.renameElement);
     const endRenaming = useElementStore((state) => state.endRenaming);
+    const setElementRef = useRefStore((state) => state.setElementRef);
 
     const [nameState, setNameState] = useState(name);
     const [newNameState, setNewNameState] = useState(name);
@@ -46,6 +48,12 @@ export const Element = memo(
     const elementRef = useRef<HTMLDivElement>(null);
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+      if (elementRef.current) {
+        setElementRef(elementKey, elementRef.current);
+      }
+    }, [elementKey, setElementRef]);
 
     const handleClickIcon = () => {
       if (type === 'file' && contentType) {

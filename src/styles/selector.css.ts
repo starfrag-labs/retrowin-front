@@ -2,6 +2,7 @@ import { style } from '@vanilla-extract/css';
 
 export const selectBox = style({
   position: 'absolute',
+  display: 'none',
   top: '0',
   left: '0',
   width: '1px',

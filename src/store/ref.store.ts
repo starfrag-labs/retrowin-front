@@ -1,79 +1,54 @@
-import React from "react";
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type State = {
-  elementsRef: React.RefObject<Map<string, HTMLElement>>,
-  windowsRef: React.RefObject<Map<string, HTMLElement>>,
-}
+  elementsRef: Map<string, HTMLElement>;
+  backgroundWindowRef: HTMLElement | null;
+  windowsRef: Map<string, HTMLElement>;
+};
 
 type Action = {
   setElementRef: (key: string, htmlEl: HTMLElement) => void;
-  setElementsRef: (
-    elementsRef: React.RefObject<Map<string, HTMLElement>>
-  ) => void;
   getElementByKey: (key: string) => HTMLElement | undefined;
-  setWindowRef: (
-    key: string,
-    htmlEl: HTMLElement
-  ) => void;
-  setWindowsRef: (
-    windowsRef: React.RefObject<Map<string, HTMLElement>>
-  ) => void;
+  setBackgroundWindowRef: (htmlEl: HTMLElement) => void;
+  setWindowRef: (key: string, htmlEl: HTMLElement) => void;
   getWindowByKey: (key: string) => HTMLElement | undefined;
 };
 
 const initialState: State = {
-  elementsRef: React.createRef<Map<string, HTMLElement>>(),
-  windowsRef: React.createRef<Map<string, HTMLElement>>(),
+  elementsRef: new Map(),
+  backgroundWindowRef: null,
+  windowsRef: new Map(),
 };
 
 export const useRefStore = create<State & Action>((set, get) => ({
   elementsRef: initialState.elementsRef,
   windowsRef: initialState.windowsRef,
+  backgroundWindowRef: initialState.backgroundWindowRef,
   setElementRef: (key, htmlEl) => {
     set((state) => {
-      if (state.elementsRef.current) {
-        state.elementsRef.current.set(key, htmlEl);
+      if (state.elementsRef) {
+        state.elementsRef.set(key, htmlEl);
       }
-      return { elementsRef: state.elementsRef };
-    });
-  },
-  setElementsRef: (elementsRef) => {
-    set((state) => {
-      if (state.elementsRef.current === null) {
-        state.elementsRef = elementsRef;
-      } else {
-        elementsRef.current?.forEach((el, key) => {
-          state.elementsRef.current?.set(key, el);
-        });
-      }
+      console.log(state.elementsRef);
+
       return { elementsRef: state.elementsRef };
     });
   },
   getElementByKey: (key) => {
-    return get().elementsRef.current?.get(key);
+    return get().elementsRef.get(key);
+  },
+  setBackgroundWindowRef: (htmlEl) => {
+    set({ backgroundWindowRef: htmlEl });
   },
   setWindowRef: (key, htmlEl) => {
     set((state) => {
-      if (state.windowsRef.current) {
-        state.windowsRef.current.set(key, htmlEl);
-      }
-      return { windowsRef: state.windowsRef };
-    });
-  },
-  setWindowsRef: (windowsRef) => {
-    set((state) => {
-      if (state.windowsRef.current === null) {
-        state.windowsRef = windowsRef;
-      } else {
-        windowsRef.current?.forEach((el, key) => {
-          state.windowsRef.current?.set(key, el);
-        });
+      if (state.windowsRef) {
+        state.windowsRef.set(key, htmlEl);
       }
       return { windowsRef: state.windowsRef };
     });
   },
   getWindowByKey: (key) => {
-    return get().windowsRef.current?.get(key);
+    return get().windowsRef.get(key);
   },
 }));

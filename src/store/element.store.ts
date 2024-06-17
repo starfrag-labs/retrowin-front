@@ -18,6 +18,7 @@ type Action = {
   endRenaming: (key: string) => void;
   selectElement: (key: string) => void;
   unselectElement: (key: string) => void;
+  unselectAllElements: () => void;
   getAbsolutePath: (key: string) => string;
 };
 
@@ -130,6 +131,15 @@ export const useElementStore = create<State & Action>((set, get) => ({
           el.key === key ? element : el
         );
       }
+      return { elements: state.elements };
+    });
+  },
+  unselectAllElements: () => {
+    set((state) => {
+      state.elements = state.elements.map((el) => {
+        el.selected = false;
+        return el;
+      });
       return { elements: state.elements };
     });
   },
