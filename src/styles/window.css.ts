@@ -2,9 +2,8 @@ import { style } from "@vanilla-extract/css";
 
 export const windowContainer = style({
   position: 'absolute',
-  backgroundColor: 'rgb(20, 20, 20)',
+  backgroundColor: 'rgba(250, 250, 250, 1)',
   border: '1px solid black',
-  borderRadius: '10px',
 });
 
 export const windowContent = style({
@@ -18,8 +17,6 @@ export const windowHeader = style({
   padding: '0.5rem',
   backgroundColor: 'rgb(200, 200, 200)',
   borderBottom: '1px solid black',
-  borderTopLeftRadius: '10px',
-  borderTopRightRadius: '10px',
 });
 
 export const navigatorContainer = style({
@@ -34,9 +31,6 @@ export const closeBtn = style({
   padding: '0.5rem',
   cursor: 'pointer',
   borderRadius: '50%',
-  backgroundColor: 'rgb(220,0, 0)',
+  backgroundColor: 'rgb(255,100, 100)',
   border: 'none',
-  ':hover': {
-    backgroundColor: 'rgb(250,0,0)',
-  },
 });

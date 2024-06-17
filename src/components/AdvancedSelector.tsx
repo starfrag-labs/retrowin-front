@@ -67,9 +67,10 @@ export const AdvancedSelector = ({
 
       // Check if the target is not an element
       let isNotElement = true;
-      elementsRef.forEach((elementRef) => {
+      elementsRef.forEach((elementRef, key) => {
         if (elementRef.current?.contains(e.target as Node)) {
           isNotElement = false;
+          selectElement(key);
         }
       });
       if (!isNotElement) return;
@@ -97,13 +98,14 @@ export const AdvancedSelector = ({
       }
     },
     [
-      backgroundWindowRef,
-      elementsRef,
-      findElementByParentKey,
-      rootKey,
       shiftKey,
-      unselectAllElements,
+      rootKey,
+      elementsRef,
+      backgroundWindowRef,
       windowsRef,
+      selectElement,
+      unselectAllElements,
+      findElementByParentKey,
     ]
   );
 

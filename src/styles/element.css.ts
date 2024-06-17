@@ -13,6 +13,45 @@ export const elementContainer = style({
   cursor: 'pointer',
   padding: '1rem',
   borderRadius: '15px',
+  ':hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+});
+
+const defaultElement: StyleRule = {
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  cursor: 'pointer',
+  padding: '1rem',
+  borderRadius: '15px',
+  whiteSpace: 'nowrap',
+} as const;
+
+export const backgroundElement = style({
+  ...defaultElement,
+  ':hover': {
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+  },
+});
+
+export const backgroundSelectedElement = style({
+  ...defaultElement,
+  backgroundColor: 'rgba(255, 255, 255, 0.2)',
+  whiteSpace: 'wrap',
+});
+
+export const windowElement = style({
+  ...defaultElement,
+  ':hover': {
+    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+  },
+});
+
+export const windowSelectedElement = style({
+  ...defaultElement,
+  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  whiteSpace: 'wrap',
 });
 
 const defaultIcon: StyleRule = {
@@ -41,7 +80,7 @@ export const elementNameText = style({
   whiteSpace: 'nowrap',
   textAlign: 'center',
   color: 'white',
-  filter: 'drop-shadow(0 0 1px black) drop-shadow(0 0 1px black)',
+  filter: 'drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black)',
 });
 
 export const elementNameTextarea = style({

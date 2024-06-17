@@ -4,7 +4,7 @@ import { elementsContainer } from '../styles/element.css';
 import { IElementState } from '../types/store';
 import { useWindowStore } from '../store/window.store';
 
-export const Elements = ({ folderKey }: { folderKey: string }): React.ReactElement => {
+export const Elements = ({ folderKey, isWindowElements = false }: { folderKey: string, isWindowElements?: boolean }): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
   );
@@ -33,6 +33,7 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
           type={uploadFileElement.type}
           selected={uploadFileElement.selected}
           renaming={uploadFileElement.renaming}
+          isWindowElement={isWindowElements}
         />
       </div>
       {elements.map((element) => (
@@ -44,6 +45,7 @@ export const Elements = ({ folderKey }: { folderKey: string }): React.ReactEleme
           type={element.type}
           selected={element.selected}
           renaming={element.renaming}
+          isWindowElement={isWindowElements}
         />
       ))}
     </div>

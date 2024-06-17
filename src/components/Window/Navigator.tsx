@@ -41,7 +41,7 @@ export const Navigator = ({ folderKey }: { folderKey: string }) => {
   return (
     <div className={navigatorContainer}>
       {isLoaded && (
-        <Elements folderKey={folderKey} />
+        <Elements folderKey={folderKey} isWindowElements/>
       )}
     </div>
   );

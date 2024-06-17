@@ -12,7 +12,7 @@ import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { useWindowStore } from '../store/window.store';
-import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText } from '../styles/element.css';
+import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText, windowElement, backgroundElement, backgroundSelectedElement, windowSelectedElement } from '../styles/element.css';
 import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
@@ -25,6 +25,7 @@ export const Element = memo(
     type,
     selected,
     renaming,
+    isWindowElement,
   }: {
     name: string;
     elementKey: string;
@@ -32,6 +33,7 @@ export const Element = memo(
     type: IElementState['type'];
     selected: boolean;
     renaming: boolean;
+    isWindowElement: boolean;
   }): React.ReactElement => {
     const queryClient = useQueryClient();
 
@@ -48,6 +50,12 @@ export const Element = memo(
     const elementRef = useRef<HTMLDivElement>(null);
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
+
+    useEffect(() => {
+      if (elementRef.current) {
+        elementRef.current.className = isWindowElement ? windowElement : backgroundElement;
+      }
+    }, [isWindowElement]);
 
     useEffect(() => {
       if (elementRef.current) {
@@ -114,20 +122,6 @@ export const Element = memo(
       }
     };
 
-    const handleMouseOn = () => {
-      if (elementRef.current && nameRef.current && !selected) {
-        const backgroundColor = 'rgba(255, 255, 255, 0.1)';
-        elementRef.current.style.backgroundColor = backgroundColor;
-      }
-    };
-
-    const handleMouseOut = () => {
-      if (elementRef.current && nameRef.current && !selected) {
-        const backgroundColor = 'rgba(0, 0, 0, 0)';
-        elementRef.current.style.backgroundColor = backgroundColor;
-      }
-    };
-
     useEffect(() => {
       if (renaming && renameRef.current) {
         renameRef.current.style.height = 'auto';
@@ -140,15 +134,11 @@ export const Element = memo(
 
     const highlightElement = useCallback(async () => {
       if (elementRef.current && nameRef.current && selected) {
-        const backgroundColor = 'rgba(255, 255, 255, 0.2)';
-        elementRef.current.style.backgroundColor = backgroundColor;
-        nameRef.current.style.whiteSpace = 'wrap';
+        elementRef.current.className = isWindowElement ? windowSelectedElement : backgroundSelectedElement;
       } else if (elementRef.current && nameRef.current) {
-        const backgroundColor = 'rgba(0, 0, 0, 0)';
-        elementRef.current.style.backgroundColor = backgroundColor;
-        nameRef.current.style.whiteSpace = 'nowrap';
+        elementRef.current.className = isWindowElement ? windowElement : backgroundElement;
       }
-    }, [selected]);
+    }, [isWindowElement, selected]);
 
     useEffect(() => {
       highlightElement();
@@ -219,11 +209,14 @@ export const Element = memo(
       };
     }, [renameElement]);
 
-    const handleEndRenaming = useCallback((e: MouseEvent) => {
-      if (e.button === 0 && renaming && e.target !== renameRef.current) {
-        endRenaming(elementKey);
-      }
-    }, [elementKey, endRenaming, renaming]);
+    const handleEndRenaming = useCallback(
+      (e: MouseEvent) => {
+        if (e.button === 0 && renaming && e.target !== renameRef.current) {
+          endRenaming(elementKey);
+        }
+      },
+      [elementKey, endRenaming, renaming]
+    );
 
     useEffect(() => {
       document.addEventListener('mousedown', handleEndRenaming);
@@ -237,8 +230,6 @@ export const Element = memo(
         className={elementContainer}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
-        onMouseOver={handleMouseOn}
-        onMouseOut={handleMouseOut}
       >
         {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
         {type === 'folder' && <FaFolder className={folderIcon} />}
