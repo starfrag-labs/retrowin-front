@@ -17,53 +17,96 @@ export const AdvancedSelector = ({
   const [targetWindowRect, setTargetWindowRect] = useState<DOMRect>(
     document.body.getBoundingClientRect()
   );
-  const [currentWindowElements, setCurrentWindowElements] = useState<IElementState[] | undefined>();
+  const [currentWindowElements, setCurrentWindowElements] = useState<
+    IElementState[] | undefined
+  >();
+  const [shiftKey, setShiftKey] = useState(false);
 
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
   const unselectAllElements = useElementStore(
     (state) => state.unselectAllElements
   );
-  const findElementByParentKey = useElementStore((state) => state.findElementsByParentKey);
+  const findElementByParentKey = useElementStore(
+    (state) => state.findElementsByParentKey
+  );
 
   const windowsRef = useRefStore((state) => state.windowsRef);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const rootKey = useElementStore((state) => state.rootKey);
 
-  const startSelecting = useCallback((e: MouseEvent) => {
-    if (!selectorRef.current || !boxRef.current || !backgroundWindowRef?.current || !elementsRef) return;
-
-    // Check if the target is not an element
-    let isNotElement = true;
-    elementsRef.forEach((elementRef) => {
-      if (elementRef.current?.contains(e.target as Node)) {
-        isNotElement = false;
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setShiftKey(true);
       }
-    });
-    if (!isNotElement) return;
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setShiftKey(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
 
-    // Unselect all elements and set start position
-    unselectAllElements();
-    setStartX(e.clientX);
-    setStartY(e.clientY);
+  const startSelecting = useCallback(
+    (e: MouseEvent) => {
+      if (
+        !selectorRef.current ||
+        !boxRef.current ||
+        !backgroundWindowRef?.current ||
+        !elementsRef
+      )
+        return;
 
-    if (backgroundWindowRef.current.contains(e.target as Node)) {
-      setTargetWindowRect(backgroundWindowRef.current.getBoundingClientRect());
-      setCurrentWindowElements(findElementByParentKey(rootKey))
-    }
-    if (windowsRef) {
-      windowsRef.forEach((window, parentKey) => {
-        if (window.current && window.current.contains(e.target as Node)) {
-          // Set target window rect
-          setTargetWindowRect(window.current.getBoundingClientRect());
-          // Set current window elements
-          setCurrentWindowElements(findElementByParentKey(parentKey));
+      // Check if the target is not an element
+      let isNotElement = true;
+      elementsRef.forEach((elementRef) => {
+        if (elementRef.current?.contains(e.target as Node)) {
+          isNotElement = false;
         }
       });
-    }
-  }, [backgroundWindowRef, elementsRef, findElementByParentKey, rootKey, unselectAllElements, windowsRef]);
-  
+      if (!isNotElement) return;
+
+      // Unselect all elements and set start position
+      if (!shiftKey) unselectAllElements();
+      setStartX(e.clientX);
+      setStartY(e.clientY);
+
+      if (backgroundWindowRef.current.contains(e.target as Node)) {
+        setTargetWindowRect(
+          backgroundWindowRef.current.getBoundingClientRect()
+        );
+        setCurrentWindowElements(findElementByParentKey(rootKey));
+      }
+      if (windowsRef) {
+        windowsRef.forEach((window, parentKey) => {
+          if (window.current && window.current.contains(e.target as Node)) {
+            // Set target window rect
+            setTargetWindowRect(window.current.getBoundingClientRect());
+            // Set current window elements
+            setCurrentWindowElements(findElementByParentKey(parentKey));
+          }
+        });
+      }
+    },
+    [
+      backgroundWindowRef,
+      elementsRef,
+      findElementByParentKey,
+      rootKey,
+      shiftKey,
+      unselectAllElements,
+      windowsRef,
+    ]
+  );
+
   useEffect(() => {
     if (currentWindowElements) {
       setIsSelecting(true);
@@ -84,11 +127,11 @@ export const AdvancedSelector = ({
         boxRect.bottom > elementRect.top
       ) {
         selectElement(element.key);
-      } else {
+      } else if (!shiftKey && element.selected) {
         unselectElement(element.key);
       }
     });
-  }, [currentWindowElements, elementsRef, selectElement, unselectElement]);
+  }, [currentWindowElements, elementsRef, selectElement, shiftKey, unselectElement]);
 
   const selecting = useCallback(
     (e: MouseEvent) => {

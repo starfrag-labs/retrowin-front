@@ -371,26 +371,26 @@ export const Selector = ({
     [elementsRef, displayDraggingElements, isMoving, startX, startY]
   );
 
-  useEffect(() => {
-    document.addEventListener('mousedown', moveElementsStart);
-    return () => {
-      document.removeEventListener('mousedown', moveElementsStart);
-    };
-  }, [moveElementsStart]);
+  // useEffect(() => {
+  //   document.addEventListener('mousedown', moveElementsStart);
+  //   return () => {
+  //     document.removeEventListener('mousedown', moveElementsStart);
+  //   };
+  // }, [moveElementsStart]);
 
-  useEffect(() => {
-    document.addEventListener('mouseup', moveElementsEnd);
-    return () => {
-      document.removeEventListener('mouseup', moveElementsEnd);
-    };
-  }, [moveElementsEnd]);
+  // useEffect(() => {
+  //   document.addEventListener('mouseup', moveElementsEnd);
+  //   return () => {
+  //     document.removeEventListener('mouseup', moveElementsEnd);
+  //   };
+  // }, [moveElementsEnd]);
 
-  useEffect(() => {
-    document.addEventListener('mousemove', moveElements);
-    return () => {
-      document.removeEventListener('mousemove', moveElements);
-    };
-  }, [moveElements]);
+  // useEffect(() => {
+  //   document.addEventListener('mousemove', moveElements);
+  //   return () => {
+  //     document.removeEventListener('mousemove', moveElements);
+  //   };
+  // }, [moveElements]);
 
   return (
     <div className={selector} ref={selectorRef}>

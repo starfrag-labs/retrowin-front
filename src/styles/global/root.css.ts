@@ -12,4 +12,8 @@ globalStyle("body", {
   padding: 0,
   overflow: 'hidden',
   fontFamily: 'Roboto, sans-serif',
+  userSelect: 'none',
+  WebkitUserSelect: 'none',
+  MozUserSelect: 'none',
+  msUserSelect: 'none',
 })
