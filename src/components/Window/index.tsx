@@ -19,7 +19,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
 
   useEffect(() => {
     if (windowContentRef.current) {
-      setWindowRef(windowKey, windowContentRef.current);
+      setWindowRef(windowKey, windowContentRef);
     }
   }, [setWindowRef, windowKey]);
 

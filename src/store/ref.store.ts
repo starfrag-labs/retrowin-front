@@ -1,17 +1,17 @@
 import { create } from 'zustand';
 
 type State = {
-  elementsRef: Map<string, HTMLElement>;
-  backgroundWindowRef: HTMLElement | null;
-  windowsRef: Map<string, HTMLElement>;
+  elementsRef: Map<string, React.RefObject<HTMLElement>>;
+  backgroundWindowRef: React.RefObject<HTMLElement> | null;
+  windowsRef: Map<string, React.RefObject<HTMLElement>>;
 };
 
 type Action = {
-  setElementRef: (key: string, htmlEl: HTMLElement) => void;
-  getElementByKey: (key: string) => HTMLElement | undefined;
-  setBackgroundWindowRef: (htmlEl: HTMLElement) => void;
-  setWindowRef: (key: string, htmlEl: HTMLElement) => void;
-  getWindowByKey: (key: string) => HTMLElement | undefined;
+  setElementRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
+  getElementByKey: (key: string) => React.RefObject<HTMLElement> | undefined;
+  setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
+  setWindowRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
+  getWindowByKey: (key: string) => React.RefObject<HTMLElement> | undefined;
 };
 
 const initialState: State = {
@@ -24,10 +24,10 @@ export const useRefStore = create<State & Action>((set, get) => ({
   elementsRef: initialState.elementsRef,
   windowsRef: initialState.windowsRef,
   backgroundWindowRef: initialState.backgroundWindowRef,
-  setElementRef: (key, htmlEl) => {
+  setElementRef: (key, ref) => {
     set((state) => {
       if (state.elementsRef) {
-        state.elementsRef.set(key, htmlEl);
+        state.elementsRef.set(key, ref);
       }
       console.log(state.elementsRef);
 
@@ -37,13 +37,13 @@ export const useRefStore = create<State & Action>((set, get) => ({
   getElementByKey: (key) => {
     return get().elementsRef.get(key);
   },
-  setBackgroundWindowRef: (htmlEl) => {
-    set({ backgroundWindowRef: htmlEl });
+  setBackgroundWindowRef: (ref) => {
+    set({ backgroundWindowRef: ref });
   },
-  setWindowRef: (key, htmlEl) => {
+  setWindowRef: (key, ref) => {
     set((state) => {
       if (state.windowsRef) {
-        state.windowsRef.set(key, htmlEl);
+        state.windowsRef.set(key, ref);
       }
       return { windowsRef: state.windowsRef };
     });

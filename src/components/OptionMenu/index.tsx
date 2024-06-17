@@ -18,15 +18,14 @@ export const OptionMenu = ({
 
   const handleContextMenu = (e: React.MouseEvent) => {
     const currentMenu = menuRef.current;
-    const currentElements = elementsRef.current;
     if (currentMenu) {
       e.preventDefault();
       setMenuType('background');
       currentMenu.style.top = `${e.clientY}px`;
       currentMenu.style.left = `${e.clientX}px`;
-      if (currentElements) {
-        currentElements.forEach((element, key) => {
-          if (element.contains(e.target as Node)) {
+      if (elementsRef) {
+        elementsRef.forEach((element, key) => {
+          if (element.current && element.current.contains(e.target as Node)) {
             setTargetElementKey(key);
             setMenuType('element');
           }

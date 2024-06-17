@@ -61,7 +61,7 @@ function MainComponent() {
 
   useEffect(() => {
     if (backgroundWindowRef.current) {
-      setBackgroundWindowRef(backgroundWindowRef.current);
+      setBackgroundWindowRef(backgroundWindowRef);
     }
   }, [backgroundWindowRef, setBackgroundWindowRef]);
   useEffect(() => {

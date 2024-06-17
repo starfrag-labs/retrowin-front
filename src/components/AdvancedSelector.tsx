@@ -32,8 +32,8 @@ export const AdvancedSelector = ({
       let targetWindow: HTMLElement | null = null;
       if (windowsRef) {
         windowsRef.forEach((window) => {
-          if (window && window.contains(e.target as Node)) {
-            targetWindow = window;
+          if (window.current && window.current.contains(e.target as Node)) {
+            targetWindow = window.current;
           }
         });
       }
@@ -49,7 +49,8 @@ export const AdvancedSelector = ({
 
         const boxRect = boxRef.current.getBoundingClientRect();
         elementsRef.forEach((element, key) => {
-          const elementRect = element.getBoundingClientRect();
+          if (!element.current) return;
+          const elementRect = element.current.getBoundingClientRect();
           if (
             boxRect.left < elementRect.right &&
             boxRect.right > elementRect.left &&

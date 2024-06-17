@@ -51,7 +51,7 @@ export const Element = memo(
 
     useEffect(() => {
       if (elementRef.current) {
-        setElementRef(elementKey, elementRef.current);
+        setElementRef(elementKey, elementRef);
       }
     }, [elementKey, setElementRef]);
 
