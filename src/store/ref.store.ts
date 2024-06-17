@@ -29,8 +29,6 @@ export const useRefStore = create<State & Action>((set, get) => ({
       if (state.elementsRef) {
         state.elementsRef.set(key, ref);
       }
-      console.log(state.elementsRef);
-
       return { elementsRef: state.elementsRef };
     });
   },
