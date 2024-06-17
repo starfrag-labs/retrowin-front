@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useElementStore } from '../../store/element.store';
 import { useWindowStore } from '../../store/window.store';
-import { windowContainer, windowContent, windowHeader } from '../../styles/window.css';
+import { closeBtn, windowContainer, windowContent, windowHeader } from '../../styles/window.css';
 import { Navigator } from './Navigator';
 import { Uploader } from './Uploader';
 import { useRefStore } from '../../store/ref.store';
@@ -75,7 +75,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
         onMouseDown={handleMouseDown}
       >
         {element?.name || 'Window'}
-        <button onClick={() => closeWindow(window.key)}>X</button>
+        <button onClick={() => closeWindow(window.key)} className={closeBtn} />
       </div>
       <div className={windowContent} ref={windowContentRef}>
         {window.type === 'navigator' ? (

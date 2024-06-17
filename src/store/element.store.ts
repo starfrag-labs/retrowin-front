@@ -3,12 +3,14 @@ import { IElementState } from '../types/store';
 
 type State = {
   elements: IElementState[];
+  rootKey: string;
 };
 
 type Action = {
   getElementsByParentKey: (parentKey: string) => IElementState[];
   addElements: (elements: IElementState[]) => void;
   addElement: (element: IElementState) => void;
+  setRootKey: (rootKey: string) => void;
   deleteElement: (key: string) => void;
   findElement: (key: string) => IElementState | undefined;
   findElementsByParentKey: (parentKey: string) => IElementState[];
@@ -24,10 +26,12 @@ type Action = {
 
 const initialState: State = {
   elements: [],
+  rootKey: '',
 };
 
 export const useElementStore = create<State & Action>((set, get) => ({
   elements: initialState.elements,
+  rootKey: initialState.rootKey,
   // Element functions
   getElementsByParentKey: (parentKey) => {
     return get().elements.filter((element) => element.parentKey === parentKey);
@@ -49,6 +53,9 @@ export const useElementStore = create<State & Action>((set, get) => ({
       state.elements = [...filteredElements, element];
       return { elements: state.elements };
     });
+  },
+  setRootKey: (rootKey) => {
+    set({ rootKey });
   },
   deleteElement: (key) => {
     set((state) => {

@@ -58,6 +58,11 @@ function MainComponent() {
     readFolderQueryOption(accessToken, rootFolderKey)
   );
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
+  const setRootKey = useElementStore((state) => state.setRootKey);
+
+  useEffect(() => {
+    setRootKey(rootFolderKey);
+  }, [rootFolderKey, setRootKey]);
 
   useEffect(() => {
     if (backgroundWindowRef.current) {

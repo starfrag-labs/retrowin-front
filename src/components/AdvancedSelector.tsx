@@ -1,8 +1,8 @@
-import { useCallback, useRef, useState } from 'react';
-import { draggingElementsIcon } from '../styles/element.css';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { selectBox, selector } from '../styles/selector.css';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
+import { IElementState } from '../types/store';
 
 export const AdvancedSelector = ({
   children,
@@ -11,110 +11,156 @@ export const AdvancedSelector = ({
 }): React.ReactElement => {
   const selectorRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [targetWindowRect, setTargetWindowRect] = useState<DOMRect>(
+    document.body.getBoundingClientRect()
+  );
+  const [currentWindowElements, setCurrentWindowElements] = useState<IElementState[] | undefined>();
 
-  const elements = useElementStore((state) => state.elements);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
   const unselectAllElements = useElementStore(
     (state) => state.unselectAllElements
   );
-  const findElement = useElementStore((state) => state.findElement);
+  const findElementByParentKey = useElementStore((state) => state.findElementsByParentKey);
 
   const windowsRef = useRefStore((state) => state.windowsRef);
+  const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const elementsRef = useRefStore((state) => state.elementsRef);
+  const rootKey = useElementStore((state) => state.rootKey);
 
-  const handleMouseDown = useCallback(
-    (e: React.MouseEvent) => {
-      if (!selectorRef.current || !boxRef.current) return;
-      const x = e.clientX;
-      const y = e.clientY;
+  const startSelecting = useCallback((e: MouseEvent) => {
+    if (!selectorRef.current || !boxRef.current || !backgroundWindowRef?.current || !elementsRef) return;
 
-      let targetWindow: HTMLElement | null = null;
-      if (windowsRef) {
-        windowsRef.forEach((window) => {
-          if (window.current && window.current.contains(e.target as Node)) {
-            targetWindow = window.current;
-          }
-        });
+    // Check if the target is not an element
+    let isNotElement = true;
+    elementsRef.forEach((elementRef) => {
+      if (elementRef.current?.contains(e.target as Node)) {
+        isNotElement = false;
       }
+    });
+    if (!isNotElement) return;
 
-      // display the box
-      boxRef.current.style.left = `${x}px`;
-      boxRef.current.style.top = `${y}px`;
-      boxRef.current.style.width = '0px';
-      boxRef.current.style.height = '0px';
+    // Unselect all elements and set start position
+    unselectAllElements();
+    setStartX(e.clientX);
+    setStartY(e.clientY);
 
-      const checkElementsInBox = () => {
-        if (!elementsRef || !boxRef.current) return;
+    if (backgroundWindowRef.current.contains(e.target as Node)) {
+      setTargetWindowRect(backgroundWindowRef.current.getBoundingClientRect());
+      setCurrentWindowElements(findElementByParentKey(rootKey))
+    }
+    if (windowsRef) {
+      windowsRef.forEach((window, parentKey) => {
+        if (window.current && window.current.contains(e.target as Node)) {
+          // Set target window rect
+          setTargetWindowRect(window.current.getBoundingClientRect());
+          // Set current window elements
+          setCurrentWindowElements(findElementByParentKey(parentKey));
+        }
+      });
+    }
+  }, [backgroundWindowRef, elementsRef, findElementByParentKey, rootKey, unselectAllElements, windowsRef]);
+  
+  useEffect(() => {
+    if (currentWindowElements) {
+      setIsSelecting(true);
+    }
+  }, [currentWindowElements]);
 
-        const boxRect = boxRef.current.getBoundingClientRect();
-        elementsRef.forEach((element, key) => {
-          if (!element.current) return;
-          const elementRect = element.current.getBoundingClientRect();
-          if (
-            boxRect.left < elementRect.right &&
-            boxRect.right > elementRect.left &&
-            boxRect.top < elementRect.bottom &&
-            boxRect.bottom > elementRect.top
-          ) {
-            selectElement(key);
-          } else {
-            unselectElement(key);
-          }
-        });
-      };
+  const checkElementsInBox = useCallback(() => {
+    if (!elementsRef || !boxRef.current || !currentWindowElements) return;
+    const boxRect = boxRef.current.getBoundingClientRect();
+    currentWindowElements.forEach((element) => {
+      const elementRef = elementsRef.get(element.key);
+      if (!elementRef?.current) return;
+      const elementRect = elementRef.current.getBoundingClientRect();
+      if (
+        boxRect.left < elementRect.right &&
+        boxRect.right > elementRect.left &&
+        boxRect.top < elementRect.bottom &&
+        boxRect.bottom > elementRect.top
+      ) {
+        selectElement(element.key);
+      } else {
+        unselectElement(element.key);
+      }
+    });
+  }, [currentWindowElements, elementsRef, selectElement, unselectElement]);
 
-      // mouse move handler
-      const handleMouseMove = (e: MouseEvent) => {
-        if (e.buttons !== 1) return;
+  const selecting = useCallback(
+    (e: MouseEvent) => {
+      if (!selectorRef.current || !boxRef.current || !isSelecting) return;
+      const left = Math.max(
+        Math.min(startX, e.clientX),
+        targetWindowRect.left + 1
+      );
+      const top = Math.max(
+        Math.min(startY, e.clientY),
+        targetWindowRect.top + 1
+      );
+      const right = Math.min(
+        Math.max(startX, e.clientX),
+        targetWindowRect.right - 3
+      );
+      const bottom = Math.min(
+        Math.max(startY, e.clientY),
+        targetWindowRect.bottom - 3
+      );
+      const width = right - left;
+      const height = bottom - top;
 
-        const targetWindowRect =
-          targetWindow?.getBoundingClientRect() ||
-          document.body.getBoundingClientRect();
-        if (!selectorRef.current || !boxRef.current) return;
+      boxRef.current.style.left = `${left}px`;
+      boxRef.current.style.top = `${top}px`;
+      boxRef.current.style.width = `${width}px`;
+      boxRef.current.style.height = `${height}px`;
+      boxRef.current.style.display = 'block';
 
-        const left = Math.max(
-          Math.min(x, e.clientX),
-          targetWindowRect.left + 1
-        );
-        const top = Math.max(Math.min(y, e.clientY), targetWindowRect.top + 1);
-        const right = Math.min(
-          Math.max(x, e.clientX),
-          targetWindowRect.right - 3
-        );
-        const bottom = Math.min(
-          Math.max(y, e.clientY),
-          targetWindowRect.bottom - 3
-        );
-        const width = right - left;
-        const height = bottom - top;
-
-        boxRef.current.style.left = `${left}px`;
-        boxRef.current.style.top = `${top}px`;
-        boxRef.current.style.width = `${width}px`;
-        boxRef.current.style.height = `${height}px`;
-        boxRef.current.style.display = 'block';
-
-        checkElementsInBox();
-      };
-
-      // mouse up handler
-      const handleMouseUp = () => {
-        if (!boxRef.current) return;
-        boxRef.current.style.display = 'none';
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-
-      // add event listeners
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
+      checkElementsInBox();
     },
-    [elementsRef, selectElement, unselectElement, windowsRef]
+    [
+      isSelecting,
+      startX,
+      targetWindowRect.left,
+      targetWindowRect.top,
+      targetWindowRect.right,
+      targetWindowRect.bottom,
+      startY,
+      checkElementsInBox,
+    ]
   );
 
+  const stopSelecting = useCallback(() => {
+    if (!boxRef.current) return;
+    setIsSelecting(false);
+    boxRef.current.style.display = 'none';
+  }, []);
+
+  useEffect(() => {
+    document.addEventListener('mousedown', startSelecting);
+    return () => {
+      document.removeEventListener('mousedown', startSelecting);
+    };
+  }, [startSelecting]);
+
+  useEffect(() => {
+    document.addEventListener('mousemove', selecting);
+    return () => {
+      document.removeEventListener('mousemove', selecting);
+    };
+  }, [selecting]);
+
+  useEffect(() => {
+    document.addEventListener('mouseup', stopSelecting);
+    return () => {
+      document.removeEventListener('mouseup', stopSelecting);
+    };
+  }, [stopSelecting]);
+
   return (
-    <div className={selector} ref={selectorRef} onMouseDown={handleMouseDown}>
+    <div className={selector} ref={selectorRef}>
       <div className={selectBox} ref={boxRef} />
       {children}
     </div>
