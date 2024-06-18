@@ -3,13 +3,13 @@ import { useTokenStore } from '../../store/token.store';
 import { uploadChunk } from '../../api/cloud';
 import { useWindowStore } from '../../store/window.store';
 import { uploadButton, uploadForm, uploadInput, uploadLabel, uploadName, uploadTitle, uploader, uploaderContainer } from '../../styles/windows/uploader.css';
-import { useRef } from 'react';
+import { memo, useRef } from 'react';
 
-export function Uploader({
+export const Uploader = memo(({
   folderKey,
 }: {
   folderKey: string;
-}): React.ReactElement {
+}): React.ReactElement => {
   const chunkSize = 1024 * 512;
   const queryClient = useQueryClient();
 
@@ -78,7 +78,6 @@ export function Uploader({
             </label>
             <input
               className={uploadName}
-              value="...nothing selected"
               placeholder="...nothing selected"
               ref={uploadNameRef}
             />
@@ -97,4 +96,4 @@ export function Uploader({
       </div>
     </div>
   );
-}
+});

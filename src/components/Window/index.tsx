@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useElementStore } from '../../store/element.store';
 import { useWindowStore } from '../../store/window.store';
 import { Navigator } from './Navigator';
@@ -12,6 +12,7 @@ import {
 } from '../../styles/windows/window.css';
 
 export const Window = ({ windowKey }: { windowKey: string }) => {
+  const [title, setTitle] = useState('Window');
   const window = useWindowStore((state) => state.findWindow(windowKey));
   const windowSize = useRef({ width: 0, height: 0 });
   const windowPosition = useRef({ x: 0, y: 0 });
@@ -149,6 +150,16 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     };
   }, [startResizing]);
 
+  
+  // set window title
+  useEffect(() => {
+    if (element && element.name) {
+      setTitle(element.name);
+    } else if (window && window.type === 'uploader') {
+      setTitle('Upload Files');
+    }
+  }, [element, window]);
+  
   if (!window) return null;
 
   return (
@@ -158,7 +169,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
         ref={windowHeaderRef}
         onMouseDown={moveWindow}
       >
-        {element?.name || 'Window'}
+        {title}
         <button onClick={() => closeWindow(window.key)} className={closeBtn} />
       </div>
       <div className={windowContent} ref={windowContentRef}>
