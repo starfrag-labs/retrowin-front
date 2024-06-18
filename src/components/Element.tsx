@@ -69,12 +69,8 @@ export const Element = memo(
       } else if (type === 'file') {
         handleDownload();
       } else if (type === 'folder') {
-        openFolder();
+        newWindow(elementKey, 'navigator');
       }
-    };
-
-    const openFolder = () => {
-      newWindow(elementKey, 'navigator');
     };
 
     const handleDownload = async () => {

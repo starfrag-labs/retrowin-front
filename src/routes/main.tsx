@@ -13,8 +13,9 @@ import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { OptionMenu } from '../components/OptionMenu';
-import { AdvancedSelector } from '../components/AdvancedSelector';
+import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
+import { Dragger } from '../components/Dragger';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -53,7 +54,9 @@ function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
   const windows = useWindowStore((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
-  const setBackgroundWindowRef = useRefStore((state) => state.setBackgroundWindowRef);
+  const setBackgroundWindowRef = useRefStore(
+    (state) => state.setBackgroundWindowRef
+  );
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(accessToken, rootFolderKey)
   );
@@ -107,21 +110,23 @@ function MainComponent() {
 
   return (
     <AuthManager>
-      <AdvancedSelector>
-        <Background>
-          <OptionMenu>
-            <div
-              className={backgroundSelectorContainer}
-              ref={backgroundWindowRef}
-            >
-              <Elements folderKey={rootFolderKey} />
-            </div>
-            {windows.map((window) => {
-              return <Window key={window.key} windowKey={window.key} />;
-            })}
-          </OptionMenu>
-        </Background>
-      </AdvancedSelector>
+      <Selector>
+        <Dragger>
+          <Background>
+            <OptionMenu>
+              <div
+                className={backgroundSelectorContainer}
+                ref={backgroundWindowRef}
+              >
+                <Elements folderKey={rootFolderKey} />
+              </div>
+              {windows.map((window) => {
+                return <Window key={window.key} windowKey={window.key} />;
+              })}
+            </OptionMenu>
+          </Background>
+        </Dragger>
+      </Selector>
     </AuthManager>
   );
 }

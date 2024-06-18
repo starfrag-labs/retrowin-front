@@ -1,10 +1,15 @@
-import { useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useElementStore } from '../../store/element.store';
 import { useWindowStore } from '../../store/window.store';
-import { closeBtn, windowContainer, windowContent, windowHeader } from '../../styles/window.css';
 import { Navigator } from './Navigator';
 import { Uploader } from './Uploader';
 import { useRefStore } from '../../store/ref.store';
+import {
+  windowContainer,
+  windowHeader,
+  closeBtn,
+  windowContent,
+} from '../../styles/windows/window.css';
 
 export const Window = ({ windowKey }: { windowKey: string }) => {
   const window = useWindowStore((state) => state.findWindow(windowKey));
@@ -14,8 +19,10 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
   const element = useElementStore((state) => state.findElement(windowKey));
+  const readyResizing = useWindowStore((state) => state.readyResizing);
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const setWindowRef = useRefStore((state) => state.setWindowRef);
+  const setReadyResizing = useWindowStore((state) => state.setReadyResizing);
 
   useEffect(() => {
     if (windowContentRef.current) {
@@ -47,7 +54,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     }
   }, []);
 
-  const handleMouseDown = (e: React.MouseEvent) => {
+  const moveWindow = (e: React.MouseEvent) => {
     if (!windowContainerRef.current || !windowHeaderRef.current) return;
     const rect = windowHeaderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -65,6 +72,58 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  const changeCursor = useCallback((e: MouseEvent) => {
+    if (!windowContainerRef.current) return;
+    const rect = windowContainerRef.current.getBoundingClientRect();
+    if (e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
+      setReadyResizing(true);
+      windowContainerRef.current.style.cursor = 'nwse-resize';
+    } else if (readyResizing) {
+      setReadyResizing(false);
+      windowContainerRef.current.style.cursor = 'default';
+    }
+  }, [readyResizing, setReadyResizing]);
+
+  useEffect(() => {
+    const currentWindow = windowContainerRef.current;
+    if (!currentWindow) return;
+    currentWindow.addEventListener('mousemove', changeCursor);
+    return () => {
+      currentWindow.removeEventListener('mousemove', changeCursor);
+    };
+  }, [changeCursor]);
+
+  const startResizing = useCallback((e: MouseEvent) => {
+    if (!windowContainerRef.current) return;
+    const rect = windowContainerRef.current.getBoundingClientRect();
+    if (readyResizing && e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
+      const handleMouseMove = (e: MouseEvent) => {
+        if (!windowContainerRef.current || !windowContentRef.current || !windowHeaderRef.current) return;
+        const width = e.clientX - rect.left;
+        const height = e.clientY - rect.top;
+        windowContainerRef.current.style.width = `${width}px`;
+        windowContainerRef.current.style.height = `${height}px`;
+        windowContentRef.current.style.width = `${width}px`;
+        windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
+      };
+      const handleMouseUp = () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+    }
+  }, [readyResizing]);
+
+  useEffect(() => {
+    const currentWindow = windowContainerRef.current;
+    if (!currentWindow) return;
+    currentWindow.addEventListener('mousedown', startResizing);
+    return () => {
+      currentWindow.removeEventListener('mousedown', startResizing);
+    };
+  }, [startResizing]);
+
   if (!window) return null;
 
   return (
@@ -72,7 +131,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       <div
         className={windowHeader}
         ref={windowHeaderRef}
-        onMouseDown={handleMouseDown}
+        onMouseDown={moveWindow}
       >
         {element?.name || 'Window'}
         <button onClick={() => closeWindow(window.key)} className={closeBtn} />

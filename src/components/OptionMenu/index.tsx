@@ -12,6 +12,7 @@ export const OptionMenu = ({
 }): React.ReactElement => {
   const elementsRef = useRefStore((state) => state.elementsRef);
   const menuRef = useRef<HTMLDivElement>(null);
+  const setMenuRef = useRefStore((state) => state.setMenuRef);
 
   const [targetElementKey, setTargetElementKey] = useState('');
   const [menuType, setMenuType] = useState('');
@@ -50,6 +51,12 @@ export const OptionMenu = ({
       document.removeEventListener('mousedown', closeMenu);
     };
   }, [closeMenu]);
+
+  useEffect(() => {
+    if (menuRef.current) {
+      setMenuRef(menuRef);
+    }
+  }, [setMenuRef]);
 
   return (
     <div className={defaultContainer} onContextMenu={handleContextMenu}>

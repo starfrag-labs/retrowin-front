@@ -1,404 +1,239 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import React from 'react';
+import { selectBox, selector } from '../styles/selector.css';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
-import { draggingElementsIcon } from '../styles/element.css';
-import { selector, selectBox } from '../styles/selector.css';
-import { moveFile, moveFolder } from '../api/cloud';
-import { useTokenStore } from '../store/token.store';
-import { useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { IElementState } from '../types/store';
+import { useWindowStore } from '../store/window.store';
 
 export const Selector = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const queryClient = useQueryClient();
-
-  const [isDragging, setIsDragging] = useState(false);
-  const [isMoving, setIsMoving] = useState(false);
-  const [displayDraggingElements, setDisplayDraggingElements] = useState(false);
-  const [startX, setStartX] = useState(0);
-  const [startY, setStartY] = useState(0);
-  const [selectedElements, setSelectedElements] = useState<string[]>([]);
-
   const selectorRef = useRef<HTMLDivElement>(null);
   const boxRef = useRef<HTMLDivElement>(null);
-  const draggingElementsRef = useRef<HTMLDivElement>(null);
+  const [isSelecting, setIsSelecting] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [startY, setStartY] = useState(0);
+  const [targetWindowRect, setTargetWindowRect] = useState<DOMRect>(
+    document.body.getBoundingClientRect()
+  );
+  const [currentWindowElements, setCurrentWindowElements] = useState<
+    IElementState[] | undefined
+  >();
+  const [shiftKey, setShiftKey] = useState(false);
 
-  const accessToken = useTokenStore((state) => state.accessToken);
-  const findElement = useElementStore((state) => state.findElement);
-  const elementsRef = useRefStore((state) => state.elementsRef);
-  const windowsRef = useRefStore((state) => state.windowsRef);
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
-  const moveElement = useElementStore((state) => state.moveElement);
+  const unselectAllElements = useElementStore(
+    (state) => state.unselectAllElements
+  );
+  const findElement = useElementStore((state) => state.findElement);
+  const findElementByParentKey = useElementStore(
+    (state) => state.findElementsByParentKey
+  );
 
-  const checkElementsInBox = useCallback(() => {
-    if (elementsRef.current === null) {
-      return;
-    }
-    if (boxRef.current && isDragging && selectorRef.current) {
-      const boxRect = boxRef.current.getBoundingClientRect();
-      const currentSelectorRef = selectorRef.current;
+  const menuRef = useRefStore((state) => state.menuRef);
+  const resizing = useWindowStore((state) => state.readyResizing);
+  const windowsRef = useRefStore((state) => state.windowsRef);
+  const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
+  const elementsRef = useRefStore((state) => state.elementsRef);
+  const rootKey = useElementStore((state) => state.rootKey);
 
-      elementsRef.current.forEach((el, key) => {
-        if (!currentSelectorRef.contains(el)) {
-          return;
-        }
-        const elRect = el.getBoundingClientRect();
-        if (
-          boxRect.left < elRect.right &&
-          boxRect.right > elRect.left &&
-          boxRect.top < elRect.bottom &&
-          boxRect.bottom > elRect.top &&
-          selectedElements.indexOf(key) === -1
-        ) {
-          selectElement(key);
-          setSelectedElements((prev) => [...prev, key]);
-        } else if (
-          selectedElements.indexOf(key) !== -1 &&
-          (boxRect.left > elRect.right ||
-            boxRect.right < elRect.left ||
-            boxRect.top > elRect.bottom ||
-            boxRect.bottom < elRect.top)
-        ) {
-          unselectElement(key);
-          setSelectedElements((prev) => prev.filter((k) => k !== key));
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setShiftKey(true);
+      }
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === 'Shift') {
+        setShiftKey(false);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keyup', handleKeyUp);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keyup', handleKeyUp);
+    };
+  }, []);
+
+  const startSelecting = useCallback(
+    (e: MouseEvent) => {
+      if (
+        !selectorRef.current ||
+        !boxRef.current ||
+        !backgroundWindowRef?.current ||
+        !elementsRef ||
+        resizing
+      )
+        return;
+
+      // Check if the target is not an element
+      let selectedKey = '';
+      let isElement = false;
+      let clickSelected = false;
+      elementsRef.forEach((elementRef, key) => {
+        const isContaining = elementRef.current?.contains(e.target as Node);
+        if (isContaining && findElement(key)?.selected) {
+          clickSelected = true;
+          isElement = true;
+        } else if (isContaining) {
+          clickSelected = false;
+          isElement = true;
+          selectedKey = key;
         }
       });
-    }
-  }, [
-    elementsRef,
-    isDragging,
-    selectedElements,
-    selectElement,
-    unselectElement,
-  ]);
 
-  const onDragStart = useCallback(
-    (e: MouseEvent) => {
-      if (
-        selectorRef.current === null ||
-        boxRef.current === null ||
-        elementsRef.current === null
-      ) {
-        return;
-      }
-      if (selectorRef.current === e.target) {
-        e.preventDefault();
-
-        // start selecting
-        setIsDragging(true);
-        setStartX(e.pageX);
-        setStartY(e.pageY);
-        boxRef.current.style.display = 'block';
-
-        // unselect all elements
-        setSelectedElements([]);
-        elementsRef.current.forEach((_el, key) => {
-          unselectElement(key);
-        });
-        return;
-      }
-    },
-    [elementsRef, unselectElement]
-  );
-
-  const onDragEnd = useCallback(
-    (e: MouseEvent) => {
-      if (boxRef.current === null || isDragging === false) {
-        return;
-      }
-      e.preventDefault();
-      setIsDragging(false);
-      boxRef.current.style.width = '0px';
-      boxRef.current.style.height = '0px';
-      boxRef.current.style.left = '0px';
-      boxRef.current.style.top = '0px';
-      boxRef.current.style.display = 'none';
-    },
-    [isDragging]
-  );
-
-  const onDrag = useCallback(
-    (e: MouseEvent) => {
-      e.preventDefault();
-      if (isDragging && boxRef.current) {
-        const x = e.pageX;
-        const y = e.pageY;
-        boxRef.current.style.left = Math.min(x, startX) + 'px';
-        boxRef.current.style.top = Math.min(y, startY) + 'px';
-        boxRef.current.style.width = Math.abs(x - startX) + 'px';
-        boxRef.current.style.height = Math.abs(y - startY) + 'px';
-        checkElementsInBox();
-      }
-    },
-    [checkElementsInBox, isDragging, startX, startY]
-  );
-
-  useEffect(() => {
-    document.addEventListener('mousedown', onDragStart);
-    return () => {
-      document.removeEventListener('mousedown', onDragStart);
-    };
-  }, [onDragStart]);
-
-  useEffect(() => {
-    document.addEventListener('mouseup', onDragEnd);
-    return () => {
-      document.removeEventListener('mouseup', onDragEnd);
-    };
-  }, [onDragEnd]);
-
-  useEffect(() => {
-    document.addEventListener('mousemove', onDrag);
-    return () => {
-      document.removeEventListener('mousemove', onDrag);
-    };
-  }, [onDrag]);
-
-  const clickElement = useCallback(
-    (e: MouseEvent) => {
-      const currentElements = elementsRef.current;
-      const currentDraggingElements = draggingElementsRef.current;
-      const currentSelectorRef = selectorRef.current;
-      if (
-        currentElements === null ||
-        currentSelectorRef === null ||
-        currentDraggingElements === null
-      ) {
-        return;
-      }
-      if (!currentSelectorRef.contains(e.target as Node)) {
-        setSelectedElements([]);
-        selectedElements.forEach((key) => {
-          unselectElement(key);
-        });
+      // Check if the target is not the menu
+      if (menuRef?.current && menuRef.current.contains(e.target as Node)) {
         return;
       }
 
-      currentElements.forEach((el, key) => {
-        if (!currentSelectorRef.contains(el)) {
+      if (isElement) {
+        if (shiftKey || clickSelected) return;
+        else {
+          unselectAllElements();
+          selectElement(selectedKey);
           return;
         }
-        const elRect = el.getBoundingClientRect();
-        if (
-          e.pageX > elRect.left &&
-          e.pageX < elRect.right &&
-          e.pageY > elRect.top &&
-          e.pageY < elRect.bottom
-        ) {
-          if (selectedElements.indexOf(key) === -1 && !e.shiftKey) {
-            setSelectedElements([key]);
-            selectedElements.forEach((k) => {
-              if (k !== key) {
-                unselectElement(k);
-              }
-            });
-            selectElement(key);
+      } else if (!shiftKey) {
+        unselectAllElements();
+      }
 
-            // start moving the element
-            e.preventDefault();
-            setDisplayDraggingElements(false);
-            setStartX(e.pageX);
-            setStartY(e.pageY);
-            setIsMoving(true);
+      setStartX(e.clientX);
+      setStartY(e.clientY);
 
-            // create a clone of the element
-            const clone = el.cloneNode(true) as HTMLElement;
-            clone.style.position = 'absolute';
-            clone.style.left = elRect.left + 'px';
-            clone.style.top = elRect.top + 'px';
-            currentDraggingElements.appendChild(clone);
-          } else if (selectedElements.indexOf(key) === -1 && e.shiftKey) {
-            selectElement(key);
-            setSelectedElements((prev) => [...prev, key]);
+      if (backgroundWindowRef.current.contains(e.target as Node)) {
+        setTargetWindowRect(
+          backgroundWindowRef.current.getBoundingClientRect()
+        );
+        setCurrentWindowElements(findElementByParentKey(rootKey));
+      }
+      if (windowsRef) {
+        windowsRef.forEach((window, parentKey) => {
+          if (window.current && window.current.contains(e.target as Node)) {
+            // Set target window rect
+            setTargetWindowRect(window.current.getBoundingClientRect());
+            // Set current window elements
+            setCurrentWindowElements(findElementByParentKey(parentKey));
           }
-        }
-      });
-    },
-    [elementsRef, selectedElements, selectElement, unselectElement]
-  );
-
-  useEffect(() => {
-    document.addEventListener('mousedown', clickElement);
-    return () => {
-      document.removeEventListener('mousedown', clickElement);
-    };
-  }, [clickElement]);
-
-  const moveElementsStart = useCallback(
-    (e: MouseEvent) => {
-      const currentElements = elementsRef.current;
-      const currentDraggingElements = draggingElementsRef.current;
-
-      if (currentElements === null || currentDraggingElements === null) {
-        return;
-      }
-      if (selectedElements.length === 0) {
-        return;
-      }
-      setStartX(e.pageX);
-      setStartY(e.pageY);
-      setIsMoving(true);
-      e.preventDefault();
-      currentElements.forEach((el, key) => {
-        if (selectedElements.indexOf(key) !== -1) {
-          const clone = el.cloneNode(true) as HTMLElement;
-          clone.style.position = 'absolute';
-          clone.style.left = el.getBoundingClientRect().left + 'px';
-          clone.style.top = el.getBoundingClientRect().top + 'px';
-          currentDraggingElements.appendChild(clone);
-        }
-      });
-      currentDraggingElements.style.left = '0px';
-      currentDraggingElements.style.top = '0px';
-    },
-    [elementsRef, selectedElements]
-  );
-
-  const moveElementsEnd = useCallback(
-    (e: MouseEvent) => {
-      const currentElements = elementsRef.current;
-      const currentWindows = windowsRef.current;
-      if (isMoving && draggingElementsRef.current) {
-        let targetFolderKey = '';
-        // search for the target folder from the elements
-        if (currentElements) {
-          currentElements.forEach((el, key) => {
-            if (
-              el.contains(e.target as Node) &&
-              findElement(key)?.type === 'folder'
-            ) {
-              targetFolderKey = key;
-            }
-          });
-        }
-        // search for the target folder from the windows
-        if (currentWindows) {
-          currentWindows.forEach((el, key) => {
-            if (
-              el.contains(e.target as Node) &&
-              findElement(key)?.type === 'folder'
-            ) {
-              targetFolderKey = key;
-            }
-          });
-        }
-        // move the selected elements to the target folder
-        if (targetFolderKey !== '' && currentElements) {
-          selectedElements.forEach((k) => {
-            const element = findElement(k);
-            if (k === targetFolderKey) {
-              return;
-            }
-            if (element && element.type === 'folder') {
-              // move the folder
-              moveFolder(accessToken, element.key, targetFolderKey).then(() => {
-                queryClient.invalidateQueries({
-                  queryKey: ['read', 'folder'],
-                });
-                moveElement(element.key, targetFolderKey);
-              });
-            } else if (element && element.type === 'file') {
-              // move the file
-              moveFile(
-                accessToken,
-                element.parentKey,
-                element.key,
-                targetFolderKey
-              ).then(() => {
-                queryClient.invalidateQueries(
-                  readFolderQueryOption(accessToken, targetFolderKey)
-                );
-                moveElement(element.key, element.parentKey);
-              });
-            }
-          });
-        }
-
-        e.preventDefault();
-        setIsMoving(false);
-        setDisplayDraggingElements(false);
-        document.body.style.cursor = 'default';
-        while (draggingElementsRef.current.firstChild) {
-          draggingElementsRef.current.removeChild(
-            draggingElementsRef.current.firstChild
-          );
-        }
+        });
       }
     },
     [
-      accessToken,
+      backgroundWindowRef,
       elementsRef,
-      findElement,
-      isMoving,
-      moveElement,
-      queryClient,
-      selectedElements,
+      resizing,
+      menuRef,
+      shiftKey,
       windowsRef,
+      findElement,
+      unselectAllElements,
+      selectElement,
+      findElementByParentKey,
+      rootKey,
     ]
   );
 
-  const moveElements = useCallback(
-    (e: MouseEvent) => {
-      const currentElements = elementsRef.current;
-      const currentDraggingElements = draggingElementsRef.current;
-      if (
-        isMoving &&
-        currentElements !== null &&
-        currentDraggingElements !== null
-      ) {
-        e.preventDefault();
-        const x = e.pageX;
-        const y = e.pageY;
-        currentDraggingElements.style.left = x - startX + 'px';
-        currentDraggingElements.style.top = y - startY + 'px';
+  useEffect(() => {
+    if (currentWindowElements) {
+      setIsSelecting(true);
+    }
+  }, [currentWindowElements]);
 
-        if (
-          !displayDraggingElements &&
-          isMoving &&
-          currentElements &&
-          (Math.abs(x - startX) > 10 || Math.abs(y - startY) > 10)
-        ) {
-          document.body.style.cursor = 'grabbing';
-          setDisplayDraggingElements(true);
-        }
+  const checkElementsInBox = useCallback(() => {
+    if (!elementsRef || !boxRef.current || !currentWindowElements) return;
+    const boxRect = boxRef.current.getBoundingClientRect();
+    currentWindowElements.forEach((element) => {
+      const elementRef = elementsRef.get(element.key);
+      if (!elementRef?.current) return;
+      const elementRect = elementRef.current.getBoundingClientRect();
+      if (
+        boxRect.left < elementRect.right &&
+        boxRect.right > elementRect.left &&
+        boxRect.top < elementRect.bottom &&
+        boxRect.bottom > elementRect.top
+      ) {
+        selectElement(element.key);
+      } else if (!shiftKey && element.selected) {
+        unselectElement(element.key);
       }
+    });
+  }, [
+    currentWindowElements,
+    elementsRef,
+    selectElement,
+    shiftKey,
+    unselectElement,
+  ]);
+
+  const selecting = useCallback(
+    (e: MouseEvent) => {
+      if (!selectorRef.current || !boxRef.current || !isSelecting) return;
+      const left = Math.max(Math.min(startX, e.clientX), targetWindowRect.left);
+      const top = Math.max(Math.min(startY, e.clientY), targetWindowRect.top);
+      const right = Math.min(
+        Math.max(startX, e.clientX),
+        targetWindowRect.right - 2
+      );
+      const bottom = Math.min(
+        Math.max(startY, e.clientY),
+        targetWindowRect.bottom - 3
+      );
+      const width = right - left;
+      const height = bottom - top;
+
+      boxRef.current.style.left = `${left}px`;
+      boxRef.current.style.top = `${top}px`;
+      boxRef.current.style.width = `${width}px`;
+      boxRef.current.style.height = `${height}px`;
+      boxRef.current.style.display = 'block';
+
+      checkElementsInBox();
     },
-    [elementsRef, displayDraggingElements, isMoving, startX, startY]
+    [
+      isSelecting,
+      startX,
+      targetWindowRect.left,
+      targetWindowRect.top,
+      targetWindowRect.right,
+      targetWindowRect.bottom,
+      startY,
+      checkElementsInBox,
+    ]
   );
 
-  // useEffect(() => {
-  //   document.addEventListener('mousedown', moveElementsStart);
-  //   return () => {
-  //     document.removeEventListener('mousedown', moveElementsStart);
-  //   };
-  // }, [moveElementsStart]);
+  const stopSelecting = useCallback(() => {
+    if (!boxRef.current) return;
+    setIsSelecting(false);
+    boxRef.current.style.display = 'none';
+  }, []);
 
-  // useEffect(() => {
-  //   document.addEventListener('mouseup', moveElementsEnd);
-  //   return () => {
-  //     document.removeEventListener('mouseup', moveElementsEnd);
-  //   };
-  // }, [moveElementsEnd]);
+  useEffect(() => {
+    document.addEventListener('mousedown', startSelecting);
+    return () => {
+      document.removeEventListener('mousedown', startSelecting);
+    };
+  }, [startSelecting]);
 
-  // useEffect(() => {
-  //   document.addEventListener('mousemove', moveElements);
-  //   return () => {
-  //     document.removeEventListener('mousemove', moveElements);
-  //   };
-  // }, [moveElements]);
+  useEffect(() => {
+    document.addEventListener('mousemove', selecting);
+    return () => {
+      document.removeEventListener('mousemove', selecting);
+    };
+  }, [selecting]);
+
+  useEffect(() => {
+    document.addEventListener('mouseup', stopSelecting);
+    return () => {
+      document.removeEventListener('mouseup', stopSelecting);
+    };
+  }, [stopSelecting]);
 
   return (
     <div className={selector} ref={selectorRef}>
-      <div
-        className={draggingElementsIcon}
-        ref={draggingElementsRef}
-        hidden={!displayDraggingElements}
-      />
       <div className={selectBox} ref={boxRef} />
       {children}
     </div>

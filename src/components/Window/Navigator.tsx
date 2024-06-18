@@ -5,7 +5,7 @@ import { useElementStore } from '../../store/element.store';
 import { useEffect, useState } from 'react';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { IElementState } from '../../types/store';
-import { navigatorContainer } from '../../styles/window.css';
+import { navigatorContainer } from '../../styles/windows/navigator.css';
 
 export const Navigator = ({ folderKey }: { folderKey: string }) => {
   const [isLoaded, setIsLoaded] = useState(false);

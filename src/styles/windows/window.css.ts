@@ -4,6 +4,7 @@ export const windowContainer = style({
   position: 'absolute',
   backgroundColor: 'rgba(250, 250, 250, 1)',
   border: '1px solid black',
+  overflow: 'hidden',
 });
 
 export const windowContent = style({
@@ -17,11 +18,6 @@ export const windowHeader = style({
   padding: '0.5rem',
   backgroundColor: 'rgb(200, 200, 200)',
   borderBottom: '1px solid black',
-});
-
-export const navigatorContainer = style({
-  width: '100%',
-  height: '100%',
 });
 
 export const closeBtn = style({

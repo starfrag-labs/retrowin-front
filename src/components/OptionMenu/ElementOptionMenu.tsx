@@ -16,6 +16,9 @@ export const ElementOptionMenu = ({
 }): React.ReactElement => {
   const queryClient = useQueryClient();
   const currentMenu = menuRef.current;
+  const selectedElements = useElementStore((state) =>
+    state.elements.filter((element) => element.selected)
+  );
   const element = useElementStore((state) => state.findElement(elementKey));
   const accessToken = useTokenStore((state) => state.accessToken);
   const startRenaming = useElementStore((state) => state.startRenaming);
@@ -65,7 +68,25 @@ export const ElementOptionMenu = ({
 
   const handleDelete = () => {
     if (!element || !currentMenu) return;
-    if (element.type === 'file') {
+    if (selectedElements.length > 1) {
+      selectedElements.forEach((element) => {
+        if (element.type === 'file') {
+          deleteFile(accessToken, element.parentKey, element.key).then(() => {
+            queryClient.invalidateQueries(
+              readFolderQueryOption(accessToken, element.parentKey)
+            );
+            deleteElement(element.key);
+          });
+        } else {
+          deleteFolder(accessToken, element.key).then(() => {
+            queryClient.invalidateQueries(
+              readFolderQueryOption(accessToken, element.parentKey)
+            );
+            deleteElement(element.key);
+          });
+        }
+      });
+    } else if (element.type === 'file') {
       deleteFile(accessToken, element.parentKey, element.key).then(() => {
         queryClient.invalidateQueries(
           readFolderQueryOption(accessToken, element.parentKey)
@@ -131,11 +152,30 @@ export const ElementOptionMenu = ({
     },
   ];
 
+  const multipleMenuList = [
+    {
+      name: 'Delete',
+      action: handleDelete,
+    },
+  ];
+
+  let currentMenuList: {
+    name: string;
+    action: () => void;
+  }[] = [];
+  if (selectedElements.length > 1) {
+    currentMenuList = multipleMenuList;
+  } else if (element?.type === 'file') {
+    currentMenuList = fileMenuList;
+  } else if (element?.type === 'folder') {
+    currentMenuList = folderMenuList;
+  }
+
   if (!element) return <></>;
 
   return (
     <MenuGenerator
-      menuList={element.type === 'file' ? fileMenuList : folderMenuList}
+      menuList={currentMenuList}
     />
   );
 };

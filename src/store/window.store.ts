@@ -3,6 +3,7 @@ import { IWindow } from '../types/window';
 
 type State = {
   windows: IWindow[];
+  readyResizing: boolean;
 };
 
 type Action = {
@@ -11,14 +12,17 @@ type Action = {
   minimizeWindow: (key: string) => void;
   highlightWindow: (key: string) => void;
   closeWindow: (key: string) => void;
+  setReadyResizing: (readyResizing: boolean) => void;
 };
 
 const initialState: State = {
   windows: [],
+  readyResizing: false,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
+  readyResizing: initialState.readyResizing,
   // Window functions
   newWindow: (key, type) => {
     set((state) => {
@@ -60,5 +64,8 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       state.windows = state.windows.filter((w) => w.key !== key);
       return { windows: state.windows };
     });
+  },
+  setReadyResizing: (readyResizing) => {
+    set({ readyResizing });
   },
 }));
