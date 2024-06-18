@@ -31,15 +31,25 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
   }, [setWindowRef, windowKey]);
 
   useEffect(() => {
-    if (windowContainerRef.current) {
-      const width = document.body.clientWidth / 2;
-      const height = document.body.clientHeight / 2;
-      const x = document.body.clientWidth / 2 - width / 2;
-      const y = document.body.clientHeight / 2 - height / 2;
-      windowSize.current = { width, height };
-      windowPosition.current = { x, y };
+    if (windowContainerRef.current && window) {
+      if (window.type === 'uploader') {
+        const width = document.body.clientWidth / 2.5;
+        const height = document.body.clientHeight / 2.5;
+        const x = document.body.clientWidth / 2 - width / 2;
+        const y = document.body.clientHeight / 2 - height / 2;
+        windowSize.current = { width, height };
+        windowPosition.current = { x, y };
+        return;
+      } else {
+        const width = document.body.clientWidth / 2;
+        const height = document.body.clientHeight / 2;
+        const x = document.body.clientWidth / 2 - width / 2;
+        const y = document.body.clientHeight / 2 - height / 2;
+        windowSize.current = { width, height };
+        windowPosition.current = { x, y };
+      }
     }
-  }, []);
+  }, [window]);
 
   useEffect(() => {
     if (windowContainerRef.current) {
@@ -72,17 +82,20 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
-  const changeCursor = useCallback((e: MouseEvent) => {
-    if (!windowContainerRef.current) return;
-    const rect = windowContainerRef.current.getBoundingClientRect();
-    if (e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
-      setReadyResizing(true);
-      windowContainerRef.current.style.cursor = 'nwse-resize';
-    } else if (readyResizing) {
-      setReadyResizing(false);
-      windowContainerRef.current.style.cursor = 'default';
-    }
-  }, [readyResizing, setReadyResizing]);
+  const changeCursor = useCallback(
+    (e: MouseEvent) => {
+      if (!windowContainerRef.current) return;
+      const rect = windowContainerRef.current.getBoundingClientRect();
+      if (e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
+        setReadyResizing(true);
+        windowContainerRef.current.style.cursor = 'nwse-resize';
+      } else if (readyResizing) {
+        setReadyResizing(false);
+        windowContainerRef.current.style.cursor = 'default';
+      }
+    },
+    [readyResizing, setReadyResizing]
+  );
 
   useEffect(() => {
     const currentWindow = windowContainerRef.current;
@@ -93,27 +106,39 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     };
   }, [changeCursor]);
 
-  const startResizing = useCallback((e: MouseEvent) => {
-    if (!windowContainerRef.current) return;
-    const rect = windowContainerRef.current.getBoundingClientRect();
-    if (readyResizing && e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
-      const handleMouseMove = (e: MouseEvent) => {
-        if (!windowContainerRef.current || !windowContentRef.current || !windowHeaderRef.current) return;
-        const width = e.clientX - rect.left;
-        const height = e.clientY - rect.top;
-        windowContainerRef.current.style.width = `${width}px`;
-        windowContainerRef.current.style.height = `${height}px`;
-        windowContentRef.current.style.width = `${width}px`;
-        windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
-      };
-      const handleMouseUp = () => {
-        document.removeEventListener('mousemove', handleMouseMove);
-        document.removeEventListener('mouseup', handleMouseUp);
-      };
-      document.addEventListener('mousemove', handleMouseMove);
-      document.addEventListener('mouseup', handleMouseUp);
-    }
-  }, [readyResizing]);
+  const startResizing = useCallback(
+    (e: MouseEvent) => {
+      if (!windowContainerRef.current) return;
+      const rect = windowContainerRef.current.getBoundingClientRect();
+      if (
+        readyResizing &&
+        e.clientX > rect.right - 10 &&
+        e.clientY > rect.bottom - 10
+      ) {
+        const handleMouseMove = (e: MouseEvent) => {
+          if (
+            !windowContainerRef.current ||
+            !windowContentRef.current ||
+            !windowHeaderRef.current
+          )
+            return;
+          const width = e.clientX - rect.left;
+          const height = e.clientY - rect.top;
+          windowContainerRef.current.style.width = `${width}px`;
+          windowContainerRef.current.style.height = `${height}px`;
+          windowContentRef.current.style.width = `${width}px`;
+          windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
+        };
+        const handleMouseUp = () => {
+          document.removeEventListener('mousemove', handleMouseMove);
+          document.removeEventListener('mouseup', handleMouseUp);
+        };
+        document.addEventListener('mousemove', handleMouseMove);
+        document.addEventListener('mouseup', handleMouseUp);
+      }
+    },
+    [readyResizing]
+  );
 
   useEffect(() => {
     const currentWindow = windowContainerRef.current;

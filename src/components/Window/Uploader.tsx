@@ -2,6 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useTokenStore } from '../../store/token.store';
 import { uploadChunk } from '../../api/cloud';
 import { useWindowStore } from '../../store/window.store';
+import { uploadButton, uploadForm, uploadInput, uploadLabel, uploadName, uploadTitle, uploader, uploaderContainer } from '../../styles/windows/uploader.css';
+import { useRef } from 'react';
 
 export function Uploader({
   folderKey,
@@ -10,6 +12,8 @@ export function Uploader({
 }): React.ReactElement {
   const chunkSize = 1024 * 512;
   const queryClient = useQueryClient();
+
+  const uploadNameRef = useRef<HTMLInputElement>(null);
 
   const accessToken = useTokenStore((state) => state.accessToken);
   const closeWindow = useWindowStore((state) => state.closeWindow);
@@ -53,10 +57,44 @@ export function Uploader({
     closeWindow(folderKey);
   };
 
+  const uploadNameHandler = (event: React.ChangeEvent<HTMLInputElement>) => {
+    event.preventDefault();
+    if (!uploadNameRef.current) return;
+    if (!event.currentTarget.files) return;
+    const length = event.currentTarget.files.length;
+    const text =
+      length > 1 ? `${length} files` : event.currentTarget.files[0].name;
+    uploadNameRef.current.value = text;
+  };
+
   return (
-    <form onSubmit={uploadFileHandler}>
-      <input type="file" name="file" multiple />
-      <button type="submit">Upload</button>
-    </form>
+    <div className={uploaderContainer}>
+      <div className={uploader}>
+        <div className={uploadTitle}>upload files</div>
+        <form onSubmit={uploadFileHandler} className={uploadForm}>
+          <div className={uploadInput}>
+            <label htmlFor="file" className={uploadLabel}>
+              select files
+            </label>
+            <input
+              className={uploadName}
+              value="...nothing selected"
+              placeholder="...nothing selected"
+              ref={uploadNameRef}
+            />
+            <input
+              type="file"
+              id="file"
+              multiple
+              onChange={uploadNameHandler}
+              style={{ display: 'none' }}
+            />
+          </div>
+          <button type="submit" className={uploadButton}>
+            upload
+          </button>
+        </form>
+      </div>
+    </div>
   );
 }

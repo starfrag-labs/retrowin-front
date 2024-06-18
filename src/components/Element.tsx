@@ -1,18 +1,25 @@
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { useTokenStore } from '../store/token.store';
 import { downloadFile, renameFile, renameFolder } from '../api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import { useWindowStore } from '../store/window.store';
-import { elementContainer, uploadFileIcon, folderIcon, fileIcon, elementNameContainer, elementNameTextarea, elementNameText, windowElement, backgroundElement, backgroundSelectedElement, windowSelectedElement } from '../styles/element.css';
+import {
+  elementContainer,
+  uploadFileIcon,
+  folderIcon,
+  fileIcon,
+  elementNameContainer,
+  elementNameTextarea,
+  backgroundElementNameText,
+  windowElement,
+  backgroundElement,
+  backgroundSelectedElement,
+  windowSelectedElement,
+  windowElementNameText,
+} from '../styles/element.css';
 import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
@@ -52,8 +59,13 @@ export const Element = memo(
     const renameRef = useRef<HTMLTextAreaElement>(null);
 
     useEffect(() => {
-      if (elementRef.current) {
-        elementRef.current.className = isWindowElement ? windowElement : backgroundElement;
+      if (elementRef.current && nameRef.current) {
+        elementRef.current.className = isWindowElement
+          ? windowElement
+          : backgroundElement;
+        nameRef.current.className = isWindowElement
+          ? windowElementNameText
+          : backgroundElementNameText;
       }
     }, [isWindowElement]);
 
@@ -130,9 +142,13 @@ export const Element = memo(
 
     const highlightElement = useCallback(async () => {
       if (elementRef.current && nameRef.current && selected) {
-        elementRef.current.className = isWindowElement ? windowSelectedElement : backgroundSelectedElement;
+        elementRef.current.className = isWindowElement
+          ? windowSelectedElement
+          : backgroundSelectedElement;
       } else if (elementRef.current && nameRef.current) {
-        elementRef.current.className = isWindowElement ? windowElement : backgroundElement;
+        elementRef.current.className = isWindowElement
+          ? windowElement
+          : backgroundElement;
       }
     }, [isWindowElement, selected]);
 
@@ -242,7 +258,7 @@ export const Element = memo(
               spellCheck="false"
             />
           ) : (
-            <div className={elementNameText} ref={nameRef}>
+            <div className={backgroundElementNameText} ref={nameRef}>
               {nameState}
             </div>
           )}

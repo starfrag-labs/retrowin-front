@@ -74,13 +74,21 @@ export const folderIcon = style({
   color: 'orange',
 });
 
-export const elementNameText = style({
+export const backgroundElementNameText = style({
   textOverflow: 'ellipsis',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textAlign: 'center',
   color: 'white',
   filter: 'drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black)',
+});
+
+export const windowElementNameText = style({
+  textOverflow: 'ellipsis',
+  overflow: 'hidden',
+  whiteSpace: 'nowrap',
+  textAlign: 'center',
+  color: 'black',
 });
 
 export const elementNameTextarea = style({
