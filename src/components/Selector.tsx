@@ -70,6 +70,11 @@ export const Selector = ({
       )
         return;
 
+      // Check if the target is not the menu
+      if (menuRef?.current && menuRef.current.contains(e.target as Node)) {
+        return;
+      }
+
       // Check if the target is not an element
       let selectedKey = '';
       let isElement = false;
@@ -85,11 +90,6 @@ export const Selector = ({
           selectedKey = key;
         }
       });
-
-      // Check if the target is not the menu
-      if (menuRef?.current && menuRef.current.contains(e.target as Node)) {
-        return;
-      }
 
       if (isElement) {
         if (shiftKey || clickSelected) return;

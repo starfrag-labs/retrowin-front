@@ -38,7 +38,6 @@ export const backgroundElement = style({
 export const backgroundSelectedElement = style({
   ...defaultElement,
   backgroundColor: 'rgba(255, 255, 255, 0.2)',
-  whiteSpace: 'wrap',
 });
 
 export const windowElement = style({
@@ -51,7 +50,6 @@ export const windowElement = style({
 export const windowSelectedElement = style({
   ...defaultElement,
   backgroundColor: 'rgba(0, 0, 0, 0.2)',
-  whiteSpace: 'wrap',
 });
 
 const defaultIcon: StyleRule = {
@@ -74,20 +72,24 @@ export const folderIcon = style({
   color: 'orange',
 });
 
-export const backgroundElementNameText = style({
+const defaultText: StyleRule = {
+  width: '100%',
+  height: 'auto',
   textOverflow: 'ellipsis',
+  wordWrap: 'break-word',
   overflow: 'hidden',
-  whiteSpace: 'nowrap',
+  whiteSpace: 'wrap',
   textAlign: 'center',
+} as const;
+
+export const backgroundElementNameText = style({
+  ...defaultText,
   color: 'white',
   filter: 'drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black)',
 });
 
 export const windowElementNameText = style({
-  textOverflow: 'ellipsis',
-  overflow: 'hidden',
-  whiteSpace: 'nowrap',
-  textAlign: 'center',
+  ...defaultText,
   color: 'black',
 });
 

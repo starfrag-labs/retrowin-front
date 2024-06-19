@@ -26,7 +26,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const rootKey = useElementStore((state) => state.rootKey);
 
-  const selectElement = useElementStore((state) => state.selectElement);
   const findElement = useElementStore((state) => state.findElement);
   const moveElement = useElementStore((state) => state.moveElement);
 
@@ -39,12 +38,13 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       setStartY(e.pageY);
       elementsRef.forEach((elementRef, key) => {
         const element = findElement(key);
+        let contained = false;
         if (elementRef.current?.contains(e.target as Node)) {
           setIsDragging(true);
           setPointerMoved(false); // Reset the pointerMoved state
-          selectElement(key);
+          contained = true;
         }
-        if (!element?.selected) return;
+        if (!element?.selected && !contained) return;
         const clone = elementRef.current?.cloneNode(true) as HTMLDivElement;
         clone.style.position = 'absolute';
         clone.style.left =
@@ -56,7 +56,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       draggingElementsRef.current.style.left = '0px';
       draggingElementsRef.current.style.top = '0px';
     },
-    [elementsRef, findElement, selectElement]
+    [elementsRef, findElement]
   );
 
   const dragElement = useCallback(

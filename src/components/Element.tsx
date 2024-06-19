@@ -135,10 +135,12 @@ export const Element = memo(
         elementRef.current.className = isWindowElement
           ? windowSelectedElement
           : backgroundSelectedElement;
+        nameRef.current.style.whiteSpace = 'wrap';
       } else if (elementRef.current && nameRef.current) {
         elementRef.current.className = isWindowElement
           ? windowElement
           : backgroundElement;
+        nameRef.current.style.whiteSpace = 'nowrap';
       }
     }, [isWindowElement, selected]);
 
