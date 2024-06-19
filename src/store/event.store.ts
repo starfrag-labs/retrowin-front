@@ -1,40 +1,23 @@
 import { create } from "zustand";
-import { CustomMouseEventType } from "../types/event"
 
 type State = {
-  mouseEventType: CustomMouseEventType;
-  startMousePosition: { x: number; y: number };
-  pressedKey: string[];
+  resizing: boolean;
+  renaming: boolean;
 }
 
 type Action = {
-  setMouseEventType: (eventType: CustomMouseEventType) => void;
-  setStartMousePosition: (x: number, y: number) => void;
-  setPressedKey: (key: string) => void;
+  setResizing: (resizing: boolean) => void;
+  setRenaming: (renaming: boolean) => void;
 }
 
 const initialState: State = {
-  mouseEventType: 'idle',
-  startMousePosition: { x: 0, y: 0 },
-  pressedKey: [],
+  resizing: false,
+  renaming: false,
 }
 
 export const useEventStore = create<State & Action>((set) => ({
-  mouseEventType: initialState.mouseEventType,
-  pressedKey: initialState.pressedKey,
-  startMousePosition: initialState.startMousePosition,
-  setMouseEventType: (eventType) => {
-    set({ mouseEventType: eventType });
-  },
-  setStartMousePosition: (x, y) => {
-    set({ startMousePosition: { x, y } });
-  },
-  setPressedKey: (key) => {
-    set((state) => {
-      if (!state.pressedKey.includes(key)) {
-        state.pressedKey = [...state.pressedKey, key];
-      }
-      return { pressedKey: state.pressedKey };
-    });
-  },
+  resizing: initialState.resizing,
+  renaming: initialState.renaming,
+  setResizing: (resizing) => set({ resizing }),
+  setRenaming: (renaming) => set({ renaming }),
 }))

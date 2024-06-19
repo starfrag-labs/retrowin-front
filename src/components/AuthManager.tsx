@@ -10,20 +10,22 @@ export const AuthManager = ({ children }: { children: React.ReactNode }): React.
   const setAccessToken = useTokenStore((state) => state.setAccessToken);
 
   const validateToken = useCallback(async () => {
+    console.log(accessToken);
+    
     if (accessToken) {
-      await isValid(accessToken).catch(async () => {
-        const newToken = await refresh(accessToken)
-          .then((response) => {
+      await isValid(accessToken)
+        .then((response) => {
+          console.log(response);
+        })
+        .catch(async () => {
+          const newToken = await refresh(accessToken).then((response) => {
             const token = response.headers['authorization'].split(
               ' '
             )[1] as string;
             return token;
-          })
-          .catch(() => {
-            return '';
           });
-        setAccessToken(newToken);
-      });
+          setAccessToken(newToken);
+        });
     }
   }, [accessToken, setAccessToken]);
 

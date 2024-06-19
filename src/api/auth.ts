@@ -1,16 +1,23 @@
 import axios from 'axios';
 import { IProfile } from '../types/response';
 import { authUrls } from './urls';
-
+import { authApi } from '.';
 
 export const isValid = (accessToken: string) => {
-  return axios.request({
+  return authApi.request({
     method: authUrls.validate.method,
-    url: authUrls.validate.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
+    url: '/token/valid',
+    // headers: {
+    //   Authorization: `Bearer ${accessToken}`,
+    // },
   });
+  // return axios.request({
+  //   method: authUrls.validate.method,
+  //   url: authUrls.validate.url,
+  //   headers: {
+  //     Authorization: `Bearer ${accessToken}`,
+  //   },
+  // });
 };
 
 export const refresh = (accessToken: string) => {

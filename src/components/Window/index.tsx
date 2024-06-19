@@ -12,6 +12,7 @@ import {
 } from '../../styles/windows/window.css';
 import { ImageReader } from './ImageReader';
 import { VideoPlayer } from './VideoPlayer';
+import { useEventStore } from '../../store/event.store';
 
 export const Window = ({ windowKey }: { windowKey: string }) => {
   const [title, setTitle] = useState('Window');
@@ -22,10 +23,11 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
   const element = useElementStore((state) => state.findElement(windowKey));
-  const readyResizing = useWindowStore((state) => state.readyResizing);
+  const resizing = useEventStore((state) => state.resizing);
+
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const setWindowRef = useRefStore((state) => state.setWindowRef);
-  const setReadyResizing = useWindowStore((state) => state.setReadyResizing);
+  const setResizing = useEventStore((state) => state.setResizing);
 
   useEffect(() => {
     if (windowContentRef.current) {
@@ -90,14 +92,14 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       if (!windowContainerRef.current) return;
       const rect = windowContainerRef.current.getBoundingClientRect();
       if (e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
-        setReadyResizing(true);
+        setResizing(true);
         windowContainerRef.current.style.cursor = 'nwse-resize';
-      } else if (readyResizing) {
-        setReadyResizing(false);
+      } else if (resizing) {
+        setResizing(false);
         windowContainerRef.current.style.cursor = 'default';
       }
     },
-    [readyResizing, setReadyResizing]
+    [resizing, setResizing]
   );
 
   useEffect(() => {
@@ -114,7 +116,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       if (!windowContainerRef.current) return;
       const rect = windowContainerRef.current.getBoundingClientRect();
       if (
-        readyResizing &&
+        resizing &&
         e.clientX > rect.right - 10 &&
         e.clientY > rect.bottom - 10
       ) {
@@ -140,7 +142,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
         document.addEventListener('mouseup', handleMouseUp);
       }
     },
-    [readyResizing]
+    [resizing]
   );
 
   useEffect(() => {

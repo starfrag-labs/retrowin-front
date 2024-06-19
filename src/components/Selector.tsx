@@ -3,7 +3,7 @@ import { selectBox, selector } from '../styles/selector.css';
 import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { IElementState } from '../types/store';
-import { useWindowStore } from '../store/window.store';
+import { useEventStore } from '../store/event.store';
 
 export const Selector = ({
   children,
@@ -34,7 +34,8 @@ export const Selector = ({
   );
 
   const menuRef = useRefStore((state) => state.menuRef);
-  const resizing = useWindowStore((state) => state.readyResizing);
+  const resizing = useEventStore((state) => state.resizing);
+  const renaming = useEventStore((state) => state.renaming);
   const windowsRef = useRefStore((state) => state.windowsRef);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const elementsRef = useRefStore((state) => state.elementsRef);
@@ -59,65 +60,46 @@ export const Selector = ({
     };
   }, []);
 
-  const startSelecting = useCallback(
+  const selectingStart = useCallback(
     (e: MouseEvent) => {
-      if (
-        !selectorRef.current ||
-        !boxRef.current ||
-        !backgroundWindowRef?.current ||
-        !elementsRef ||
-        resizing
-      )
-        return;
+      // Check if the mouse event is triggered on the menu
+      const currentMenuRef = menuRef?.current;
+      if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
+      if (resizing || renaming) return;
 
-      // Check if the target is not the menu
-      if (menuRef?.current && menuRef.current.contains(e.target as Node)) {
-        return;
-      }
-
-      // Check if the target is not an element
-      let selectedKey = '';
-      let isElement = false;
-      let clickSelected = false;
+      // Check if the mouse event is triggered on an element
+      let element: IElementState | undefined;
       elementsRef.forEach((elementRef, key) => {
-        const isContaining = elementRef.current?.contains(e.target as Node);
-        if (isContaining && findElement(key)?.selected) {
-          clickSelected = true;
-          isElement = true;
-        } else if (isContaining && !clickSelected) {
-          clickSelected = false;
-          isElement = true;
-          selectedKey = key;
+        if (elementRef.current?.contains(e.target as Node)) {
+          element = findElement(key);
         }
       });
-
-      if (isElement) {
-        if (shiftKey || clickSelected) return;
-        else {
-          unselectAllElements();
-          selectElement(selectedKey);
-          return;
-        }
-      } else if (!shiftKey) {
-        unselectAllElements();
-      }
+      // If the mouse event is triggered on an element, return
+      if (element) return;
 
       setStartX(e.clientX);
       setStartY(e.clientY);
+      unselectAllElements();
 
-      if (backgroundWindowRef.current.contains(e.target as Node)) {
-        setTargetWindowRect(
-          backgroundWindowRef.current.getBoundingClientRect()
-        );
+      // Get target window
+      const currentBackgroundWindowRef = backgroundWindowRef?.current;
+      if (
+        currentBackgroundWindowRef &&
+        currentBackgroundWindowRef.contains(e.target as Node)
+      ) {
+        setTargetWindowRect(currentBackgroundWindowRef.getBoundingClientRect());
         setCurrentWindowElements(findElementByParentKey(rootKey));
+        setIsSelecting(true);
       }
       if (windowsRef) {
-        windowsRef.forEach((window, parentKey) => {
-          if (window.current && window.current.contains(e.target as Node)) {
-            // Set target window rect
-            setTargetWindowRect(window.current.getBoundingClientRect());
-            // Set current window elements
+        windowsRef.forEach((windowRef, parentKey) => {
+          // Check if target is on a window's corner
+          const currentWindowRef = windowRef.current;
+          if (!currentWindowRef) return;
+          if (currentWindowRef && currentWindowRef.contains(e.target as Node)) {
+            setTargetWindowRect(currentWindowRef.getBoundingClientRect());
             setCurrentWindowElements(findElementByParentKey(parentKey));
+            setIsSelecting(true);
           }
         });
       }
@@ -125,23 +107,16 @@ export const Selector = ({
     [
       backgroundWindowRef,
       elementsRef,
-      resizing,
-      menuRef,
-      shiftKey,
-      windowsRef,
       findElement,
-      unselectAllElements,
-      selectElement,
       findElementByParentKey,
+      menuRef,
+      renaming,
+      resizing,
       rootKey,
+      unselectAllElements,
+      windowsRef,
     ]
   );
-
-  useEffect(() => {
-    if (currentWindowElements) {
-      setIsSelecting(true);
-    }
-  }, [currentWindowElements]);
 
   const checkElementsInBox = useCallback(() => {
     if (!elementsRef || !boxRef.current || !currentWindowElements) return;
@@ -205,18 +180,18 @@ export const Selector = ({
     ]
   );
 
-  const stopSelecting = useCallback(() => {
+  const selectingEnd = useCallback(() => {
     if (!boxRef.current) return;
     setIsSelecting(false);
     boxRef.current.style.display = 'none';
   }, []);
 
   useEffect(() => {
-    document.addEventListener('mousedown', startSelecting);
+    document.addEventListener('mousedown', selectingStart);
     return () => {
-      document.removeEventListener('mousedown', startSelecting);
+      document.removeEventListener('mousedown', selectingStart);
     };
-  }, [startSelecting]);
+  }, [selectingStart]);
 
   useEffect(() => {
     document.addEventListener('mousemove', selecting);
@@ -226,11 +201,11 @@ export const Selector = ({
   }, [selecting]);
 
   useEffect(() => {
-    document.addEventListener('mouseup', stopSelecting);
+    document.addEventListener('mouseup', selectingEnd);
     return () => {
-      document.removeEventListener('mouseup', stopSelecting);
+      document.removeEventListener('mouseup', selectingEnd);
     };
-  }, [stopSelecting]);
+  }, [selectingEnd]);
 
   return (
     <div className={selector} ref={selectorRef}>

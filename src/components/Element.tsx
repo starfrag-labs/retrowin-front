@@ -23,6 +23,7 @@ import {
 import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
+import { useEventStore } from '../store/event.store';
 
 export const Element = memo(
   ({
@@ -57,6 +58,7 @@ export const Element = memo(
     const elementRef = useRef<HTMLDivElement>(null);
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
+    const setRenaming = useEventStore((state) => state.setRenaming);
 
     useEffect(() => {
       if (elementRef.current && nameRef.current) {
@@ -127,8 +129,11 @@ export const Element = memo(
         renameRef.current.focus();
         renameRef.current.value = '';
         renameRef.current.value = nameState;
+        setRenaming(true)
+      } else {
+        setRenaming(false)
       }
-    }, [nameState, renaming]);
+    }, [nameState, renaming, setRenaming]);
 
     const highlightElement = useCallback(async () => {
       if (elementRef.current && nameRef.current && selected) {
@@ -248,6 +253,7 @@ export const Element = memo(
               onChange={handleTextareaChange}
               onKeyDown={handleEnter}
               spellCheck="false"
+              onFocus={(e) => e.currentTarget.select()}
             />
           ) : (
             <div className={backgroundElementNameText} ref={nameRef}>
