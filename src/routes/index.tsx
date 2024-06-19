@@ -5,6 +5,7 @@ import { getProfile, issue } from '../api/auth';
 import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
 import { checkUser, enrollUser } from '../api/cloud';
+import { Loading } from '../components/Loading';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -28,7 +29,7 @@ export const Route = createFileRoute('/')({
     const accessToken = useTokenStore.getState().accessToken;
     const setIsCloudUser = useUserStore.getState().setIsCloudUser;
     const setProfile = useUserStore.getState().setProfile;
-  
+
     if (accessToken) {
       await checkUser(accessToken)
         .then(() => {
@@ -39,16 +40,15 @@ export const Route = createFileRoute('/')({
             setIsCloudUser(true);
           });
         });
-      await getProfile(accessToken)
-        .then((response) => {
-          setProfile(response.data.data);
-        })
+      await getProfile(accessToken).then((response) => {
+        setProfile(response.data.data);
+      });
       throw redirect({
         to: '/main',
       });
     }
   },
-  pendingComponent: () => <div>Loading...</div>,
+  pendingComponent: () => <Loading />,
   component: IndexComponent,
 });
 

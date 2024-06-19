@@ -1,24 +1,21 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { useRefStore } from "../store/ref.store";
-import { useElementStore } from "../store/element.store";
-import { draggingElementsIcon } from "../styles/element.css";
-import { moveFile, moveFolder } from "../api/cloud";
-import { useTokenStore } from "../store/token.store";
-import { useQueryClient } from "@tanstack/react-query";
-import { readFolderQueryOption } from "../utils/queryOptions/folder.query";
-import { defaultContainer } from "../styles/global/container.css";
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { useRefStore } from '../store/ref.store';
+import { useElementStore } from '../store/element.store';
+import { draggingElementsIcon } from '../styles/element.css';
+import { moveFile, moveFolder } from '../api/cloud';
+import { useTokenStore } from '../store/token.store';
+import { useQueryClient } from '@tanstack/react-query';
+import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { defaultContainer } from '../styles/global/container.css';
 
-export const Dragger = ({
-  children
-}: {
-  children: React.ReactNode;
-}) => {
+export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [displayDraggingElements, setDisplayDraggingElements] = useState(false);
+  const [pointerMoved, setPointerMoved] = useState(false); // To prevent the click event from being triggered when dragging
 
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
@@ -32,7 +29,6 @@ export const Dragger = ({
   const selectElement = useElementStore((state) => state.selectElement);
   const findElement = useElementStore((state) => state.findElement);
   const moveElement = useElementStore((state) => state.moveElement);
-  const unselectAllElements = useElementStore((state) => state.unselectAllElements);
 
   const dragElementStart = useCallback(
     (e: MouseEvent) => {
@@ -45,6 +41,7 @@ export const Dragger = ({
         const element = findElement(key);
         if (elementRef.current?.contains(e.target as Node)) {
           setIsDragging(true);
+          setPointerMoved(false); // Reset the pointerMoved state
           selectElement(key);
         }
         if (!element?.selected) return;
@@ -71,18 +68,18 @@ export const Dragger = ({
       draggingElementsRef.current.style.top = e.pageY - startY + 'px';
 
       if (
-        !displayDraggingElements &&
         isDragging &&
         Math.abs(e.pageX - startX) > 5 &&
         Math.abs(e.pageY - startY) > 5
       ) {
         document.body.style.cursor = 'grabbing';
         setDisplayDraggingElements(true);
+        setPointerMoved(true);
       }
     },
-    [displayDraggingElements, isDragging, startX, startY]
+    [isDragging, startX, startY]
   );
-  
+
   const dragElementEnd = useCallback(
     (e: MouseEvent) => {
       if (!isDragging) return;
@@ -124,7 +121,7 @@ export const Dragger = ({
       });
 
       // Move the selected elements to the target folder
-      if (targetFolderKey) {
+      if (targetFolderKey && pointerMoved) {
         elements.forEach((element) => {
           if (element.key === targetFolderKey) return;
           if (element.selected && element.type === 'folder') {
@@ -154,7 +151,6 @@ export const Dragger = ({
             });
           }
         });
-      unselectAllElements();
       }
     },
     [
@@ -162,7 +158,7 @@ export const Dragger = ({
       backgroundWindowRef,
       windowsRef,
       elementsRef,
-      unselectAllElements,
+      pointerMoved,
       rootKey,
       findElement,
       elements,
@@ -203,4 +199,4 @@ export const Dragger = ({
       {children}
     </div>
   );
-}
+};

@@ -77,7 +77,11 @@ export const Element = memo(
 
     const handleClickIcon = () => {
       if (type === 'file' && contentType) {
-        openImage();
+        if (contentType.includes('image')) {
+          newWindow(elementKey, 'image')
+        } else if (contentType.includes('video')) {
+          newWindow(elementKey, 'video')
+        }
       } else if (type === 'file') {
         handleDownload();
       } else if (type === 'folder') {
@@ -98,20 +102,6 @@ export const Element = memo(
       document.body.appendChild(link);
       link.click();
       link.remove();
-    };
-
-    const openImage = async () => {
-      if (!contentType) {
-        return;
-      }
-      const response = await downloadFile(accessToken, parentKey, elementKey);
-      if (!response) {
-        return;
-      }
-      const url = window.URL.createObjectURL(
-        new Blob([response.data], { type: contentType })
-      );
-      window.open(url);
     };
 
     const handleTextareaChange = (

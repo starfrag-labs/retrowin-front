@@ -20,7 +20,7 @@ export const Elements = ({ folderKey, isWindowElements = false }: { folderKey: s
   };
 
   const handleDoubleClick = () => {
-    newWindow(`${folderKey}-upload`, 'uploader');
+    newWindow(`${folderKey}_upload`, 'uploader');
   };
 
   return (

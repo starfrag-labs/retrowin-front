@@ -10,6 +10,8 @@ import {
   closeBtn,
   windowContent,
 } from '../../styles/windows/window.css';
+import { ImageReader } from './ImageReader';
+import { VideoPlayer } from './VideoPlayer';
 
 export const Window = ({ windowKey }: { windowKey: string }) => {
   const [title, setTitle] = useState('Window');
@@ -150,7 +152,6 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     };
   }, [startResizing]);
 
-  
   // set window title
   useEffect(() => {
     if (element && element.name) {
@@ -159,7 +160,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       setTitle('Upload Files');
     }
   }, [element, window]);
-  
+
   if (!window) return null;
 
   return (
@@ -173,10 +174,14 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
         <button onClick={() => closeWindow(window.key)} className={closeBtn} />
       </div>
       <div className={windowContent} ref={windowContentRef}>
-        {window.type === 'navigator' ? (
+        {window.type === 'image' ? (
+          <ImageReader fileKey={window.key} setTitle={setTitle}/>
+        ) : window.type === 'video' ? (
+          <VideoPlayer fileKey={window.key} />
+        ) : window.type === 'navigator' ? (
           <Navigator folderKey={window.key} />
         ) : window.type === 'uploader' ? (
-          <Uploader folderKey={window.key} />
+          <Uploader folderKey={window.key.split('_')[0]} />
         ) : null}
       </div>
     </div>

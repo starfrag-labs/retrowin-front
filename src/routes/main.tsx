@@ -16,6 +16,7 @@ import { OptionMenu } from '../components/OptionMenu';
 import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
 import { Dragger } from '../components/Dragger';
+import { Loading } from '../components/Loading';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -46,7 +47,7 @@ export const Route = createFileRoute('/main')({
       readFolderQueryOption(accessToken, rootFolderKey)
     );
   },
-  pendingComponent: () => <div>Loading...</div>,
+  pendingComponent: () => <Loading />,
   component: MainComponent,
 });
 

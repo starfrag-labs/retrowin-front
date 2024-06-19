@@ -79,7 +79,7 @@ export const Selector = ({
         if (isContaining && findElement(key)?.selected) {
           clickSelected = true;
           isElement = true;
-        } else if (isContaining) {
+        } else if (isContaining && !clickSelected) {
           clickSelected = false;
           isElement = true;
           selectedKey = key;

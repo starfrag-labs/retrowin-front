@@ -32,10 +32,7 @@ export const Uploader = memo(({
         fileName,
         totalChunks,
         i
-      ).catch((error) => {
-        console.log(fileName);
-        console.error(error);
-      });
+      )
       if (!result) {
         console.log('Failed to upload chunk');
         break;
