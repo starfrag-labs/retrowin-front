@@ -52,10 +52,10 @@ api.interceptors.response.use(
             return api.request(error.config);
         }).catch((error) => {
           console.log('error >>> ', error);
-          useTokenStore.getState().setAccessToken('');
         });
       }
     }
+    useTokenStore.getState().setAccessToken('');
     useTokenStore.getState().resetRequestCount();
     return Promise.reject(error);
   }
