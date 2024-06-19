@@ -1,47 +1,62 @@
-import axios from "axios";
-import config from "../utils/config";
-import { useTokenStore } from "../store/token.store";
+import axios, { AxiosError, AxiosResponse } from 'axios';
+import config from '../utils/config';
+import { useTokenStore } from '../store/token.store';
+import { authUrls } from './urls';
 
-export const authApi = axios.create({
-  baseURL: config.auth,
+export const api = axios.create({
+  baseURL: config.api,
   headers: {
-    "Content-Type": "application/json",
+    'Content-Type': 'application/json',
   },
-  withCredentials: true,
+  // withCredentials: true,
 });
 
-export const cloudApi = axios.create({
-  baseURL: config.cloud,
-  headers: {
-    "Content-Type": "application/json",
-  },
-  withCredentials: true,
-});
-
-authApi.interceptors.request.use(
+api.interceptors.request.use(
   (config) => {
     const token = useTokenStore.getState().accessToken;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
-      console.log(config.url);
-      
     }
     return config;
   },
-  (error) => {
+  async (error) => {
     return Promise.reject(error);
   }
 );
 
-cloudApi.interceptors.request.use(
-  (config) => {
-    const token = useTokenStore.getState().accessToken;
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
+api.interceptors.response.use(
+  (response: AxiosResponse) => {
+    useTokenStore.getState().resetRequestCount();
+    return response;
   },
-  (error) => {
+  async (error: AxiosError | Error) => {
+    console.log('error', error);
+
+    if (axios.isAxiosError(error)) {
+      const token = useTokenStore.getState().accessToken;
+      const requestCount = useTokenStore.getState().requestCount;
+      if (error.response?.status === 401 && requestCount < 1 && error.config) {
+        // create url
+        await axios.request({
+          method: authUrls.refresh.method,
+          url: `${config.api}${authUrls.refresh.url}`,
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          withCredentials: true,
+        }).then((response) => {
+          const newToken = response.headers['authorization'].split(' ')[1];
+          useTokenStore.getState().setAccessToken(newToken);
+          useTokenStore.getState().incrementRequestCount();
+          if (error.config)
+            return api.request(error.config);
+        }).catch((error) => {
+          console.log('error >>> ', error);
+          useTokenStore.getState().setAccessToken('');
+        });
+      }
+    }
+    useTokenStore.getState().resetRequestCount();
     return Promise.reject(error);
   }
 );

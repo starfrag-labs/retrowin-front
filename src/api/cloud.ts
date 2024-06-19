@@ -1,10 +1,10 @@
+import { api } from '.';
 import { ReadFolderData } from '../types/response';
-import axios from 'axios';
 import { cloudUrls } from './urls';
 
 export const checkUser = async (accessToken: string) => {
   const checkUser = cloudUrls.user.checkUser;
-  const response = await axios.request({
+  const response = await api.request({
     method: checkUser.method,
     url: checkUser.url,
     headers: {
@@ -16,7 +16,7 @@ export const checkUser = async (accessToken: string) => {
 
 export const enrollUser = async (accessToken: string) => {
   const createUser = cloudUrls.user.enrollUser;
-  const response = await axios.request({
+  const response = await api.request({
     method: createUser.method,
     url: createUser.url,
     headers: {
@@ -28,7 +28,7 @@ export const enrollUser = async (accessToken: string) => {
 
 export const deleteUser = async (accessToken: string) => {
   const deleteUser = cloudUrls.user.deleteUser;
-  const response = await axios.request({
+  const response = await api.request({
     method: deleteUser.method,
     url: deleteUser.url,
     headers: {
@@ -40,7 +40,7 @@ export const deleteUser = async (accessToken: string) => {
 
 export const createRootFolder = async (accessToken: string) => {
   const createRootFolder = cloudUrls.folder.createRootFolder;
-  const response = await axios.request<string>({
+  const response = await api.request<string>({
     method: createRootFolder.method,
     url: createRootFolder.url,
     headers: {
@@ -56,7 +56,7 @@ export const createFolder = async (
   folderName: string
 ) => {
   const createFolder = cloudUrls.folder.createFolder(folderKey);
-  const response = await axios.request<string>({
+  const response = await api.request<string>({
     method: createFolder.method,
     url: createFolder.url,
     headers: {
@@ -71,7 +71,7 @@ export const createFolder = async (
 
 export const readFolder = async (accessToken: string, folderKey: string) => {
   const readFolder = cloudUrls.folder.readFolder(folderKey);
-  const response = await axios.request<ReadFolderData>({
+  const response = await api.request<ReadFolderData>({
     method: readFolder.method,
     url: readFolder.url,
     headers: {
@@ -83,7 +83,7 @@ export const readFolder = async (accessToken: string, folderKey: string) => {
 
 export const getRootFolderKey = async (accessToken: string) => {
   const getRootFolderKey = cloudUrls.folder.getRootFolderKey;
-  const response = await axios.request<string>({
+  const response = await api.request<string>({
     method: getRootFolderKey.method,
     url: getRootFolderKey.url,
     headers: {
@@ -95,7 +95,7 @@ export const getRootFolderKey = async (accessToken: string) => {
 
 export const deleteFolder = async (accessToken: string, folderKey: string) => {
   const deleteFolder = cloudUrls.folder.deleteFolder(folderKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: deleteFolder.method,
     url: deleteFolder.url,
     headers: {
@@ -111,7 +111,7 @@ export const moveFolder = async (
   targetKey: string
 ) => {
   const moveFolder = cloudUrls.folder.moveFolder(folderKey, targetKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: moveFolder.method,
     url: moveFolder.url,
     headers: {
@@ -127,7 +127,7 @@ export const renameFolder = async (
   folderName: string
 ) => {
   const renameFolder = cloudUrls.folder.renameFolder(folderKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: renameFolder.method,
     url: renameFolder.url,
     headers: {
@@ -155,7 +155,7 @@ export const uploadChunk = async (
   formData.append('totalChunks', totalChunks.toString());
   formData.append('chunkNumber', chunkNumber.toString());
 
-  const response = await axios.request({
+  const response = await api.request({
     method: uploadFile.method,
     url: uploadFile.url,
     headers: {
@@ -173,7 +173,7 @@ export const downloadFile = async (
   fileKey: string
 ) => {
   const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
-  const response = await axios.request<Blob>({
+  const response = await api.request<Blob>({
     method: downloadFile.method,
     url: downloadFile.url,
     headers: {
@@ -190,7 +190,7 @@ export const deleteFile = async (
   fileKey: string
 ) => {
   const deleteFile = cloudUrls.file.deleteFile(folderKey, fileKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: deleteFile.method,
     url: deleteFile.url,
     headers: {
@@ -207,7 +207,7 @@ export const renameFile = async (
   fileName: string
 ) => {
   const renameFile = cloudUrls.file.renameFile(folderKey, fileKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: renameFile.method,
     url: renameFile.url,
     headers: {
@@ -227,7 +227,7 @@ export const moveFile = async (
   newFolderKey: string
 ) => {
   const moveFile = cloudUrls.file.moveFile(folderKey, fileKey, newFolderKey);
-  const response = await axios.request({
+  const response = await api.request({
     method: moveFile.method,
     url: moveFile.url,
     headers: {
@@ -236,4 +236,3 @@ export const moveFile = async (
   });
   return response;
 };
-

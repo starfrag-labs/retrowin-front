@@ -40,7 +40,7 @@ export const Route = createFileRoute('/')({
             setIsCloudUser(true);
           });
         });
-      await getProfile(accessToken).then((response) => {
+      await getProfile().then((response) => {
         setProfile(response.data.data);
       });
       throw redirect({

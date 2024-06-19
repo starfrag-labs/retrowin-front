@@ -1,54 +1,35 @@
-import axios from 'axios';
 import { IProfile } from '../types/response';
 import { authUrls } from './urls';
-import { authApi } from '.';
+import { api } from '.';
 
-export const isValid = (accessToken: string) => {
-  return authApi.request({
+export const isValid = () => {
+  return api.request({
     method: authUrls.validate.method,
-    url: '/token/valid',
-    // headers: {
-    //   Authorization: `Bearer ${accessToken}`,
-    // },
+    url: authUrls.validate.url,
   });
-  // return axios.request({
-  //   method: authUrls.validate.method,
-  //   url: authUrls.validate.url,
-  //   headers: {
-  //     Authorization: `Bearer ${accessToken}`,
-  //   },
-  // });
 };
 
-export const refresh = (accessToken: string) => {
-  return axios.request({
+export const refresh = () => {
+  return api.request({
     method: authUrls.refresh.method,
     url: authUrls.refresh.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    withCredentials: true,
   });
 };
 
 export const issue = async (code: string) => {
-  const response = await axios.request({
+  const response = await api.request({
     method: authUrls.issue.method,
     url: `${authUrls.issue.url}?code=${code}`,
-    withCredentials: true,
   });
   return response;
 };
 
-export const getProfile = (accessToken: string) => {
-  return axios.request<{
+export const getProfile = () => {
+  return api.request<{
     message: string;
     data: IProfile;
   }>({
     method: authUrls.profile.method,
     url: authUrls.profile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
 };

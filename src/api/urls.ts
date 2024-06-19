@@ -1,21 +1,18 @@
-import { Urls } from "../types/request";
-import config from "../utils/config";
-
-export const authUrls: Urls = {
+export const authUrls = {
   validate: {
-    url: `${config.auth}/token/valid`,
+    url: `/ifauth/token/valid`,
     method: 'GET',
   },
   refresh: {
-    url: `${config.auth}/token/refresh`,
+    url: `/ifauth/token/refresh`,
     method: 'GET',
   },
   issue: {
-    url: `${config.auth}/token/issue`,
+    url: `/ifauth/token/issue`,
     method: 'GET',
   },
   profile: {
-    url: `${config.auth}/user/profile`,
+    url: `/ifauth/user/profile`,
     method: 'GET',
   },
 };
@@ -23,54 +20,54 @@ export const authUrls: Urls = {
 export const cloudUrls = {
   user: {
     checkUser: {
-      url: `${config.cloud}/user`,
+      url: `/ifcloud/user`,
       method: 'GET',
     },
     enrollUser: {
-      url: `${config.cloud}/user/enroll`,
+      url: `/ifcloud/user/enroll`,
       method: 'GET',
     },
     deleteUser: {
-      url: `${config.cloud}/user`,
+      url: `/ifcloud/user`,
       method: 'DELETE',
     },
   },
   folder: {
     createRootFolder: {
-      url: `${config.cloud}/folder/root`,
+      url: `/ifcloud/folder/root`,
       method: 'POST',
     },
     createFolder: (folderKey: string) => {
       return {
-        url: `${config.cloud}/folder/${folderKey}`,
+        url: `/ifcloud/folder/${folderKey}`,
         method: 'POST',
       };
     },
     deleteFolder: (folderKey: string) => {
       return {
-        url: `${config.cloud}/folder/${folderKey}`,
+        url: `/ifcloud/folder/${folderKey}`,
         method: 'DELETE',
       };
     },
     readFolder: (folderKey: string) => {
       return {
-        url: `${config.cloud}/folder/${folderKey}`,
+        url: `/ifcloud/folder/${folderKey}`,
         method: 'GET',
       };
     },
     getRootFolderKey: {
-      url: `${config.cloud}/folder/rootKey`,
+      url: `/ifcloud/folder/rootKey`,
       method: 'GET',
     },
     moveFolder: (folderKey: string, targetKey: string) => {
       return {
-        url: `${config.cloud}/folder/move/${folderKey}?targetKey=${targetKey}`,
+        url: `/ifcloud/folder/move/${folderKey}?targetKey=${targetKey}`,
         method: 'PATCH',
       };
     },
     renameFolder: (folderKey: string) => {
       return {
-        url: `${config.cloud}/folder/rename/${folderKey}`,
+        url: `/ifcloud/folder/rename/${folderKey}`,
         method: 'PATCH',
       };
     },
@@ -78,31 +75,31 @@ export const cloudUrls = {
   file: {
     uploadFile: (folderKey: string) => {
       return {
-        url: `${config.cloud}/file/upload/${folderKey}`,
+        url: `/ifcloud/upload/${folderKey}`,
         method: 'POST',
       };
     },
     downloadFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${config.cloud}/file/download/${folderKey}/${fileKey}`,
+        url: `/ifcloud/download/${folderKey}/${fileKey}`,
         method: 'GET',
       };
     },
     deleteFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${config.cloud}/file/${folderKey}/${fileKey}`,
+        url: `/ifcloud/${folderKey}/${fileKey}`,
         method: 'DELETE',
       };
     },
     renameFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${config.cloud}/file/rename/${folderKey}/${fileKey}`,
+        url: `/ifcloud/rename/${folderKey}/${fileKey}`,
         method: 'PATCH',
       };
     },
     moveFile: (folderKey: string, fileKey: string, targetKey: string) => {
       return {
-        url: `${config.cloud}/file/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
+        url: `/ifcloud/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
         method: 'PATCH',
       };
     },
