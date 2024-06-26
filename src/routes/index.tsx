@@ -6,6 +6,7 @@ import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
 import { checkUser, enrollUser } from '../api/cloud';
 import { Loading } from '../components/Loading';
+import { useEffect } from 'react';
 
 const codeSchema = z.object({
   code: z.string().optional(),
@@ -56,10 +57,12 @@ function IndexComponent() {
   const accessToken = useTokenStore((state) => state.accessToken);
   const code = Route.useSearch().code;
 
-  if (!accessToken && !code) {
-    const loginUrl = `${config.oauth}?redirect_url=${config.redirectUrl}`;
-    window.location.href = loginUrl;
-  }
+  useEffect(() => {
+    if (!accessToken && !code) {
+      const loginUrl = `${config.oauth}?redirect=${config.redirectUrl}`;
+      window.location.href = loginUrl;
+    }
+  }, [accessToken, code]);
 
   if (accessToken) {
     return <Navigate to="/main" />;

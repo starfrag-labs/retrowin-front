@@ -30,29 +30,28 @@ api.interceptors.response.use(
     return response;
   },
   async (error: AxiosError | Error) => {
-    console.log('error', error);
-
     if (axios.isAxiosError(error)) {
       const token = useTokenStore.getState().accessToken;
       const requestCount = useTokenStore.getState().requestCount;
       if (error.response?.status === 401 && requestCount < 1 && error.config) {
         // create url
-        await axios.request({
-          method: authUrls.refresh.method,
-          url: `${config.api}${authUrls.refresh.url}`,
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          withCredentials: true,
-        }).then((response) => {
-          const newToken = response.headers['authorization'].split(' ')[1];
-          useTokenStore.getState().setAccessToken(newToken);
-          useTokenStore.getState().incrementRequestCount();
-          if (error.config)
-            return api.request(error.config);
-        }).catch((error) => {
-          console.log('error >>> ', error);
-        });
+        await axios
+          .request({
+            method: authUrls.refresh.method,
+            url: `${config.api}${authUrls.refresh.url}`,
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          })
+          .then((response) => {
+            const newToken = response.headers['authorization'].split(' ')[1];
+            useTokenStore.getState().setAccessToken(newToken);
+            useTokenStore.getState().incrementRequestCount();
+            if (error.config) return api.request(error.config);
+          })
+          .catch(() => {});
+        window.location.reload();
       }
     }
     useTokenStore.getState().setAccessToken('');

@@ -75,31 +75,31 @@ export const cloudUrls = {
   file: {
     uploadFile: (folderKey: string) => {
       return {
-        url: `/ifcloud/upload/${folderKey}`,
+        url: `/ifcloud/file/upload/${folderKey}`,
         method: 'POST',
       };
     },
     downloadFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `/ifcloud/download/${folderKey}/${fileKey}`,
+        url: `/ifcloud/file/download/${folderKey}/${fileKey}`,
         method: 'GET',
       };
     },
     deleteFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `/ifcloud/${folderKey}/${fileKey}`,
+        url: `/ifcloud/file/${folderKey}/${fileKey}`,
         method: 'DELETE',
       };
     },
     renameFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `/ifcloud/rename/${folderKey}/${fileKey}`,
+        url: `/ifcloud/file/rename/${folderKey}/${fileKey}`,
         method: 'PATCH',
       };
     },
     moveFile: (folderKey: string, fileKey: string, targetKey: string) => {
       return {
-        url: `/ifcloud/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
+        url: `/ifcloud/file/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
         method: 'PATCH',
       };
     },
