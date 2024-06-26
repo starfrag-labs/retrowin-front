@@ -15,12 +15,11 @@ RUN npm install -y && \
 FROM node:22-alpine as deploy
 
 WORKDIR /app
-RUN rm -rf ./*
+RUN rm -rf ./* && \
+  npm i -g serve
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/.env ./.env
 
-EXPOSE 7777
-
-ENTRYPOINT [ "node", "dist/index.js" ]
+ENTRYPOINT ["serve", "-s", "dist", "-l", "3000"]
