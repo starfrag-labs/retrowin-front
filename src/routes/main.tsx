@@ -17,7 +17,6 @@ import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
 import { Dragger } from '../components/Dragger';
 import { Loading } from '../components/Loading';
-import { useWindowStoreV2 } from '../store/window.store.v2';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {

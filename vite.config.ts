@@ -11,4 +11,8 @@ export default defineConfig({
     TanStackRouterVite(),
     vanillaExtractPlugin(),
   ],
+  server: {
+    host: true,
+    port: 7777,
+  }
 })
