@@ -45,20 +45,27 @@ export const Element = memo(
   }): React.ReactElement => {
     const queryClient = useQueryClient();
 
+    // states
+    const [nameState, setNameState] = useState(name);
+    const [newNameState, setNewNameState] = useState(name);
+
+    // refs
+    const elementRef = useRef<HTMLDivElement>(null);
+    const nameRef = useRef<HTMLInputElement>(null);
+    const renameRef = useRef<HTMLTextAreaElement>(null);
+
+    // store states
     const accessToken = useTokenStore((state) => state.accessToken);
+
+    // store functions
     const newWindow = useWindowStore((state) => state.newWindow);
     const rename = useElementStore((state) => state.renameElement);
     const endRenaming = useElementStore((state) => state.endRenaming);
     const setElementRef = useRefStore((state) => state.setElementRef);
-
-    const [nameState, setNameState] = useState(name);
-    const [newNameState, setNewNameState] = useState(name);
-
-    const contentType = getContentType(name);
-    const elementRef = useRef<HTMLDivElement>(null);
-    const nameRef = useRef<HTMLInputElement>(null);
-    const renameRef = useRef<HTMLTextAreaElement>(null);
     const setRenaming = useEventStore((state) => state.setRenaming);
+    const closeWindow = useWindowStore((state) => state.closeWindow);
+    
+    const contentType = getContentType(name);
 
     useEffect(() => {
       if (elementRef.current && nameRef.current) {
@@ -77,6 +84,7 @@ export const Element = memo(
       }
     }, [elementKey, setElementRef]);
 
+    // click icon event handler
     const handleClickIcon = () => {
       if (type === 'file' && contentType) {
         if (contentType.includes('image')) {
@@ -87,10 +95,12 @@ export const Element = memo(
       } else if (type === 'file') {
         handleDownload();
       } else if (type === 'folder') {
+        closeWindow(parentKey);
         newWindow(elementKey, 'navigator');
       }
     };
 
+    // download file event handler
     const handleDownload = async () => {
       const response = await downloadFile(accessToken, parentKey, elementKey);
       if (!response) {

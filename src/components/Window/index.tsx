@@ -9,32 +9,44 @@ import {
   windowHeader,
   closeBtn,
   windowContent,
+  maximizeBtn,
+  btnContainer,
+  minimizeBtn,
 } from '../../styles/windows/window.css';
 import { ImageReader } from './ImageReader';
 import { VideoPlayer } from './VideoPlayer';
 import { useEventStore } from '../../store/event.store';
 
 export const Window = ({ windowKey }: { windowKey: string }) => {
+  // states
   const [title, setTitle] = useState('Window');
-  const window = useWindowStore((state) => state.findWindow(windowKey));
+  const [maximized, setMaximized] = useState(false);
+
+  // refs
   const windowSize = useRef({ width: 0, height: 0 });
   const windowPosition = useRef({ x: 0, y: 0 });
   const windowContainerRef = useRef<HTMLDivElement>(null);
+
+  // store states
+  const window = useWindowStore((state) => state.findWindow(windowKey));
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
   const element = useElementStore((state) => state.findElement(windowKey));
   const resizing = useEventStore((state) => state.resizing);
 
+  // store functions
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const setWindowRef = useRefStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
 
+  // update ref store on mount
   useEffect(() => {
     if (windowContentRef.current) {
       setWindowRef(windowKey, windowContentRef);
     }
   }, [setWindowRef, windowKey]);
 
+  // initialize window size and position
   useEffect(() => {
     if (windowContainerRef.current && window) {
       if (window.type === 'uploader') {
@@ -56,6 +68,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     }
   }, [window]);
 
+  // set window size and position
   useEffect(() => {
     if (windowContainerRef.current) {
       windowContainerRef.current.style.width = `${windowSize.current.width}px`;
@@ -69,8 +82,31 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     }
   }, []);
 
+  // maximize window
+  const maximizeWindow = () => {
+    if (!windowContainerRef.current) return;
+    setMaximized(true);
+    windowContainerRef.current.style.width = `${document.body.clientWidth}px`;
+    windowContainerRef.current.style.height = `${document.body.clientHeight}px`;
+    windowContainerRef.current.style.left = '0px';
+    windowContainerRef.current.style.top = '0px';
+  }
+
+  // minimize window
+  const minimizeWindow = () => {
+    if (!windowContainerRef.current) return;
+    setMaximized(false);
+    windowContainerRef.current.style.width = `${windowSize.current.width}px`;
+    windowContainerRef.current.style.height = `${windowSize.current.height}px`;
+    windowContainerRef.current.style.left = `${windowPosition.current.x}px`;
+    windowContainerRef.current.style.top = `${windowPosition.current.y}px`;
+  }
+
+  // move window
   const moveWindow = (e: React.MouseEvent) => {
     if (!windowContainerRef.current || !windowHeaderRef.current) return;
+    if (e.clientX < 0 || e.clientY < 0) return;
+    if (e.clientX > document.body.clientWidth || e.clientY > document.body.clientHeight) return;
     const rect = windowHeaderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -80,6 +116,19 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       windowContainerRef.current.style.top = `${e.clientY - y}px`;
     };
     const handleMouseUp = () => {
+      // correct window position
+      if (!windowContainerRef.current) return;
+      const rect = windowContainerRef.current.getBoundingClientRect();
+      const x = rect.left;
+      const y = rect.top;
+      if (x < 0) windowContainerRef.current.style.left = '0px';
+      if (y < 0) windowContainerRef.current.style.top = '0px';
+      if (x + rect.width > document.body.clientWidth)
+        windowContainerRef.current.style.left = `${document.body.clientWidth - rect.width}px`;
+      if (y + rect.height > document.body.clientHeight)
+        windowContainerRef.current.style.top = `${document.body.clientHeight - rect.height}px`;
+
+      // remove event listeners
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
     };
@@ -87,6 +136,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     document.addEventListener('mouseup', handleMouseUp);
   };
 
+  // change cursor on resize
   const changeCursor = useCallback(
     (e: MouseEvent) => {
       if (!windowContainerRef.current) return;
@@ -145,6 +195,7 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
     [resizing]
   );
 
+  // resize window start
   useEffect(() => {
     const currentWindow = windowContainerRef.current;
     if (!currentWindow) return;
@@ -173,7 +224,14 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
         onMouseDown={moveWindow}
       >
         {title}
-        <button onClick={() => closeWindow(window.key)} className={closeBtn} />
+        <div className={btnContainer}>
+          {maximized ? ( 
+            <button onClick={minimizeWindow} className={minimizeBtn} />
+          ) : (
+            <button onClick={maximizeWindow} className={maximizeBtn} />
+          )}
+          <button onClick={() => closeWindow(window.key)} className={closeBtn} />
+        </div>
       </div>
       <div className={windowContent} ref={windowContentRef}>
         {window.type === 'image' ? (

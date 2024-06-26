@@ -107,8 +107,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         Math.abs(e.pageX - startX) > 5 &&
         Math.abs(e.pageY - startY) > 5
       ) {
-        console.log('dragElementStart');
-
         document.body.style.cursor = 'grabbing';
         setDisplayDraggingElements(true);
         setPointerMoved(true);

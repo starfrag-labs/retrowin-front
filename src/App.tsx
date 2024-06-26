@@ -25,7 +25,7 @@ export function App() {
       />
       <ReactQueryDevtools
         initialIsOpen={false}
-        buttonPosition="top-right"
+        buttonPosition="bottom-left"
         position="top"
       />
     </QueryClientProvider>

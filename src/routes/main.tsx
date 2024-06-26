@@ -17,6 +17,7 @@ import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
 import { Dragger } from '../components/Dragger';
 import { Loading } from '../components/Loading';
+import { useWindowStoreV2 } from '../store/window.store.v2';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -54,6 +55,7 @@ export const Route = createFileRoute('/main')({
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
   const windows = useWindowStore((state) => state.windows);
+  // const windowsV2 = useWindowStoreV2((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef

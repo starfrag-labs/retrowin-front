@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { StyleRule, style } from "@vanilla-extract/css";
 
 export const windowContainer = style({
   position: 'absolute',
@@ -20,13 +20,32 @@ export const windowHeader = style({
   borderBottom: '1px solid black',
 });
 
-export const closeBtn = style({
+export const btnContainer = style({
+  display: 'flex',
+  gap: '0.5rem',
+});
+
+const btn: StyleRule = {
   width: '1rem',
   height: '1rem',
   fontSize: '1rem',
   padding: '0.5rem',
   cursor: 'pointer',
   borderRadius: '50%',
-  backgroundColor: 'rgb(255,100, 100)',
   border: 'none',
+} as const;
+
+export const maximizeBtn = style({
+  ...btn,
+  backgroundColor: 'rgb(100, 255, 100)',
+});
+
+export const minimizeBtn = style({  
+  ...btn,
+  backgroundColor: 'rgb(100, 100, 255)',
+});
+
+export const closeBtn = style({
+  ...btn,
+  backgroundColor: 'rgb(255,100, 100)',
 });

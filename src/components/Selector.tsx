@@ -74,6 +74,7 @@ export const Selector = ({
           element = findElement(key);
         }
       });
+
       // If the mouse event is triggered on an element, return
       if (element) return;
 
