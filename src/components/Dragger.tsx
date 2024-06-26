@@ -63,7 +63,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     (e: MouseEvent) => {
       if (e.button !== 0) return;
       if (resizing || renaming) return;
-      
+
       // Check if the mouse event is triggered on the menu
       const currentMenuRef = menuRef?.current;
       if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
@@ -90,6 +90,8 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       elementsRef,
       findElement,
       menuRef,
+      renaming,
+      resizing,
       selectElement,
       shiftKey,
       unselectAllElements,
