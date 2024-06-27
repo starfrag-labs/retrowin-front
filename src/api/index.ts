@@ -34,7 +34,7 @@ api.interceptors.response.use(
       const token = useTokenStore.getState().accessToken;
       const requestCount = useTokenStore.getState().requestCount;
       if (error.response?.status === 401 && requestCount < 1 && error.config) {
-        // create url
+        // Refresh token
         await axios
           .request({
             method: authUrls.refresh.method,
@@ -50,8 +50,9 @@ api.interceptors.response.use(
             useTokenStore.getState().incrementRequestCount();
             if (error.config) return api.request(error.config);
           })
-          .catch(() => {});
-        window.location.reload();
+          .catch(() => {
+            window.location.reload();
+          });
       }
     }
     useTokenStore.getState().setAccessToken('');

@@ -4,25 +4,39 @@ import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
+import { useWindowStoreV2 } from '../store/window.store.v2';
 
 export const Selector = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const selectorRef = useRef<HTMLDivElement>(null);
-  const boxRef = useRef<HTMLDivElement>(null);
+  // States
   const [isSelecting, setIsSelecting] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
+  const [shiftKey, setShiftKey] = useState(false);
   const [targetWindowRect, setTargetWindowRect] = useState<DOMRect>(
     document.body.getBoundingClientRect()
   );
   const [currentWindowElements, setCurrentWindowElements] = useState<
     IElementState[] | undefined
   >();
-  const [shiftKey, setShiftKey] = useState(false);
 
+  // Refs
+  const selectorRef = useRef<HTMLDivElement>(null);
+  const boxRef = useRef<HTMLDivElement>(null);
+
+  // Store states
+  const menuRef = useRefStore((state) => state.menuRef);
+  const resizing = useEventStore((state) => state.resizing);
+  const renaming = useEventStore((state) => state.renaming);
+  const windowsRef = useRefStore((state) => state.windowsRef);
+  const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
+  const elementsRef = useRefStore((state) => state.elementsRef);
+  const rootKey = useElementStore((state) => state.rootKey);
+  
+  // Store functions
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
   const unselectAllElements = useElementStore(
@@ -32,15 +46,9 @@ export const Selector = ({
   const findElementByParentKey = useElementStore(
     (state) => state.findElementsByParentKey
   );
+  const findWindow = useWindowStoreV2((state) => state.findWindow);
 
-  const menuRef = useRefStore((state) => state.menuRef);
-  const resizing = useEventStore((state) => state.resizing);
-  const renaming = useEventStore((state) => state.renaming);
-  const windowsRef = useRefStore((state) => state.windowsRef);
-  const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
-  const elementsRef = useRefStore((state) => state.elementsRef);
-  const rootKey = useElementStore((state) => state.rootKey);
-
+  // Keyboard event listeners
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Shift') {
@@ -60,6 +68,7 @@ export const Selector = ({
     };
   }, []);
 
+  // Selecting start event listener
   const selectingStart = useCallback(
     (e: MouseEvent) => {
       // Check if the mouse event is triggered on the menu
@@ -74,8 +83,6 @@ export const Selector = ({
           element = findElement(key);
         }
       });
-
-      // If the mouse event is triggered on an element, return
       if (element) return;
 
       setStartX(e.clientX);
@@ -93,14 +100,15 @@ export const Selector = ({
         setIsSelecting(true);
       }
       if (windowsRef) {
-        windowsRef.forEach((windowRef, parentKey) => {
+        windowsRef.forEach((windowRef, windowKey) => {
           // Check if target is on a window's corner
           const currentWindowRef = windowRef.current;
-          if (!currentWindowRef) return;
+          const window = findWindow(windowKey); // Get window by key
+          if (!currentWindowRef || !window) return;
           if (currentWindowRef && currentWindowRef.contains(e.target as Node)) {
-            setTargetWindowRect(currentWindowRef.getBoundingClientRect());
-            setCurrentWindowElements(findElementByParentKey(parentKey));
-            setIsSelecting(true);
+            setTargetWindowRect(currentWindowRef.getBoundingClientRect()); // Set target window rect
+            setCurrentWindowElements(findElementByParentKey(window.targetKey)); // Set current window elements to select
+            setIsSelecting(true); // Start selecting
           }
         });
       }
@@ -110,6 +118,7 @@ export const Selector = ({
       elementsRef,
       findElement,
       findElementByParentKey,
+      findWindow,
       menuRef,
       renaming,
       resizing,
@@ -119,6 +128,7 @@ export const Selector = ({
     ]
   );
 
+  // Check elements in the box
   const checkElementsInBox = useCallback(() => {
     if (!elementsRef || !boxRef.current || !currentWindowElements) return;
     const boxRect = boxRef.current.getBoundingClientRect();
@@ -145,6 +155,7 @@ export const Selector = ({
     unselectElement,
   ]);
 
+  // Selecting event listener
   const selecting = useCallback(
     (e: MouseEvent) => {
       if (!selectorRef.current || !boxRef.current || !isSelecting) return;
@@ -181,12 +192,14 @@ export const Selector = ({
     ]
   );
 
+  // Selecting end event listener
   const selectingEnd = useCallback(() => {
     if (!boxRef.current) return;
     setIsSelecting(false);
     boxRef.current.style.display = 'none';
   }, []);
 
+  // Event listeners
   useEffect(() => {
     document.addEventListener('mousedown', selectingStart);
     return () => {

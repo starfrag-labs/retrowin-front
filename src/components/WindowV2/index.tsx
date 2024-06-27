@@ -1,8 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useElementStore } from '../../store/element.store';
-import { useWindowStore } from '../../store/window.store';
-import { Navigator } from './Navigator';
-import { Uploader } from './Uploader';
 import { useRefStore } from '../../store/ref.store';
 import {
   windowContainer,
@@ -13,14 +10,14 @@ import {
   btnContainer,
   minimizeBtn,
 } from '../../styles/windows/window.css';
-import { ImageReader } from './ImageReader';
-import { VideoPlayer } from './VideoPlayer';
 import { useEventStore } from '../../store/event.store';
+import { useWindowStoreV2 } from '../../store/window.store.v2';
+import { VideoPlayer } from './VideoPlayer';
+import { ImageReader } from './ImageReader';
+import { Uploader } from './Uploader';
+import { Navigator } from './Navigator';
 
-/**
- * Deprecated component
- */
-export const Window = ({ windowKey }: { windowKey: string }) => {
+export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   // states
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
@@ -31,16 +28,17 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
   const windowContainerRef = useRef<HTMLDivElement>(null);
 
   // store states
-  const window = useWindowStore((state) => state.findWindow(windowKey));
+  const window = useWindowStoreV2((state) => state.findWindow(windowKey))
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
   const element = useElementStore((state) => state.findElement(windowKey));
   const resizing = useEventStore((state) => state.resizing);
 
   // store functions
-  const closeWindow = useWindowStore((state) => state.closeWindow);
+  const closeWindow = useWindowStoreV2((state) => state.closeWindow);
   const setWindowRef = useRefStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
+  const highlightWindow = useWindowStoreV2((state) => state.highlightWindow);
 
   // update ref store on mount
   useEffect(() => {
@@ -239,8 +237,14 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
 
   if (!window) return null;
 
+  // handle mouse down event on window
+  const handleMouseDown = () => {
+    // highlight window on click
+    highlightWindow(window.key);
+  };
+
   return (
-    <div className={windowContainer} ref={windowContainerRef}>
+    <div className={windowContainer} ref={windowContainerRef} onMouseDown={handleMouseDown}>
       <div
         className={windowHeader}
         ref={windowHeaderRef}
@@ -261,13 +265,13 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       </div>
       <div className={windowContent} ref={windowContentRef}>
         {window.type === 'image' ? (
-          <ImageReader fileKey={window.key} setTitle={setTitle} />
+          <ImageReader fileKey={window.targetKey} setTitle={setTitle} />
         ) : window.type === 'video' ? (
-          <VideoPlayer fileKey={window.key} />
+          <VideoPlayer fileKey={window.targetKey} />
         ) : window.type === 'navigator' ? (
-          <Navigator folderKey={window.key} />
+          <Navigator folderKey={window.targetKey} />
         ) : window.type === 'uploader' ? (
-          <Uploader folderKey={window.key.split('_')[0]} />
+          <Uploader folderKey={window.targetKey.split('_')[0]} />
         ) : null}
       </div>
     </div>

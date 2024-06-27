@@ -8,7 +8,8 @@ type State = {
 type Action = {
   newWindow: (targetKey: string, type: IWindowV2['type']) => void;
   updateWindow: (key: string, targetKey: string) => void;
-  findWindow: (targetKey: string) => IWindowV2 | undefined;
+  findWindow: (key: string) => IWindowV2 | undefined;
+  findWindowByTarget: (targetKey: string) => IWindowV2 | undefined;
   closeWindow: (key: string) => void;
   highlightWindow: (key: string) => void;
 };
@@ -39,10 +40,14 @@ export const useWindowStoreV2 = create<State & Action>((set, get) => ({
       if (window) {
         window.targetKey = targetKey;
       }
+      state.windows = [...state.windows]
       return { windows: state.windows };
     });
   },
-  findWindow: (targetKey) => {
+  findWindow(key) {
+    return get().windows.find((w) => w.key === key);
+  },
+  findWindowByTarget: (targetKey) => {
     return get().windows.find((w) => w.targetKey === targetKey);
   },
   closeWindow: (key) => {
