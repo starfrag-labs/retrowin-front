@@ -13,6 +13,7 @@ import { useEventStore } from '../store/event.store';
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
+  // States
   const [shiftKey, setShiftKey] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
@@ -21,8 +22,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const [displayDraggingElements, setDisplayDraggingElements] = useState(false);
   const [pointerMoved, setPointerMoved] = useState(false); // To prevent the click event from being triggered when dragging
 
+  // Refs
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
+  // Store states
   const accessToken = useTokenStore((state) => state.accessToken);
   const elements = useElementStore((state) => state.elements);
   const elementsRef = useRefStore((state) => state.elementsRef);
@@ -33,12 +36,13 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
 
+  // Store functions
   const findElement = useElementStore((state) => state.findElement);
   const moveElement = useElementStore((state) => state.moveElement);
+  const selectElement = useElementStore((state) => state.selectElement);
   const unselectAllElements = useElementStore(
     (state) => state.unselectAllElements
   );
-  const selectElement = useElementStore((state) => state.selectElement);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
