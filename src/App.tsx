@@ -9,6 +9,7 @@ const router = createRouter({
   context: {
     queryClient: queryClient,
   },
+  basepath: import.meta.env.VITE_BASE_URL,
 });
 
 declare module '@tanstack/react-router' {
