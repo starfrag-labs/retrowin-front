@@ -1,35 +1,21 @@
-import { Link, Outlet, createRootRoute } from '@tanstack/react-router';
+import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/router-devtools';
-import React from 'react';
+import { QueryClient } from '@tanstack/react-query';
+import { defaultContainer } from '../styles/global/container.css';
+import { Loading } from '../components/Loading';
 
-export const Route = createRootRoute({
+export const Route = createRootRouteWithContext<{
+  queryClient: QueryClient;
+}>()({
+  pendingComponent: () => <Loading />,
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
-    <>
-      <div>
-        <Link
-          to="/"
-          activeProps={{
-            className: 'font-bold',
-          }}
-          activeOptions={{ exact: true }}
-        >
-          Home
-        </Link>
-        <Link
-          to={'/about'}
-          activeProps={{
-            className: 'font-bold',
-          }}
-        >
-          About
-        </Link>
-        <Outlet />
-        <TanStackRouterDevtools position="bottom-right" />
-      </div>
-    </>
+    <div className={defaultContainer}>
+      <Outlet />
+      <TanStackRouterDevtools position="bottom-right" />
+    </div>
   );
 }
