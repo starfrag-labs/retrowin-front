@@ -17,6 +17,9 @@ import { ImageReader } from './ImageReader';
 import { VideoPlayer } from './VideoPlayer';
 import { useEventStore } from '../../store/event.store';
 
+/**
+ * Deprecated component
+ */
 export const Window = ({ windowKey }: { windowKey: string }) => {
   // states
   const [title, setTitle] = useState('Window');
