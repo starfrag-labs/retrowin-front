@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import {
   backgroundContainer,
   sky,
@@ -9,6 +9,8 @@ import {
   clouds,
   ground,
 } from '../styles/background.css';
+import groundImg from '../assets/ground.png'
+import cloudImg from '../assets/clouds.png'
 
 export const Background = ({
   children,
@@ -24,20 +26,15 @@ export const Background = ({
   const meteorContainerRef = useRef<HTMLDivElement>(null);
   const groundRef = useRef<HTMLDivElement>(null);
 
-  const preloadImages = useCallback((imageArray: string[]) => {
-    imageArray.forEach((url) => {
-      const img = new Image();
-      img.src = url;
-    });
+  const preloadImages = useCallback(() => {
+    const img = new Image();
+    img.src = groundImg;
+    img.src = cloudImg;
   }, []);
 
-  const groundImage = useMemo(() => ['../assets/ground.png'], []);
-  const cloudImage = useMemo(() => ['../assets/clouds.png'], []);
-
-  useEffect(() => {
-    preloadImages(groundImage);
-    preloadImages(cloudImage);
-  }, [cloudImage, groundImage, preloadImages]);
+  useLayoutEffect(() => {
+    preloadImages();
+  }, [preloadImages]);
 
   const setUpTime = useCallback(() => {
     const now = new Date();
