@@ -84,29 +84,49 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
 
   // maximize window
   const maximizeWindow = () => {
-    if (!windowContainerRef.current) return;
+    if (
+      !windowContainerRef.current ||
+      !windowContentRef.current ||
+      !windowHeaderRef.current
+    )
+      return;
     setMaximized(true);
-    windowContainerRef.current.style.width = `${document.body.clientWidth}px`;
-    windowContainerRef.current.style.height = `${document.body.clientHeight}px`;
+    const width = document.body.clientWidth;
+    const height = document.body.clientHeight;
     windowContainerRef.current.style.left = '0px';
     windowContainerRef.current.style.top = '0px';
-  }
+    windowContainerRef.current.style.width = `${width}px`;
+    windowContainerRef.current.style.height = `${height}px`;
+    windowContentRef.current.style.width = `${width}px`;
+    windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
+  };
 
   // minimize window
   const minimizeWindow = () => {
-    if (!windowContainerRef.current) return;
+    if (
+      !windowContainerRef.current ||
+      !windowContentRef.current ||
+      !windowHeaderRef.current
+    )
+      return;
     setMaximized(false);
     windowContainerRef.current.style.width = `${windowSize.current.width}px`;
     windowContainerRef.current.style.height = `${windowSize.current.height}px`;
     windowContainerRef.current.style.left = `${windowPosition.current.x}px`;
     windowContainerRef.current.style.top = `${windowPosition.current.y}px`;
-  }
+    windowContentRef.current.style.width = `${windowSize.current.width}px`;
+    windowContentRef.current.style.height = `${windowSize.current.height - windowHeaderRef.current.clientHeight}px`;
+  };
 
   // move window
   const moveWindow = (e: React.MouseEvent) => {
     if (!windowContainerRef.current || !windowHeaderRef.current) return;
     if (e.clientX < 0 || e.clientY < 0) return;
-    if (e.clientX > document.body.clientWidth || e.clientY > document.body.clientHeight) return;
+    if (
+      e.clientX > document.body.clientWidth ||
+      e.clientY > document.body.clientHeight
+    )
+      return;
     const rect = windowHeaderRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
@@ -225,17 +245,20 @@ export const Window = ({ windowKey }: { windowKey: string }) => {
       >
         {title}
         <div className={btnContainer}>
-          {maximized ? ( 
+          {maximized ? (
             <button onClick={minimizeWindow} className={minimizeBtn} />
           ) : (
             <button onClick={maximizeWindow} className={maximizeBtn} />
           )}
-          <button onClick={() => closeWindow(window.key)} className={closeBtn} />
+          <button
+            onClick={() => closeWindow(window.key)}
+            className={closeBtn}
+          />
         </div>
       </div>
       <div className={windowContent} ref={windowContentRef}>
         {window.type === 'image' ? (
-          <ImageReader fileKey={window.key} setTitle={setTitle}/>
+          <ImageReader fileKey={window.key} setTitle={setTitle} />
         ) : window.type === 'video' ? (
           <VideoPlayer fileKey={window.key} />
         ) : window.type === 'navigator' ? (
