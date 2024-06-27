@@ -3,17 +3,12 @@ import react from '@vitejs/plugin-react-swc'
 import { TanStackRouterVite } from '@tanstack/router-vite-plugin'
 import { vanillaExtractPlugin } from '@vanilla-extract/vite-plugin';
 
-
 // https://vitejs.dev/config/
 export default defineConfig({
-  plugins: [
-    react(),
-    TanStackRouterVite(),
-    vanillaExtractPlugin(),
-  ],
+  plugins: [react(), TanStackRouterVite(), vanillaExtractPlugin()],
   server: {
     host: true,
-    port: 3000,
+    port: 5173,
   },
-  base: '/ifcloud/'
-})
+  base: '/ifcloud'
+});

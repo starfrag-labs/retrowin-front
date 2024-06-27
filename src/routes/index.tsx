@@ -43,6 +43,8 @@ export const Route = createFileRoute('/')({
         });
       await getProfile().then((response) => {
         setProfile(response.data.data);
+      }).catch(() => {
+        return null;
       });
       throw redirect({
         to: '/main',
