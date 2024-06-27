@@ -40,6 +40,7 @@ export const useWindowStoreV2 = create<State & Action>((set, get) => ({
       if (window) {
         window.targetKey = targetKey;
       }
+      state.windows = [...state.windows]
       return { windows: state.windows };
     });
   },
