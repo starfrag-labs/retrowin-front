@@ -6,9 +6,8 @@ import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
 import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
-import { Window } from '../components/Window';
+// import { Window } from '../components/Window';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
-import { useWindowStore } from '../store/window.store';
 import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
@@ -17,6 +16,8 @@ import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
 import { Dragger } from '../components/Dragger';
 import { Loading } from '../components/Loading';
+import { useWindowStoreV2 } from '../store/window.store.v2';
+import { WindowV2 } from '../components/WindowV2';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -53,8 +54,7 @@ export const Route = createFileRoute('/main')({
 
 function MainComponent() {
   const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const windows = useWindowStore((state) => state.windows);
-  // const windowsV2 = useWindowStoreV2((state) => state.windows);
+  const window = useWindowStoreV2((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef
@@ -122,8 +122,8 @@ function MainComponent() {
               >
                 <Elements folderKey={rootFolderKey} />
               </div>
-              {windows.map((window) => {
-                return <Window key={window.key} windowKey={window.key} />;
+              {window.map((window) => {
+                return <WindowV2 key={window.key} windowKey={window.key} />;
               })}
             </OptionMenu>
           </Background>

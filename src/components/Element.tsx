@@ -5,7 +5,6 @@ import { downloadFile, renameFile, renameFolder } from '../api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
-import { useWindowStore } from '../store/window.store';
 import {
   elementContainer,
   uploadFileIcon,
@@ -24,6 +23,7 @@ import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
+import { useWindowStoreV2 } from '../store/window.store.v2';
 
 export const Element = memo(
   ({
@@ -58,12 +58,13 @@ export const Element = memo(
     const accessToken = useTokenStore((state) => state.accessToken);
 
     // store functions
-    const newWindow = useWindowStore((state) => state.newWindow);
+    const newWindow = useWindowStoreV2((state) => state.newWindow);
+    const findWindowByTarget = useWindowStoreV2((state) => state.findWindowByTarget);
+    const updateWindow = useWindowStoreV2((state) => state.updateWindow);
     const rename = useElementStore((state) => state.renameElement);
     const endRenaming = useElementStore((state) => state.endRenaming);
     const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
-    const closeWindow = useWindowStore((state) => state.closeWindow);
     
     const contentType = getContentType(name);
 
@@ -95,8 +96,12 @@ export const Element = memo(
       } else if (type === 'file') {
         handleDownload();
       } else if (type === 'folder') {
-        closeWindow(parentKey);
-        newWindow(elementKey, 'navigator');
+        const window = findWindowByTarget(parentKey);
+        if (window) {
+          updateWindow(window.key, elementKey);
+        } else {
+          newWindow(elementKey, 'navigator');
+        }
       }
     };
 
