@@ -31,8 +31,8 @@ export const Background = ({
     });
   }, []);
 
-  const groundImage = useMemo(() => ['/src/assets/ground.png'], []);
-  const cloudImage = useMemo(() => ['/src/assets/clouds.png'], []);
+  const groundImage = useMemo(() => ['../assets/ground.png'], []);
+  const cloudImage = useMemo(() => ['../assets/clouds.png'], []);
 
   useEffect(() => {
     preloadImages(groundImage);
