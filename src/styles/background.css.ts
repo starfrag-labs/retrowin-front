@@ -29,10 +29,20 @@ export const clouds = style({
   top: '0',
 });
 
-export const stars = style({
+export const starContainer = style({
   position: 'absolute',
   width: '100%',
   height: '100%',
+});
+
+export const moon = style({
+  position: 'absolute',
+  background: 'url(/src/assets/moon.png)',
+  backgroundSize: 'cover',
+  width: '70px',
+  height: '70px',
+  left: '50vw',
+  top: '50vh',
 });
 
 export const ground = style({
