@@ -13,11 +13,20 @@ export const windowContent = style({
 
 export const windowHeader = style({
   display: 'flex',
+  flexDirection: 'row',
   justifyContent: 'space-between',
   alignItems: 'center',
   padding: '0.5rem',
   backgroundColor: 'rgb(200, 200, 200)',
   borderBottom: '1px solid black',
+});
+
+export const windowHeaderLeft = style({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '0.5rem',
+  alignItems: 'center',
+  justifyContent: 'flex-start',
 });
 
 export const btnContainer = style({
@@ -48,4 +57,25 @@ export const minimizeBtn = style({
 export const closeBtn = style({
   ...btn,
   backgroundColor: 'rgb(255,100, 100)',
+});
+
+export const navigatorArrowContainer = style({
+  display: 'flex',
+  flexDirection: 'row',
+  gap: '0.5rem',
+});
+
+export const navigatorArrowStyleRule: StyleRule = {
+  width: '1.75rem',
+  height: '1.75rem',
+  cursor: 'pointer',
+} as const;
+
+export const navigatorArrow = style({
+  ...navigatorArrowStyleRule,
+});
+
+export const navigatorArrowDisabled = style({
+  ...navigatorArrowStyleRule,
+  color: 'gray',
 });

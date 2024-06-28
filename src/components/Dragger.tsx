@@ -9,6 +9,7 @@ import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
+import { useWindowStoreV2 } from '../store/window.store.v2';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -43,6 +44,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const unselectAllElements = useElementStore(
     (state) => state.unselectAllElements
   );
+  const findWindow = useWindowStoreV2((state) => state.findWindow);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -168,11 +170,13 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Search for the target folder from the windows
       windowsRef.forEach((windowRef, key) => {
+        const window = findWindow(key);
         if (
+          window &&
           windowRef.current?.contains(e.target as Node) &&
-          findElement(key)?.type === 'folder'
+          findElement(window.targetKey)?.type === 'folder'
         ) {
-          targetFolderKey = key;
+          targetFolderKey = window.targetKey;
         }
       });
 
@@ -227,6 +231,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       elementsRef,
       pointerMoved,
       rootKey,
+      findWindow,
       findElement,
       elements,
       accessToken,
