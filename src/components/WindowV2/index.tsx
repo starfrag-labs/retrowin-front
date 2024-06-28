@@ -31,7 +31,7 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   const window = useWindowStoreV2((state) => state.findWindow(windowKey))
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
-  const element = useElementStore((state) => state.findElement(windowKey));
+  const element = useElementStore((state) => state.findElement(window?.targetKey ?? ''));
   const resizing = useEventStore((state) => state.resizing);
 
   // store functions
