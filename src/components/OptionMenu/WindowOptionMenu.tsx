@@ -1,7 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createFolder } from '../../api/cloud';
 import { useTokenStore } from '../../store/token.store';
-import { useWindowStore } from '../../store/window.store';
 import { MenuGenerator } from './MenuGenerator';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStoreV2 } from '../../store/window.store.v2';
@@ -23,11 +22,11 @@ export const WindowOptionsMenu = ({
   const window = useWindowStoreV2((state) => state.findWindow(windowKey));
 
   // store functions
-  const newWindow = useWindowStore((state) => state.newWindow);
+  const newWindow = useWindowStoreV2((state) => state.newWindow);
 
   const handleUpload = () => {
     if (!currentMenu || !window) return;
-    newWindow(window.targetKey, 'uploader');
+    newWindow(`${window.targetKey}_uploader`, 'uploader');
     currentMenu.style.display = 'none';
   };
 
