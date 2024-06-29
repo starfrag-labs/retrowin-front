@@ -23,4 +23,5 @@ export interface IWindowV2 {
     | 'uploader'
     | 'other';
   targetHistory?: string[];
+  historyIndex?: number;
 }

@@ -9,6 +9,10 @@ import {
   maximizeBtn,
   btnContainer,
   minimizeBtn,
+  navigatorArrowContainer,
+  windowHeaderLeft,
+  navigatorArrowDisabled,
+  navigatorArrow,
 } from '../../styles/windows/window.css';
 import { useEventStore } from '../../store/event.store';
 import { useWindowStoreV2 } from '../../store/window.store.v2';
@@ -16,11 +20,15 @@ import { VideoPlayer } from './VideoPlayer';
 import { ImageReader } from './ImageReader';
 import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
+import { MdNavigateBefore } from 'react-icons/md';
+import { MdNavigateNext } from 'react-icons/md';
+import { Loading } from '../Loading';
 
 export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   // states
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // refs
   const windowSize = useRef({ width: 0, height: 0 });
@@ -28,10 +36,12 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   const windowContainerRef = useRef<HTMLDivElement>(null);
 
   // store states
-  const window = useWindowStoreV2((state) => state.findWindow(windowKey))
+  const window = useWindowStoreV2((state) => state.findWindow(windowKey));
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
-  const element = useElementStore((state) => state.findElement(windowKey));
+  const element = useElementStore((state) =>
+    state.findElement(window?.targetKey ?? '')
+  );
   const resizing = useEventStore((state) => state.resizing);
 
   // store functions
@@ -39,6 +49,8 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   const setWindowRef = useRefStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
   const highlightWindow = useWindowStoreV2((state) => state.highlightWindow);
+  const prevWindow = useWindowStoreV2((state) => state.prevWindow);
+  const nextWindow = useWindowStoreV2((state) => state.nextWindow);
 
   // update ref store on mount
   useEffect(() => {
@@ -235,22 +247,59 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
     }
   }, [element, window]);
 
-  if (!window) return null;
-
   // handle mouse down event on window
   const handleMouseDown = () => {
     // highlight window on click
-    highlightWindow(window.key);
+    if (window) {
+      highlightWindow(window.key);
+    }
   };
 
+  if (!window) return null;
+
   return (
-    <div className={windowContainer} ref={windowContainerRef} onMouseDown={handleMouseDown}>
+    <div
+      className={windowContainer}
+      ref={windowContainerRef}
+      onMouseDown={handleMouseDown}
+    >
       <div
         className={windowHeader}
         ref={windowHeaderRef}
         onMouseDown={moveWindow}
       >
-        {title}
+        <div className={windowHeaderLeft}>
+          {window.type === 'navigator' &&
+            window.historyIndex !== undefined &&
+            window.targetHistory !== undefined && (
+              <div className={navigatorArrowContainer}>
+                <MdNavigateBefore
+                  className={
+                    window.historyIndex === 0
+                      ? navigatorArrowDisabled
+                      : navigatorArrow
+                  }
+                  onClick={() => {
+                    prevWindow(window.key);
+                  }}
+                />
+                <MdNavigateNext
+                  className={
+                    window.historyIndex === window.targetHistory.length - 1
+                      ? navigatorArrowDisabled
+                      : navigatorArrow
+                  }
+                  onClick={() => {
+                    nextWindow(window.key);
+                  }}
+                />
+              </div>
+            )}
+          {title}
+          {window.type === 'navigator' && loading && (
+            <Loading size="1rem" border="3px" />
+          )}
+        </div>
         <div className={btnContainer}>
           {maximized ? (
             <button onClick={minimizeWindow} className={minimizeBtn} />
@@ -269,7 +318,7 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
         ) : window.type === 'video' ? (
           <VideoPlayer fileKey={window.targetKey} />
         ) : window.type === 'navigator' ? (
-          <Navigator folderKey={window.targetKey} />
+          <Navigator folderKey={window.targetKey} setLoading={setLoading} />
         ) : window.type === 'uploader' ? (
           <Uploader folderKey={window.targetKey.split('_')[0]} />
         ) : null}

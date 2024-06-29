@@ -6,7 +6,6 @@ export const loadingContainer = style({
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
-  backgroundColor: 'rgb(0, 0, 0)',
 })
 
 const spin = keyframes({
