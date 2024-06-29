@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useProgressStore } from '../store/progress.store';
 import {
   progressBar,
@@ -11,17 +10,6 @@ import { MdFileUpload, MdFileDownload } from 'react-icons/md';
 export const Progress = (): React.ReactElement => {
   // store states
   const progresses = useProgressStore((state) => state.progresses);
-
-  // store functions
-  const removeProgress = useProgressStore((state) => state.removeProgress);
-
-  useEffect(() => {
-    progresses.map((progress) => {
-      if (progress.loaded === progress.total) {
-        removeProgress(progress.name);
-      }
-    });
-  }, [progresses, removeProgress]);
 
   if (progresses.length === 0) return <></>;
 

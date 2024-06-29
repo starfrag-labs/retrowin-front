@@ -56,6 +56,8 @@ export const useProgressStore = create<State & Action>((set, get) => ({
     })),
   removeProgress: (key) =>
     set((state) => ({
-      progresses: state.progresses.filter((p) => p.key !== key),
+      progresses: state.progresses.filter(
+        (p) => p.key !== key && p.total > p.loaded
+      ),
     })),
 }));

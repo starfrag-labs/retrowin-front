@@ -147,7 +147,7 @@ export const uploadChunk = async (
   chunk: File | Blob,
   fileName: string,
   totalChunks: number,
-  chunkNumber: number,
+  chunkNumber: number
 ) => {
   const uploadFile = cloudUrls.file.uploadFile(folderKey);
   const formData = new FormData();
@@ -156,23 +156,28 @@ export const uploadChunk = async (
   formData.append('totalChunks', totalChunks.toString());
   formData.append('chunkNumber', chunkNumber.toString());
 
-  const response = await api.request({
-    method: uploadFile.method,
-    url: uploadFile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-      'Content-Type': 'multipart/form-data',
-    },
-    data: formData,
-    onUploadProgress: (event) => {
-      const progressName = `${folderKey}-${fileName}`;
-      useProgressStore.getState().updateProgress({
-        key: progressName,
-        loaded: event.loaded + chunkNumber * chunk.size,
-        total: chunk.size * totalChunks,
-      });
-    }
-  });
+  const response = api
+    .request({
+      method: uploadFile.method,
+      url: uploadFile.url,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        'Content-Type': 'multipart/form-data',
+      },
+      data: formData,
+      onUploadProgress: (event) => {
+        const progressName = `${folderKey}-${fileName}`;
+        useProgressStore.getState().updateProgress({
+          key: progressName,
+          loaded: event.loaded + chunkNumber * chunk.size,
+          total: chunk.size * totalChunks,
+        });
+      },
+    })
+    .catch((error) => {
+      useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
+      return Promise.reject(error);
+    });
   return response;
 };
 
@@ -208,10 +213,12 @@ export const downloadFile = async (
         }
       },
     })
+    .then((response) => {
+      useProgressStore.getState().removeProgress(fileKey);
+      return response;
+    })
     .catch((error) => {
-      if (progressName) {
-        useProgressStore.getState().removeProgress(progressName);
-      }
+      useProgressStore.getState().removeProgress(fileKey);
       return Promise.reject(error);
     });
   return response;

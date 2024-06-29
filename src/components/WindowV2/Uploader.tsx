@@ -8,7 +8,7 @@ import { useProgressStore } from '../../store/progress.store';
 
 export const Uploader = memo(
   ({ folderKey }: { folderKey: string }): React.ReactElement => {
-    const chunkSize = 1024 * 1024;
+    const chunkSize = 1024 * 1024 * 5;
     const queryClient = useQueryClient();
 
     // refs
@@ -21,13 +21,22 @@ export const Uploader = memo(
     const closeWindow = useWindowStore((state) => state.closeWindow);
 
     const uploadFile = async (file: File) => {
-      useProgressStore.getState().addProgress({
-        key: `${folderKey}-${file.name}`,
-        name: `${file.name}`,
-        type: 'upload',
-      });
       const totalChunks = Math.ceil(file.size / chunkSize);
       const fileName = file.name.replace(/\s/g, '_');
+      
+      // check if progress exists
+      if (useProgressStore.getState().findProgress(`${folderKey}-${fileName}`)) {
+        return;
+      }
+
+      // add progress
+      useProgressStore.getState().addProgress({
+        key: `${folderKey}-${fileName}`,
+        name: `${fileName}`,
+        type: 'upload',
+      });
+
+      // upload chunks
       for (let i = 0; i < totalChunks; i++) {
         const start = i * chunkSize;
         const end = Math.min(file.size, (i + 1) * chunkSize);
@@ -41,7 +50,7 @@ export const Uploader = memo(
           i
         );
       }
-      useProgressStore.getState().removeProgress(`${folderKey}-${file.name}`);
+      useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
       queryClient.invalidateQueries({
         queryKey: ['read', 'folder', folderKey],
       });

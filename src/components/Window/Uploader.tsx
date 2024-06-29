@@ -25,7 +25,7 @@ export const Uploader = memo(({
       const start = i * chunkSize;
       const end = Math.min(file.size, (i + 1) * chunkSize);
       const chunk = file.slice(start, end);
-      const result = await uploadChunk(
+      await uploadChunk(
         accessToken,
         folderKey,
         chunk,
@@ -33,12 +33,6 @@ export const Uploader = memo(({
         totalChunks,
         i
       )
-      if (!result) {
-        console.log('Failed to upload chunk');
-        break;
-      } else {
-        console.log(result);
-      }
     }
     queryClient.invalidateQueries({
       queryKey: ['read', 'folder', folderKey],
