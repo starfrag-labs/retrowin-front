@@ -24,7 +24,11 @@ import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
 import { Loading } from '../Loading';
 
-export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
+export const WindowV2 = ({
+  windowKey,
+}: {
+  windowKey: string;
+}): React.ReactElement => {
   // states
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
@@ -255,7 +259,7 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
     }
   };
 
-  if (!window) return null;
+  if (!window) return <></>;
 
   return (
     <div

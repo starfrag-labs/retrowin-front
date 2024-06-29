@@ -16,3 +16,11 @@ export interface IWindowState extends IWindow {
 export interface IProfileState extends IProfile {
   isCloudUser: boolean;
 }
+
+export interface IProgressState {
+  key: string;
+  name: string;
+  type: 'upload' | 'download';
+  loaded: number;
+  total: number;
+}

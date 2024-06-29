@@ -30,12 +30,12 @@ export const Background = ({
   const dayStart = 6 * 60 * 60 * 1000;
   const dayEnd = 18 * 60 * 60 * 1000;
   const changeDayTime = 2 * 60 * 60 * 1000;
-  const timeRefreshInterval = 10000;
+  const timeRefreshInterval = 60000;
   const initStarCount = 1000;
   const meteorInterval = 5000;
 
   // states
-  const [time, setTime] = useState<number>(0);
+  const [time, setTime] = useState<number>(new Date().getTime() % oneDay);
   const [isDay, setIsDay] = useState(false);
   const [weight, setWeight] = useState(0);
 
@@ -91,7 +91,7 @@ export const Background = ({
     } else if (time <= dayStart && dayStart - time <= changeDayTime) {
       // increase linearly on the first 2 hours from day start - 2 hours
       setWeight(1 - (dayStart - time) / changeDayTime);
-    } else if (time >= dayEnd - changeDayTime) {
+    } else if (time >= dayEnd - changeDayTime && time < dayEnd) {
       // decrease linearly on the last 2 hours from day end - 2 hours
       setWeight((dayEnd - time) / changeDayTime);
     } else {
@@ -305,7 +305,7 @@ export const Background = ({
     if (!moon) {
       return;
     }
-    if (time < dayStart - changeDayTime || time >= dayEnd) {
+    if (time > dayStart - changeDayTime && time <= dayEnd) {
       moon.style.display = 'none';
       return;
     } else {
@@ -314,7 +314,7 @@ export const Background = ({
       const moonX =
         (time >= dayEnd ? time - dayEnd : time + oneDay - dayEnd) /
         nightDuration;
-      const moonY = 1.2 - (Math.sin(moonX * (Math.PI / 2)) * 0.8 + 0.4);
+      const moonY = 1.2 - (Math.sin(moonX * (Math.PI / 2)) * 0.7 + 0.6);
       moon.style.display = 'block';
       moon.style.left = `${moonX * 100}vw`;
       moon.style.top = `${moonY * 100}vh`;

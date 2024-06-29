@@ -27,7 +27,7 @@ export const ElementOptionMenu = ({
 
   const handleDownload = () => {
     if (!element || !currentMenu) return;
-    downloadFile(accessToken, element.parentKey, element.key).then(
+    downloadFile(accessToken, element.parentKey, element.key, element.name).then(
       (response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
         const link = document.createElement('a');

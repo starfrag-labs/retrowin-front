@@ -18,6 +18,7 @@ import { Dragger } from '../components/Dragger';
 import { Loading } from '../components/Loading';
 import { useWindowStoreV2 } from '../store/window.store.v2';
 import { WindowV2 } from '../components/WindowV2';
+import { Progress } from '../components/Progress';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
@@ -125,6 +126,7 @@ function MainComponent() {
               {window.map((window) => {
                 return <WindowV2 key={window.key} windowKey={window.key} />;
               })}
+              <Progress />
             </OptionMenu>
           </Background>
         </Dragger>
