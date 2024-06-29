@@ -3,9 +3,9 @@ import { useTokenStore } from '../../store/token.store';
 import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
-import { useWindowStore } from '../../store/window.store';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
+import { useWindowStoreV2 } from '../../store/window.store.v2';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -23,7 +23,7 @@ export const ElementOptionMenu = ({
   const accessToken = useTokenStore((state) => state.accessToken);
   const startRenaming = useElementStore((state) => state.startRenaming);
   const deleteElement = useElementStore((state) => state.deleteElement);
-  const newWindow = useWindowStore((state) => state.newWindow);
+  const newWindow = useWindowStoreV2((state) => state.newWindow);
 
   const handleDownload = () => {
     if (!element || !currentMenu) return;
@@ -49,17 +49,11 @@ export const ElementOptionMenu = ({
       (contentType === 'image/jpg' ||
         contentType === 'image/jpeg' ||
         contentType === 'image/png' ||
-        contentType === 'image/gif' ||
-        contentType === 'video/mp4')
+        contentType === 'image/gif')
     ) {
-      downloadFile(accessToken, element.parentKey, element.key).then(
-        (response) => {
-          const url = window.URL.createObjectURL(
-            new Blob([response.data], { type: contentType })
-          );
-          window.open(url, '_blank');
-        }
-      );
+      newWindow(element.key, 'image')
+    } else if (element.type === 'file' && contentType === 'video/mp4') {
+      newWindow(element.key, 'video');
     } else if (element.type === 'folder') {
       newWindow(element.key, 'navigator');
     }

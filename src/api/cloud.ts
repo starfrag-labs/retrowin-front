@@ -173,7 +173,7 @@ export const downloadFile = async (
   fileKey: string
 ) => {
   const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
-  const response = await api.request<Blob>({
+  const response = api.request<Blob>({
     method: downloadFile.method,
     url: downloadFile.url,
     headers: {
