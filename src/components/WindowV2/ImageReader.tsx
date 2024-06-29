@@ -20,13 +20,16 @@ export const ImageReader = ({
   fileKey: string;
   setTitle: (title: string) => void;
 }): React.ReactElement => {
+  // states
   const [targetKey, setTargetKey] = useState<string>(fileKey);
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
   const [sourceUrl, setSourceUrl] = useState<string>('');
 
+  // store states
   const accessToken = useTokenStore((state) => state.accessToken);
 
+  // store functions
   const findElement = useElementStore((state) => state.findElement);
   const findElementsByParentKey = useElementStore(
     (state) => state.findElementsByParentKey

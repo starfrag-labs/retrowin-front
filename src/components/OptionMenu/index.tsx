@@ -4,6 +4,7 @@ import { defaultContainer } from '../../styles/global/container.css';
 import { ElementOptionMenu } from './ElementOptionMenu';
 import { menuContainer } from '../../styles/menu.css';
 import { BackgroundOptionMenu } from './BackgroundOptionMenu';
+import { WindowOptionsMenu } from './WindowOptionMenu';
 
 export const OptionMenu = ({
   children,
@@ -11,9 +12,11 @@ export const OptionMenu = ({
   children: React.ReactNode;
 }): React.ReactElement => {
   const elementsRef = useRefStore((state) => state.elementsRef);
+  const windowsRef = useRefStore((state) => state.windowsRef);
   const menuRef = useRef<HTMLDivElement>(null);
   const setMenuRef = useRefStore((state) => state.setMenuRef);
 
+  const [targetWindowKey, setTargetWindowKey] = useState('');
   const [targetElementKey, setTargetElementKey] = useState('');
   const [menuType, setMenuType] = useState('');
 
@@ -21,9 +24,23 @@ export const OptionMenu = ({
     const currentMenu = menuRef.current;
     if (currentMenu) {
       e.preventDefault();
-      setMenuType('background');
       currentMenu.style.top = `${e.clientY}px`;
       currentMenu.style.left = `${e.clientX}px`;
+
+      // Set the menu type to background by default
+      setMenuType('background');
+
+      // Check if the right-clicked element is a window
+      if (windowsRef) {
+        windowsRef.forEach((window, key) => {
+          if (window.current && window.current.contains(e.target as Node)) {
+            setTargetWindowKey(key);
+            setMenuType('window');
+          }
+        });
+      }
+
+      // Check if the right-clicked element is an element
       if (elementsRef) {
         elementsRef.forEach((element, key) => {
           if (element.current && element.current.contains(e.target as Node)) {
@@ -32,6 +49,7 @@ export const OptionMenu = ({
           }
         });
       }
+
       currentMenu.style.display = 'block';
     }
   };
@@ -64,6 +82,9 @@ export const OptionMenu = ({
       <div className={menuContainer} ref={menuRef}>
         {menuType === 'element' && (
           <ElementOptionMenu elementKey={targetElementKey} menuRef={menuRef} />
+        )}
+        {menuType === 'window' && (
+          <WindowOptionsMenu windowKey={targetWindowKey} menuRef={menuRef} />
         )}
         {menuType === 'background' && (
           <BackgroundOptionMenu menuRef={menuRef} />

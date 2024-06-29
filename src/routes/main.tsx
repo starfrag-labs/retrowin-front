@@ -123,6 +123,8 @@ function MainComponent() {
                 <Elements folderKey={rootFolderKey} />
               </div>
               {window.map((window) => {
+                console.log(window);
+                
                 return <WindowV2 key={window.key} windowKey={window.key} />;
               })}
             </OptionMenu>

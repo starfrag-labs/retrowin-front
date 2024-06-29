@@ -22,11 +22,13 @@ import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
+import { Loading } from '../Loading';
 
 export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
   // states
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   // refs
   const windowSize = useRef({ width: 0, height: 0 });
@@ -294,6 +296,9 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
               </div>
             )}
           {title}
+          {window.type === 'navigator' && loading && (
+            <Loading size="1rem" border="3px" />
+          )}
         </div>
         <div className={btnContainer}>
           {maximized ? (
@@ -313,7 +318,7 @@ export const WindowV2 = ({ windowKey }: { windowKey: string }) => {
         ) : window.type === 'video' ? (
           <VideoPlayer fileKey={window.targetKey} />
         ) : window.type === 'navigator' ? (
-          <Navigator folderKey={window.targetKey} />
+          <Navigator folderKey={window.targetKey} setLoading={setLoading} />
         ) : window.type === 'uploader' ? (
           <Uploader folderKey={window.targetKey.split('_')[0]} />
         ) : null}
