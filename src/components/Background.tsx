@@ -35,7 +35,7 @@ export const Background = ({
   const meteorInterval = 5000;
 
   // states
-  const [time, setTime] = useState<number>(0);
+  const [time, setTime] = useState<number>(new Date().getTime() % oneDay);
   const [isDay, setIsDay] = useState(false);
   const [weight, setWeight] = useState(0);
 
