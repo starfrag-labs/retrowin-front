@@ -107,7 +107,7 @@ export const Element = memo(
 
     // download file event handler
     const handleDownload = async () => {
-      const response = await downloadFile(accessToken, parentKey, elementKey);
+      const response = await downloadFile(accessToken, parentKey, elementKey, name);
       if (!response) {
         return;
       }

@@ -1,4 +1,5 @@
 import { api } from '.';
+import { useProgressStore } from '../store/progress.store';
 import { ReadFolderData } from '../types/response';
 import { cloudUrls } from './urls';
 
@@ -146,7 +147,7 @@ export const uploadChunk = async (
   chunk: File | Blob,
   fileName: string,
   totalChunks: number,
-  chunkNumber: number
+  chunkNumber: number,
 ) => {
   const uploadFile = cloudUrls.file.uploadFile(folderKey);
   const formData = new FormData();
@@ -163,6 +164,14 @@ export const uploadChunk = async (
       'Content-Type': 'multipart/form-data',
     },
     data: formData,
+    onUploadProgress: (event) => {
+      const progressName = `${folderKey}-${fileName}`;
+      useProgressStore.getState().updateProgress({
+        key: progressName,
+        loaded: event.loaded + chunkNumber * chunk.size,
+        total: chunk.size * totalChunks,
+      });
+    }
   });
   return response;
 };
@@ -170,17 +179,41 @@ export const uploadChunk = async (
 export const downloadFile = async (
   accessToken: string,
   folderKey: string,
-  fileKey: string
+  fileKey: string,
+  progressName?: string
 ) => {
+  if (progressName) {
+    useProgressStore.getState().addProgress({
+      key: fileKey,
+      name: progressName,
+      type: 'download',
+    });
+  }
   const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
-  const response = api.request<Blob>({
-    method: downloadFile.method,
-    url: downloadFile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    responseType: 'blob',
-  });
+  const response = api
+    .request<Blob>({
+      method: downloadFile.method,
+      url: downloadFile.url,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+      responseType: 'blob',
+      onDownloadProgress: (event) => {
+        if (progressName) {
+          useProgressStore.getState().updateProgress({
+            key: fileKey,
+            loaded: event.loaded,
+            total: event.total ?? 0,
+          });
+        }
+      },
+    })
+    .catch((error) => {
+      if (progressName) {
+        useProgressStore.getState().removeProgress(progressName);
+      }
+      return Promise.reject(error);
+    });
   return response;
 };
 

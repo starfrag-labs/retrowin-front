@@ -41,8 +41,10 @@ export const moon = style({
   backgroundSize: 'cover',
   width: '70px',
   height: '70px',
-  left: '50vw',
-  top: '50vh',
+  left: 0,
+  bottom: 0,
+  transitionDuration: '5s',
+  transitionTimingFunction: 'linear',
 });
 
 export const ground = style({
