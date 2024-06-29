@@ -13,7 +13,7 @@ export const Navigator = ({
 }: {
   folderKey: string;
   setLoading: (loading: boolean) => void;
-}) => {
+}): React.ReactElement => {
   const accessToken = useTokenStore.getState().accessToken;
   const query = useQuery(readFolderQueryOption(accessToken, folderKey));
   const setElements = useElementStore((state) => state.addElements);

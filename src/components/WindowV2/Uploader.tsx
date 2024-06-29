@@ -77,6 +77,7 @@ export const Uploader = memo(({
               className={uploadName}
               placeholder="...nothing selected"
               ref={uploadNameRef}
+              readOnly
             />
             <input
               type="file"
