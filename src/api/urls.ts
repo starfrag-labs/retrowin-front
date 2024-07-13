@@ -1,18 +1,6 @@
-export const authUrls = {
-  validate: {
-    url: `/ifauth/token/valid`,
-    method: 'GET',
-  },
-  refresh: {
-    url: `/ifauth/token/refresh`,
-    method: 'GET',
-  },
-  issue: {
-    url: `/ifauth/token/issue`,
-    method: 'GET',
-  },
+export const memberUrls = {
   profile: {
-    url: `/ifauth/user/profile`,
+    url: `/ifauth/manager/member/profile`,
     method: 'GET',
   },
 };

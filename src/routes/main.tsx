@@ -1,6 +1,5 @@
-import { createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute } from '@tanstack/react-router';
 import { useEffect, useRef } from 'react';
-import { useTokenStore } from '../store/token.store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { Elements } from '../components/Elements';
@@ -8,7 +7,6 @@ import { useElementStore } from '../store/element.store';
 import { Background } from '../components/Background';
 // import { Window } from '../components/Window';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
-import { AuthManager } from '../components/AuthManager';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { OptionMenu } from '../components/OptionMenu';
@@ -16,52 +14,43 @@ import { Selector } from '../components/Selector';
 import { useRefStore } from '../store/ref.store';
 import { Dragger } from '../components/Dragger';
 import { Loading } from '../components/Loading';
-import { useWindowStoreV2 } from '../store/window.store.v2';
-import { WindowV2 } from '../components/WindowV2';
+import { useWindowStore } from '../store/window.store';
+import { WindowV2 } from '../components/Window';
 import { Progress } from '../components/Progress';
 
 export const Route = createFileRoute('/main')({
   beforeLoad: async () => {
-    const accessToken = useTokenStore.getState().accessToken;
-    if (!accessToken) {
-      throw redirect({
-        to: '/',
-      });
-    }
-    const rootFolderKey = await getRootFolderKey(accessToken)
+    const rootFolderKey = await getRootFolderKey()
       .then((response) => {
         return response.data;
       })
       .catch(async (error) => {
         if (error.response.status === 404) {
-          const result = await createRootFolder(accessToken);
+          const result = await createRootFolder();
           return result.data;
         }
         throw error;
       });
     return {
-      accessToken: accessToken,
       rootFolderKey: rootFolderKey,
     };
   },
-  loader: async ({ context: { queryClient, rootFolderKey, accessToken } }) => {
-    queryClient.ensureQueryData(
-      readFolderQueryOption(accessToken, rootFolderKey)
-    );
+  loader: async ({ context: { queryClient, rootFolderKey } }) => {
+    queryClient.ensureQueryData(readFolderQueryOption(rootFolderKey));
   },
   pendingComponent: () => <Loading />,
   component: MainComponent,
 });
 
 function MainComponent() {
-  const { accessToken, rootFolderKey } = Route.useRouteContext();
-  const window = useWindowStoreV2((state) => state.windows);
+  const { rootFolderKey } = Route.useRouteContext();
+  const window = useWindowStore((state) => state.windows);
   const setElements = useElementStore((state) => state.addElements);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef
   );
   const rootFolderQuery = useSuspenseQuery(
-    readFolderQueryOption(accessToken, rootFolderKey)
+    readFolderQueryOption(rootFolderKey)
   );
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
   const setRootKey = useElementStore((state) => state.setRootKey);
@@ -112,25 +101,23 @@ function MainComponent() {
   }, [rootFolderKey, rootFolderQuery.data, setElements]);
 
   return (
-    <AuthManager>
-      <Selector>
-        <Dragger>
-          <Background>
-            <OptionMenu>
-              <div
-                className={backgroundSelectorContainer}
-                ref={backgroundWindowRef}
-              >
-                <Elements folderKey={rootFolderKey} />
-              </div>
-              {window.map((window) => {
-                return <WindowV2 key={window.key} windowKey={window.key} />;
-              })}
-              <Progress />
-            </OptionMenu>
-          </Background>
-        </Dragger>
-      </Selector>
-    </AuthManager>
+    <Selector>
+      <Dragger>
+        <Background>
+          <OptionMenu>
+            <div
+              className={backgroundSelectorContainer}
+              ref={backgroundWindowRef}
+            >
+              <Elements folderKey={rootFolderKey} />
+            </div>
+            {window.map((window) => {
+              return <WindowV2 key={window.key} windowKey={window.key} />;
+            })}
+            <Progress />
+          </OptionMenu>
+        </Background>
+      </Dragger>
+    </Selector>
   );
 }

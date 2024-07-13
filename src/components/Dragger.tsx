@@ -3,13 +3,12 @@ import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { draggingElementsIcon } from '../styles/element.css';
 import { moveFile, moveFolder } from '../api/cloud';
-import { useTokenStore } from '../store/token.store';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
-import { useWindowStoreV2 } from '../store/window.store.v2';
+import { useWindowStore } from '../store/window.store';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -27,7 +26,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const accessToken = useTokenStore((state) => state.accessToken);
   const elements = useElementStore((state) => state.elements);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const windowsRef = useRefStore((state) => state.windowsRef);
@@ -44,7 +42,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const unselectAllElements = useElementStore(
     (state) => state.unselectAllElements
   );
-  const findWindow = useWindowStoreV2((state) => state.findWindow);
+  const findWindow = useWindowStore((state) => state.findWindow);
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -196,30 +194,27 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
           if (element.key === targetFolderKey) return;
           if (element.parentKey === targetFolderKey) return;
           if (element.selected && element.type === 'folder') {
-            moveFolder(accessToken, element.key, targetFolderKey).then(() => {
+            moveFolder(element.key, targetFolderKey).then(() => {
               queryClient.invalidateQueries(
-                readFolderQueryOption(accessToken, targetFolderKey)
+                readFolderQueryOption(targetFolderKey)
               );
               queryClient.invalidateQueries(
-                readFolderQueryOption(accessToken, element.parentKey)
+                readFolderQueryOption(element.parentKey)
               );
               moveElement(element.key, targetFolderKey);
             });
           } else if (element.selected && element.type === 'file') {
-            moveFile(
-              accessToken,
-              element.parentKey,
-              element.key,
-              targetFolderKey
-            ).then(() => {
-              queryClient.invalidateQueries(
-                readFolderQueryOption(accessToken, targetFolderKey)
-              );
-              queryClient.invalidateQueries(
-                readFolderQueryOption(accessToken, element.parentKey)
-              );
-              moveElement(element.key, targetFolderKey);
-            });
+            moveFile(element.parentKey, element.key, targetFolderKey).then(
+              () => {
+                queryClient.invalidateQueries(
+                  readFolderQueryOption(targetFolderKey)
+                );
+                queryClient.invalidateQueries(
+                  readFolderQueryOption(element.parentKey)
+                );
+                moveElement(element.key, targetFolderKey);
+              }
+            );
           }
         });
       }
@@ -234,7 +229,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       findWindow,
       findElement,
       elements,
-      accessToken,
       queryClient,
       moveElement,
     ]

@@ -4,7 +4,7 @@ import { useRefStore } from '../store/ref.store';
 import { useElementStore } from '../store/element.store';
 import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
-import { useWindowStoreV2 } from '../store/window.store.v2';
+import { useWindowStore } from '../store/window.store';
 
 export const Selector = ({
   children,
@@ -35,7 +35,7 @@ export const Selector = ({
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const rootKey = useElementStore((state) => state.rootKey);
-  
+
   // Store functions
   const selectElement = useElementStore((state) => state.selectElement);
   const unselectElement = useElementStore((state) => state.unselectElement);
@@ -46,7 +46,7 @@ export const Selector = ({
   const findElementByParentKey = useElementStore(
     (state) => state.findElementsByParentKey
   );
-  const findWindow = useWindowStoreV2((state) => state.findWindow);
+  const findWindow = useWindowStore((state) => state.findWindow);
 
   // Keyboard event listeners
   useEffect(() => {

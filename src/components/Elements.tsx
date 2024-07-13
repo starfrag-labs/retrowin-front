@@ -2,13 +2,19 @@ import { Element } from './Element';
 import { useElementStore } from '../store/element.store';
 import { elementsContainer } from '../styles/element.css';
 import { IElementState } from '../types/store';
-import { useWindowStoreV2 } from '../store/window.store.v2';
+import { useWindowStore } from '../store/window.store';
 
-export const Elements = ({ folderKey, isWindowElements = false }: { folderKey: string, isWindowElements?: boolean }): React.ReactElement => {
+export const Elements = ({
+  folderKey,
+  isWindowElements = false,
+}: {
+  folderKey: string;
+  isWindowElements?: boolean;
+}): React.ReactElement => {
   const elements = useElementStore((state) =>
     state.getElementsByParentKey(folderKey)
   );
-  const newWindow = useWindowStoreV2((state) => state.newWindow);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   const uploadFileElement: IElementState = {
     key: 'upload-file',

@@ -16,10 +16,9 @@ export interface ReadFolderData {
 export type ProviderType = 'local' | 'google';
 
 export interface IProfile {
-  uuidKey: string;
   email: string;
-  nickname: string;
   imageUrl: string | null;
+  nickname: string;
   joinDate: string;
   updateDate: string;
   provider: ProviderType;
