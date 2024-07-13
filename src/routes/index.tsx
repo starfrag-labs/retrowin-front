@@ -1,4 +1,4 @@
-import { Navigate, createFileRoute, redirect } from '@tanstack/react-router';
+import { createFileRoute, redirect } from '@tanstack/react-router';
 import { z } from 'zod';
 import { getProfile } from '../api/auth';
 import config from '../utils/config';
@@ -31,5 +31,5 @@ export const Route = createFileRoute('/')({
 });
 
 function IndexComponent() {
-  return <Navigate to="/main" />;
+  return <Loading />;
 }
