@@ -1,10 +1,9 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createFolder } from '../../api/cloud';
 import { useElementStore } from '../../store/element.store';
-import { useTokenStore } from '../../store/token.store';
 import { MenuGenerator } from './MenuGenerator';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
-import { useWindowStoreV2 } from '../../store/window.store.v2';
+import { useWindowStore } from '../../store/window.store';
 
 export const BackgroundOptionMenu = ({
   menuRef,
@@ -16,8 +15,7 @@ export const BackgroundOptionMenu = ({
   const rootElement = useElementStore(
     (state) => state.getElementsByParentKey('')[0]
   );
-  const accessToken = useTokenStore((state) => state.accessToken);
-  const newWindow = useWindowStoreV2((state) => state.newWindow);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleUpload = () => {
     if (!currentMenu) return;
@@ -27,19 +25,15 @@ export const BackgroundOptionMenu = ({
 
   const handleCreateFolder = () => {
     if (!currentMenu) return;
-    createFolder(accessToken, rootElement.key, 'NewFolder').then(() => {
-      queryClient.invalidateQueries(
-        readFolderQueryOption(accessToken, rootElement.key)
-      );
+    createFolder(rootElement.key, 'NewFolder').then(() => {
+      queryClient.invalidateQueries(readFolderQueryOption(rootElement.key));
     });
     currentMenu.style.display = 'none';
   };
 
   const handleRefresh = () => {
     if (!currentMenu) return;
-    queryClient.invalidateQueries(
-      readFolderQueryOption(accessToken, rootElement.key)
-    );
+    queryClient.invalidateQueries(readFolderQueryOption(rootElement.key));
     currentMenu.style.display = 'none';
   };
 

@@ -1,6 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { useTokenStore } from '../store/token.store';
 import { downloadFile, renameFile, renameFolder } from '../api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
@@ -23,7 +22,7 @@ import { IElementState } from '../types/store';
 import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
-import { useWindowStoreV2 } from '../store/window.store.v2';
+import { useWindowStore } from '../store/window.store';
 
 export const Element = memo(
   ({
@@ -54,18 +53,17 @@ export const Element = memo(
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
 
-    // store states
-    const accessToken = useTokenStore((state) => state.accessToken);
-
     // store functions
-    const newWindow = useWindowStoreV2((state) => state.newWindow);
-    const findWindowByTarget = useWindowStoreV2((state) => state.findWindowByTarget);
-    const updateWindow = useWindowStoreV2((state) => state.updateWindow);
+    const newWindow = useWindowStore((state) => state.newWindow);
+    const findWindowByTarget = useWindowStore(
+      (state) => state.findWindowByTarget
+    );
+    const updateWindow = useWindowStore((state) => state.updateWindow);
     const rename = useElementStore((state) => state.renameElement);
     const endRenaming = useElementStore((state) => state.endRenaming);
     const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
-    
+
     const contentType = getContentType(name);
 
     useEffect(() => {
@@ -89,9 +87,9 @@ export const Element = memo(
     const handleClickIcon = () => {
       if (type === 'file' && contentType) {
         if (contentType.includes('image')) {
-          newWindow(elementKey, 'image')
+          newWindow(elementKey, 'image');
         } else if (contentType.includes('video')) {
-          newWindow(elementKey, 'video')
+          newWindow(elementKey, 'video');
         }
       } else if (type === 'file') {
         handleDownload();
@@ -107,7 +105,7 @@ export const Element = memo(
 
     // download file event handler
     const handleDownload = async () => {
-      const response = await downloadFile(accessToken, parentKey, elementKey, name);
+      const response = await downloadFile(parentKey, elementKey, name);
       if (!response) {
         return;
       }
@@ -144,9 +142,9 @@ export const Element = memo(
         renameRef.current.focus();
         renameRef.current.value = '';
         renameRef.current.value = nameState;
-        setRenaming(true)
+        setRenaming(true);
       } else {
-        setRenaming(false)
+        setRenaming(false);
       }
     }, [nameState, renaming, setRenaming]);
 
@@ -181,7 +179,7 @@ export const Element = memo(
           const tempName = name;
           setNameState(newNameState);
           endRenaming(elementKey);
-          renameFolder(accessToken, elementKey, newNameState)
+          renameFolder(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: ['read', 'folder', parentKey],
@@ -200,7 +198,7 @@ export const Element = memo(
           const tempName = name;
           setNameState(newNameState);
           endRenaming(elementKey);
-          renameFile(accessToken, parentKey, elementKey, newNameState)
+          renameFile(parentKey, elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: ['read', 'folder', parentKey],
@@ -214,7 +212,6 @@ export const Element = memo(
         }
       },
       [
-        accessToken,
         elementKey,
         endRenaming,
         name,

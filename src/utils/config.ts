@@ -1,11 +1,11 @@
-import { Config } from "../types/config";
+import { Config } from '../types/config';
 
-const api = import.meta.env.VITE_API as string;
-const oauth = import.meta.env.VITE_OAUTH as string;
+const gate = import.meta.env.VITE_API_GATEWAY as string;
+const auth = import.meta.env.VITE_AUTH as string;
 const redirectUrl = import.meta.env.VITE_REDIRECT as string;
 
 export default {
-  api,
-  oauth,
+  gate,
+  auth,
   redirectUrl,
-} as Config ;
+} as Config;

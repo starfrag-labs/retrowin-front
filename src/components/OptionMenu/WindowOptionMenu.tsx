@@ -1,9 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createFolder } from '../../api/cloud';
-import { useTokenStore } from '../../store/token.store';
 import { MenuGenerator } from './MenuGenerator';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
-import { useWindowStoreV2 } from '../../store/window.store.v2';
+import { useWindowStore } from '../../store/window.store';
 
 export const WindowOptionsMenu = ({
   windowKey,
@@ -18,11 +17,10 @@ export const WindowOptionsMenu = ({
   const currentMenu = menuRef.current;
 
   // store states
-  const accessToken = useTokenStore((state) => state.accessToken);
-  const window = useWindowStoreV2((state) => state.findWindow(windowKey));
+  const window = useWindowStore((state) => state.findWindow(windowKey));
 
   // store functions
-  const newWindow = useWindowStoreV2((state) => state.newWindow);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleUpload = () => {
     if (!currentMenu || !window) return;
@@ -32,19 +30,15 @@ export const WindowOptionsMenu = ({
 
   const handleCreateFolder = () => {
     if (!currentMenu || !window) return;
-    createFolder(accessToken, window.targetKey, 'NewFolder').then(() => {
-      queryClient.invalidateQueries(
-        readFolderQueryOption(accessToken, window.targetKey)
-      );
+    createFolder(window.targetKey, 'NewFolder').then(() => {
+      queryClient.invalidateQueries(readFolderQueryOption(window.targetKey));
     });
     currentMenu.style.display = 'none';
   };
 
   const handleRefresh = () => {
     if (!currentMenu || !window) return;
-    queryClient.invalidateQueries(
-      readFolderQueryOption(accessToken, window.targetKey)
-    );
+    queryClient.invalidateQueries(readFolderQueryOption(window.targetKey));
     currentMenu.style.display = 'none';
   };
 

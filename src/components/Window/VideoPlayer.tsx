@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react';
-import { useTokenStore } from '../../store/token.store';
 import { Loading } from '../Loading';
 import { useQuery } from '@tanstack/react-query';
 import { readFileQueryOption } from '../../utils/queryOptions/file.query';
@@ -15,10 +14,9 @@ export const VideoPlayer = ({
   const [loading, setLoading] = useState(true);
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const element = useElementStore((state) => state.findElement(fileKey));
-  const accessToken = useTokenStore((state) => state.accessToken);
 
   const query = useQuery(
-    readFileQueryOption(accessToken, element?.parentKey ?? '', fileKey)
+    readFileQueryOption(element?.parentKey ?? '', fileKey)
   );
 
   useEffect(() => {

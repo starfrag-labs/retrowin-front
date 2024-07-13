@@ -3,56 +3,43 @@ import { useProgressStore } from '../store/progress.store';
 import { ReadFolderData } from '../types/response';
 import { cloudUrls } from './urls';
 
-export const checkUser = async (accessToken: string) => {
+export const checkUser = async () => {
   const checkUser = cloudUrls.user.checkUser;
   const response = await api.request({
     method: checkUser.method,
     url: checkUser.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
-export const enrollUser = async (accessToken: string) => {
+export const enrollUser = async () => {
   const createUser = cloudUrls.user.enrollUser;
   const response = await api.request({
     method: createUser.method,
     url: createUser.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
-export const deleteUser = async (accessToken: string) => {
+export const deleteUser = async () => {
   const deleteUser = cloudUrls.user.deleteUser;
   const response = await api.request({
     method: deleteUser.method,
     url: deleteUser.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
-export const createRootFolder = async (accessToken: string) => {
+export const createRootFolder = async () => {
   const createRootFolder = cloudUrls.folder.createRootFolder;
   const response = await api.request<string>({
     method: createRootFolder.method,
     url: createRootFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
 export const createFolder = async (
-  accessToken: string,
   folderKey: string,
   folderName: string
 ) => {
@@ -60,9 +47,6 @@ export const createFolder = async (
   const response = await api.request<string>({
     method: createFolder.method,
     url: createFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     data: {
       folderName: folderName,
     },
@@ -70,44 +54,34 @@ export const createFolder = async (
   return response;
 };
 
-export const readFolder = async (accessToken: string, folderKey: string) => {
+export const readFolder = async (folderKey: string) => {
   const readFolder = cloudUrls.folder.readFolder(folderKey);
   const response = await api.request<ReadFolderData>({
     method: readFolder.method,
     url: readFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
-export const getRootFolderKey = async (accessToken: string) => {
+export const getRootFolderKey = async () => {
   const getRootFolderKey = cloudUrls.folder.getRootFolderKey;
   const response = await api.request<string>({
     method: getRootFolderKey.method,
     url: getRootFolderKey.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
-export const deleteFolder = async (accessToken: string, folderKey: string) => {
+export const deleteFolder = async (folderKey: string) => {
   const deleteFolder = cloudUrls.folder.deleteFolder(folderKey);
   const response = await api.request({
     method: deleteFolder.method,
     url: deleteFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
 export const moveFolder = async (
-  accessToken: string,
   folderKey: string,
   targetKey: string
 ) => {
@@ -115,15 +89,11 @@ export const moveFolder = async (
   const response = await api.request({
     method: moveFolder.method,
     url: moveFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
 export const renameFolder = async (
-  accessToken: string,
   folderKey: string,
   folderName: string
 ) => {
@@ -131,9 +101,6 @@ export const renameFolder = async (
   const response = await api.request({
     method: renameFolder.method,
     url: renameFolder.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     data: {
       folderName: folderName,
     },
@@ -142,7 +109,6 @@ export const renameFolder = async (
 };
 
 export const uploadChunk = async (
-  accessToken: string,
   folderKey: string,
   chunk: File | Blob,
   fileName: string,
@@ -161,7 +127,6 @@ export const uploadChunk = async (
       method: uploadFile.method,
       url: uploadFile.url,
       headers: {
-        Authorization: `Bearer ${accessToken}`,
         'Content-Type': 'multipart/form-data',
       },
       data: formData,
@@ -182,7 +147,6 @@ export const uploadChunk = async (
 };
 
 export const downloadFile = async (
-  accessToken: string,
   folderKey: string,
   fileKey: string,
   progressName?: string
@@ -199,9 +163,6 @@ export const downloadFile = async (
     .request<Blob>({
       method: downloadFile.method,
       url: downloadFile.url,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
       responseType: 'blob',
       onDownloadProgress: (event) => {
         if (progressName) {
@@ -225,7 +186,6 @@ export const downloadFile = async (
 };
 
 export const deleteFile = async (
-  accessToken: string,
   folderKey: string,
   fileKey: string
 ) => {
@@ -233,15 +193,11 @@ export const deleteFile = async (
   const response = await api.request({
     method: deleteFile.method,
     url: deleteFile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };
 
 export const renameFile = async (
-  accessToken: string,
   folderKey: string,
   fileKey: string,
   fileName: string
@@ -250,9 +206,6 @@ export const renameFile = async (
   const response = await api.request({
     method: renameFile.method,
     url: renameFile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
     data: {
       fileName: fileName,
     },
@@ -261,7 +214,6 @@ export const renameFile = async (
 };
 
 export const moveFile = async (
-  accessToken: string,
   folderKey: string,
   fileKey: string,
   newFolderKey: string
@@ -270,9 +222,6 @@ export const moveFile = async (
   const response = await api.request({
     method: moveFile.method,
     url: moveFile.url,
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
   });
   return response;
 };

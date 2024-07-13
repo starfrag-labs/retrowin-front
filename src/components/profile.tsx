@@ -1,5 +1,4 @@
 import { useQueryClient } from '@tanstack/react-query';
-import { useTokenStore } from '../store/token.store';
 import { IProfile } from '../types/response';
 
 export const Profile = ({
@@ -9,11 +8,9 @@ export const Profile = ({
   switchShowProfile: () => void;
   profile: IProfile;
 }): React.ReactElement => {
-  const setAccessToken = useTokenStore.getState().setAccessToken;
   const queryClient = useQueryClient();
 
   const logout = () => {
-    setAccessToken('');
     queryClient.clear();
     location.href = '/';
   };
