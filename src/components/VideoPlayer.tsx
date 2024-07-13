@@ -10,11 +10,10 @@ export function VideoPlayer({
   fileKey: string;
 }): React.ReactElement {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const url = `${config.cloud}/videos/stream/${folderKey}/${fileKey}/master.m3u8`;
+  const url = `${config.gate}/videos/stream/${folderKey}/${fileKey}/master.m3u8`;
   useEffect(() => {
     if (Hls.isSupported() && videoRef.current) {
-      const hls = new Hls({
-      });
+      const hls = new Hls({});
       hls.loadSource(url);
       hls.attachMedia(videoRef.current);
     }

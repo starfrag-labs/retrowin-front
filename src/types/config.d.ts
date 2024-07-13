@@ -1,7 +1,5 @@
 export interface Config {
-  api: string;
+  gate: string;
   auth: string;
-  cloud: string;
-  oauth: string;
   redirectUrl: string;
 }
