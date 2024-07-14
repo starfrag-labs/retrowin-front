@@ -7,6 +7,8 @@ import { Loading } from '../components/Loading';
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
+  beforeLoad: async () => {
+  },
   pendingComponent: () => <Loading />,
   component: RootComponent,
 });
