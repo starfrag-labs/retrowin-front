@@ -3,7 +3,7 @@ import { Loading } from '../../../components/Loading';
 import { createRootFolder, getRootFolderKey } from '../../../api/cloud';
 import { AxiosError } from 'axios';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
-import { Elements } from '../../../components/mobile/mElements';
+import { Elements } from '../../../components/mobile/Elements';
 
 export const Route = createFileRoute('/_mLayout/m/')({
   beforeLoad: async () => {

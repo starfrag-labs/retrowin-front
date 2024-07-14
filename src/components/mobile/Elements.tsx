@@ -1,5 +1,5 @@
 import { ReadFolderData } from '../../types/response';
-import { Element } from './mElement';
+import { Element } from './Element';
 
 export const Elements = ({ data }: { data: ReadFolderData }) => {
   return (
