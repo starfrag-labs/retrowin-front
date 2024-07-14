@@ -1,8 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router';
 import { z } from 'zod';
-import { getProfile } from '../api/auth';
-import config from '../utils/config';
-import { useUserStore } from '../store/user.store';
 import { Loading } from '../components/Loading';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useRef, useEffect } from 'react';
@@ -19,7 +16,7 @@ import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
-import { checkUser, createRootFolder, enrollUser, getRootFolderKey } from '../api/cloud';
+import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
 
 const codeSchema = z.object({
@@ -29,22 +26,6 @@ const codeSchema = z.object({
 export const Route = createFileRoute('/')({
   validateSearch: codeSchema,
   beforeLoad: async () => {
-    const setProfile = useUserStore.getState().setProfile;
-    await getProfile()
-      .then((response) => {
-        setProfile(response.data.data);
-      })
-      .catch(() => {
-        window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
-      });
-    await checkUser().catch(async (error: AxiosError) => {
-      if (error.response?.status === 404) {
-        await enrollUser();
-        return;
-      }
-      throw error;
-    });
-
     const rootFolderKey = await getRootFolderKey()
       .then((response) => {
         return response.data;

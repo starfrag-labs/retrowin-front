@@ -11,13 +11,31 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as MLayoutImport } from './routes/_mLayout.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
+import { Route as MLayoutMIndexImport } from './routes/_mLayout/m/index.tsx'
+import { Route as MLayoutMFolderKeyImport } from './routes/_mLayout/m/$folderKey.tsx'
 
 // Create/Update Routes
+
+const MLayoutRoute = MLayoutImport.update({
+  id: '/_mLayout',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
+} as any)
+
+const MLayoutMIndexRoute = MLayoutMIndexImport.update({
+  path: '/m/',
+  getParentRoute: () => MLayoutRoute,
+} as any)
+
+const MLayoutMFolderKeyRoute = MLayoutMFolderKeyImport.update({
+  path: '/m/$folderKey',
+  getParentRoute: () => MLayoutRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -28,11 +46,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/_mLayout': {
+      preLoaderRoute: typeof MLayoutImport
+      parentRoute: typeof rootRoute
+    }
+    '/_mLayout/m/$folderKey': {
+      preLoaderRoute: typeof MLayoutMFolderKeyImport
+      parentRoute: typeof MLayoutImport
+    }
+    '/_mLayout/m/': {
+      preLoaderRoute: typeof MLayoutMIndexImport
+      parentRoute: typeof MLayoutImport
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([IndexRoute])
+export const routeTree = rootRoute.addChildren([
+  IndexRoute,
+  MLayoutRoute.addChildren([MLayoutMFolderKeyRoute, MLayoutMIndexRoute]),
+])
 
 /* prettier-ignore-end */
