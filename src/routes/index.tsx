@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
 import { Loading } from '../components/Loading';
 import { useSuspenseQuery } from '@tanstack/react-query';
@@ -18,9 +18,10 @@ import { IElementState } from '../types/store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
+import MobileDetect from 'mobile-detect';
 
 const codeSchema = z.object({
-  code: z.string().optional(),
+  mobile: z.boolean().optional().default(false),
 });
 
 export const Route = createFileRoute('/')({
@@ -51,16 +52,30 @@ export const Route = createFileRoute('/')({
 
 function IndexComponent() {
   const { rootFolderKey } = Route.useRouteContext();
+  const { mobile } = Route.useSearch();
+
   const window = useWindowStore((state) => state.windows);
+
   const setElements = useElementStore((state) => state.addElements);
+  const setRootKey = useElementStore((state) => state.setRootKey);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef
   );
+
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(rootFolderKey)
   );
+
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
-  const setRootKey = useElementStore((state) => state.setRootKey);
+
+  const navigate = useNavigate({ from: '/' });
+
+  useEffect(() => {
+    const md = new MobileDetect(navigator.userAgent);
+    if (!mobile && md.isPhoneSized()) {
+      navigate({ to: '/m' });
+    }
+  }, [mobile, navigate]);
 
   useEffect(() => {
     setRootKey(rootFolderKey);
@@ -128,4 +143,3 @@ function IndexComponent() {
     </Selector>
   );
 }
-
