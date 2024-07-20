@@ -13,6 +13,16 @@ export interface ReadFolderData {
   files: IFile[];
 }
 
+export interface getFolderInfoData {
+  key: string;
+  name: string;
+  info: {
+    createDate: Date;
+    updateDate: Date;
+  }
+  parentKey: string;
+}
+
 export type ProviderType = 'local' | 'google';
 
 export interface IProfile {

@@ -1,14 +1,10 @@
 import { style } from '@vanilla-extract/css';
 
-export const backgroundContainer = style({
-  backgroundColor: 'white',
-  width: '100%',
-  height: '100%',
-});
-
 export const background = style({
+  width: '100%',
   display: 'flex',
+  minHeight: '100%',
+  backgroundColor: 'white',
   flexDirection: 'column',
   alignItems: 'center',
-  justifyContent: 'center',
 });

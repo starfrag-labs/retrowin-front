@@ -1,6 +1,6 @@
 import { api } from '.';
 import { useProgressStore } from '../store/progress.store';
-import { ReadFolderData } from '../types/response';
+import { getFolderInfoData, ReadFolderData } from '../types/response';
 import { cloudUrls } from './urls';
 
 export const checkUser = async () => {
@@ -107,6 +107,15 @@ export const renameFolder = async (
   });
   return response;
 };
+
+export const getFolderInfo = async (folderKey: string) => {
+  const getFolderInfo = cloudUrls.folder.info(folderKey);
+  const response = await api.request<getFolderInfoData>({
+    method: getFolderInfo.method,
+    url: getFolderInfo.url,
+  });
+  return response;
+}
 
 export const uploadChunk = async (
   folderKey: string,

@@ -62,6 +62,12 @@ export const cloudUrls = {
         method: 'PATCH',
       };
     },
+    info: (folderKey: string) => {
+      return {
+        url: `${cloudPrefix}/folder/${folderKey}/info`,
+        method: 'GET',
+      };
+    }
   },
   file: {
     uploadFile: (folderKey: string) => {

@@ -14,20 +14,20 @@ export const Route = createRootRouteWithContext<{
 }>()({
   beforeLoad: async () => {
     const setProfile = useUserStore.getState().setProfile;
-    await getProfile()
-      .then((response) => {
-        setProfile(response.data.data);
-      })
-      .catch(() => {
-        window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
-      });
-    await checkUser().catch(async (error: AxiosError) => {
-      if (error.response?.status === 404) {
-        await enrollUser();
-        return;
-      }
-      throw error;
-    });
+    // await getProfile()
+    //   .then((response) => {
+    //     setProfile(response.data.data);
+    //   })
+    //   .catch(() => {
+    //     window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
+    //   });
+    // await checkUser().catch(async (error: AxiosError) => {
+    //   if (error.response?.status === 404) {
+    //     await enrollUser();
+    //     return;
+    //   }
+    //   throw error;
+    // });
   },
   pendingComponent: () => <Loading />,
   component: RootComponent,
@@ -37,7 +37,7 @@ function RootComponent() {
   return (
     <div className={defaultContainer}>
       <Outlet />
-      <TanStackRouterDevtools position="bottom-right" />
+      {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </div>
   );
 }

@@ -1,23 +1,28 @@
-import { ReadFolderData } from '../../types/response';
+import { useMobileElementStore } from '../../store/mobile/element.store';
+import { elementsContainer } from '../../styles/mobile/element.css';
 import { Element } from './Element';
 
-export const Elements = ({ data }: { data: ReadFolderData }) => {
+export const Elements = ({
+  folderKey,
+  selecting,
+}: {
+  folderKey: string;
+  selecting: boolean;
+}) => {
+  const elements = useMobileElementStore((state) =>
+    state.findElementsByParentKey(folderKey)
+  );
   return (
-    <div>
-      {data.folders.map((folder) => (
+    <div className={elementsContainer}>
+      {elements.map((element) => (
         <Element
-          key={folder.key}
-          elementKey={folder.key}
-          type="folder"
-          name={folder.name}
-        />
-      ))}
-      {data.files.map((file) => (
-        <Element
-          key={file.key}
-          elementKey={file.key}
-          type="file"
-          name={file.name}
+          key={element.key}
+          elementKey={element.key}
+          name={element.name}
+          type={element.type}
+          parentKey={element.parentKey}
+          selected={element.selected}
+          selecting={selecting}
         />
       ))}
     </div>

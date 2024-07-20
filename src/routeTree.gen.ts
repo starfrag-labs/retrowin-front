@@ -11,31 +11,31 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as MLayoutImport } from './routes/_mLayout.tsx'
 import { Route as IndexImport } from './routes/index.tsx'
-import { Route as MLayoutMIndexImport } from './routes/_mLayout/m/index.tsx'
-import { Route as MLayoutMFolderKeyImport } from './routes/_mLayout/m/$folderKey.tsx'
+import { Route as MIndexImport } from './routes/m/index.tsx'
+import { Route as MFolderKeyImport } from './routes/m/$folderKey.tsx'
+import { Route as MViewerFileKeyImport } from './routes/m/viewer/$fileKey.tsx'
 
 // Create/Update Routes
-
-const MLayoutRoute = MLayoutImport.update({
-  id: '/_mLayout',
-  getParentRoute: () => rootRoute,
-} as any)
 
 const IndexRoute = IndexImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any)
 
-const MLayoutMIndexRoute = MLayoutMIndexImport.update({
+const MIndexRoute = MIndexImport.update({
   path: '/m/',
-  getParentRoute: () => MLayoutRoute,
+  getParentRoute: () => rootRoute,
 } as any)
 
-const MLayoutMFolderKeyRoute = MLayoutMFolderKeyImport.update({
+const MFolderKeyRoute = MFolderKeyImport.update({
   path: '/m/$folderKey',
-  getParentRoute: () => MLayoutRoute,
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MViewerFileKeyRoute = MViewerFileKeyImport.update({
+  path: '/m/viewer/$fileKey',
+  getParentRoute: () => rootRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
@@ -46,17 +46,17 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/_mLayout': {
-      preLoaderRoute: typeof MLayoutImport
+    '/m/$folderKey': {
+      preLoaderRoute: typeof MFolderKeyImport
       parentRoute: typeof rootRoute
     }
-    '/_mLayout/m/$folderKey': {
-      preLoaderRoute: typeof MLayoutMFolderKeyImport
-      parentRoute: typeof MLayoutImport
+    '/m/': {
+      preLoaderRoute: typeof MIndexImport
+      parentRoute: typeof rootRoute
     }
-    '/_mLayout/m/': {
-      preLoaderRoute: typeof MLayoutMIndexImport
-      parentRoute: typeof MLayoutImport
+    '/m/viewer/$fileKey': {
+      preLoaderRoute: typeof MViewerFileKeyImport
+      parentRoute: typeof rootRoute
     }
   }
 }
@@ -65,7 +65,9 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren([
   IndexRoute,
-  MLayoutRoute.addChildren([MLayoutMFolderKeyRoute, MLayoutMIndexRoute]),
+  MFolderKeyRoute,
+  MIndexRoute,
+  MViewerFileKeyRoute,
 ])
 
 /* prettier-ignore-end */

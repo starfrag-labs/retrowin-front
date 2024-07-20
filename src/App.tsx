@@ -24,11 +24,11 @@ export function App() {
       <RouterProvider
         router={router}
       />
-      <ReactQueryDevtools
+      {/* <ReactQueryDevtools
         initialIsOpen={false}
         buttonPosition="bottom-left"
         position="top"
-      />
+      /> */}
     </QueryClientProvider>
   );
 }
