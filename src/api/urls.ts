@@ -1,5 +1,4 @@
-const authPrefix = '/ifauth';
-const cloudPrefix = '';
+import { authPrefix, cloudPrefix } from '../utils/config';
 
 export const memberUrls = {
   profile: {
