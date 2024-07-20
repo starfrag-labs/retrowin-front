@@ -1,5 +1,5 @@
 import { queryOptions } from '@tanstack/react-query';
-import { getFolderInfo, getRootFolderKey, readFolder } from '../../api/cloud';
+import { getFolderInfo, getFolderPath, getRootFolderKey, readFolder } from '../../api/cloud';
 import { getFolderInfoData, ReadFolderData } from '../../types/response';
 import { retryCount } from './index.query';
 
@@ -37,6 +37,18 @@ export const getFolderInfoQueryOption = (folderKey: string) =>
     queryKey: ['info', 'folder', folderKey],
     queryFn: async () => {
       const data = await getFolderInfo(folderKey).then((response) => {
+        return response.data;
+      });
+      return data;
+    },
+  });
+
+export const getFolderPathQueryOption = (folderKey: string) =>
+  queryOptions<string[]>({
+    retry: retryCount,
+    queryKey: ['path', 'folder', folderKey],
+    queryFn: async () => {
+      const data = await getFolderPath(folderKey).then((response) => {
         return response.data;
       });
       return data;

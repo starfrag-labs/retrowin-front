@@ -117,6 +117,15 @@ export const getFolderInfo = async (folderKey: string) => {
   return response;
 }
 
+export const getFolderPath = async (folderKey: string) => {
+  const getFolderPath = cloudUrls.folder.path(folderKey);
+  const response = await api.request<string[]>({
+    method: getFolderPath.method,
+    url: getFolderPath.url,
+  });
+  return response;
+}
+
 export const uploadChunk = async (
   folderKey: string,
   chunk: File | Blob,

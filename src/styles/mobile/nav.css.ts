@@ -1,4 +1,4 @@
-import { style } from "@vanilla-extract/css";
+import { style } from '@vanilla-extract/css';
 
 export const navContainer = style({
   display: 'flex',
@@ -14,11 +14,11 @@ export const navContainer = style({
   boxSizing: 'border-box',
 });
 
-export const navLeftContainer = style({
+export const navItemsContainer = style({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: '10px',
+  gap: '1rem',
 });
 
 export const returnIcon = style({

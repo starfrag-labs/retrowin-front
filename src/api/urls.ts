@@ -67,6 +67,12 @@ export const cloudUrls = {
         url: `${cloudPrefix}/folder/${folderKey}/info`,
         method: 'GET',
       };
+    },
+    path: (folderKey: string) => {
+      return {
+        url: `${cloudPrefix}/folder/${folderKey}/path`,
+        method: 'GET',
+      };
     }
   },
   file: {

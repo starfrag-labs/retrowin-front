@@ -27,9 +27,9 @@ export const Element = memo(
     parentKey: string;
     selected: boolean;
     selecting: boolean;
-  }) => {
+  }): React.ReactElement => {
     const contentType = getContentType(name);
-    const selectTime = 500;
+    const selectTime = 400;
     let timer: NodeJS.Timeout;
     const navigate = useNavigate({ from: '/m/$folderKey' });
 

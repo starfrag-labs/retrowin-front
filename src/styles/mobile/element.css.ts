@@ -5,6 +5,7 @@ export const elementsContainer = style({
   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
   gridGap: '5px',
   width: '100%',
+  height: '100%',
   padding: '10px',
   boxSizing: 'border-box',
 });
@@ -58,4 +59,14 @@ export const folderIcon = style({
 export const miniFolderIcon = style({
   fontSize: '1.5rem',
   color: 'orange',
+});
+
+export const emptyFolderMessage = style({
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
+  height: '100%',
+  width: '100%',
+  fontSize: '1.5rem',
+  color: 'grey',
 });

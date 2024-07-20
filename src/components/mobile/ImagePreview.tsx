@@ -9,7 +9,7 @@ export const ImagePreview = ({
 }: {
   elementKey: string;
   parentKey: string;
-}) => {
+}): React.ReactElement => {
   const query = useQuery(readFileQueryOption(parentKey, elementKey));
   const [sourceUrl, setSourceUrl] = useState<string>('');
 

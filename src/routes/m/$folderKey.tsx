@@ -13,7 +13,7 @@ import { Elements } from '../../components/mobile/Elements';
 import { IoMdReturnLeft } from 'react-icons/io';
 import {
   navContainer,
-  navLeftContainer,
+  navItemsContainer,
   returnIcon,
   uploadIcon,
 } from '../../styles/mobile/nav.css';
@@ -21,6 +21,7 @@ import { FaPlus } from 'react-icons/fa6';
 import { Logo } from '../../components/Logo';
 import { Uploader } from '../../components/mobile/Menu/CreateMenu';
 import { EditMenu } from '../../components/mobile/Menu/EditMenu';
+import { ProgressSpinner } from '../../components/mobile/ProgressSpinner';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -39,21 +40,23 @@ function Component() {
   // States
   const [uploading, setUploading] = useState<boolean>(false);
   const [selecting, setSelecting] = useState<boolean>(false);
-  
+
   // Query
   const readQuery = useSuspenseQuery(readFolderQueryOption(folderKey));
   const infoQuery = useSuspenseQuery(getFolderInfoQueryOption(folderKey));
-  
+
   // Store
   const elements = useMobileElementStore((state) => state.elements);
-  
+
   // Actions
   const addElements = useMobileElementStore((state) => state.addElements);
-  const unselectAll = useMobileElementStore((state) => state.unselectAllElements);
-  
+  const unselectAll = useMobileElementStore(
+    (state) => state.unselectAllElements
+  );
+
   // Navigation
   const navigate = useNavigate({ from: '/m/$folderKey' });
-  
+
   // Functions
   const toggleUploading = useCallback(() => {
     setUploading(!uploading);
@@ -99,7 +102,7 @@ function Component() {
     <div className={background}>
       <nav className={navContainer}>
         {infoQuery.data.parentKey ? (
-          <div className={navLeftContainer}>
+          <div className={navItemsContainer}>
             <IoMdReturnLeft
               onClick={() => {
                 navigate({
@@ -114,19 +117,20 @@ function Component() {
         ) : (
           <Logo />
         )}
-        <FaPlus
-          className={uploadIcon}
-          onTouchEnd={selecting ? unselectAll : toggleUploading}
-          style={{
-            transform: selecting ? 'rotate(45deg)' : 'rotate(0deg)',
-          }}
-        />
+        <div className={navItemsContainer}>
+          <ProgressSpinner />
+          <FaPlus
+            className={uploadIcon}
+            onTouchEnd={selecting ? unselectAll : toggleUploading}
+            style={{
+              transform: selecting ? 'rotate(45deg)' : 'rotate(0deg)',
+            }}
+          />
+        </div>
       </nav>
       <Elements folderKey={folderKey} selecting={selecting} />
       {uploading && <Uploader folderKey={folderKey} toggle={toggleUploading} />}
-      {selecting && !uploading && (
-        <EditMenu folderKey={folderKey} />
-      )}
+      {selecting && !uploading && <EditMenu folderKey={folderKey} />}
     </div>
   );
 }
