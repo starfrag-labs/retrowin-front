@@ -3,7 +3,10 @@ import { Loading } from '../../components/Loading';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { useMobileElementStore } from '../../store/mobile/element.store';
-import { background } from '../../styles/mobile/background.css';
+import {
+  backgroundContainer,
+  background,
+} from '../../styles/mobile/background.css';
 import { IMobileElementState } from '../../types/store';
 import {
   getFolderInfoQueryOption,
@@ -99,7 +102,8 @@ function Component() {
   }, [readQuery.data, addElements, folderKey]);
 
   return (
-    <div className={background}>
+    <div className={backgroundContainer}>
+      <div className={background} />
       <nav className={navContainer}>
         {infoQuery.data.parentKey ? (
           <div className={navItemsContainer}>

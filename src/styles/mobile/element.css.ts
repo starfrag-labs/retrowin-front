@@ -5,7 +5,6 @@ export const elementsContainer = style({
   gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
   gridGap: '5px',
   width: '100%',
-  height: '100%',
   padding: '10px',
   boxSizing: 'border-box',
 });
