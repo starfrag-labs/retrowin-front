@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { readFileQueryOption } from '../../utils/queryOptions/file.query';
 import { useCallback, useEffect, useState } from 'react';
-import { imagePreview, imagePreviewContainer } from '../../styles/mobile/preview.css';
+import { imagePreview } from '../../styles/mobile/preview.css';
 import { Loading } from '../Loading';
 
 export const ImagePreview = ({
@@ -25,13 +25,9 @@ export const ImagePreview = ({
     createUrl();
   }, [createUrl]);
 
-  return (
-    <div className={imagePreviewContainer}>
-      {sourceUrl ? (
-        <img src={sourceUrl} alt="preview" className={imagePreview} />
-      ) : (
-        <Loading />
-      )}
-    </div>
-  );
+  if (sourceUrl) {
+    return <img src={sourceUrl} alt="preview" className={imagePreview} />;
+  } else {
+    return <Loading />;
+  }
 };

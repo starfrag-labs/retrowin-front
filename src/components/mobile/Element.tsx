@@ -9,7 +9,7 @@ import { previewContainer } from '../../styles/mobile/preview.css';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { ImagePreview } from './ImagePreview';
 import { useNavigate } from '@tanstack/react-router';
-import { memo } from 'react';
+import React, { memo } from 'react';
 import { useMobileElementStore } from '../../store/mobile/element.store';
 
 export const Element = memo(
@@ -28,10 +28,15 @@ export const Element = memo(
     selected: boolean;
     selecting: boolean;
   }): React.ReactElement => {
+    const navigate = useNavigate({ from: '/m/$folderKey' });
     const contentType = getContentType(name);
     const selectTime = 400;
-    let timer: NodeJS.Timeout;
-    const navigate = useNavigate({ from: '/m/$folderKey' });
+    const selectThreshold = 10;
+
+    // State
+    const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
+    const [startX, setStartX] = React.useState<number>(0);
+    const [startY, setStartY] = React.useState<number>(0);
 
     // Actions
     const setActiveElementKey = useMobileElementStore(
@@ -60,6 +65,7 @@ export const Element = memo(
     };
 
     const onLongTouch = () => {
+      setTimer(null);
       if (selected) {
         unselectElement(elementKey);
       } else {
@@ -67,8 +73,27 @@ export const Element = memo(
       }
     };
 
-    const touchStart = () => {
-      timer = setTimeout(onLongTouch, selectTime);
+    const touchStart = (e: React.TouchEvent) => {
+      setStartX(e.touches[0].clientX);
+      setStartY(e.touches[0].clientY);
+      const timerId = setTimeout(onLongTouch, selectTime);
+      setTimer(timerId);
+
+      const touchMove = (e: TouchEvent) => {
+        if (
+          Math.abs(e.touches[0].clientX - startX) > selectThreshold ||
+          Math.abs(e.touches[0].clientY - startY) > selectThreshold
+        ) {
+          clearTimeout(timerId);
+          setTimer(null);
+        }
+      };
+
+      window.addEventListener('touchmove', touchMove, { passive: true });
+
+      window.addEventListener('touchend', () => {
+        window.removeEventListener('touchmove', touchMove);
+      });
     };
 
     const touchEnd = () => {

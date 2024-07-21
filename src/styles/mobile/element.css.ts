@@ -2,11 +2,12 @@ import { style, StyleRule } from '@vanilla-extract/css';
 
 export const elementsContainer = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
-  gridGap: '5px',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(8.75rem, 1fr))',
+  gridAutoRows: '10rem',
   width: '100%',
-  padding: '10px',
+  padding: '1rem',
   boxSizing: 'border-box',
+  gap: '5px',
 });
 
 export const elementContainer = style({
@@ -16,26 +17,20 @@ export const elementContainer = style({
   justifyContent: 'center',
   borderRadius: '10px',
   width: '100%',
+  height: 'auto',
   maxWidth: '50vw',
-  aspectRatio: '1 / 0.6',
-  padding: '10px',
   boxSizing: 'border-box',
+  padding: '10px',
 });
 
 export const elementNameContainer = style({
   display: 'block',
-  justifyContent: 'center',
-  alignItems: 'center',
-  width: '8rem',
-  margin: '10px',
+  padding: '1rem',
+  width: '70%',
   textOverflow: 'ellipsis',
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textAlign: 'center',
-  // ios safari
-  WebkitLineClamp: 2,
-  WebkitBoxOrient: 'vertical',
-  WebkitBackfaceVisibility: 'hidden',
 });
 
 const defaultIcon: StyleRule = {
