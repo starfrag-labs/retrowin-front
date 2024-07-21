@@ -7,7 +7,13 @@ import { editMenu, editMenuItemIcon } from '../../../styles/mobile/menu.css';
 import { useEffect, useState } from 'react';
 import { MoveMenu } from './MoveMenu';
 import { Modal } from '../Modal';
-import { deleteFile, deleteFolder, downloadFile, renameFile } from '../../../api/cloud';
+import {
+  deleteFile,
+  deleteFolder,
+  downloadFile,
+  renameFile,
+  renameFolder,
+} from '../../../api/cloud';
 import { IMobileElementState } from '../../../types/store';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
@@ -84,26 +90,44 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     // replace all spaces with _ and trim the name
     // if extname is empty, add it to the name
     let modifiedNewName = newName.trim().replace(/\s/g, '_');
-    const newExtName = modifiedNewName.match(/\.[0-9a-z]+$/i)?.[0] || '';
-    const extname = element.name.match(/\.[0-9a-z]+$/i)?.[0] || '';
 
-    if (newExtName === '') {
-      modifiedNewName = `${modifiedNewName}${extname}`;
-    }
-    if (element.name === modifiedNewName) {
-      toggleRenameModalOpen();
-      unselectAll();
+    if (element.type === 'folder') {
+      await renameFolder(element.key, modifiedNewName)
+        .then(() => {
+          queryClient.invalidateQueries(
+            readFolderQueryOption(element.parentKey)
+          );
+          renameElement(element.key, modifiedNewName);
+          toggleRenameModalOpen();
+        })
+        .finally(() => {
+          unselectAll();
+        });
       return;
-    }
-    await renameFile(element.parentKey, element.key, modifiedNewName)
-      .then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
-        renameElement(element.key, modifiedNewName);
+    } else if (element.type === 'file') {
+      const newExtName = modifiedNewName.match(/\.[0-9a-z]+$/i)?.[0] || '';
+      const extname = element.name.match(/\.[0-9a-z]+$/i)?.[0] || '';
+
+      if (newExtName === '') {
+        modifiedNewName = `${modifiedNewName}${extname}`;
+      }
+      if (element.name === modifiedNewName) {
         toggleRenameModalOpen();
-      })
-      .finally(() => {
         unselectAll();
-      });
+        return;
+      }
+      await renameFile(element.parentKey, element.key, modifiedNewName)
+        .then(() => {
+          queryClient.invalidateQueries(
+            readFolderQueryOption(element.parentKey)
+          );
+          renameElement(element.key, modifiedNewName);
+          toggleRenameModalOpen();
+        })
+        .finally(() => {
+          unselectAll();
+        });
+    }
   };
 
   const handleDownload = async () => {
@@ -116,15 +140,17 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     toggleDownloadModalOpen();
     unselectAll();
     selectedFiles.forEach(async (file) => {
-      await downloadFile(file.parentKey, file.key, file.name).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+      await downloadFile(file.parentKey, file.key, file.name).then(
+        (response) => {
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file.name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        }
+      );
     });
   };
 

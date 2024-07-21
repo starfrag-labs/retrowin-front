@@ -2,9 +2,10 @@ import { style } from '@vanilla-extract/css';
 
 export const backgroundContainer = style({
   display: 'flex',
+  position: 'relative',
   flexDirection: 'column',
   width: '100%',
-  height: '100%',
+  height: '100dvh',
 });
 
 export const background = style({

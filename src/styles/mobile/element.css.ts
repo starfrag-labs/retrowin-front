@@ -2,7 +2,7 @@ import { style, StyleRule } from '@vanilla-extract/css';
 
 export const elementsContainer = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))',
   gridGap: '5px',
   width: '100%',
   padding: '10px',
@@ -32,6 +32,10 @@ export const elementNameContainer = style({
   overflow: 'hidden',
   whiteSpace: 'nowrap',
   textAlign: 'center',
+  // ios safari
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  WebkitBackfaceVisibility: 'hidden',
 });
 
 const defaultIcon: StyleRule = {
