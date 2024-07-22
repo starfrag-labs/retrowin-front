@@ -71,7 +71,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
 
     await Promise.all([
       selectedFolders.map((folder) => deleteFolder(folder.key)),
-      selectedFiles.map((file) => deleteFile(file.parentKey, file.key)),
+      selectedFiles.map((file) => deleteFile(file.key)),
     ]).then(() => {
       selectedElements.forEach((element) => {
         deleteElement(element.key);
@@ -116,7 +116,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
         unselectAll();
         return;
       }
-      await renameFile(element.parentKey, element.key, modifiedNewName)
+      await renameFile(element.key, modifiedNewName)
         .then(() => {
           queryClient.invalidateQueries(
             readFolderQueryOption(element.parentKey)
@@ -140,7 +140,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     toggleDownloadModalOpen();
     unselectAll();
     selectedFiles.forEach(async (file) => {
-      await downloadFile(file.parentKey, file.key, file.name).then(
+      await downloadFile(file.key, file.name).then(
         (response) => {
           const url = window.URL.createObjectURL(new Blob([response.data]));
           const link = document.createElement('a');

@@ -70,7 +70,7 @@ export const MoveMenu = ({
 
   const handleMove = () => {
     selectedElements.forEach(async (element) => {
-      await moveFile(element.parentKey, element.key, currentFolderKey).then(
+      await moveFile(element.key, currentFolderKey).then(
         () => {
           queryClient.invalidateQueries(
             readFolderQueryOption(element.parentKey)
