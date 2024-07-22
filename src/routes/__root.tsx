@@ -1,7 +1,5 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
-import {
-  QueryClient,
-} from '@tanstack/react-query';
+import { QueryClient } from '@tanstack/react-query';
 import { defaultContainer } from '../styles/global/container.css';
 import { Loading } from '../components/Loading';
 import { AxiosError } from 'axios';
@@ -15,26 +13,28 @@ export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async () => {
-    return new Promise((resolve, reject) => {
-      const setProfile = useUserStore.getState().setProfile;
-      getProfile()
-        .then((response) => {
-          setProfile(response.data.data);
-          resolve('done');
-        })
-        .catch(() => {
-          window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
-          reject();
+    if (import.meta.env.PROD) {
+      return new Promise((resolve, reject) => {
+        const setProfile = useUserStore.getState().setProfile;
+        getProfile()
+          .then((response) => {
+            setProfile(response.data.data);
+            resolve('done');
+          })
+          .catch(() => {
+            window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
+            reject();
+          });
+      }).then(() => {
+        checkUser().catch(async (error: AxiosError) => {
+          if (error.response?.status === 404) {
+            await enrollUser();
+            return;
+          }
+          throw error;
         });
-    }).then(() => {
-      checkUser().catch(async (error: AxiosError) => {
-        if (error.response?.status === 404) {
-          await enrollUser();
-          return;
-        }
-        throw error;
       });
-    });
+    }
   },
   pendingComponent: () => <Loading />,
   component: RootComponent,

@@ -1,9 +1,8 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
 import { Loading } from '../../../components/Loading';
-import { readFileQueryOption } from '../../../utils/queryOptions/file.query';
-import { useQuery } from '@tanstack/react-query';
+import { getFileInfoQueryOption, readFileQueryOption } from '../../../utils/queryOptions/file.query';
+import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
-import { useMobileElementStore } from '../../../store/mobile/element.store';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { IoIosReturnLeft } from 'react-icons/io';
@@ -20,6 +19,7 @@ import {
   viewerBottom,
   viewerNav,
 } from '../../../styles/mobile/viewer.css';
+import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <Loading />,
@@ -30,6 +30,7 @@ function Component() {
   const { fileKey } = Route.useParams();
 
   // States
+  const [fileName, setFileName] = useState<string>('');
   const [targetKey, setTargetKey] = useState<string>(fileKey);
   const [parentKey, setParentKey] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(true);
@@ -37,43 +38,49 @@ function Component() {
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
 
-  // Store actions
-  const findElement = useMobileElementStore((state) => state.findElement);
-  const findElementsByParentKey = useMobileElementStore(
-    (state) => state.findElementsByParentKey
-  );
-
   // Query
-  const readQuery = useQuery(
-    readFileQueryOption(findElement(targetKey)?.parentKey ?? '', targetKey)
+  const readQuery = useSuspenseQuery(
+    readFileQueryOption('', targetKey)
+  );
+  const infoQuery = useSuspenseQuery(
+    getFileInfoQueryOption(targetKey)
+  );
+  const readFolderQuery = useQuery(
+    readFolderQueryOption(parentKey)
   );
 
   useEffect(() => {
-    const element = findElement(fileKey);
-    if (!element) return;
-    setParentKey(element.parentKey);
-  }, [fileKey, findElement]);
+    if (infoQuery.isSuccess && infoQuery.data) {
+      setFileName(infoQuery.data.fileName);
+    }
+  }, [infoQuery.data, infoQuery.isSuccess]);
 
   useEffect(() => {
-    const element = findElement(fileKey);
-    if (!element) return;
-    setSiblings(
-      findElementsByParentKey(element.parentKey)
-        .filter((element) => {
-          const contentType = getContentType(element.name);
-          return (
-            contentType === 'image/jpg' ||
-            contentType === 'image/jpeg' ||
-            contentType === 'image/png' ||
-            contentType === 'image/gif' ||
-            contentType === 'video/mp4' ||
-            contentType === 'video/webm' ||
-            contentType === 'video/ogg'
-          );
-        })
-        .map((element) => element.key)
-    );
-  }, [fileKey, findElement, findElementsByParentKey]);
+    if (infoQuery.isSuccess && infoQuery.data) {
+      setParentKey(infoQuery.data.parentFolderKey);
+    }
+  }, [fileKey, infoQuery.data, infoQuery.isSuccess]);
+
+  useEffect(() => {
+    if (readFolderQuery.isSuccess && readFolderQuery.data) {
+      setSiblings(
+        readFolderQuery.data.files
+          .filter((file) => {
+            const contentType = getContentType(file.name);
+            return (
+              contentType === 'image/jpg' ||
+              contentType === 'image/jpeg' ||
+              contentType === 'image/png' ||
+              contentType === 'image/gif' ||
+              contentType === 'video/mp4' ||
+              contentType === 'video/webm' ||
+              contentType === 'video/ogg'
+            );
+          })
+          .map((file) => file.key)
+      );
+    }   
+  }, [fileKey, readFolderQuery.data, readFolderQuery.isSuccess]);
 
   useEffect(() => {
     setImageNumber(siblings.indexOf(targetKey));
@@ -81,9 +88,11 @@ function Component() {
 
   const createUrl = useCallback(async () => {
     setLoading(true);
-    const element = findElement(targetKey);
-    if (!element) return;
-    const contentType = getContentType(element.name);
+    if (!fileName) {
+      setLoading(false);
+      return;
+    }
+    const contentType = getContentType(fileName);
     if (
       readQuery.isSuccess &&
       readQuery.data &&
@@ -98,7 +107,7 @@ function Component() {
       setSourceUrl(URL.createObjectURL(readQuery.data));
       setLoading(false);
     }
-  }, [findElement, readQuery.data, readQuery.isSuccess, targetKey]);
+  }, [fileName, readQuery.data, readQuery.isSuccess]);
 
   useEffect(() => {
     createUrl();
@@ -146,8 +155,8 @@ function Component() {
           <Loading />
         ) : (
           <div>
-            {sourceUrl ? (
-              getContentType(findElement(targetKey)?.name ?? '')?.match(
+            {fileName ?? sourceUrl ? (
+              getContentType(fileName)?.match(
                 'image'
               ) ? (
                 <img src={sourceUrl} alt="preview" className={imageContent} />

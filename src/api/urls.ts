@@ -83,27 +83,33 @@ export const cloudUrls = {
     },
     downloadFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${cloudPrefix}/file/download/${folderKey}/${fileKey}`,
+        url: `${cloudPrefix}/file/download/${fileKey}`,
         method: 'GET',
       };
     },
     deleteFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${cloudPrefix}/file/${folderKey}/${fileKey}`,
+        url: `${cloudPrefix}/file/${fileKey}`,
         method: 'DELETE',
       };
     },
     renameFile: (folderKey: string, fileKey: string) => {
       return {
-        url: `${cloudPrefix}/file/rename/${folderKey}/${fileKey}`,
+        url: `${cloudPrefix}/file/rename/${fileKey}`,
         method: 'PATCH',
       };
     },
     moveFile: (folderKey: string, fileKey: string, targetKey: string) => {
       return {
-        url: `${cloudPrefix}/file/move/${folderKey}/${fileKey}?targetKey=${targetKey}`,
+        url: `${cloudPrefix}/file/move/${fileKey}?targetKey=${targetKey}`,
         method: 'PATCH',
       };
     },
+    getFileInfo: (fileKey: string) => {
+      return {
+        url: `${cloudPrefix}/file/info/${fileKey}`,
+        method: 'GET',
+      };
+    }
   },
 };

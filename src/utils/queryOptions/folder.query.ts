@@ -29,6 +29,7 @@ export const readFolderQueryOption = (folderKey: string) =>
       });
       return data;
     },
+    enabled: !!folderKey,
   });
 
 export const getFolderInfoQueryOption = (folderKey: string) =>
@@ -41,6 +42,7 @@ export const getFolderInfoQueryOption = (folderKey: string) =>
       });
       return data;
     },
+    enabled: !!folderKey,
   });
 
 export const getFolderPathQueryOption = (folderKey: string) =>
@@ -53,4 +55,5 @@ export const getFolderPathQueryOption = (folderKey: string) =>
       });
       return data;
     },
+    enabled: !!folderKey,
   });

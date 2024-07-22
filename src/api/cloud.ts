@@ -1,6 +1,6 @@
 import { api } from '.';
 import { useProgressStore } from '../store/progress.store';
-import { getFolderInfoData, ReadFolderData } from '../types/response';
+import { getFileInfoData, getFolderInfoData, ReadFolderData } from '../types/response';
 import { cloudUrls } from './urls';
 
 export const checkUser = async () => {
@@ -243,3 +243,12 @@ export const moveFile = async (
   });
   return response;
 };
+
+export const getFileInfo = async (fileKey: string) => {
+  const getFileInfo = cloudUrls.file.getFileInfo(fileKey);
+  const response = await api.request<getFileInfoData>({
+    method: getFileInfo.method,
+    url: getFileInfo.url,
+  });
+  return response;
+}
