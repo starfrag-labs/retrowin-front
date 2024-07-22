@@ -1,7 +1,7 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { QueryClient } from '@tanstack/react-query';
 import { defaultContainer } from '../styles/global/container.css';
-import { Loading } from '../components/Loading';
+import { CircularLoading } from '../components/CircularLoading';
 import { AxiosError } from 'axios';
 import { getProfile } from '../api/auth';
 import { checkUser, enrollUser } from '../api/cloud';
@@ -36,7 +36,7 @@ export const Route = createRootRouteWithContext<{
       });
     }
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: RootComponent,
 });
 

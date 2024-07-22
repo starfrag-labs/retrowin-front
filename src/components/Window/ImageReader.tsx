@@ -10,7 +10,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { readFileQueryOption } from '../../utils/queryOptions/file.query';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
-import { Loading } from '../Loading';
+import { CircularLoading } from '../CircularLoading';
 
 export const ImageReader = memo(
   ({
@@ -95,7 +95,7 @@ export const ImageReader = memo(
 
     return (
       <div className={imageReaderContainer}>
-        {loading && <Loading />}
+        {loading && <CircularLoading />}
         {imageNumber > 0 && (
           <MdNavigateBefore onClick={handlePrev} className={prevButton} />
         )}

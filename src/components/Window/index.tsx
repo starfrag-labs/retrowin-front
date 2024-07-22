@@ -22,7 +22,7 @@ import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
-import { Loading } from '../Loading';
+import { CircularLoading } from '../CircularLoading';
 
 export const WindowV2 = ({
   windowKey,
@@ -301,7 +301,7 @@ export const WindowV2 = ({
             )}
           {title}
           {window.type === 'navigator' && loading && (
-            <Loading size="1rem" border="3px" />
+            <CircularLoading size="1rem" border="3px" />
           )}
         </div>
         <div className={btnContainer}>

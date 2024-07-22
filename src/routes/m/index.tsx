@@ -1,8 +1,8 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { AxiosError } from 'axios';
 import { useEffect } from 'react';
 import { createRootFolder } from '../../api/cloud';
-import { Loading } from '../../components/Loading';
+import { CircularLoading } from '../../components/CircularLoading';
 import { useMobileElementStore } from '../../store/mobile/element.store';
 import { IMobileElementState } from '../../types/store';
 import { getRootFolderKeyQueryOption } from '../../utils/queryOptions/folder.query';
@@ -23,7 +23,7 @@ export const Route = createFileRoute('/m/')({
       rootFolderKey: rootFolderKey,
     };
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: Component,
 });
 

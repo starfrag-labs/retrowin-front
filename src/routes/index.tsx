@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
-import { Loading } from '../components/Loading';
+import { CircularLoading } from '../components/CircularLoading';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useRef, useEffect } from 'react';
 import { Background } from '../components/Background';
@@ -46,7 +46,7 @@ export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient, rootFolderKey } }) => {
     queryClient.ensureQueryData(readFolderQueryOption(rootFolderKey));
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: IndexComponent,
 });
 

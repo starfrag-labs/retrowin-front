@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaFolder } from 'react-icons/fa';
 import { RiFolderTransferLine } from 'react-icons/ri';
 import { miniFolderIcon } from '../../../styles/mobile/element.css';
-import { Loading } from '../../Loading';
+import { CircularLoading } from '../../CircularLoading';
 import {
   leftJustifiedMenuLabel,
   menu,
@@ -70,17 +70,11 @@ export const MoveMenu = ({
 
   const handleMove = () => {
     selectedElements.forEach(async (element) => {
-      await moveFile(element.key, currentFolderKey).then(
-        () => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(element.parentKey)
-          );
-          queryClient.invalidateQueries(
-            readFolderQueryOption(currentFolderKey)
-          );
-          moveElement(element.key, currentFolderKey);
-        }
-      );
+      await moveFile(element.key, currentFolderKey).then(() => {
+        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
+        queryClient.invalidateQueries(readFolderQueryOption(currentFolderKey));
+        moveElement(element.key, currentFolderKey);
+      });
     });
     unselectAll();
     toggle();
@@ -151,7 +145,7 @@ export const MoveMenu = ({
           )}
         </div>
       ) : (
-        <Loading />
+        <CircularLoading />
       )}
     </div>
   );

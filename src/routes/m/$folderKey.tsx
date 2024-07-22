@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { Loading } from '../../components/Loading';
+import { CircularLoading } from '../../components/CircularLoading';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { useMobileElementStore } from '../../store/mobile/element.store';
@@ -32,7 +32,7 @@ export const Route = createFileRoute('/m/$folderKey')({
       folderKey: params.folderKey,
     };
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: Component,
 });
 

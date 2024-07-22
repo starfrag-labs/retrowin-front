@@ -1,6 +1,9 @@
 import { createFileRoute, Link } from '@tanstack/react-router';
-import { Loading } from '../../../components/Loading';
-import { getFileInfoQueryOption, readFileQueryOption } from '../../../utils/queryOptions/file.query';
+import { CircularLoading } from '../../../components/CircularLoading';
+import {
+  getFileInfoQueryOption,
+  readFileQueryOption,
+} from '../../../utils/queryOptions/file.query';
 import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
@@ -22,7 +25,7 @@ import {
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: Component,
 });
 
@@ -39,15 +42,9 @@ function Component() {
   const [imageNumber, setImageNumber] = useState<number>(0);
 
   // Query
-  const readQuery = useSuspenseQuery(
-    readFileQueryOption(targetKey)
-  );
-  const infoQuery = useSuspenseQuery(
-    getFileInfoQueryOption(targetKey)
-  );
-  const readFolderQuery = useQuery(
-    readFolderQueryOption(parentKey)
-  );
+  const readQuery = useSuspenseQuery(readFileQueryOption(targetKey));
+  const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
+  const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
   useEffect(() => {
     if (infoQuery.isSuccess && infoQuery.data) {
@@ -79,7 +76,7 @@ function Component() {
           })
           .map((file) => file.key)
       );
-    }   
+    }
   }, [fileKey, readFolderQuery.data, readFolderQuery.isSuccess]);
 
   useEffect(() => {
@@ -152,16 +149,14 @@ function Component() {
       </nav>
       <div>
         {loading ? (
-          <Loading />
+          <CircularLoading />
         ) : (
           <div>
             {fileName ?? sourceUrl ? (
-              getContentType(fileName)?.match(
-                'image'
-              ) ? (
+              getContentType(fileName)?.match('image') ? (
                 <img src={sourceUrl} alt="preview" className={imageContent} />
               ) : (
-                <video controls src={sourceUrl} className={imageContent}/>
+                <video controls src={sourceUrl} className={imageContent} />
               )
             ) : (
               <div>loading...</div>
