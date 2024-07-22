@@ -16,7 +16,7 @@ export const VideoPlayer = ({
   const element = useElementStore((state) => state.findElement(fileKey));
 
   const query = useQuery(
-    readFileQueryOption(element?.parentKey ?? '', fileKey)
+    readFileQueryOption(fileKey)
   );
 
   useEffect(() => {

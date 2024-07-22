@@ -204,7 +204,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
               moveElement(element.key, targetFolderKey);
             });
           } else if (element.selected && element.type === 'file') {
-            moveFile(element.parentKey, element.key, targetFolderKey).then(
+            moveFile(element.key, targetFolderKey).then(
               () => {
                 queryClient.invalidateQueries(
                   readFolderQueryOption(targetFolderKey)

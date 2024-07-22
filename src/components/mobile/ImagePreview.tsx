@@ -6,12 +6,10 @@ import { Loading } from '../Loading';
 
 export const ImagePreview = ({
   elementKey,
-  parentKey,
 }: {
   elementKey: string;
-  parentKey: string;
 }): React.ReactElement => {
-  const query = useQuery(readFileQueryOption(parentKey, elementKey));
+  const query = useQuery(readFileQueryOption(elementKey));
   const [sourceUrl, setSourceUrl] = useState<string>('');
 
   const createUrl = useCallback(async () => {

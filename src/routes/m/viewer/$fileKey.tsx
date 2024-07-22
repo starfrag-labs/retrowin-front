@@ -40,7 +40,7 @@ function Component() {
 
   // Query
   const readQuery = useSuspenseQuery(
-    readFileQueryOption('', targetKey)
+    readFileQueryOption(targetKey)
   );
   const infoQuery = useSuspenseQuery(
     getFileInfoQueryOption(targetKey)

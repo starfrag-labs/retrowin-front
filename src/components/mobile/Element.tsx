@@ -17,14 +17,12 @@ export const Element = memo(
     elementKey,
     name,
     type,
-    parentKey,
     selected,
     selecting,
   }: {
     elementKey: string;
     name: string;
     type: string;
-    parentKey: string;
     selected: boolean;
     selecting: boolean;
   }): React.ReactElement => {
@@ -116,7 +114,7 @@ export const Element = memo(
           {type === 'folder' ? (
             <FaFolder className={folderIcon} />
           ) : contentType?.match('image') ? (
-            <ImagePreview elementKey={elementKey} parentKey={parentKey} />
+            <ImagePreview elementKey={elementKey} />
           ) : (
             <FaFileAlt className={fileIcon} />
           )}

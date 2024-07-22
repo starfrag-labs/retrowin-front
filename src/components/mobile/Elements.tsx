@@ -29,7 +29,6 @@ export const Elements = ({
           elementKey={element.key}
           name={element.name}
           type={element.type}
-          parentKey={element.parentKey}
           selected={element.selected}
           selecting={selecting}
         />

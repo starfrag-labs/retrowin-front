@@ -165,7 +165,6 @@ export const uploadChunk = async (
 };
 
 export const downloadFile = async (
-  folderKey: string,
   fileKey: string,
   progressName?: string
 ) => {
@@ -176,7 +175,7 @@ export const downloadFile = async (
       type: 'download',
     });
   }
-  const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
+  const downloadFile = cloudUrls.file.downloadFile(fileKey);
   const response = api
     .request<Blob>({
       method: downloadFile.method,
@@ -204,10 +203,9 @@ export const downloadFile = async (
 };
 
 export const deleteFile = async (
-  folderKey: string,
   fileKey: string
 ) => {
-  const deleteFile = cloudUrls.file.deleteFile(folderKey, fileKey);
+  const deleteFile = cloudUrls.file.deleteFile(fileKey);
   const response = await api.request({
     method: deleteFile.method,
     url: deleteFile.url,
@@ -216,11 +214,10 @@ export const deleteFile = async (
 };
 
 export const renameFile = async (
-  folderKey: string,
   fileKey: string,
   fileName: string
 ) => {
-  const renameFile = cloudUrls.file.renameFile(folderKey, fileKey);
+  const renameFile = cloudUrls.file.renameFile(fileKey);
   const response = await api.request({
     method: renameFile.method,
     url: renameFile.url,
@@ -232,11 +229,10 @@ export const renameFile = async (
 };
 
 export const moveFile = async (
-  folderKey: string,
   fileKey: string,
   newFolderKey: string
 ) => {
-  const moveFile = cloudUrls.file.moveFile(folderKey, fileKey, newFolderKey);
+  const moveFile = cloudUrls.file.moveFile(fileKey, newFolderKey);
   const response = await api.request({
     method: moveFile.method,
     url: moveFile.url,

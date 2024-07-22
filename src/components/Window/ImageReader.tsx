@@ -33,12 +33,7 @@ export const ImageReader = memo(
     );
     const [loading, setLoading] = useState(true);
 
-    const query = useQuery(
-      readFileQueryOption(
-        findElement(targetKey)?.parentKey ?? '',
-        targetKey
-      )
-    );
+    const query = useQuery(readFileQueryOption(targetKey));
 
     useEffect(() => {
       const element = findElement(fileKey);
