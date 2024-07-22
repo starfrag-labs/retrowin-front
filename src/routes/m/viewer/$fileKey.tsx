@@ -1,10 +1,10 @@
-import { createFileRoute, Link } from '@tanstack/react-router';
+import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { CircularLoading } from '../../../components/CircularLoading';
 import {
   getFileInfoQueryOption,
   readFileQueryOption,
 } from '../../../utils/queryOptions/file.query';
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
@@ -23,6 +23,9 @@ import {
   viewerNav,
 } from '../../../styles/mobile/viewer.css';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
+import { deleteFile, downloadFile } from '../../../api/cloud';
+import { Modal } from '../../../components/mobile/Modal';
+import { useMobileElementStore } from '../../../store/mobile/element.store';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <CircularLoading />,
@@ -30,7 +33,11 @@ export const Route = createFileRoute('/m/viewer/$fileKey')({
 });
 
 function Component() {
+  const queryClient = useQueryClient();
   const { fileKey } = Route.useParams();
+  
+  // Navigation
+  const navigate = useNavigate({ from: '/m/viewer/$fileKey' });
 
   // States
   const [fileName, setFileName] = useState<string>('');
@@ -40,12 +47,27 @@ function Component() {
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState<boolean>(false);
 
   // Query
   const readQuery = useSuspenseQuery(readFileQueryOption(targetKey));
   const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
+  // Actions
+  const deleteElement = useMobileElementStore((state) => state.deleteElement);
+
+  // Functions
+  const toggleDeleteModalOpen = () => {
+    setIsDeleteModalOpen(!isDeleteModalOpen);
+  };
+
+  const toggleDownloadModalOpen = () => {
+    setIsDownloadModalOpen(!isDownloadModalOpen);
+  }
+
+  // Effects
   useEffect(() => {
     if (infoQuery.isSuccess && infoQuery.data) {
       setFileName(infoQuery.data.fileName);
@@ -122,6 +144,36 @@ function Component() {
     }
   };
 
+  const handleDelete = async () => {
+    await deleteFile(targetKey).then(() => {
+      console.log(parentKey);
+      queryClient.invalidateQueries(readFolderQueryOption(parentKey));
+      deleteElement(targetKey);
+      if (siblings.length > 1) {
+        if (imageNumber > 0) {
+          setTargetKey(siblings[imageNumber - 1]);
+        } else {
+          setTargetKey(siblings[imageNumber + 1]);
+        }
+      } else {
+        navigate({ to: '/m/$folderKey', params: { folderKey: parentKey } });
+      }
+    });
+  }
+
+  const handleDownload = async () => {
+    toggleDownloadModalOpen();
+    await downloadFile(targetKey, fileName).then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', fileName);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
+  }
+
   return (
     <div className={imageViewerContainer}>
       <nav className={viewerNav}>
@@ -159,18 +211,28 @@ function Component() {
                 <video controls src={sourceUrl} className={imageContent} />
               )
             ) : (
-              <div>loading...</div>
+              <CircularLoading />
             )}
           </div>
         )}
       </div>
       <div className={viewerBottom}>
-        <MdDelete className={activeControllerButton} />
+        <MdDelete className={activeControllerButton} onTouchEnd={toggleDeleteModalOpen} />
         <div className={pageNumber}>
           {imageNumber + 1} / {siblings.length}
         </div>
-        <MdDownload className={activeControllerButton} />
+        <MdDownload className={activeControllerButton} onTouchEnd={toggleDownloadModalOpen} />
       </div>
+      {isDeleteModalOpen && (
+        <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
+          <div>Are you sure you want to delete this file?</div>
+        </Modal>
+      )}
+      {isDownloadModalOpen && (
+        <Modal onAccept={handleDownload} onClose={toggleDownloadModalOpen}>
+          <div>Are you sure you want to download this file?</div>
+        </Modal>
+      )}
     </div>
   );
 }

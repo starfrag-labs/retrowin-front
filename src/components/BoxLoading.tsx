@@ -4,7 +4,7 @@ import { boxLoading, boxLoadingDots } from '../styles/loading.css';
 export const BoxLoading = () => {
   return (
     <div className={boxLoading}>
-      <BsThreeDots className={boxLoadingDots} />
+      <BsThreeDots className={boxLoadingDots}/>
     </div>
   );
 };

@@ -156,6 +156,7 @@ export const uploadChunk = async (
           total: chunk.size * totalChunks,
         });
       },
+      
     })
     .catch((error) => {
       useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);

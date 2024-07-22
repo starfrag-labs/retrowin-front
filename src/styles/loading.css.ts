@@ -40,7 +40,8 @@ const gradient = keyframes({
 
 export const boxLoading = style({
   display: 'flex',
-  background: 'linear-gradient(270deg, rgba(0,0,0,0.01), rgba(0,0,0,0.05), rgba(0,0,0,0.01))',
+  background:
+    'linear-gradient(270deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.01))',
   backgroundSize: '600% 600%',
   animation: `${gradient} 2s linear infinite`,
   width: '100%',

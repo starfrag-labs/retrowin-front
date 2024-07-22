@@ -4,7 +4,6 @@ export const windowContainer = style({
   position: 'absolute',
   backgroundColor: 'rgba(250, 250, 250, 1)',
   border: '1px solid black',
-  overflow: 'hidden',
 });
 
 export const windowContent = style({
