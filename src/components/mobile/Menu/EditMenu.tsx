@@ -47,6 +47,12 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   const toggleRenameModalOpen = () => {
+    if (selectedElements.length !== 1) {
+      return;
+    }
+    const element = selectedElements[0];
+
+    setNewName(element.name);
     setRenameModalOpen(!renameModalOpen);
   };
 
@@ -140,17 +146,15 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     toggleDownloadModalOpen();
     unselectAll();
     selectedFiles.forEach(async (file) => {
-      await downloadFile(file.key, file.name).then(
-        (response) => {
-          const url = window.URL.createObjectURL(new Blob([response.data]));
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', file.name);
-          document.body.appendChild(link);
-          link.click();
-          link.remove();
-        }
-      );
+      await downloadFile(file.key, file.name).then((response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', file.name);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
     });
   };
 
@@ -188,7 +192,11 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
       )}
       {renameModalOpen && (
         <Modal onAccept={handleRename} onClose={toggleRenameModalOpen}>
-          <input type="text" onChange={(e) => setNewName(e.target.value)} />
+          <input
+            type="text"
+            onChange={(e) => setNewName(e.target.value)}
+            defaultValue={newName}
+          />
         </Modal>
       )}
       {deleteModalOpen && (
