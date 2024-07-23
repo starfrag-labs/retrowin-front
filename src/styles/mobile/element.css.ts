@@ -10,7 +10,7 @@ export const elementsContainer = style({
   gap: '5px',
 });
 
-export const elementContainer = style({
+const elementContainerBase = {
   display: 'flex',
   flexDirection: 'column',
   alignItems: 'center',
@@ -21,6 +21,17 @@ export const elementContainer = style({
   maxWidth: '50vw',
   boxSizing: 'border-box',
   padding: '10px',
+  ':active': {
+    backgroundColor: '#f0f0f0',
+  },
+} as const;
+
+export const elementContainer = style({
+  ...elementContainerBase,
+});
+
+export const selectedElement = style({
+  backgroundColor: '#f0f0f0',
 });
 
 export const elementNameContainer = style({
