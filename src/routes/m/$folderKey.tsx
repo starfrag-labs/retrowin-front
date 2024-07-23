@@ -1,17 +1,11 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { CircularLoading } from '../../components/CircularLoading';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
-import { useMobileElementStore } from '../../store/mobile/element.store';
 import {
   backgroundContainer,
   background,
 } from '../../styles/mobile/background.css';
-import { IMobileElementState } from '../../types/store';
-import {
-  getFolderInfoQueryOption,
-  readFolderQueryOption,
-} from '../../utils/queryOptions/folder.query';
+import { getFolderInfoQueryOption } from '../../utils/queryOptions/folder.query';
 import { Elements } from '../../components/mobile/Elements';
 import { IoMdReturnLeft } from 'react-icons/io';
 import {
@@ -25,6 +19,8 @@ import { Logo } from '../../components/Logo';
 import { Uploader } from '../../components/mobile/Menu/CreateMenu';
 import { EditMenu } from '../../components/mobile/Menu/EditMenu';
 import { ProgressSpinner } from '../../components/mobile/ProgressSpinner';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMobileElementStore } from '../../store/mobile/element.store';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -45,17 +41,13 @@ function Component() {
   const [selecting, setSelecting] = useState<boolean>(false);
 
   // Query
-  const readQuery = useSuspenseQuery(readFolderQueryOption(folderKey));
   const infoQuery = useSuspenseQuery(getFolderInfoQueryOption(folderKey));
 
   // Store
-  const elements = useMobileElementStore((state) => state.elements);
+  const selectedKeys = useMobileElementStore((state) => state.selectedKeys);
 
   // Actions
-  const addElements = useMobileElementStore((state) => state.addElements);
-  const unselectAll = useMobileElementStore(
-    (state) => state.unselectAllElements
-  );
+  const unselectAll = useMobileElementStore((state) => state.unselectAllKeys);
 
   // Navigation
   const navigate = useNavigate({ from: '/m/$folderKey' });
@@ -66,46 +58,14 @@ function Component() {
   }, [uploading, setUploading]);
 
   useEffect(() => {
-    setSelecting(false);
-    elements.forEach((element) => {
-      if (element.selected) {
-        setSelecting(true);
-        return;
-      }
-    });
-  }, [elements, setSelecting]);
-
-  useEffect(() => {
-    const data = readQuery.data;
-    if (!data) {
-      return;
-    }
-    const folderElements: IMobileElementState[] = data.folders.map((folder) => {
-      return {
-        key: folder.key,
-        name: folder.name,
-        type: 'folder',
-        parentKey: folderKey,
-        selected: false,
-      };
-    });
-    const fileElements: IMobileElementState[] = data.files.map((file) => {
-      return {
-        key: file.key,
-        name: file.name,
-        type: 'file',
-        parentKey: folderKey,
-        selected: false,
-      };
-    });
-    addElements([...folderElements, ...fileElements]);
-  }, [readQuery.data, addElements, folderKey]);
+    setSelecting(selectedKeys.length > 0);
+  }, [selectedKeys.length, setSelecting]);
 
   return (
     <div className={backgroundContainer}>
       <div className={background} />
       <nav className={navContainer}>
-        {infoQuery.data.parentKey ? (
+        {infoQuery.data?.parentKey ? (
           <div className={navItemsContainer}>
             <IoMdReturnLeft
               onClick={() => {

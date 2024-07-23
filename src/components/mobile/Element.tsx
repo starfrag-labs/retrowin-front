@@ -4,12 +4,13 @@ import {
   elementNameContainer,
   fileIcon,
   folderIcon,
+  selectedElement,
 } from '../../styles/mobile/element.css';
 import { previewContainer } from '../../styles/mobile/preview.css';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { ImagePreview } from './ImagePreview';
 import { useNavigate } from '@tanstack/react-router';
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { useMobileElementStore } from '../../store/mobile/element.store';
 
 export const Element = memo(
@@ -32,25 +33,20 @@ export const Element = memo(
     const selectThreshold = 10;
 
     // State
-    const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
-    const [startX, setStartX] = React.useState<number>(0);
-    const [startY, setStartY] = React.useState<number>(0);
+    const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
+    const [startX, setStartX] = useState<number>(0);
+    const [startY, setStartY] = useState<number>(0);
 
     // Actions
-    const setActiveElementKey = useMobileElementStore(
-      (state) => state.setActiveElementKey
-    );
-    const selectElement = useMobileElementStore((state) => state.selectElement);
-    const unselectElement = useMobileElementStore(
-      (state) => state.unselectElement
-    );
+    const selectKey = useMobileElementStore((state) => state.selectKey);
+    const unselectKey = useMobileElementStore((state) => state.unselectKey);
 
     const handleClick = () => {
       if (selecting && !selected) {
-        selectElement(elementKey);
+        selectKey(elementKey);
         return;
       } else if (selecting && selected) {
-        unselectElement(elementKey);
+        unselectKey(elementKey);
         return;
       }
       if (type === 'folder') {
@@ -58,16 +54,16 @@ export const Element = memo(
       } else if (contentType?.match('image') || contentType?.match('video')) {
         navigate({ to: '/m/viewer/$fileKey', params: { fileKey: elementKey } });
       } else {
-        setActiveElementKey(elementKey);
+        // setActiveElementKey(elementKey);
       }
     };
 
     const onLongTouch = () => {
       setTimer(null);
       if (selected) {
-        unselectElement(elementKey);
+        unselectKey(elementKey);
       } else {
-        selectElement(elementKey);
+        selectKey(elementKey);
       }
     };
 
@@ -103,12 +99,11 @@ export const Element = memo(
 
     return (
       <div
-        className={elementContainer}
+        className={
+          selected ? `${elementContainer} ${selectedElement}` : elementContainer
+        }
         onTouchStart={touchStart}
         onTouchEnd={touchEnd}
-        style={{
-          backgroundColor: selected ? '#f0f0f0' : 'transparent',
-        }}
       >
         <div className={previewContainer}>
           {type === 'folder' ? (

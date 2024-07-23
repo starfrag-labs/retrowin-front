@@ -14,9 +14,9 @@ import {
   menu,
   menuContainer,
 } from '../../../styles/mobile/menu.css';
-import { useMobileElementStore } from '../../../store/mobile/element.store';
 import { Modal } from '../Modal';
-import { moveFile } from '../../../api/cloud';
+import { moveFile, moveFolder } from '../../../api/cloud';
+import { useMobileElementStore } from '../../../store/mobile/element.store';
 
 export const MoveMenu = ({
   folderKey,
@@ -35,15 +35,11 @@ export const MoveMenu = ({
   // Refs
   const menuRef = useRef<HTMLDivElement>(null);
 
-  const selectedElements = useMobileElementStore((state) =>
-    state.elements.filter((element) => element.selected)
-  );
-
   // Actions
-  const unselectAll = useMobileElementStore(
-    (state) => state.unselectAllElements
+  const isSelected = useMobileElementStore((state) => state.isSelected);
+  const unselectAllKeys = useMobileElementStore(
+    (state) => state.unselectAllKeys
   );
-  const moveElement = useMobileElementStore((state) => state.moveElement);
 
   // Queries
   const readQuery = useQuery(readFolderQueryOption(currentFolderKey));
@@ -68,16 +64,34 @@ export const MoveMenu = ({
     [toggle]
   );
 
-  const handleMove = () => {
-    selectedElements.forEach(async (element) => {
-      await moveFile(element.key, currentFolderKey).then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
-        queryClient.invalidateQueries(readFolderQueryOption(currentFolderKey));
-        moveElement(element.key, currentFolderKey);
-      });
+  const handleMove = async () => {
+    if (readQuery.isLoading || !readQuery.data) {
+      return;
+    }
+    await Promise.all([
+      readQuery.data.files.forEach(async (file) => {
+        if (isSelected(file.key)) {
+          await moveFile(file.key, currentFolderKey).then(() => {
+            queryClient.invalidateQueries(
+              readFolderQueryOption(file.parentKey)
+            );
+          });
+        }
+      }),
+      readQuery.data.folders.forEach(async (folder) => {
+        if (isSelected(folder.key)) {
+          await moveFolder(folder.key, currentFolderKey).then(() => {
+            queryClient.invalidateQueries(
+              readFolderQueryOption(folder.parentKey)
+            );
+          });
+        }
+      }),
+    ]).then(() => {
+      queryClient.invalidateQueries(readFolderQueryOption(currentFolderKey));
+      unselectAllKeys();
+      toggle();
     });
-    unselectAll();
-    toggle();
   };
 
   // Setup path for modal

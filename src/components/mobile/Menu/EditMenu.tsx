@@ -1,4 +1,3 @@
-import { useMobileElementStore } from '../../../store/mobile/element.store';
 import { MdDeleteOutline } from 'react-icons/md';
 import { RiFolderTransferLine } from 'react-icons/ri';
 import { CgRename } from 'react-icons/cg';
@@ -14,16 +13,15 @@ import {
   renameFile,
   renameFolder,
 } from '../../../api/cloud';
-import { IMobileElementState } from '../../../types/store';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
+import { useMobileElementStore } from '../../../store/mobile/element.store';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
+  const readQuery = useQuery(readFolderQueryOption(folderKey));
+
   const queryClient = useQueryClient();
 
-  const [selectedElements, setSelectedElements] = useState<
-    IMobileElementState[]
-  >([]);
   const [isFolderSelected, setIsFolderSelected] = useState(false);
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
   const [renameModalOpen, setRenameModalOpen] = useState(false);
@@ -32,14 +30,14 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const [newName, setNewName] = useState('');
 
   // Store
-  const elements = useMobileElementStore((state) => state.elements);
+  const selectedKeys = useMobileElementStore((state) => state.selectedKeys);
 
   // Actions
-  const unselectAll = useMobileElementStore(
-    (state) => state.unselectAllElements
+  const isSelected = useMobileElementStore((state) => state.isSelected);
+  const unselectAllKeys = useMobileElementStore(
+    (state) => state.unselectAllKeys
   );
-  const renameElement = useMobileElementStore((state) => state.renameElement);
-  const deleteElement = useMobileElementStore((state) => state.deleteElement);
+  const unselectKey = useMobileElementStore((state) => state.unselectKey);
 
   // Functions
   const toggleMoving = () => {
@@ -47,13 +45,20 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   const toggleRenameModalOpen = () => {
-    if (selectedElements.length !== 1) {
+    if (selectedKeys.length !== 1) {
       return;
     }
-    const element = selectedElements[0];
+    if (readQuery.isLoading || !readQuery.data) {
+      return;
+    }
+    const element =
+      readQuery.data.files.find((file) => file.key === selectedKeys[0]) ||
+      readQuery.data.folders.find((folder) => folder.key === selectedKeys[0]);
 
-    setNewName(element.name);
-    setRenameModalOpen(!renameModalOpen);
+    if (element) {
+      setNewName(element.name);
+      setRenameModalOpen(!renameModalOpen);
+    }
   };
 
   const toggleDeleteModalOpen = () => {
@@ -65,86 +70,82 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   const handleDelete = async () => {
-    if (selectedElements.length === 0) {
+    if (readQuery.isLoading || !readQuery.data) {
       return;
     }
-    const selectedFolders = selectedElements.filter(
-      (element) => element.type === 'folder'
-    );
-    const selectedFiles = selectedElements.filter(
-      (element) => element.type === 'file'
-    );
 
     await Promise.all([
-      selectedFolders.map((folder) => deleteFolder(folder.key)),
-      selectedFiles.map((file) => deleteFile(file.key)),
+      readQuery.data.folders.forEach(
+        (folder) => isSelected(folder.key) && deleteFolder(folder.key)
+      ),
+      readQuery.data.files.forEach(
+        (file) => isSelected(file.key) && deleteFile(file.key)
+      ),
     ]).then(() => {
-      selectedElements.forEach((element) => {
-        deleteElement(element.key);
-        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
-      });
-      unselectAll();
+      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
+      unselectAllKeys();
     });
   };
 
   const handleRename = async () => {
-    if (selectedElements.length !== 1 || newName === '') {
+    if (selectedKeys.length !== 1 || newName === '') {
       return;
     }
-    const element = selectedElements[0];
+
+    if (readQuery.isLoading || !readQuery.data) {
+      return;
+    }
+
+    const file = readQuery.data.files.find(
+      (file) => file.key === selectedKeys[0]
+    );
+    const folder = readQuery.data.folders.find(
+      (folder) => folder.key === selectedKeys[0]
+    );
 
     // replace all spaces with _ and trim the name
     // if extname is empty, add it to the name
     let modifiedNewName = newName.trim().replace(/\s/g, '_');
 
-    if (element.type === 'folder') {
-      await renameFolder(element.key, modifiedNewName)
-        .then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(element.parentKey)
-          );
-          renameElement(element.key, modifiedNewName);
-          toggleRenameModalOpen();
-        })
-        .finally(() => {
-          unselectAll();
-        });
-      return;
-    } else if (element.type === 'file') {
+    if (file) {
       const newExtName = modifiedNewName.match(/\.[0-9a-z]+$/i)?.[0] || '';
-      const extname = element.name.match(/\.[0-9a-z]+$/i)?.[0] || '';
+      const extname = file.name.match(/\.[0-9a-z]+$/i)?.[0] || '';
 
       if (newExtName === '') {
         modifiedNewName = `${modifiedNewName}${extname}`;
       }
-      if (element.name === modifiedNewName) {
-        toggleRenameModalOpen();
-        unselectAll();
-        return;
-      }
-      await renameFile(element.key, modifiedNewName)
-        .then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(element.parentKey)
-          );
-          renameElement(element.key, modifiedNewName);
-          toggleRenameModalOpen();
-        })
-        .finally(() => {
-          unselectAll();
-        });
     }
+
+    if (folder && folder.name !== modifiedNewName) {
+      await renameFolder(folder.key, modifiedNewName).then(() => {
+        queryClient.invalidateQueries(readFolderQueryOption(folder.parentKey));
+      });
+    } else if (file && file.name !== modifiedNewName) {
+      await renameFile(file.key, modifiedNewName).then(() => {
+        queryClient.invalidateQueries(readFolderQueryOption(file.parentKey));
+      });
+    }
+
+    unselectKey(selectedKeys[0]);
+    setNewName('');
+    toggleRenameModalOpen();
   };
 
   const handleDownload = async () => {
-    if (selectedElements.length === 0) {
+    if (selectedKeys.length === 0) {
       return;
     }
-    const selectedFiles = selectedElements.filter(
-      (element) => element.type === 'file'
+    if (readQuery.isLoading || !readQuery.data) {
+      return;
+    }
+
+    const selectedFiles = readQuery.data.files.filter((file) =>
+      isSelected(file.key)
     );
+
     toggleDownloadModalOpen();
-    unselectAll();
+    unselectAllKeys();
+
     selectedFiles.forEach(async (file) => {
       await downloadFile(file.key, file.name).then((response) => {
         const url = window.URL.createObjectURL(new Blob([response.data]));
@@ -159,14 +160,13 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   useEffect(() => {
-    setSelectedElements(elements.filter((element) => element.selected));
-  }, [elements]);
-
-  useEffect(() => {
+    if (readQuery.isLoading || !readQuery.data) {
+      return;
+    }
     setIsFolderSelected(
-      elements.some((element) => element.selected && element.type === 'folder')
+      readQuery.data.folders.some((folder) => isSelected(folder.key))
     );
-  }, [elements]);
+  }, [isSelected, readQuery.data, readQuery.isLoading]);
 
   return (
     <div className={editMenu}>
@@ -178,7 +178,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
         className={editMenuItemIcon}
         onTouchEnd={toggleMoving}
       />
-      {selectedElements.length === 1 && (
+      {selectedKeys.length === 1 && (
         <CgRename
           className={editMenuItemIcon}
           onTouchEnd={toggleRenameModalOpen}
@@ -202,8 +202,8 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
       {deleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
           <div>
-            Are you sure you want to delete {selectedElements.length}{' '}
-            {selectedElements.length === 1 ? 'item' : 'items'}?
+            Are you sure you want to delete {selectedKeys.length}{' '}
+            {selectedKeys.length === 1 ? 'item' : 'items'}?
           </div>
         </Modal>
       )}
@@ -211,8 +211,8 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
       {downloadModalOpen && (
         <Modal onAccept={handleDownload} onClose={toggleDownloadModalOpen}>
           <div>
-            Are you sure you want to download {selectedElements.length}{' '}
-            {selectedElements.length === 1 ? 'item' : 'items'}?
+            Are you sure you want to download {selectedKeys.length}{' '}
+            {selectedKeys.length === 1 ? 'item' : 'items'}?
           </div>
         </Modal>
       )}

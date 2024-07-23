@@ -25,7 +25,6 @@ import {
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { deleteFile, downloadFile } from '../../../api/cloud';
 import { Modal } from '../../../components/mobile/Modal';
-import { useMobileElementStore } from '../../../store/mobile/element.store';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <CircularLoading />,
@@ -54,9 +53,6 @@ function Component() {
   const readQuery = useSuspenseQuery(readFileQueryOption(targetKey));
   const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
-
-  // Actions
-  const deleteElement = useMobileElementStore((state) => state.deleteElement);
 
   // Functions
   const toggleDeleteModalOpen = () => {
@@ -148,7 +144,6 @@ function Component() {
     setIsDeleteModalOpen(false);
     await deleteFile(targetKey).then(() => {
       queryClient.invalidateQueries(readFolderQueryOption(parentKey));
-      deleteElement(targetKey);
       if (siblings.length > 1) {
         if (imageNumber > 0) {
           setTargetKey(siblings[imageNumber - 1]);
