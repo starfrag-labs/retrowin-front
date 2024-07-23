@@ -105,7 +105,7 @@ export const Element = memo(
 
     // download file event handler
     const handleDownload = async () => {
-      const response = await downloadFile(parentKey, elementKey, name);
+      const response = await downloadFile(elementKey, name);
       if (!response) {
         return;
       }
@@ -198,7 +198,7 @@ export const Element = memo(
           const tempName = name;
           setNameState(newNameState);
           endRenaming(elementKey);
-          renameFile(parentKey, elementKey, newNameState)
+          renameFile(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: ['read', 'folder', parentKey],

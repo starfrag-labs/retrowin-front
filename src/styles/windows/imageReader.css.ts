@@ -7,6 +7,7 @@ export const imageReaderContainer = style({
   justifyContent: 'center',
   alignItems: 'center',
   backgroundColor: 'rgb(0, 0, 0)',  
+  overflow: 'hidden',
 })
 
 export const imageSrc = style({

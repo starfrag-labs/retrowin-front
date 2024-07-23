@@ -6,6 +6,7 @@ export const uploaderContainer = style({
   justifyContent: 'center',
   width: '100%',
   height: '100%',
+  overflow: 'auto'
 });
 
 export const uploader = style({

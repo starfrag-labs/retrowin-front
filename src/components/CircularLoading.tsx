@@ -1,16 +1,19 @@
-import { loadingContainer, loadingSpinner } from '../styles/loading.css';
+import {
+  circularLoadingContainer,
+  circularLoadingSpinner,
+} from '../styles/loading.css';
 
-export const Loading = ({
+export const CircularLoading = ({
   size = '100px',
   border = '8px',
 }: {
   size?: string;
-  border?: string;  
+  border?: string;
 }): React.ReactElement => {
   return (
-    <div className={loadingContainer}>
+    <div className={circularLoadingContainer}>
       <div
-        className={loadingSpinner}
+        className={circularLoadingSpinner}
         style={{
           width: size,
           height: size,

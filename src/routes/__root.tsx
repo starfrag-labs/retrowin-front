@@ -1,15 +1,42 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
-import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 import { QueryClient } from '@tanstack/react-query';
 import { defaultContainer } from '../styles/global/container.css';
-import { Loading } from '../components/Loading';
+import { CircularLoading } from '../components/CircularLoading';
+import { AxiosError } from 'axios';
+import { getProfile } from '../api/auth';
+import { checkUser, enrollUser } from '../api/cloud';
+import config from '../utils/config';
+import { useUserStore } from '../store/user.store';
+// import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
   beforeLoad: async () => {
+    if (import.meta.env.PROD) {
+      return new Promise((resolve, reject) => {
+        const setProfile = useUserStore.getState().setProfile;
+        getProfile()
+          .then((response) => {
+            setProfile(response.data.data);
+            resolve('done');
+          })
+          .catch(() => {
+            window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
+            reject();
+          });
+      }).then(() => {
+        checkUser().catch(async (error: AxiosError) => {
+          if (error.response?.status === 404) {
+            await enrollUser();
+            return;
+          }
+          throw error;
+        });
+      });
+    }
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: RootComponent,
 });
 
@@ -17,7 +44,7 @@ function RootComponent() {
   return (
     <div className={defaultContainer}>
       <Outlet />
-      <TanStackRouterDevtools position="bottom-right" />
+      {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </div>
   );
 }

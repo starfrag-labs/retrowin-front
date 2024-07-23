@@ -7,8 +7,10 @@ export const backgroundSelectorContainer = style({
 });
 
 export const backgroundContainer = style({
+  position: 'fixed',
   height: '100%',
   width: '100%',
+  overflow: 'hidden',
 });
 
 export const sky = style({

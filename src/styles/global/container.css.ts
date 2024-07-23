@@ -3,6 +3,7 @@ import { style } from "@vanilla-extract/css";
 export const defaultContainer = style({
   width: '100%',
   height: '100%',
+  color: "black"
 })
 
 export const centerContainer = style({

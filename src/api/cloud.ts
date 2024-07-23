@@ -1,6 +1,6 @@
 import { api } from '.';
 import { useProgressStore } from '../store/progress.store';
-import { ReadFolderData } from '../types/response';
+import { getFileInfoData, getFolderInfoData, ReadFolderData } from '../types/response';
 import { cloudUrls } from './urls';
 
 export const checkUser = async () => {
@@ -108,6 +108,24 @@ export const renameFolder = async (
   return response;
 };
 
+export const getFolderInfo = async (folderKey: string) => {
+  const getFolderInfo = cloudUrls.folder.info(folderKey);
+  const response = await api.request<getFolderInfoData>({
+    method: getFolderInfo.method,
+    url: getFolderInfo.url,
+  });
+  return response;
+}
+
+export const getFolderPath = async (folderKey: string) => {
+  const getFolderPath = cloudUrls.folder.path(folderKey);
+  const response = await api.request<string[]>({
+    method: getFolderPath.method,
+    url: getFolderPath.url,
+  });
+  return response;
+}
+
 export const uploadChunk = async (
   folderKey: string,
   chunk: File | Blob,
@@ -138,6 +156,7 @@ export const uploadChunk = async (
           total: chunk.size * totalChunks,
         });
       },
+      
     })
     .catch((error) => {
       useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
@@ -147,7 +166,6 @@ export const uploadChunk = async (
 };
 
 export const downloadFile = async (
-  folderKey: string,
   fileKey: string,
   progressName?: string
 ) => {
@@ -158,7 +176,7 @@ export const downloadFile = async (
       type: 'download',
     });
   }
-  const downloadFile = cloudUrls.file.downloadFile(folderKey, fileKey);
+  const downloadFile = cloudUrls.file.downloadFile(fileKey);
   const response = api
     .request<Blob>({
       method: downloadFile.method,
@@ -186,10 +204,9 @@ export const downloadFile = async (
 };
 
 export const deleteFile = async (
-  folderKey: string,
   fileKey: string
 ) => {
-  const deleteFile = cloudUrls.file.deleteFile(folderKey, fileKey);
+  const deleteFile = cloudUrls.file.deleteFile(fileKey);
   const response = await api.request({
     method: deleteFile.method,
     url: deleteFile.url,
@@ -198,11 +215,10 @@ export const deleteFile = async (
 };
 
 export const renameFile = async (
-  folderKey: string,
   fileKey: string,
   fileName: string
 ) => {
-  const renameFile = cloudUrls.file.renameFile(folderKey, fileKey);
+  const renameFile = cloudUrls.file.renameFile(fileKey);
   const response = await api.request({
     method: renameFile.method,
     url: renameFile.url,
@@ -214,14 +230,22 @@ export const renameFile = async (
 };
 
 export const moveFile = async (
-  folderKey: string,
   fileKey: string,
   newFolderKey: string
 ) => {
-  const moveFile = cloudUrls.file.moveFile(folderKey, fileKey, newFolderKey);
+  const moveFile = cloudUrls.file.moveFile(fileKey, newFolderKey);
   const response = await api.request({
     method: moveFile.method,
     url: moveFile.url,
   });
   return response;
 };
+
+export const getFileInfo = async (fileKey: string) => {
+  const getFileInfo = cloudUrls.file.getFileInfo(fileKey);
+  const response = await api.request<getFileInfoData>({
+    method: getFileInfo.method,
+    url: getFileInfo.url,
+  });
+  return response;
+}

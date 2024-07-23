@@ -12,11 +12,29 @@
 
 import { Route as rootRoute } from './routes/__root'
 import { Route as IndexImport } from './routes/index.tsx'
+import { Route as MIndexImport } from './routes/m/index.tsx'
+import { Route as MFolderKeyImport } from './routes/m/$folderKey.tsx'
+import { Route as MViewerFileKeyImport } from './routes/m/viewer/$fileKey.tsx'
 
 // Create/Update Routes
 
 const IndexRoute = IndexImport.update({
   path: '/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MIndexRoute = MIndexImport.update({
+  path: '/m/',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MFolderKeyRoute = MFolderKeyImport.update({
+  path: '/m/$folderKey',
+  getParentRoute: () => rootRoute,
+} as any)
+
+const MViewerFileKeyRoute = MViewerFileKeyImport.update({
+  path: '/m/viewer/$fileKey',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -28,11 +46,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
+    '/m/$folderKey': {
+      preLoaderRoute: typeof MFolderKeyImport
+      parentRoute: typeof rootRoute
+    }
+    '/m/': {
+      preLoaderRoute: typeof MIndexImport
+      parentRoute: typeof rootRoute
+    }
+    '/m/viewer/$fileKey': {
+      preLoaderRoute: typeof MViewerFileKeyImport
+      parentRoute: typeof rootRoute
+    }
   }
 }
 
 // Create and export the route tree
 
-export const routeTree = rootRoute.addChildren([IndexRoute])
+export const routeTree = rootRoute.addChildren([
+  IndexRoute,
+  MFolderKeyRoute,
+  MIndexRoute,
+  MViewerFileKeyRoute,
+])
 
 /* prettier-ignore-end */

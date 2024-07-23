@@ -22,13 +22,17 @@ import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
-import { Loading } from '../Loading';
+import { CircularLoading } from '../CircularLoading';
 
 export const WindowV2 = ({
   windowKey,
 }: {
   windowKey: string;
 }): React.ReactElement => {
+  // Minimum size of window
+  const minWidth = 400;
+  const minHeight = 200;
+
   // states
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
@@ -67,8 +71,8 @@ export const WindowV2 = ({
   useEffect(() => {
     if (windowContainerRef.current && window) {
       if (window.type === 'uploader') {
-        const width = document.body.clientWidth / 2.5;
-        const height = document.body.clientHeight / 2.5;
+        const width = Math.max(document.body.clientWidth / 2.5, minWidth);
+        const height = Math.max(document.body.clientHeight / 2.5, minHeight);
         const x = document.body.clientWidth / 2 - width / 2;
         const y = document.body.clientHeight / 2 - height / 2;
         windowSize.current = { width, height };
@@ -118,8 +122,8 @@ export const WindowV2 = ({
     windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
   };
 
-  // minimize window
-  const minimizeWindow = () => {
+  // revert window size
+  const revertWindowSize = () => {
     if (
       !windowContainerRef.current ||
       !windowContentRef.current ||
@@ -214,8 +218,8 @@ export const WindowV2 = ({
             !windowHeaderRef.current
           )
             return;
-          const width = e.clientX - rect.left;
-          const height = e.clientY - rect.top;
+          const width = Math.max(e.clientX - rect.left, minWidth);
+          const height = Math.max(e.clientY - rect.top, minHeight);
           windowContainerRef.current.style.width = `${width}px`;
           windowContainerRef.current.style.height = `${height}px`;
           windowContentRef.current.style.width = `${width}px`;
@@ -301,12 +305,12 @@ export const WindowV2 = ({
             )}
           {title}
           {window.type === 'navigator' && loading && (
-            <Loading size="1rem" border="3px" />
+            <CircularLoading size="1rem" border="3px" />
           )}
         </div>
         <div className={btnContainer}>
           {maximized ? (
-            <button onClick={minimizeWindow} className={minimizeBtn} />
+            <button onClick={revertWindowSize} className={minimizeBtn} />
           ) : (
             <button onClick={maximizeWindow} className={maximizeBtn} />
           )}

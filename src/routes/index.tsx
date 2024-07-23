@@ -1,9 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
-import { getProfile } from '../api/auth';
-import config from '../utils/config';
-import { useUserStore } from '../store/user.store';
-import { Loading } from '../components/Loading';
+import { CircularLoading } from '../components/CircularLoading';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { useRef, useEffect } from 'react';
 import { Background } from '../components/Background';
@@ -19,32 +16,17 @@ import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { IElementState } from '../types/store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
-import { checkUser, createRootFolder, enrollUser, getRootFolderKey } from '../api/cloud';
+import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
+import MobileDetect from 'mobile-detect';
 
 const codeSchema = z.object({
-  code: z.string().optional(),
+  mobile: z.boolean().optional().default(false),
 });
 
 export const Route = createFileRoute('/')({
   validateSearch: codeSchema,
   beforeLoad: async () => {
-    const setProfile = useUserStore.getState().setProfile;
-    await getProfile()
-      .then((response) => {
-        setProfile(response.data.data);
-      })
-      .catch(() => {
-        window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
-      });
-    await checkUser().catch(async (error: AxiosError) => {
-      if (error.response?.status === 404) {
-        await enrollUser();
-        return;
-      }
-      throw error;
-    });
-
     const rootFolderKey = await getRootFolderKey()
       .then((response) => {
         return response.data;
@@ -64,22 +46,36 @@ export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient, rootFolderKey } }) => {
     queryClient.ensureQueryData(readFolderQueryOption(rootFolderKey));
   },
-  pendingComponent: () => <Loading />,
+  pendingComponent: () => <CircularLoading />,
   component: IndexComponent,
 });
 
 function IndexComponent() {
   const { rootFolderKey } = Route.useRouteContext();
+  const { mobile } = Route.useSearch();
+
   const window = useWindowStore((state) => state.windows);
+
   const setElements = useElementStore((state) => state.addElements);
+  const setRootKey = useElementStore((state) => state.setRootKey);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef
   );
+
   const rootFolderQuery = useSuspenseQuery(
     readFolderQueryOption(rootFolderKey)
   );
+
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
-  const setRootKey = useElementStore((state) => state.setRootKey);
+
+  const navigate = useNavigate({ from: '/' });
+
+  useEffect(() => {
+    const md = new MobileDetect(navigator.userAgent);
+    if (!mobile && md.isPhoneSized()) {
+      navigate({ to: '/m' });
+    }
+  }, [mobile, navigate]);
 
   useEffect(() => {
     setRootKey(rootFolderKey);
@@ -147,4 +143,3 @@ function IndexComponent() {
     </Selector>
   );
 }
-
