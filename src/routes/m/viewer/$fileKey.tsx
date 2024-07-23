@@ -145,8 +145,8 @@ function Component() {
   };
 
   const handleDelete = async () => {
+    setIsDeleteModalOpen(false);
     await deleteFile(targetKey).then(() => {
-      console.log(parentKey);
       queryClient.invalidateQueries(readFolderQueryOption(parentKey));
       deleteElement(targetKey);
       if (siblings.length > 1) {
