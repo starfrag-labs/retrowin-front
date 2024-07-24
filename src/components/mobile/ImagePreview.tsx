@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { readFileQueryOption } from '../../utils/queryOptions/file.query';
+import { downloadFileQueryOption } from '../../utils/queryOptions/file.query';
 import { useCallback, useEffect, useState } from 'react';
 import { imagePreview } from '../../styles/mobile/preview.css';
 import { BoxLoading } from '../BoxLoading';
@@ -9,7 +9,7 @@ export const ImagePreview = ({
 }: {
   elementKey: string;
 }): React.ReactElement => {
-  const query = useQuery(readFileQueryOption(elementKey));
+  const query = useQuery(downloadFileQueryOption(elementKey));
   const [sourceUrl, setSourceUrl] = useState<string>('');
 
   const createUrl = useCallback(async () => {

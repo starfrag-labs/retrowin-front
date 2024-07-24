@@ -6,7 +6,7 @@ import { retryCount } from './index.query';
 export const getRootFolderKeyQueryOption = () =>
   queryOptions<string>({
     retry: retryCount,
-    queryKey: ['read', 'folder'],
+    queryKey: ['folder', 'root', 'read'],
     queryFn: async () => {
       const data = await getRootFolderKey().then((response) => {
         return response.data;
@@ -22,7 +22,7 @@ export const readFolderQueryOption = (folderKey: string) =>
       files: [],
     },
     retry: retryCount,
-    queryKey: ['read', 'folder', folderKey],
+    queryKey: ['folder', folderKey, 'read'],
     queryFn: async () => {
       const data = await readFolder(folderKey).then((response) => {
         return response.data;
@@ -35,7 +35,7 @@ export const readFolderQueryOption = (folderKey: string) =>
 export const getFolderInfoQueryOption = (folderKey: string) =>
   queryOptions<getFolderInfoData>({
     retry: retryCount,
-    queryKey: ['info', 'folder', folderKey],
+    queryKey: ['folder', folderKey, 'info'],
     queryFn: async () => {
       const data = await getFolderInfo(folderKey).then((response) => {
         return response.data;
@@ -48,7 +48,7 @@ export const getFolderInfoQueryOption = (folderKey: string) =>
 export const getFolderPathQueryOption = (folderKey: string) =>
   queryOptions<string[]>({
     retry: retryCount,
-    queryKey: ['path', 'folder', folderKey],
+    queryKey: ['folder', folderKey, 'path'],
     queryFn: async () => {
       const data = await getFolderPath(folderKey).then((response) => {
         return response.data;

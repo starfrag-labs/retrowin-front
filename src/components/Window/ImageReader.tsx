@@ -8,7 +8,7 @@ import {
   prevButton,
 } from '../../styles/windows/imageReader.css';
 import { useQuery } from '@tanstack/react-query';
-import { readFileQueryOption } from '../../utils/queryOptions/file.query';
+import { downloadFileQueryOption } from '../../utils/queryOptions/file.query';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { CircularLoading } from '../CircularLoading';
 
@@ -33,7 +33,7 @@ export const ImageReader = memo(
     );
     const [loading, setLoading] = useState(true);
 
-    const query = useQuery(readFileQueryOption(targetKey));
+    const query = useQuery(downloadFileQueryOption(targetKey));
 
     useEffect(() => {
       const element = findElement(fileKey);
@@ -42,12 +42,7 @@ export const ImageReader = memo(
         findElementsByParentKey(element.parentKey)
           .filter((element) => {
             const contentType = getContentType(element.name);
-            return (
-              contentType === 'image/jpg' ||
-              contentType === 'image/jpeg' ||
-              contentType === 'image/png' ||
-              contentType === 'image/gif'
-            );
+            return contentType ? true : false;
           })
           .map((element) => element.key)
       );
@@ -65,10 +60,8 @@ export const ImageReader = memo(
       if (
         query.isSuccess &&
         query.data &&
-        (contentType === 'image/jpg' ||
-          contentType === 'image/jpeg' ||
-          contentType === 'image/png' ||
-          contentType === 'image/gif')
+        contentType &&
+        contentType.startsWith('image')
       ) {
         setSourceUrl(URL.createObjectURL(query.data));
         setLoading(false);

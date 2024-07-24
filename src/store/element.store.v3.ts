@@ -1,7 +1,8 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 type State = {
   selectedKeys: string[];
+  renamingKey: string | null;
 };
 
 type Action = {
@@ -9,14 +10,17 @@ type Action = {
   unselectKey: (key: string) => void;
   unselectAllKeys: () => void;
   isSelected: (key: string) => boolean;
+  setRenamingKey: (key: string | null) => void;
 };
 
 const initialState: State = {
   selectedKeys: [],
+  renamingKey: null,
 };
 
 export const useMobileElementStore = create<State & Action>((set, get) => ({
   selectedKeys: initialState.selectedKeys,
+  renamingKey: initialState.renamingKey,
   selectKey: (key) => {
     set((state) => {
       if (!state.selectedKeys.includes(key)) {
@@ -38,5 +42,8 @@ export const useMobileElementStore = create<State & Action>((set, get) => ({
   },
   isSelected: (key) => {
     return get().selectedKeys.includes(key);
+  },
+  setRenamingKey: (key) => {
+    set({ renamingKey: key });
   },
 }));

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CircularLoading } from '../CircularLoading';
 import { useQuery } from '@tanstack/react-query';
-import { readFileQueryOption } from '../../utils/queryOptions/file.query';
+import { downloadFileQueryOption } from '../../utils/queryOptions/file.query';
 import { useElementStore } from '../../store/element.store';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import {
@@ -18,7 +18,7 @@ export const VideoPlayer = ({
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const element = useElementStore((state) => state.findElement(fileKey));
 
-  const query = useQuery(readFileQueryOption(fileKey));
+  const query = useQuery(downloadFileQueryOption(fileKey));
 
   useEffect(() => {
     if (!element) return;

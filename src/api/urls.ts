@@ -23,19 +23,19 @@ export const cloudUrls = {
     },
   },
   folder: {
-    createRootFolder: {
+    createRoot: {
       url: `${cloudPrefix}/folder/root`,
       method: 'POST',
     },
-    createFolder: (folderKey: string) => ({
+    create: (folderKey: string) => ({
       url: `${cloudPrefix}/folder/${folderKey}`,
       method: 'POST',
     }),
-    deleteFolder: (folderKey: string) => ({
+    delete: (folderKey: string) => ({
       url: `${cloudPrefix}/folder/${folderKey}`,
       method: 'DELETE',
     }),
-    readFolder: (folderKey: string) => ({
+    read: (folderKey: string) => ({
       url: `${cloudPrefix}/folder/${folderKey}`,
       method: 'GET',
     }),
@@ -43,11 +43,11 @@ export const cloudUrls = {
       url: `${cloudPrefix}/folder/rootKey`,
       method: 'GET',
     },
-    moveFolder: (folderKey: string, targetKey: string) => ({
+    move: (folderKey: string, targetKey: string) => ({
       url: `${cloudPrefix}/folder/move/${folderKey}?targetKey=${targetKey}`,
       method: 'PATCH',
     }),
-    renameFolder: (folderKey: string) => ({
+    rename: (folderKey: string) => ({
       url: `${cloudPrefix}/folder/rename/${folderKey}`,
       method: 'PATCH',
     }),
@@ -58,32 +58,36 @@ export const cloudUrls = {
     path: (folderKey: string) => ({
       url: `${cloudPrefix}/folder/${folderKey}/path`,
       method: 'GET',
-    })
+    }),
   },
   file: {
-    uploadFile: (folderKey: string) => ({
+    upload: (folderKey: string) => ({
       url: `${cloudPrefix}/file/upload/${folderKey}`,
       method: 'POST',
     }),
-    downloadFile: (fileKey: string) => ({
+    download: (fileKey: string) => ({
       url: `${cloudPrefix}/file/download/${fileKey}`,
       method: 'GET',
     }),
-    deleteFile: (fileKey: string) => ({
+    delete: (fileKey: string) => ({
       url: `${cloudPrefix}/file/${fileKey}`,
       method: 'DELETE',
     }),
-    renameFile: (fileKey: string) => ({
+    rename: (fileKey: string) => ({
       url: `${cloudPrefix}/file/rename/${fileKey}`,
       method: 'PATCH',
     }),
-    moveFile: (fileKey: string, targetKey: string) => ({
+    move: (fileKey: string, targetKey: string) => ({
       url: `${cloudPrefix}/file/move/${fileKey}?targetKey=${targetKey}`,
       method: 'PATCH',
     }),
-    getFileInfo: (fileKey: string) => ({
+    info: (fileKey: string) => ({
       url: `${cloudPrefix}/file/info/${fileKey}`,
       method: 'GET',
-    })
+    }),
+    path: (fileKey: string) => ({
+      url: `${cloudPrefix}/file/path/${fileKey}`,
+      method: 'GET',
+    }),
   },
 };
