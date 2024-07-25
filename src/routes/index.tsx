@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
 import { CircularLoading } from '../components/CircularLoading';
-import { useSuspenseQuery } from '@tanstack/react-query';
 import { useRef, useEffect } from 'react';
 import { Background } from '../components/Background';
 import { Dragger } from '../components/Dragger';
@@ -10,11 +9,9 @@ import { OptionMenu } from '../components/OptionMenu';
 import { Progress } from '../components/Progress';
 import { Selector } from '../components/Selector';
 import { WindowV2 } from '../components/Window';
-import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
 import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
-import { IElementState } from '../types/store';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
@@ -56,14 +53,8 @@ function IndexComponent() {
 
   const window = useWindowStore((state) => state.windows);
 
-  const setElements = useElementStore((state) => state.addElements);
-  const setRootKey = useElementStore((state) => state.setRootKey);
   const setBackgroundWindowRef = useRefStore(
     (state) => state.setBackgroundWindowRef
-  );
-
-  const rootFolderQuery = useSuspenseQuery(
-    readFolderQueryOption(rootFolderKey)
   );
 
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
@@ -78,49 +69,10 @@ function IndexComponent() {
   }, [mobile, navigate]);
 
   useEffect(() => {
-    setRootKey(rootFolderKey);
-  }, [rootFolderKey, setRootKey]);
-
-  useEffect(() => {
     if (backgroundWindowRef.current) {
       setBackgroundWindowRef(backgroundWindowRef);
     }
   }, [backgroundWindowRef, setBackgroundWindowRef]);
-  useEffect(() => {
-    const data = rootFolderQuery.data;
-    if (!data) {
-      return;
-    }
-    const rootFolderElement: IElementState = {
-      key: rootFolderKey,
-      name: '/',
-      type: 'folder',
-      parentKey: '',
-      selected: false,
-      renaming: false,
-    };
-    const folderElements: IElementState[] = data.folders.map((folder) => {
-      return {
-        key: folder.key,
-        name: folder.name,
-        type: 'folder',
-        parentKey: rootFolderKey,
-        selected: false,
-        renaming: false,
-      };
-    });
-    const fileElements: IElementState[] = data.files.map((file) => {
-      return {
-        key: file.key,
-        name: file.name,
-        type: 'file',
-        parentKey: rootFolderKey,
-        selected: false,
-        renaming: false,
-      };
-    });
-    setElements([rootFolderElement, ...folderElements, ...fileElements]);
-  }, [rootFolderKey, rootFolderQuery.data, setElements]);
 
   return (
     <Selector>

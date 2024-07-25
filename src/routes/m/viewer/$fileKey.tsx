@@ -2,9 +2,13 @@ import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
 import { CircularLoading } from '../../../components/CircularLoading';
 import {
   getFileInfoQueryOption,
-  readFileQueryOption,
+  downloadFileQueryOption,
 } from '../../../utils/queryOptions/file.query';
-import { useQuery, useQueryClient, useSuspenseQuery } from '@tanstack/react-query';
+import {
+  useQuery,
+  useQueryClient,
+  useSuspenseQuery,
+} from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
@@ -34,7 +38,7 @@ export const Route = createFileRoute('/m/viewer/$fileKey')({
 function Component() {
   const queryClient = useQueryClient();
   const { fileKey } = Route.useParams();
-  
+
   // Navigation
   const navigate = useNavigate({ from: '/m/viewer/$fileKey' });
 
@@ -47,10 +51,11 @@ function Component() {
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
-  const [isDownloadModalOpen, setIsDownloadModalOpen] = useState<boolean>(false);
+  const [isDownloadModalOpen, setIsDownloadModalOpen] =
+    useState<boolean>(false);
 
   // Query
-  const readQuery = useSuspenseQuery(readFileQueryOption(targetKey));
+  const readQuery = useSuspenseQuery(downloadFileQueryOption(targetKey));
   const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
@@ -61,7 +66,7 @@ function Component() {
 
   const toggleDownloadModalOpen = () => {
     setIsDownloadModalOpen(!isDownloadModalOpen);
-  }
+  };
 
   // Effects
   useEffect(() => {
@@ -82,15 +87,7 @@ function Component() {
         readFolderQuery.data.files
           .filter((file) => {
             const contentType = getContentType(file.name);
-            return (
-              contentType === 'image/jpg' ||
-              contentType === 'image/jpeg' ||
-              contentType === 'image/png' ||
-              contentType === 'image/gif' ||
-              contentType === 'video/mp4' ||
-              contentType === 'video/webm' ||
-              contentType === 'video/ogg'
-            );
+            return contentType ? true : false;
           })
           .map((file) => file.key)
       );
@@ -108,17 +105,7 @@ function Component() {
       return;
     }
     const contentType = getContentType(fileName);
-    if (
-      readQuery.isSuccess &&
-      readQuery.data &&
-      (contentType === 'image/jpg' ||
-        contentType === 'image/jpeg' ||
-        contentType === 'image/png' ||
-        contentType === 'image/gif' ||
-        contentType === 'video/mp4' ||
-        contentType === 'video/webm' ||
-        contentType === 'video/ogg')
-    ) {
+    if (readQuery.isSuccess && readQuery.data && contentType) {
       setSourceUrl(URL.createObjectURL(readQuery.data));
       setLoading(false);
     }
@@ -154,7 +141,7 @@ function Component() {
         navigate({ to: '/m/$folderKey', params: { folderKey: parentKey } });
       }
     });
-  }
+  };
 
   const handleDownload = async () => {
     toggleDownloadModalOpen();
@@ -167,7 +154,7 @@ function Component() {
       link.click();
       link.remove();
     });
-  }
+  };
 
   return (
     <div className={imageViewerContainer}>
@@ -195,37 +182,41 @@ function Component() {
         </div>
       </nav>
       <div>
-        {loading ? (
+        {loading || !fileName || !sourceUrl ? (
           <CircularLoading />
         ) : (
           <div>
-            {fileName ?? sourceUrl ? (
-              getContentType(fileName)?.match('image') ? (
-                <img src={sourceUrl} alt="preview" className={imageContent} />
-              ) : (
-                <video controls src={sourceUrl} className={imageContent} />
-              )
+            {getContentType(fileName)?.startsWith('image') ? (
+              <img src={sourceUrl} className={imageContent} />
             ) : (
-              <CircularLoading />
+              getContentType(fileName)?.startsWith('video') && (
+                <video src={sourceUrl} controls className={imageContent} />
+              )
             )}
           </div>
         )}
       </div>
       <div className={viewerBottom}>
-        <MdDelete className={activeControllerButton} onTouchEnd={toggleDeleteModalOpen} />
+        <MdDelete
+          className={activeControllerButton}
+          onTouchEnd={toggleDeleteModalOpen}
+        />
         <div className={pageNumber}>
           {imageNumber + 1} / {siblings.length}
         </div>
-        <MdDownload className={activeControllerButton} onTouchEnd={toggleDownloadModalOpen} />
+        <MdDownload
+          className={activeControllerButton}
+          onTouchEnd={toggleDownloadModalOpen}
+        />
       </div>
       {isDeleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
-          <div>Are you sure you want to delete this file?</div>
+          Are you sure you want to delete this file?
         </Modal>
       )}
       {isDownloadModalOpen && (
         <Modal onAccept={handleDownload} onClose={toggleDownloadModalOpen}>
-          <div>Are you sure you want to download this file?</div>
+          Are you sure you want to download this file?
         </Modal>
       )}
     </div>

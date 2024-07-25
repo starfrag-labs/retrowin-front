@@ -31,7 +31,7 @@ export const Background = ({
   const dayEnd = 18 * 60 * 60 * 1000;
   const changeDayTime = 2 * 60 * 60 * 1000;
   const timeRefreshInterval = 60000;
-  const initStarCount = 1000;
+  const initStarCount = 100;
   const meteorInterval = 5000;
 
   // states

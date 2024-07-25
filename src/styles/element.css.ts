@@ -6,18 +6,6 @@ export const elementsContainer = style({
   gap: '1rem',
 });
 
-export const elementContainer = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  cursor: 'pointer',
-  padding: '1rem',
-  borderRadius: '15px',
-  ':hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  },
-});
-
 const defaultElement: StyleRule = {
   display: 'flex',
   flexDirection: 'column',

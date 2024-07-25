@@ -2,18 +2,14 @@ import { queryOptions } from '@tanstack/react-query';
 import { downloadFile, getFileInfo } from '../../api/cloud';
 import { retryCount } from './index.query';
 
-export const readFileQueryOption = (
-  fileKey: string
-) =>
+export const downloadFileQueryOption = (fileKey: string) =>
   queryOptions<Blob>({
     retry: retryCount,
-    queryKey: ['read', 'file', fileKey],
+    queryKey: ['file', fileKey, 'read'],
     queryFn: async () => {
-      const data = await downloadFile(fileKey).then(
-        (response) => {
-          return response.data;
-        }
-      );
+      const data = await downloadFile(fileKey).then((response) => {
+        return response.data;
+      });
       return data;
     },
     enabled: !!fileKey,
@@ -22,7 +18,7 @@ export const readFileQueryOption = (
 export const getFileInfoQueryOption = (fileKey: string) =>
   queryOptions({
     retry: retryCount,
-    queryKey: ['file', 'info', fileKey],
+    queryKey: ['file', fileKey, 'info'],
     queryFn: async () => {
       const data = await getFileInfo(fileKey).then((response) => {
         return response.data;

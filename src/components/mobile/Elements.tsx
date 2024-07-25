@@ -5,7 +5,7 @@ import {
 import { Element } from './Element';
 import { useQuery } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
-import { useMobileElementStore } from '../../store/mobile/element.store';
+import { useElementStore } from '../../store/element.store';
 
 export const Elements = ({
   folderKey,
@@ -16,7 +16,7 @@ export const Elements = ({
 }): React.ReactElement => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
 
-  const isSelected = useMobileElementStore((state) => state.isSelected);
+  const isSelected = useElementStore((state) => state.isSelected);
 
   if (
     readQuery.isLoading ||

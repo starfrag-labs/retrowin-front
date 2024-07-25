@@ -19,7 +19,18 @@ export const modal = style({
 })
 
 export const modalContent = style({
+  display: 'flex',
   padding: '1rem',
+  color: 'rgba(0, 0, 0, 0.8)',
+})
+
+export const modalInput = style({
+  display: 'flex',
+  width: '100%',
+  padding: '0.5rem',
+  fontSize: '1rem',
+  border: '1px solid rgba(0, 0, 0, 0.4)',
+  borderRadius: '4px',
 })
 
 export const modalButtonContainer = style({

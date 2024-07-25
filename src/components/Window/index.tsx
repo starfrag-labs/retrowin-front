@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useElementStore } from '../../store/element.store';
 import { useRefStore } from '../../store/ref.store';
 import {
   windowContainer,
@@ -16,13 +15,14 @@ import {
 } from '../../styles/windows/window.css';
 import { useEventStore } from '../../store/event.store';
 import { useWindowStore } from '../../store/window.store';
-import { VideoPlayer } from './VideoPlayer';
-import { ImageReader } from './ImageReader';
+import { VideoViewer } from './VideoViewer';
+import { ImageViewer } from './ImageViewer';
 import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
 import { CircularLoading } from '../CircularLoading';
+import { useElementStore } from '../../store/element.store';
 
 export const WindowV2 = ({
   windowKey,
@@ -47,9 +47,6 @@ export const WindowV2 = ({
   const window = useWindowStore((state) => state.findWindow(windowKey));
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
-  const element = useElementStore((state) =>
-    state.findElement(window?.targetKey ?? '')
-  );
   const resizing = useEventStore((state) => state.resizing);
 
   // store functions
@@ -59,6 +56,7 @@ export const WindowV2 = ({
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
   const nextWindow = useWindowStore((state) => state.nextWindow);
+  const getElementInfo = useElementStore((state) => state.getElementInfo);
 
   // update ref store on mount
   useEffect(() => {
@@ -248,12 +246,13 @@ export const WindowV2 = ({
 
   // set window title
   useEffect(() => {
-    if (element && element.name) {
-      setTitle(element.name);
+    const info = getElementInfo(window?.targetKey ?? '');
+    if (info && info.name) {
+      setTitle(info.name);
     } else if (window && window.type === 'uploader') {
       setTitle('Upload Files');
     }
-  }, [element, window]);
+  }, [getElementInfo, window]);
 
   // handle mouse down event on window
   const handleMouseDown = () => {
@@ -322,9 +321,9 @@ export const WindowV2 = ({
       </div>
       <div className={windowContent} ref={windowContentRef}>
         {window.type === 'image' ? (
-          <ImageReader fileKey={window.targetKey} setTitle={setTitle} />
+          <ImageViewer fileKey={window.targetKey} setTitle={setTitle} />
         ) : window.type === 'video' ? (
-          <VideoPlayer fileKey={window.targetKey} />
+          <VideoViewer fileKey={window.targetKey} />
         ) : window.type === 'navigator' ? (
           <Navigator folderKey={window.targetKey} setLoading={setLoading} />
         ) : window.type === 'uploader' ? (

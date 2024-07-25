@@ -13,6 +13,7 @@ import {
 import { memo, useRef } from 'react';
 import { useProgressStore } from '../../store/progress.store';
 import { useWindowStore } from '../../store/window.store';
+import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 
 export const Uploader = memo(
   ({ folderKey }: { folderKey: string }): React.ReactElement => {
@@ -51,9 +52,7 @@ export const Uploader = memo(
         await uploadChunk(folderKey, chunk, fileName, totalChunks, i);
       }
       useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
-      queryClient.invalidateQueries({
-        queryKey: ['read', 'folder', folderKey],
-      });
+      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
     };
 
     const uploadFileHandler = async (

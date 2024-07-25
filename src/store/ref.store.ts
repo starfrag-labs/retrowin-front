@@ -8,8 +8,13 @@ type State = {
 };
 
 type Action = {
-  setElementRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
-  getElementByKey: (key: string) => React.RefObject<HTMLElement> | undefined;
+  setElementRef: (
+    key: string,
+    ref: React.RefObject<HTMLElement>,
+  ) => void;
+  getElementByKey: (
+    key: string
+  ) => React.RefObject<HTMLElement> | undefined;
   setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
   setWindowRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
   getWindowByKey: (key: string) => React.RefObject<HTMLElement> | undefined;
@@ -55,5 +60,5 @@ export const useRefStore = create<State & Action>((set, get) => ({
   },
   setMenuRef: (ref) => {
     set({ menuRef: ref });
-  }
+  },
 }));

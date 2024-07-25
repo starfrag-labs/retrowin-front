@@ -8,6 +8,7 @@ import {
   uploadForm,
   menuLabel,
 } from '../../../styles/mobile/menu.css';
+import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 
 export const Uploader = ({
   folderKey,
@@ -48,9 +49,7 @@ export const Uploader = ({
       await uploadChunk(folderKey, chunk, fileName, totalChunks, i);
     }
     useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
-    queryClient.invalidateQueries({
-      queryKey: ['read', 'folder', folderKey],
-    });
+    queryClient.invalidateQueries(readFolderQueryOption(folderKey));
   };
 
   const uploadFileHandler = async (event: React.FormEvent<HTMLFormElement>) => {
@@ -78,9 +77,7 @@ export const Uploader = ({
 
   const handleCreateFolder = useCallback(() => {
     createFolder(folderKey, 'NewFolder').then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ['read', 'folder', folderKey],
-      });
+      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
     });
     toggle();
   }, [folderKey, queryClient, toggle]);

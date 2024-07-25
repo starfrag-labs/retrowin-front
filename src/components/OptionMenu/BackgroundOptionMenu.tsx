@@ -1,8 +1,7 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createFolder } from '../../api/cloud';
-import { useElementStore } from '../../store/element.store';
 import { MenuGenerator } from './MenuGenerator';
-import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
+import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStore } from '../../store/window.store';
 
 export const BackgroundOptionMenu = ({
@@ -12,28 +11,26 @@ export const BackgroundOptionMenu = ({
 }): React.ReactElement => {
   const currentMenu = menuRef.current;
   const queryClient = useQueryClient();
-  const rootElement = useElementStore(
-    (state) => state.getElementsByParentKey('')[0]
-  );
+  const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleUpload = () => {
-    if (!currentMenu) return;
-    newWindow(`${rootElement.key}_uploader`, 'uploader');
+    if (!currentMenu || !rootKeyQuery.isSuccess || !rootKeyQuery.data) return;
+    newWindow(`${rootKeyQuery.data}_uploader`, 'uploader');
     currentMenu.style.display = 'none';
   };
 
   const handleCreateFolder = () => {
-    if (!currentMenu) return;
-    createFolder(rootElement.key, 'NewFolder').then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(rootElement.key));
+    if (!currentMenu || !rootKeyQuery.isSuccess || !rootKeyQuery.data) return;
+    createFolder(rootKeyQuery.data, 'NewFolder').then(() => {
+      queryClient.invalidateQueries(readFolderQueryOption(rootKeyQuery.data));
     });
     currentMenu.style.display = 'none';
   };
 
   const handleRefresh = () => {
-    if (!currentMenu) return;
-    queryClient.invalidateQueries(readFolderQueryOption(rootElement.key));
+    if (!currentMenu || !rootKeyQuery.isSuccess || !rootKeyQuery.data) return;
+    queryClient.invalidateQueries(readFolderQueryOption(rootKeyQuery.data));
     currentMenu.style.display = 'none';
   };
 
