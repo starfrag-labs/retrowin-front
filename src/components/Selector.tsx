@@ -1,16 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { selectBox, selector } from '../styles/selector.css';
 import { useRefStore } from '../store/ref.store';
-import { useElementStore } from '../store/element.store';
-import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
+import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useElementStoreV3 } from '../store/element.store.v3';
+import { ReadFolderData } from '../types/response';
 
 export const Selector = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
+  const queryClient = useQueryClient();
+
   // States
   const [isSelecting, setIsSelecting] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -19,9 +23,13 @@ export const Selector = ({
   const [targetWindowRect, setTargetWindowRect] = useState<DOMRect>(
     document.body.getBoundingClientRect()
   );
-  const [currentWindowElements, setCurrentWindowElements] = useState<
-    IElementState[] | undefined
+  const [currentWindowTargetKey, setCurrentWindowTargetKey] = useState<
+    string | undefined
   >();
+
+  // Queries
+  const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
+  const readQuery = useQuery(readFolderQueryOption(currentWindowTargetKey || ''));
 
   // Refs
   const selectorRef = useRef<HTMLDivElement>(null);
@@ -34,19 +42,13 @@ export const Selector = ({
   const windowsRef = useRefStore((state) => state.windowsRef);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const elementsRef = useRefStore((state) => state.elementsRef);
-  const rootKey = useElementStore((state) => state.rootKey);
 
   // Store functions
-  const selectElement = useElementStore((state) => state.selectElement);
-  const unselectElement = useElementStore((state) => state.unselectElement);
-  const unselectAllElements = useElementStore(
-    (state) => state.unselectAllElements
-  );
-  const findElement = useElementStore((state) => state.findElement);
-  const findElementByParentKey = useElementStore(
-    (state) => state.findElementsByParentKey
-  );
+  const selectKey = useElementStoreV3((state) => state.selectKey);
+  const unselectKey = useElementStoreV3((state) => state.unselectKey);
+  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
   const findWindow = useWindowStore((state) => state.findWindow);
+
 
   // Keyboard event listeners
   useEffect(() => {
@@ -77,26 +79,27 @@ export const Selector = ({
       if (resizing || renaming) return;
 
       // Check if the mouse event is triggered on an element
-      let element: IElementState | undefined;
-      elementsRef.forEach((elementRef, key) => {
+      let isElement = false;
+      elementsRef.forEach((elementRef) => {
         if (elementRef.current?.contains(e.target as Node)) {
-          element = findElement(key);
+          isElement = true;
         }
       });
-      if (element) return;
+      if (isElement) return;
 
       setStartX(e.clientX);
       setStartY(e.clientY);
-      unselectAllElements();
+      unselectAllKeys();
 
       // Get target window
       const currentBackgroundWindowRef = backgroundWindowRef?.current;
       if (
         currentBackgroundWindowRef &&
-        currentBackgroundWindowRef.contains(e.target as Node)
+        currentBackgroundWindowRef.contains(e.target as Node) &&
+        rootKeyQuery.isSuccess
       ) {
         setTargetWindowRect(currentBackgroundWindowRef.getBoundingClientRect());
-        setCurrentWindowElements(findElementByParentKey(rootKey));
+        setCurrentWindowTargetKey(rootKeyQuery.data);
         setIsSelecting(true);
       }
       if (windowsRef) {
@@ -107,7 +110,9 @@ export const Selector = ({
           if (!currentWindowRef || !window) return;
           if (currentWindowRef && currentWindowRef.contains(e.target as Node)) {
             setTargetWindowRect(currentWindowRef.getBoundingClientRect()); // Set target window rect
-            setCurrentWindowElements(findElementByParentKey(window.targetKey)); // Set current window elements to select
+            setCurrentWindowTargetKey(
+              window.type === 'navigator' ? window.targetKey : ''
+            ); // Set current window target key
             setIsSelecting(true); // Start selecting
           }
         });
@@ -116,24 +121,38 @@ export const Selector = ({
     [
       backgroundWindowRef,
       elementsRef,
-      findElement,
-      findElementByParentKey,
       findWindow,
       menuRef,
       renaming,
       resizing,
-      rootKey,
-      unselectAllElements,
+      rootKeyQuery.data,
+      rootKeyQuery.isSuccess,
+      unselectAllKeys,
       windowsRef,
     ]
   );
 
   // Check elements in the box
   const checkElementsInBox = useCallback(() => {
-    if (!elementsRef || !boxRef.current || !currentWindowElements) return;
+    if (
+      !elementsRef ||
+      !boxRef.current ||
+      !currentWindowTargetKey ||
+      !readQuery.isSuccess ||
+      !readQuery.data
+    )
+      return;
     const boxRect = boxRef.current.getBoundingClientRect();
-    currentWindowElements.forEach((element) => {
-      const elementRef = elementsRef.get(element.key);
+    const elements = queryClient.getQueryData<ReadFolderData>([
+      'folder',
+      currentWindowTargetKey,
+      'read',
+    ]);
+
+    if (!elements) return;
+
+    elements.folders.forEach((folder) => {
+      const elementRef = elementsRef.get(folder.key);
       if (!elementRef?.current) return;
       const elementRect = elementRef.current.getBoundingClientRect();
       if (
@@ -142,17 +161,35 @@ export const Selector = ({
         boxRect.top < elementRect.bottom &&
         boxRect.bottom > elementRect.top
       ) {
-        selectElement(element.key);
-      } else if (!shiftKey && element.selected) {
-        unselectElement(element.key);
+        selectKey(folder.key);
+      } else if (!shiftKey) {
+        unselectKey(folder.key);
+      }
+    });
+    elements.files.forEach((file) => {
+      const elementRef = elementsRef.get(file.key);
+      if (!elementRef?.current) return;
+      const elementRect = elementRef.current.getBoundingClientRect();
+      if (
+        boxRect.left < elementRect.right &&
+        boxRect.right > elementRect.left &&
+        boxRect.top < elementRect.bottom &&
+        boxRect.bottom > elementRect.top
+      ) {
+        selectKey(file.key);
+      } else if (!shiftKey) {
+        unselectKey(file.key);
       }
     });
   }, [
-    currentWindowElements,
+    currentWindowTargetKey,
     elementsRef,
-    selectElement,
+    queryClient,
+    readQuery.data,
+    readQuery.isSuccess,
+    selectKey,
     shiftKey,
-    unselectElement,
+    unselectKey,
   ]);
 
   // Selecting event listener

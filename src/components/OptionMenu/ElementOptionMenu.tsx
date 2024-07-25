@@ -1,10 +1,10 @@
-import { useElementStore } from '../../store/element.store';
 import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStore } from '../../store/window.store';
+import { useElementStoreV3 } from '../../store/element.store.v3';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -15,86 +15,67 @@ export const ElementOptionMenu = ({
 }): React.ReactElement => {
   const queryClient = useQueryClient();
   const currentMenu = menuRef.current;
-  const selectedElements = useElementStore((state) =>
-    state.elements.filter((element) => element.selected)
-  );
-  const element = useElementStore((state) => state.findElement(elementKey));
-  const startRenaming = useElementStore((state) => state.startRenaming);
-  const deleteElement = useElementStore((state) => state.deleteElement);
+  const elementInfo = useElementStoreV3((state) => state.getElementInfo(elementKey));
+  const selectedKeys = useElementStoreV3((state) => state.selectedKeys);
+
+  const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
+  const setRenamingKey = useElementStoreV3((state) => state.setRenamingKey);
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleDownload = () => {
-    if (!element || !currentMenu) return;
-    downloadFile(element.key, element.name).then(
-      (response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', element.name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      }
-    );
+    if (!currentMenu) return;
+    downloadFile(elementKey, elementInfo?.name ?? 'unknown').then((response) => {
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', elementInfo?.name ?? 'unknown');
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    });
     currentMenu.style.display = 'none';
   };
 
   const handleOpen = () => {
-    if (!element || !currentMenu) return;
-    const contentType = getContentType(element.name);
+    if (!currentMenu) return;
+    const contentType = getContentType(elementInfo?.type ?? '');
     if (
-      element.type === 'file' &&
-      (contentType === 'image/jpg' ||
-        contentType === 'image/jpeg' ||
-        contentType === 'image/png' ||
-        contentType === 'image/gif')
+      contentType?.startsWith('image')
     ) {
-      newWindow(element.key, 'image');
-    } else if (element.type === 'file' && contentType === 'video/mp4') {
-      newWindow(element.key, 'video');
-    } else if (element.type === 'folder') {
-      newWindow(element.key, 'navigator');
+      newWindow(elementKey, 'image');
+    } else if (contentType?.startsWith('video')) {
+      newWindow(elementKey, 'video');
+    } else if (elementInfo?.type === 'folder') {
+      newWindow(elementKey, 'navigator');
     }
     currentMenu.style.display = 'none';
   };
 
   const handleDelete = () => {
-    if (!element || !currentMenu) return;
-    if (selectedElements.length > 1) {
-      selectedElements.forEach((element) => {
-        if (element.type === 'file') {
-          deleteFile(element.key).then(() => {
+    if (!currentMenu) return;
+      selectedKeys.forEach((key) => {
+        const elementInfo = getElementInfo(key);
+        if (!elementInfo) return;
+        if (elementInfo?.type === 'file') {
+          deleteFile(key).then(() => {
             queryClient.invalidateQueries(
-              readFolderQueryOption(element.parentKey)
+              readFolderQueryOption(elementInfo.parentKey)
             );
-            deleteElement(element.key);
           });
         } else {
-          deleteFolder(element.key).then(() => {
+          deleteFolder(key).then(() => {
             queryClient.invalidateQueries(
-              readFolderQueryOption(element.parentKey)
+              readFolderQueryOption(elementInfo.parentKey)
             );
-            deleteElement(element.key);
           });
         }
       });
-    } else if (element.type === 'file') {
-      deleteFile(element.key).then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
-        deleteElement(element.key);
-      });
-    } else {
-      deleteFolder(element.key).then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(element.parentKey));
-        deleteElement(element.key);
-      });
-    }
     currentMenu.style.display = 'none';
   };
 
   const handleRename = () => {
-    if (!element || !currentMenu) return;
-    startRenaming(element.key);
+    if (!currentMenu) return;
+    setRenamingKey(elementKey);
     currentMenu.style.display = 'none';
   };
 
@@ -151,15 +132,16 @@ export const ElementOptionMenu = ({
     name: string;
     action: () => void;
   }[] = [];
-  if (selectedElements.length > 1) {
+
+  if (selectedKeys.length > 1) {
     currentMenuList = multipleMenuList;
-  } else if (element?.type === 'file') {
+  } else if (elementInfo?.type === 'file') {
     currentMenuList = fileMenuList;
-  } else if (element?.type === 'folder') {
+  } else if (elementInfo?.type === 'folder') {
     currentMenuList = folderMenuList;
   }
 
-  if (!element) return <></>;
+  if (!elementInfo) return <></>;
 
   return <MenuGenerator menuList={currentMenuList} />;
 };

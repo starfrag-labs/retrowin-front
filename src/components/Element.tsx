@@ -19,10 +19,10 @@ import {
   windowElementNameText,
 } from '../styles/element.css';
 import { IElementState } from '../types/store';
-import { useElementStore } from '../store/element.store';
 import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
+import { useElementStoreV3 } from '../store/element.store.v3';
 
 export const Element = memo(
   ({
@@ -59,10 +59,10 @@ export const Element = memo(
       (state) => state.findWindowByTarget
     );
     const updateWindow = useWindowStore((state) => state.updateWindow);
-    const rename = useElementStore((state) => state.renameElement);
-    const endRenaming = useElementStore((state) => state.endRenaming);
     const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
+    const setRenamingKey = useElementStoreV3((state) => state.setRenamingKey);
+    const setElementInfo = useElementStoreV3((state) => state.setElementInfo);
 
     const contentType = getContentType(name);
 
@@ -83,10 +83,19 @@ export const Element = memo(
       }
     }, [elementKey, setElementRef]);
 
+    useEffect(() => {
+      setElementInfo(elementKey, {
+        key: elementKey,
+        name,
+        type,
+        parentKey,
+      });
+    }, [elementKey, name, parentKey, setElementInfo, type]);
+
     // click icon event handler
     const handleClickIcon = () => {
       if (type === 'file' && contentType) {
-        if (contentType.includes('image')) {
+        if (contentType.startsWith('image')) {
           newWindow(elementKey, 'image');
         } else if (contentType.includes('video')) {
           newWindow(elementKey, 'video');
@@ -169,7 +178,7 @@ export const Element = memo(
     const renameElement = useCallback(
       (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
-          endRenaming(elementKey);
+          setRenamingKey(null);
         } else if (
           event.key === 'Enter' &&
           newNameState !== name &&
@@ -178,13 +187,11 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          endRenaming(elementKey);
           renameFolder(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ['read', 'folder', parentKey],
+                queryKey: ['folder', parentKey],
               });
-              rename(elementKey, newNameState);
             })
             .catch(() => {
               setNameState(tempName);
@@ -197,28 +204,26 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          endRenaming(elementKey);
           renameFile(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ['read', 'folder', parentKey],
+                queryKey: ['folder', parentKey],
               });
             })
             .catch(() => {
               setNameState(tempName);
             });
         } else if (event.key === 'Enter' && newNameState === name) {
-          endRenaming(elementKey);
+          setRenamingKey(null);
         }
       },
       [
         elementKey,
-        endRenaming,
         name,
         newNameState,
         parentKey,
         queryClient,
-        rename,
+        setRenamingKey,
         type,
       ]
     );
@@ -233,10 +238,10 @@ export const Element = memo(
     const handleEndRenaming = useCallback(
       (e: MouseEvent) => {
         if (e.button === 0 && renaming && e.target !== renameRef.current) {
-          endRenaming(elementKey);
+          setRenamingKey(null);
         }
       },
-      [elementKey, endRenaming, renaming]
+      [renaming, setRenamingKey]
     );
 
     useEffect(() => {

@@ -16,7 +16,7 @@ import {
 } from '../../../styles/mobile/menu.css';
 import { Modal } from '../Modal';
 import { moveFile, moveFolder } from '../../../api/cloud';
-import { useMobileElementStore } from '../../../store/mobile/element.store';
+import { useElementStoreV3 } from '../../../store/element.store.v3';
 
 export const MoveMenu = ({
   folderKey,
@@ -29,22 +29,20 @@ export const MoveMenu = ({
   // States
   const [path, setPath] = useState<string>('');
   const [parentKey, setParentKey] = useState<string>('');
-  const [currentFolderKey, setCurrentFolderKey] = useState<string>(folderKey);
+  const [targetFolderKey, setTargetFolderKey] = useState<string>(folderKey);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
 
   // Refs
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Actions
-  const isSelected = useMobileElementStore((state) => state.isSelected);
-  const unselectAllKeys = useMobileElementStore(
-    (state) => state.unselectAllKeys
-  );
+  const isSelected = useElementStoreV3((state) => state.isSelected);
+  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
 
   // Queries
-  const readQuery = useQuery(readFolderQueryOption(currentFolderKey));
-  const infoQuery = useQuery(getFolderInfoQueryOption(currentFolderKey));
-  const pathQuery = useQuery(getFolderPathQueryOption(currentFolderKey));
+  const readQuery = useQuery(readFolderQueryOption(targetFolderKey));
+  const infoQuery = useQuery(getFolderInfoQueryOption(targetFolderKey));
+  const pathQuery = useQuery(getFolderPathQueryOption(targetFolderKey));
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
@@ -71,24 +69,17 @@ export const MoveMenu = ({
     await Promise.all([
       readQuery.data.files.forEach(async (file) => {
         if (isSelected(file.key)) {
-          await moveFile(file.key, currentFolderKey).then(() => {
-            queryClient.invalidateQueries(
-              readFolderQueryOption(file.parentKey)
-            );
-          });
+          await moveFile(file.key, targetFolderKey);
         }
       }),
       readQuery.data.folders.forEach(async (folder) => {
         if (isSelected(folder.key)) {
-          await moveFolder(folder.key, currentFolderKey).then(() => {
-            queryClient.invalidateQueries(
-              readFolderQueryOption(folder.parentKey)
-            );
-          });
+          await moveFolder(folder.key, targetFolderKey);
         }
       }),
     ]).then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(currentFolderKey));
+      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
+      queryClient.invalidateQueries(readFolderQueryOption(targetFolderKey));
       unselectAllKeys();
       toggle();
     });
@@ -131,7 +122,7 @@ export const MoveMenu = ({
         <div className={menu} ref={menuRef}>
           {parentKey && (
             <div
-              onTouchEnd={() => setCurrentFolderKey(parentKey)}
+              onTouchEnd={() => setTargetFolderKey(parentKey)}
               className={leftJustifiedMenuLabel}
             >
               <FaFolder className={miniFolderIcon} />
@@ -141,7 +132,7 @@ export const MoveMenu = ({
           {readQuery.data.folders.map((folder) => (
             <div
               key={folder.key}
-              onTouchEnd={() => setCurrentFolderKey(folder.key)}
+              onTouchEnd={() => setTargetFolderKey(folder.key)}
               className={leftJustifiedMenuLabel}
             >
               <FaFolder className={miniFolderIcon} />

@@ -1,14 +1,16 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRefStore } from '../store/ref.store';
-import { useElementStore } from '../store/element.store';
 import { draggingElementsIcon } from '../styles/element.css';
 import { moveFile, moveFolder } from '../api/cloud';
-import { useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import {
+  getRootFolderKeyQueryOption,
+  readFolderQueryOption,
+} from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
-import { IElementState } from '../types/store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
+import { useElementStoreV3 } from '../store/element.store.v3';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -26,23 +28,24 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const elements = useElementStore((state) => state.elements);
   const elementsRef = useRefStore((state) => state.elementsRef);
   const windowsRef = useRefStore((state) => state.windowsRef);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
-  const rootKey = useElementStore((state) => state.rootKey);
   const menuRef = useRefStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
+  const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
 
   // Store functions
-  const findElement = useElementStore((state) => state.findElement);
-  const moveElement = useElementStore((state) => state.moveElement);
-  const selectElement = useElementStore((state) => state.selectElement);
-  const unselectAllElements = useElementStore(
-    (state) => state.unselectAllElements
-  );
   const findWindow = useWindowStore((state) => state.findWindow);
+
+  // Element v3
+  const isSelected = useElementStoreV3((state) => state.isSelected);
+  const selectKey = useElementStoreV3((state) => state.selectKey);
+  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
+
+  // Query
+  const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -73,18 +76,18 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
 
       // Check if the mouse event is triggered on an element
-      let element: IElementState | undefined;
+      let isElement = false;
       elementsRef.forEach((elementRef, key) => {
         if (elementRef.current?.contains(e.target as Node)) {
-          element = findElement(key);
+          isElement = true;
+          if (!isSelected(key) && !shiftKey) {
+            unselectAllKeys();
+          }
+          selectKey(key);
         }
       });
       // If the mouse event is not triggered on an element, return
-      if (!element) return;
-      if (!shiftKey && !element.selected) {
-        unselectAllElements();
-      }
-      selectElement(element.key);
+      if (!isElement) return;
       setPointerMoved(false); // Reset the pointerMoved state
       setIsDraggingReady(true);
       setStartX(e.clientX);
@@ -92,13 +95,13 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     },
     [
       elementsRef,
-      findElement,
+      isSelected,
       menuRef,
       renaming,
       resizing,
-      selectElement,
+      selectKey,
       shiftKey,
-      unselectAllElements,
+      unselectAllKeys,
     ]
   );
 
@@ -116,13 +119,14 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         setPointerMoved(true);
         setIsDragging(true);
         elementsRef.forEach((elementRef, key) => {
-          const element = findElement(key);
           let contained = false;
           if (elementRef.current?.contains(e.target as Node)) {
             contained = true;
           }
-          if (!element?.selected && !contained) return;
-          const clone = elementRef.current?.cloneNode(true) as HTMLDivElement;
+          if (!isSelected(key) && !contained) return;
+          const clone = elementRef.current?.cloneNode(
+            true
+          ) as HTMLDivElement;
           clone.style.position = 'absolute';
           clone.style.left =
             elementRef.current?.getBoundingClientRect().left + 'px';
@@ -132,7 +136,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         });
       }
     },
-    [elementsRef, findElement, isDragging, isDraggingReady, startX, startY]
+    [elementsRef, isDragging, isDraggingReady, isSelected, startX, startY]
   );
 
   const dragElement = useCallback(
@@ -161,9 +165,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       // Search for the target folder from the background
       if (
         backgroundWindowRef?.current &&
-        backgroundWindowRef.current.contains(e.target as Node)
+        backgroundWindowRef.current.contains(e.target as Node) &&
+        rootKeyQuery.isSuccess
       ) {
-        targetFolderKey = rootKey;
+        targetFolderKey = rootKeyQuery.data;
       }
 
       // Search for the target folder from the windows
@@ -172,7 +177,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         if (
           window &&
           windowRef.current?.contains(e.target as Node) &&
-          findElement(window.targetKey)?.type === 'folder'
+          window.type === 'navigator'
         ) {
           targetFolderKey = window.targetKey;
         }
@@ -180,9 +185,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Search for the target folder from the elements
       elementsRef.forEach((elementRef, key) => {
+        const info = getElementInfo(key);
         if (
           elementRef.current?.contains(e.target as Node) &&
-          findElement(key)?.type === 'folder'
+          info?.type === 'folder'
         ) {
           targetFolderKey = key;
         }
@@ -190,47 +196,39 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Move the selected elements to the target folder
       if (targetFolderKey && pointerMoved) {
-        elements.forEach((element) => {
-          if (element.key === targetFolderKey) return;
-          if (element.parentKey === targetFolderKey) return;
-          if (element.selected && element.type === 'folder') {
-            moveFolder(element.key, targetFolderKey).then(() => {
+        elementsRef.forEach((_elementRef, key) => {
+          const info = getElementInfo(key);
+          if (!isSelected(key) || key === targetFolderKey || !info) return;
+          if (info.type === 'folder') {
+            moveFolder(key, targetFolderKey).then(() => {
               queryClient.invalidateQueries(
                 readFolderQueryOption(targetFolderKey)
               );
-              queryClient.invalidateQueries(
-                readFolderQueryOption(element.parentKey)
-              );
-              moveElement(element.key, targetFolderKey);
+              queryClient.invalidateQueries(readFolderQueryOption(key));
             });
-          } else if (element.selected && element.type === 'file') {
-            moveFile(element.key, targetFolderKey).then(
-              () => {
-                queryClient.invalidateQueries(
-                  readFolderQueryOption(targetFolderKey)
-                );
-                queryClient.invalidateQueries(
-                  readFolderQueryOption(element.parentKey)
-                );
-                moveElement(element.key, targetFolderKey);
-              }
-            );
+          } else if (info.type === 'file') {
+            moveFile(key, targetFolderKey).then(() => {
+              queryClient.invalidateQueries(
+                readFolderQueryOption(targetFolderKey)
+              );
+              queryClient.invalidateQueries(readFolderQueryOption(key));
+            });
           }
         });
       }
     },
     [
-      isDragging,
       backgroundWindowRef,
-      windowsRef,
       elementsRef,
-      pointerMoved,
-      rootKey,
       findWindow,
-      findElement,
-      elements,
+      getElementInfo,
+      isDragging,
+      isSelected,
+      pointerMoved,
       queryClient,
-      moveElement,
+      rootKeyQuery.data,
+      rootKeyQuery.isSuccess,
+      windowsRef,
     ]
   );
 
