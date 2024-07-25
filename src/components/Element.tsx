@@ -5,7 +5,6 @@ import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
 import {
-  elementContainer,
   uploadFileIcon,
   folderIcon,
   fileIcon,
@@ -65,17 +64,6 @@ export const Element = memo(
     const setElementInfo = useElementStore((state) => state.setElementInfo);
 
     const contentType = getContentType(name);
-
-    useEffect(() => {
-      if (elementRef.current && nameRef.current) {
-        elementRef.current.className = isWindowElement
-          ? windowElement
-          : backgroundElement;
-        nameRef.current.className = isWindowElement
-          ? windowElementNameText
-          : backgroundElementNameText;
-      }
-    }, [isWindowElement]);
 
     useEffect(() => {
       if (elementRef.current) {
@@ -253,7 +241,9 @@ export const Element = memo(
 
     return (
       <div
-        className={elementContainer}
+        className={
+          isWindowElement ? windowElement : backgroundElement
+        }
         onDoubleClick={handleClickIcon}
         ref={elementRef}
       >
@@ -273,7 +263,11 @@ export const Element = memo(
               onFocus={(e) => e.currentTarget.select()}
             />
           ) : (
-            <div className={backgroundElementNameText} ref={nameRef}>
+            <div className={
+              isWindowElement
+                ? windowElementNameText
+                : backgroundElementNameText
+            } ref={nameRef}>
               {nameState}
             </div>
           )}
