@@ -21,14 +21,14 @@ declare module '@tanstack/react-router' {
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <RouterProvider
-        router={router}
-      />
-      <ReactQueryDevtools
-        initialIsOpen={false}
-        buttonPosition="bottom-left"
-        position="top"
-      />
+      <RouterProvider router={router} />
+      {import.meta.env.DEV && (
+        <ReactQueryDevtools
+          initialIsOpen={false}
+          buttonPosition="bottom-right"
+          position="bottom"
+        />
+      )}
     </QueryClientProvider>
   );
 }

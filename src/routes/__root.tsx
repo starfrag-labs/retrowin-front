@@ -7,7 +7,6 @@ import { getProfile } from '../api/auth';
 import { checkUser, enrollUser } from '../api/cloud';
 import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
-// import { TanStackRouterDevtools } from '@tanstack/router-devtools';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -44,7 +43,6 @@ function RootComponent() {
   return (
     <div className={defaultContainer}>
       <Outlet />
-      {/* <TanStackRouterDevtools position="bottom-right" /> */}
     </div>
   );
 }
