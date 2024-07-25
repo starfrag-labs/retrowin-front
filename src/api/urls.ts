@@ -85,9 +85,5 @@ export const cloudUrls = {
       url: `${cloudPrefix}/file/info/${fileKey}`,
       method: 'GET',
     }),
-    path: (fileKey: string) => ({
-      url: `${cloudPrefix}/file/path/${fileKey}`,
-      method: 'GET',
-    }),
   },
 };

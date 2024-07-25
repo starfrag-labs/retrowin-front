@@ -11,7 +11,7 @@ import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { ImagePreview } from './ImagePreview';
 import { useNavigate } from '@tanstack/react-router';
 import React, { memo, useState } from 'react';
-import { useElementStoreV3 } from '../../store/element.store.v3';
+import { useElementStore } from '../../store/element.store';
 
 export const Element = memo(
   ({
@@ -38,8 +38,8 @@ export const Element = memo(
     const [startY, setStartY] = useState<number>(0);
 
     // Actions
-    const selectKey = useElementStoreV3((state) => state.selectKey);
-    const unselectKey = useElementStoreV3((state) => state.unselectKey);
+    const selectKey = useElementStore((state) => state.selectKey);
+    const unselectKey = useElementStore((state) => state.unselectKey);
 
     const handleClick = () => {
       if (selecting && !selected) {

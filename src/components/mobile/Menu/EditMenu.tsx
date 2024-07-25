@@ -15,7 +15,8 @@ import {
 } from '../../../api/cloud';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
-import { useElementStoreV3 } from '../../../store/element.store.v3';
+import { useElementStore } from '../../../store/element.store';
+import { modalInput } from '../../../styles/mobile/modal.css';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
@@ -30,12 +31,12 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const [newName, setNewName] = useState('');
 
   // Store
-  const selectedKeys = useElementStoreV3((state) => state.selectedKeys);
+  const selectedKeys = useElementStore((state) => state.selectedKeys);
 
   // Actions
-  const isSelected = useElementStoreV3((state) => state.isSelected);
-  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
-  const unselectKey = useElementStoreV3((state) => state.unselectKey);
+  const isSelected = useElementStore((state) => state.isSelected);
+  const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
+  const unselectKey = useElementStore((state) => state.unselectKey);
 
   // Functions
   const toggleMoving = () => {
@@ -194,24 +195,21 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
             type="text"
             onChange={(e) => setNewName(e.target.value)}
             defaultValue={newName}
+            className={modalInput}
           />
         </Modal>
       )}
       {deleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
-          <div>
-            Are you sure you want to delete {selectedKeys.length}{' '}
-            {selectedKeys.length === 1 ? 'item' : 'items'}?
-          </div>
+          Are you sure you want to delete {selectedKeys.length}{' '}
+          {selectedKeys.length === 1 ? 'item' : 'items'}?
         </Modal>
       )}
       {moveMenuOpen && <MoveMenu folderKey={folderKey} toggle={toggleMoving} />}
       {downloadModalOpen && (
         <Modal onAccept={handleDownload} onClose={toggleDownloadModalOpen}>
-          <div>
-            Are you sure you want to download {selectedKeys.length}{' '}
-            {selectedKeys.length === 1 ? 'item' : 'items'}?
-          </div>
+          Are you sure you want to download {selectedKeys.length}{' '}
+          {selectedKeys.length === 1 ? 'item' : 'items'}?
         </Modal>
       )}
     </div>

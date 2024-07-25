@@ -22,7 +22,7 @@ import { IElementState } from '../types/store';
 import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
-import { useElementStoreV3 } from '../store/element.store.v3';
+import { useElementStore } from '../store/element.store';
 
 export const Element = memo(
   ({
@@ -61,8 +61,8 @@ export const Element = memo(
     const updateWindow = useWindowStore((state) => state.updateWindow);
     const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
-    const setRenamingKey = useElementStoreV3((state) => state.setRenamingKey);
-    const setElementInfo = useElementStoreV3((state) => state.setElementInfo);
+    const setRenamingKey = useElementStore((state) => state.setRenamingKey);
+    const setElementInfo = useElementStore((state) => state.setElementInfo);
 
     const contentType = getContentType(name);
 

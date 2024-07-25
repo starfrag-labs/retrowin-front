@@ -13,7 +13,7 @@ import {
 } from '../../utils/queryOptions/file.query';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { CircularLoading } from '../CircularLoading';
-import { useElementStoreV3 } from '../../store/element.store.v3';
+import { useElementStore } from '../../store/element.store';
 
 export const ImageViewer = memo(
   ({
@@ -35,9 +35,9 @@ export const ImageViewer = memo(
 
     const infoQuery = useQuery(getFileInfoQueryOption(targetKey));
     const downloadQuery = useQuery(downloadFileQueryOption(targetKey));
-    const info = useElementStoreV3((state) => state.info);
-    const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
-    const getElementInfoByParentKey = useElementStoreV3(
+    const info = useElementStore((state) => state.info);
+    const getElementInfo = useElementStore((state) => state.getElementInfo);
+    const getElementInfoByParentKey = useElementStore(
       (state) => state.getElementInfoByParentKey
     );
 

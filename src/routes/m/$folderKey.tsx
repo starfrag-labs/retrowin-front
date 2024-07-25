@@ -20,7 +20,7 @@ import { Uploader } from '../../components/mobile/Menu/CreateMenu';
 import { EditMenu } from '../../components/mobile/Menu/EditMenu';
 import { ProgressSpinner } from '../../components/mobile/ProgressSpinner';
 import { useSuspenseQuery } from '@tanstack/react-query';
-import { useElementStoreV3 } from '../../store/element.store.v3';
+import { useElementStore } from '../../store/element.store';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -44,10 +44,10 @@ function Component() {
   const infoQuery = useSuspenseQuery(getFolderInfoQueryOption(folderKey));
 
   // Store
-  const selectedKeys = useElementStoreV3((state) => state.selectedKeys);
+  const selectedKeys = useElementStore((state) => state.selectedKeys);
 
   // Actions
-  const unselectAll = useElementStoreV3((state) => state.unselectAllKeys);
+  const unselectAll = useElementStore((state) => state.unselectAllKeys);
 
   // Navigation
   const navigate = useNavigate({ from: '/m/$folderKey' });

@@ -16,7 +16,7 @@ import {
 } from '../../../styles/mobile/menu.css';
 import { Modal } from '../Modal';
 import { moveFile, moveFolder } from '../../../api/cloud';
-import { useElementStoreV3 } from '../../../store/element.store.v3';
+import { useElementStore } from '../../../store/element.store';
 
 export const MoveMenu = ({
   folderKey,
@@ -36,8 +36,8 @@ export const MoveMenu = ({
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Actions
-  const isSelected = useElementStoreV3((state) => state.isSelected);
-  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
+  const isSelected = useElementStore((state) => state.isSelected);
+  const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
 
   // Queries
   const readQuery = useQuery(readFolderQueryOption(targetFolderKey));
@@ -145,7 +145,7 @@ export const MoveMenu = ({
           </div>
           {modalOpen && (
             <Modal onAccept={handleMove} onClose={toggleModal}>
-              <div>Move to {path}</div>
+              Move to {path}
             </Modal>
           )}
         </div>

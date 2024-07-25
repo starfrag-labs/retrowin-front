@@ -232,12 +232,3 @@ export const getFileInfo = async (fileKey: string) => {
   });
   return response;
 };
-
-export const getFilePath = async (fileKey: string) => {
-  const getFilePath = cloudUrls.file.path(fileKey);
-  const response = await api.request<string[]>({
-    method: getFilePath.method,
-    url: getFilePath.url,
-  });
-  return response;
-}

@@ -30,7 +30,7 @@ const initialState: State = {
   info: new Map(),
 };
 
-export const useElementStoreV3 = create<State & Action>((set, get) => ({
+export const useElementStore = create<State & Action>((set, get) => ({
   selectedKeys: initialState.selectedKeys,
   renamingKey: initialState.renamingKey,
   info: initialState.info,
@@ -72,5 +72,5 @@ export const useElementStoreV3 = create<State & Action>((set, get) => ({
     return Array.from(get().info.values()).filter(
       (info) => info.parentKey === parentKey
     );
-  }
+  },
 }));

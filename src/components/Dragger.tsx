@@ -10,7 +10,7 @@ import {
 import { defaultContainer } from '../styles/global/container.css';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
-import { useElementStoreV3 } from '../store/element.store.v3';
+import { useElementStore } from '../store/element.store';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -34,15 +34,15 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const menuRef = useRefStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
-  const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
+  const getElementInfo = useElementStore((state) => state.getElementInfo);
 
   // Store functions
   const findWindow = useWindowStore((state) => state.findWindow);
 
   // Element v3
-  const isSelected = useElementStoreV3((state) => state.isSelected);
-  const selectKey = useElementStoreV3((state) => state.selectKey);
-  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
+  const isSelected = useElementStore((state) => state.isSelected);
+  const selectKey = useElementStore((state) => state.selectKey);
+  const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
 
   // Query
   const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
@@ -124,9 +124,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
             contained = true;
           }
           if (!isSelected(key) && !contained) return;
-          const clone = elementRef.current?.cloneNode(
-            true
-          ) as HTMLDivElement;
+          const clone = elementRef.current?.cloneNode(true) as HTMLDivElement;
           clone.style.position = 'absolute';
           clone.style.left =
             elementRef.current?.getBoundingClientRect().left + 'px';

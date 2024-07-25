@@ -211,12 +211,12 @@ function Component() {
       </div>
       {isDeleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
-          <div>Are you sure you want to delete this file?</div>
+          Are you sure you want to delete this file?
         </Modal>
       )}
       {isDownloadModalOpen && (
         <Modal onAccept={handleDownload} onClose={toggleDownloadModalOpen}>
-          <div>Are you sure you want to download this file?</div>
+          Are you sure you want to download this file?
         </Modal>
       )}
     </div>

@@ -4,7 +4,7 @@ import { MenuGenerator } from './MenuGenerator';
 import { useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStore } from '../../store/window.store';
-import { useElementStoreV3 } from '../../store/element.store.v3';
+import { useElementStore } from '../../store/element.store';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -15,33 +15,35 @@ export const ElementOptionMenu = ({
 }): React.ReactElement => {
   const queryClient = useQueryClient();
   const currentMenu = menuRef.current;
-  const elementInfo = useElementStoreV3((state) => state.getElementInfo(elementKey));
-  const selectedKeys = useElementStoreV3((state) => state.selectedKeys);
+  const elementInfo = useElementStore((state) =>
+    state.getElementInfo(elementKey)
+  );
+  const selectedKeys = useElementStore((state) => state.selectedKeys);
 
-  const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
-  const setRenamingKey = useElementStoreV3((state) => state.setRenamingKey);
+  const getElementInfo = useElementStore((state) => state.getElementInfo);
+  const setRenamingKey = useElementStore((state) => state.setRenamingKey);
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleDownload = () => {
     if (!currentMenu) return;
-    downloadFile(elementKey, elementInfo?.name ?? 'unknown').then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', elementInfo?.name ?? 'unknown');
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    });
+    downloadFile(elementKey, elementInfo?.name ?? 'unknown').then(
+      (response) => {
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', elementInfo?.name ?? 'unknown');
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+    );
     currentMenu.style.display = 'none';
   };
 
   const handleOpen = () => {
     if (!currentMenu) return;
     const contentType = getContentType(elementInfo?.type ?? '');
-    if (
-      contentType?.startsWith('image')
-    ) {
+    if (contentType?.startsWith('image')) {
       newWindow(elementKey, 'image');
     } else if (contentType?.startsWith('video')) {
       newWindow(elementKey, 'video');
@@ -53,23 +55,23 @@ export const ElementOptionMenu = ({
 
   const handleDelete = () => {
     if (!currentMenu) return;
-      selectedKeys.forEach((key) => {
-        const elementInfo = getElementInfo(key);
-        if (!elementInfo) return;
-        if (elementInfo?.type === 'file') {
-          deleteFile(key).then(() => {
-            queryClient.invalidateQueries(
-              readFolderQueryOption(elementInfo.parentKey)
-            );
-          });
-        } else {
-          deleteFolder(key).then(() => {
-            queryClient.invalidateQueries(
-              readFolderQueryOption(elementInfo.parentKey)
-            );
-          });
-        }
-      });
+    selectedKeys.forEach((key) => {
+      const elementInfo = getElementInfo(key);
+      if (!elementInfo) return;
+      if (elementInfo?.type === 'file') {
+        deleteFile(key).then(() => {
+          queryClient.invalidateQueries(
+            readFolderQueryOption(elementInfo.parentKey)
+          );
+        });
+      } else {
+        deleteFolder(key).then(() => {
+          queryClient.invalidateQueries(
+            readFolderQueryOption(elementInfo.parentKey)
+          );
+        });
+      }
+    });
     currentMenu.style.display = 'none';
   };
 

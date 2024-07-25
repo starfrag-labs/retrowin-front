@@ -3,9 +3,12 @@ import { selectBox, selector } from '../styles/selector.css';
 import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
-import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import {
+  getRootFolderKeyQueryOption,
+  readFolderQueryOption,
+} from '../utils/queryOptions/folder.query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useElementStoreV3 } from '../store/element.store.v3';
+import { useElementStore } from '../store/element.store';
 import { ReadFolderData } from '../types/response';
 
 export const Selector = ({
@@ -29,7 +32,9 @@ export const Selector = ({
 
   // Queries
   const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
-  const readQuery = useQuery(readFolderQueryOption(currentWindowTargetKey || ''));
+  const readQuery = useQuery(
+    readFolderQueryOption(currentWindowTargetKey || '')
+  );
 
   // Refs
   const selectorRef = useRef<HTMLDivElement>(null);
@@ -44,11 +49,10 @@ export const Selector = ({
   const elementsRef = useRefStore((state) => state.elementsRef);
 
   // Store functions
-  const selectKey = useElementStoreV3((state) => state.selectKey);
-  const unselectKey = useElementStoreV3((state) => state.unselectKey);
-  const unselectAllKeys = useElementStoreV3((state) => state.unselectAllKeys);
+  const selectKey = useElementStore((state) => state.selectKey);
+  const unselectKey = useElementStore((state) => state.unselectKey);
+  const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
   const findWindow = useWindowStore((state) => state.findWindow);
-
 
   // Keyboard event listeners
   useEffect(() => {

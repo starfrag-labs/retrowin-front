@@ -22,7 +22,7 @@ import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
 import { MdNavigateNext } from 'react-icons/md';
 import { CircularLoading } from '../CircularLoading';
-import { useElementStoreV3 } from '../../store/element.store.v3';
+import { useElementStore } from '../../store/element.store';
 
 export const WindowV2 = ({
   windowKey,
@@ -56,7 +56,7 @@ export const WindowV2 = ({
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
   const nextWindow = useWindowStore((state) => state.nextWindow);
-  const getElementInfo = useElementStoreV3((state) => state.getElementInfo);
+  const getElementInfo = useElementStore((state) => state.getElementInfo);
 
   // update ref store on mount
   useEffect(() => {

@@ -4,7 +4,7 @@ import { IElementState } from '../types/store';
 import { useWindowStore } from '../store/window.store';
 import { useQuery } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
-import { useElementStoreV3 } from '../store/element.store.v3';
+import { useElementStore } from '../store/element.store';
 
 export const Elements = ({
   folderKey,
@@ -16,8 +16,8 @@ export const Elements = ({
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const readQuery = useQuery(readFolderQueryOption(folderKey));
-  const renamingKey = useElementStoreV3((state) => state.renamingKey);
-  const selectedKeys = useElementStoreV3((state) => state.selectedKeys);
+  const renamingKey = useElementStore((state) => state.renamingKey);
+  const selectedKeys = useElementStore((state) => state.selectedKeys);
 
   const uploadFileElement: IElementState = {
     key: 'upload-file',
@@ -52,7 +52,7 @@ export const Elements = ({
               elementKey={folder.key}
               name={folder.name}
               parentKey={folderKey}
-              type='folder'
+              type="folder"
               selected={selectedKeys.includes(folder.key)}
               renaming={renamingKey === folder.key}
               isWindowElement={isWindowElements}
@@ -64,7 +64,7 @@ export const Elements = ({
               elementKey={file.key}
               name={file.name}
               parentKey={folderKey}
-              type='file'
+              type="file"
               selected={selectedKeys.includes(file.key)}
               renaming={renamingKey === file.key}
               isWindowElement={isWindowElements}
