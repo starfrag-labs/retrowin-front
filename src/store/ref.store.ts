@@ -1,18 +1,18 @@
 import { create } from 'zustand';
 
 type State = {
-  elementsRef: Map<string, React.RefObject<HTMLElement>>;
+  navigatorElementRefs: Map<string, React.RefObject<HTMLElement>>;
   backgroundWindowRef: React.RefObject<HTMLElement> | null;
-  windowsRef: Map<string, React.RefObject<HTMLElement>>;
+  windowRefs: Map<string, React.RefObject<HTMLElement>>;
   menuRef: React.RefObject<HTMLElement> | null;
 };
 
 type Action = {
-  setElementRef: (
+  setNavigatorElementRef: (
     key: string,
-    ref: React.RefObject<HTMLElement>,
+    ref: React.RefObject<HTMLElement>
   ) => void;
-  getElementByKey: (
+  getNavigatorElementRefByKey: (
     key: string
   ) => React.RefObject<HTMLElement> | undefined;
   setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
@@ -22,41 +22,41 @@ type Action = {
 };
 
 const initialState: State = {
-  elementsRef: new Map(),
+  navigatorElementRefs: new Map(),
   backgroundWindowRef: null,
-  windowsRef: new Map(),
+  windowRefs: new Map(),
   menuRef: null,
 };
 
 export const useRefStore = create<State & Action>((set, get) => ({
-  elementsRef: initialState.elementsRef,
-  windowsRef: initialState.windowsRef,
+  navigatorElementRefs: initialState.navigatorElementRefs,
+  windowRefs: initialState.windowRefs,
   backgroundWindowRef: initialState.backgroundWindowRef,
   menuRef: initialState.menuRef,
-  setElementRef: (key, ref) => {
+  setNavigatorElementRef: (key, ref) => {
     set((state) => {
-      if (state.elementsRef) {
-        state.elementsRef.set(key, ref);
+      if (state.navigatorElementRefs) {
+        state.navigatorElementRefs.set(key, ref);
       }
-      return { elementsRef: state.elementsRef };
+      return { navigatorElementRefs: state.navigatorElementRefs };
     });
   },
-  getElementByKey: (key) => {
-    return get().elementsRef.get(key);
+  getNavigatorElementRefByKey: (key) => {
+    return get().navigatorElementRefs.get(key);
   },
   setBackgroundWindowRef: (ref) => {
     set({ backgroundWindowRef: ref });
   },
   setWindowRef: (key, ref) => {
     set((state) => {
-      if (state.windowsRef) {
-        state.windowsRef.set(key, ref);
+      if (state.windowRefs) {
+        state.windowRefs.set(key, ref);
       }
-      return { windowsRef: state.windowsRef };
+      return { windowRefs: state.windowRefs };
     });
   },
   getWindowByKey: (key) => {
-    return get().windowsRef.get(key);
+    return get().windowRefs.get(key);
   },
   setMenuRef: (ref) => {
     set({ menuRef: ref });

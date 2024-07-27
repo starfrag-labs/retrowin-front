@@ -44,9 +44,11 @@ export const Selector = ({
   const menuRef = useRefStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
-  const windowsRef = useRefStore((state) => state.windowsRef);
+  const windowRefs = useRefStore((state) => state.windowRefs);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
-  const elementsRef = useRefStore((state) => state.elementsRef);
+  const navigatorElementRefs = useRefStore(
+    (state) => state.navigatorElementRefs
+  );
 
   // Store functions
   const selectKey = useElementStore((state) => state.selectKey);
@@ -84,7 +86,7 @@ export const Selector = ({
 
       // Check if the mouse event is triggered on an element
       let isElement = false;
-      elementsRef.forEach((elementRef) => {
+      navigatorElementRefs.forEach((elementRef) => {
         if (elementRef.current?.contains(e.target as Node)) {
           isElement = true;
         }
@@ -106,8 +108,8 @@ export const Selector = ({
         setCurrentWindowTargetKey(rootKeyQuery.data);
         setIsSelecting(true);
       }
-      if (windowsRef) {
-        windowsRef.forEach((windowRef, windowKey) => {
+      if (windowRefs) {
+        windowRefs.forEach((windowRef, windowKey) => {
           // Check if target is on a window's corner
           const currentWindowRef = windowRef.current;
           const window = findWindow(windowKey); // Get window by key
@@ -124,7 +126,7 @@ export const Selector = ({
     },
     [
       backgroundWindowRef,
-      elementsRef,
+      navigatorElementRefs,
       findWindow,
       menuRef,
       renaming,
@@ -132,14 +134,14 @@ export const Selector = ({
       rootKeyQuery.data,
       rootKeyQuery.isSuccess,
       unselectAllKeys,
-      windowsRef,
+      windowRefs,
     ]
   );
 
   // Check elements in the box
   const checkElementsInBox = useCallback(() => {
     if (
-      !elementsRef ||
+      !navigatorElementRefs ||
       !boxRef.current ||
       !currentWindowTargetKey ||
       !readQuery.isSuccess ||
@@ -156,7 +158,7 @@ export const Selector = ({
     if (!elements) return;
 
     elements.folders.forEach((folder) => {
-      const elementRef = elementsRef.get(folder.key);
+      const elementRef = navigatorElementRefs.get(folder.key);
       if (!elementRef?.current) return;
       const elementRect = elementRef.current.getBoundingClientRect();
       if (
@@ -171,7 +173,7 @@ export const Selector = ({
       }
     });
     elements.files.forEach((file) => {
-      const elementRef = elementsRef.get(file.key);
+      const elementRef = navigatorElementRefs.get(file.key);
       if (!elementRef?.current) return;
       const elementRect = elementRef.current.getBoundingClientRect();
       if (
@@ -187,7 +189,7 @@ export const Selector = ({
     });
   }, [
     currentWindowTargetKey,
-    elementsRef,
+    navigatorElementRefs,
     queryClient,
     readQuery.data,
     readQuery.isSuccess,

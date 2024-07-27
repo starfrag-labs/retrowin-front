@@ -58,7 +58,9 @@ export const Element = memo(
       (state) => state.findWindowByTarget
     );
     const updateWindow = useWindowStore((state) => state.updateWindow);
-    const setElementRef = useRefStore((state) => state.setElementRef);
+    const setNavigatorElementRef = useRefStore(
+      (state) => state.setNavigatorElementRef
+    );
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
@@ -67,9 +69,9 @@ export const Element = memo(
 
     useEffect(() => {
       if (elementRef.current) {
-        setElementRef(elementKey, elementRef);
+        setNavigatorElementRef(elementKey, elementRef);
       }
-    }, [elementKey, setElementRef]);
+    }, [elementKey, setNavigatorElementRef]);
 
     useEffect(() => {
       setElementInfo(elementKey, {
@@ -241,9 +243,7 @@ export const Element = memo(
 
     return (
       <div
-        className={
-          isWindowElement ? windowElement : backgroundElement
-        }
+        className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
       >
@@ -263,11 +263,14 @@ export const Element = memo(
               onFocus={(e) => e.currentTarget.select()}
             />
           ) : (
-            <div className={
-              isWindowElement
-                ? windowElementNameText
-                : backgroundElementNameText
-            } ref={nameRef}>
+            <div
+              className={
+                isWindowElement
+                  ? windowElementNameText
+                  : backgroundElementNameText
+              }
+              ref={nameRef}
+            >
               {nameState}
             </div>
           )}

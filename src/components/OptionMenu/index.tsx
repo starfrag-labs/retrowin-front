@@ -11,8 +11,10 @@ export const OptionMenu = ({
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const elementsRef = useRefStore((state) => state.elementsRef);
-  const windowsRef = useRefStore((state) => state.windowsRef);
+  const navigatorElementRefs = useRefStore(
+    (state) => state.navigatorElementRefs
+  );
+  const windowRefs = useRefStore((state) => state.windowRefs);
   const menuRef = useRef<HTMLDivElement>(null);
   const setMenuRef = useRefStore((state) => state.setMenuRef);
 
@@ -31,8 +33,8 @@ export const OptionMenu = ({
       setMenuType('background');
 
       // Check if the right-clicked element is a window
-      if (windowsRef) {
-        windowsRef.forEach((window, key) => {
+      if (windowRefs) {
+        windowRefs.forEach((window, key) => {
           if (window.current && window.current.contains(e.target as Node)) {
             setTargetWindowKey(key);
             setMenuType('window');
@@ -41,8 +43,8 @@ export const OptionMenu = ({
       }
 
       // Check if the right-clicked element is an element
-      if (elementsRef) {
-        elementsRef.forEach((element, key) => {
+      if (navigatorElementRefs) {
+        navigatorElementRefs.forEach((element, key) => {
           if (element.current && element.current.contains(e.target as Node)) {
             setTargetElementKey(key);
             setMenuType('element');
