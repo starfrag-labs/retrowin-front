@@ -1,12 +1,12 @@
 import { queryOptions } from '@tanstack/react-query';
 import { getFolderInfo, getFolderPath, getRootFolderKey, readFolder } from '../../api/cloud';
 import { getFolderInfoData, ReadFolderData } from '../../types/response';
-import { retryCount } from './index.query';
+import { generateQueryKey, retryCount } from './index.query';
 
 export const getRootFolderKeyQueryOption = () =>
   queryOptions<string>({
     retry: retryCount,
-    queryKey: ['folder', 'root', 'read'],
+    queryKey: generateQueryKey('folder', 'root', 'read'),
     queryFn: async () => {
       const data = await getRootFolderKey().then((response) => {
         return response.data;
@@ -22,7 +22,7 @@ export const readFolderQueryOption = (folderKey: string) =>
       files: [],
     },
     retry: retryCount,
-    queryKey: ['folder', folderKey, 'read'],
+    queryKey: generateQueryKey('folder', folderKey, 'read'),
     queryFn: async () => {
       const data = await readFolder(folderKey).then((response) => {
         return response.data;
@@ -35,7 +35,7 @@ export const readFolderQueryOption = (folderKey: string) =>
 export const getFolderInfoQueryOption = (folderKey: string) =>
   queryOptions<getFolderInfoData>({
     retry: retryCount,
-    queryKey: ['folder', folderKey, 'info'],
+    queryKey: generateQueryKey('folder', folderKey, 'info'),
     queryFn: async () => {
       const data = await getFolderInfo(folderKey).then((response) => {
         return response.data;
@@ -48,7 +48,7 @@ export const getFolderInfoQueryOption = (folderKey: string) =>
 export const getFolderPathQueryOption = (folderKey: string) =>
   queryOptions<string[]>({
     retry: retryCount,
-    queryKey: ['folder', folderKey, 'path'],
+    queryKey: generateQueryKey('folder', folderKey, 'path'),
     queryFn: async () => {
       const data = await getFolderPath(folderKey).then((response) => {
         return response.data;

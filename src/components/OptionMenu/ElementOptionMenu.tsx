@@ -2,9 +2,9 @@ import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
 import { useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStore } from '../../store/window.store';
 import { useElementStore } from '../../store/element.store';
+import { generateQueryKey } from '../../utils/queryOptions/index.query';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -60,15 +60,15 @@ export const ElementOptionMenu = ({
       if (!elementInfo) return;
       if (elementInfo?.type === 'file') {
         deleteFile(key).then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(elementInfo.parentKey)
-          );
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('file', elementInfo.parentKey),
+          });
         });
       } else {
         deleteFolder(key).then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(elementInfo.parentKey)
-          );
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', elementInfo.parentKey),
+          });
         });
       }
     });

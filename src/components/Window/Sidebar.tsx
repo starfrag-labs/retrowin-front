@@ -13,7 +13,7 @@ import {
 import { IoIosArrowDown } from 'react-icons/io';
 import { IoIosArrowForward } from 'react-icons/io';
 
-export const TreeNavigator = ({
+export const Sidebar = ({
   folderKey,
   isRoot = false,
   initialIsOpened = false,
@@ -63,11 +63,7 @@ export const TreeNavigator = ({
       </div>
       {isOpened &&
         readTargetFolderQuery.data.folders.map((folder) => (
-          <TreeNavigator
-            folderKey={folder.key}
-            key={folder.key}
-            level={level + 1}
-          />
+          <Sidebar folderKey={folder.key} key={folder.key} level={level + 1} />
         ))}
     </div>
   );

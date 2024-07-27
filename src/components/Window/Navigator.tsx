@@ -1,9 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { Elements } from '../Elements';
 import { useEffect } from 'react';
-import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../../utils/queryOptions/folder.query';
-import { itemContainer, navigatorContainer, treeContainer } from '../../styles/windows/navigator.css';
-import { TreeNavigator } from './TreeNavigator';
+import {
+  getRootFolderKeyQueryOption,
+  readFolderQueryOption,
+} from '../../utils/queryOptions/folder.query';
+import {
+  itemContainer,
+  navigatorContainer,
+  treeContainer,
+} from '../../styles/windows/navigator.css';
+import { Sidebar } from './Sidebar';
 
 export const Navigator = ({
   folderKey,
@@ -28,7 +35,7 @@ export const Navigator = ({
     <div className={navigatorContainer}>
       {getRootKeyQuery.data && (
         <div className={treeContainer}>
-          <TreeNavigator folderKey={getRootKeyQuery.data} isRoot initialIsOpened/>
+          <Sidebar folderKey={getRootKeyQuery.data} isRoot initialIsOpened />
         </div>
       )}
       <div className={itemContainer}>

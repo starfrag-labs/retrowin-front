@@ -17,6 +17,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { useElementStore } from '../../../store/element.store';
 import { modalInput } from '../../../styles/mobile/modal.css';
+import { generateQueryKey } from '../../../utils/queryOptions/index.query';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
@@ -81,7 +82,9 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
         (file) => isSelected(file.key) && deleteFile(file.key)
       ),
     ]).then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('folder', folderKey),
+      })
       unselectAllKeys();
     });
   };
@@ -117,11 +120,15 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
 
     if (folder && folder.name !== modifiedNewName) {
       await renameFolder(folder.key, modifiedNewName).then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(folderKey));
+        queryClient.invalidateQueries({
+          queryKey: generateQueryKey('folder', folderKey),
+        })
       });
     } else if (file && file.name !== modifiedNewName) {
       await renameFile(file.key, modifiedNewName).then(() => {
-        queryClient.invalidateQueries(readFolderQueryOption(folderKey));
+        queryClient.invalidateQueries({
+          queryKey: generateQueryKey('folder', folderKey),
+        }) 
       });
     }
 

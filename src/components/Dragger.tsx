@@ -5,12 +5,12 @@ import { moveFile, moveFolder } from '../api/cloud';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getRootFolderKeyQueryOption,
-  readFolderQueryOption,
 } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
+import { generateQueryKey } from '../utils/queryOptions/index.query';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -134,14 +134,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         });
       }
     },
-    [
-      elementRefs,
-      isDragging,
-      isDraggingReady,
-      isSelected,
-      startX,
-      startY,
-    ]
+    [elementRefs, isDragging, isDraggingReady, isSelected, startX, startY]
   );
 
   const dragElement = useCallback(
@@ -206,17 +199,21 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
           if (!isSelected(key) || key === targetFolderKey || !info) return;
           if (info.type === 'folder') {
             moveFolder(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries(
-                readFolderQueryOption(targetFolderKey)
-              );
-              queryClient.invalidateQueries(readFolderQueryOption(key));
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', targetFolderKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', key),
+              });
             });
           } else if (info.type === 'file') {
             moveFile(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries(
-                readFolderQueryOption(targetFolderKey)
-              );
-              queryClient.invalidateQueries(readFolderQueryOption(key));
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('file', targetFolderKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('file', key),
+              });
             });
           }
         });
