@@ -181,6 +181,9 @@ export const Element = memo(
               queryClient.invalidateQueries({
                 queryKey: generateQueryKey('folder', parentKey),
               });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('favorite'),
+              });
             })
             .catch(() => {
               setNameState(tempName);
@@ -197,6 +200,9 @@ export const Element = memo(
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: generateQueryKey('folder', parentKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('favorite'),
               });
             })
             .catch(() => {

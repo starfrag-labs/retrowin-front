@@ -41,7 +41,13 @@ export const WindowOptionsMenu = ({
   const handleRefresh = () => {
     if (!currentMenu || !window) return;
     queryClient.invalidateQueries({
-      queryKey: generateQueryKey('folder', window.targetKey),
+      queryKey: generateQueryKey('folder'),
+    });
+    queryClient.invalidateQueries({
+      queryKey: generateQueryKey('file'),
+    });
+    queryClient.invalidateQueries({
+      queryKey: generateQueryKey('favorite'),
     });
     currentMenu.style.display = 'none';
   };

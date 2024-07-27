@@ -1,16 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { Elements } from '../Elements';
 import { useEffect } from 'react';
-import {
-  getRootFolderKeyQueryOption,
-  readFolderQueryOption,
-} from '../../utils/queryOptions/folder.query';
+import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import {
   itemContainer,
   navigatorContainer,
-  treeContainer,
 } from '../../styles/windows/navigator.css';
-import { Sidebar } from './Sidebar';
+import { FavoriteSidebar } from './FavoriteSidebar';
+import { sidebarContainer } from '../../styles/windows/sidebar.css';
+import { useWindowStore } from '../../store/window.store';
 
 export const Navigator = ({
   folderKey,
@@ -20,24 +18,24 @@ export const Navigator = ({
   setLoading: (loading: boolean) => void;
 }): React.ReactElement => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
-  const getRootKeyQuery = useQuery(getRootFolderKeyQueryOption());
+  const window = useWindowStore((state) => state.findWindowByTarget(folderKey));
 
   useEffect(() => {
     if (readQuery.isFetching) setLoading(true);
     else setLoading(false);
   }, [readQuery.isFetching, setLoading]);
 
-  if (readQuery.isError || getRootKeyQuery.isError) return <p>Error</p>;
+  if (readQuery.isError) return <p>Error</p>;
 
-  if (!readQuery.data || !getRootKeyQuery.data) return <p>No data</p>;
+  if (!readQuery.data) return <p>No data</p>;
+
+  if (!window) return <p>Window not found</p>;
 
   return (
     <div className={navigatorContainer}>
-      {getRootKeyQuery.data && (
-        <div className={treeContainer}>
-          <Sidebar folderKey={getRootKeyQuery.data} isRoot initialIsOpened />
-        </div>
-      )}
+      <div className={sidebarContainer}>
+        <FavoriteSidebar windowKey={window?.key} />
+      </div>
       <div className={itemContainer}>
         <Elements folderKey={folderKey} isWindowElements />
       </div>

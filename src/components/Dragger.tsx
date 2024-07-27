@@ -203,16 +203,16 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
                 queryKey: generateQueryKey('folder', targetFolderKey),
               });
               queryClient.invalidateQueries({
-                queryKey: generateQueryKey('folder', key),
+                queryKey: generateQueryKey('folder', info.parentKey),
               });
             });
           } else if (info.type === 'file') {
             moveFile(key, targetFolderKey).then(() => {
               queryClient.invalidateQueries({
-                queryKey: generateQueryKey('file', targetFolderKey),
+                queryKey: generateQueryKey('folder', targetFolderKey),
               });
               queryClient.invalidateQueries({
-                queryKey: generateQueryKey('file', key),
+                queryKey: generateQueryKey('folder', info.parentKey),
               });
             });
           }

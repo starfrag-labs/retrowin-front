@@ -37,19 +37,21 @@ export const WindowV2 = ({
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [window, setWindow] = useState(useWindowStore.getState().findWindow(windowKey));
 
   // refs
   const windowSize = useRef({ width: 0, height: 0 });
   const windowPosition = useRef({ x: 0, y: 0 });
   const windowContainerRef = useRef<HTMLDivElement>(null);
-
-  // store states
-  const window = useWindowStore((state) => state.findWindow(windowKey));
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
+
+  // store states
+  const windows = useWindowStore((state) => state.windows);
   const resizing = useEventStore((state) => state.resizing);
 
   // store functions
+  const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const setWindowRef = useRefStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
@@ -65,8 +67,30 @@ export const WindowV2 = ({
     }
   }, [setWindowRef, windowKey]);
 
+  // update window state
+  useEffect(() => {
+    const window = findWindow(windowKey);
+    if (window) {
+      setWindow(window);
+    }
+  }, [findWindow, windowKey, windows]);
+
+  // set window title
+  useEffect(() => {
+    const window = findWindow(windowKey);
+    if (window) {
+      const info = getElementInfo(window.targetKey);
+      if (info && info.name) {
+        setTitle(info.name);
+      } else if (window.type === 'uploader') {
+        setTitle('Upload Files');
+      }
+    }
+  }, [getElementInfo, findWindow, windowKey, windows]);
+
   // initialize window size and position
   useEffect(() => {
+    const window = findWindow(windowKey);
     if (windowContainerRef.current && window) {
       if (window.type === 'uploader') {
         const width = Math.max(document.body.clientWidth / 2.5, minWidth);
@@ -85,7 +109,7 @@ export const WindowV2 = ({
         windowPosition.current = { x, y };
       }
     }
-  }, [window]);
+  }, [findWindow, window, windowKey]);
 
   // set window size and position
   useEffect(() => {

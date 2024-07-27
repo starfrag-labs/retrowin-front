@@ -52,6 +52,13 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   updateWindow: (key, targetKey) => {
     set((state) => {
+      // to prevent duplicate windows that have the same targetKey
+      // const targetKeyWindow = state.windows.find((w) => w.targetKey === targetKey);
+      // if (targetKeyWindow) {
+      //   state.windows = state.windows.filter((w) => w.key !== targetKeyWindow.key);
+      //   state.windows = [...state.windows, targetKeyWindow];
+      //   return { windows: state.windows };
+      // }
       const window = state.windows.find((w) => w.key === key);
       if (window) {
         window.targetKey = targetKey;

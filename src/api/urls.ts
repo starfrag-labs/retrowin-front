@@ -22,6 +22,20 @@ export const cloudUrls = {
       method: 'DELETE',
     },
   },
+  favorite: {
+    add: (folderKey: string) => ({
+      url: `${cloudPrefix}/user/favorite/${folderKey}`,
+      method: 'POST',
+    }),
+    remove: (folderKey: string) => ({
+      url: `${cloudPrefix}/user/favorite/${folderKey}`,
+      method: 'DELETE',
+    }),
+    list: {
+      url: `${cloudPrefix}/user/favorite`,
+      method: 'GET',
+    },
+  },
   folder: {
     createRoot: {
       url: `${cloudPrefix}/folder/root`,
