@@ -5,6 +5,7 @@ export const elementsContainer = style({
   gridTemplateColumns: 'repeat(auto-fill, minmax(8.75rem, 1fr))',
   gridAutoRows: '10rem',
   width: '100%',
+  height: 'auto',
   padding: '1rem',
   boxSizing: 'border-box',
   gap: '5px',
