@@ -46,9 +46,7 @@ export const Selector = ({
   const renaming = useEventStore((state) => state.renaming);
   const windowRefs = useRefStore((state) => state.windowRefs);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
-  const navigatorElementRefs = useRefStore(
-    (state) => state.navigatorElementRefs
-  );
+  const elementRefs = useRefStore((state) => state.elementRefs);
 
   // Store functions
   const selectKey = useElementStore((state) => state.selectKey);
@@ -86,7 +84,7 @@ export const Selector = ({
 
       // Check if the mouse event is triggered on an element
       let isElement = false;
-      navigatorElementRefs.forEach((elementRef) => {
+      elementRefs.forEach((elementRef) => {
         if (elementRef.current?.contains(e.target as Node)) {
           isElement = true;
         }
@@ -126,7 +124,7 @@ export const Selector = ({
     },
     [
       backgroundWindowRef,
-      navigatorElementRefs,
+      elementRefs,
       findWindow,
       menuRef,
       renaming,
@@ -141,7 +139,7 @@ export const Selector = ({
   // Check elements in the box
   const checkElementsInBox = useCallback(() => {
     if (
-      !navigatorElementRefs ||
+      !elementRefs ||
       !boxRef.current ||
       !currentWindowTargetKey ||
       !readQuery.isSuccess ||
@@ -158,7 +156,7 @@ export const Selector = ({
     if (!elements) return;
 
     elements.folders.forEach((folder) => {
-      const elementRef = navigatorElementRefs.get(folder.key);
+      const elementRef = elementRefs.get(folder.key);
       if (!elementRef?.current) return;
       const elementRect = elementRef.current.getBoundingClientRect();
       if (
@@ -173,7 +171,7 @@ export const Selector = ({
       }
     });
     elements.files.forEach((file) => {
-      const elementRef = navigatorElementRefs.get(file.key);
+      const elementRef = elementRefs.get(file.key);
       if (!elementRef?.current) return;
       const elementRect = elementRef.current.getBoundingClientRect();
       if (
@@ -189,7 +187,7 @@ export const Selector = ({
     });
   }, [
     currentWindowTargetKey,
-    navigatorElementRefs,
+    elementRefs,
     queryClient,
     readQuery.data,
     readQuery.isSuccess,

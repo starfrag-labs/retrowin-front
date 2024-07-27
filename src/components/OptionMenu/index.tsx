@@ -11,9 +11,7 @@ export const OptionMenu = ({
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const navigatorElementRefs = useRefStore(
-    (state) => state.navigatorElementRefs
-  );
+  const elementRefs = useRefStore((state) => state.elementRefs);
   const windowRefs = useRefStore((state) => state.windowRefs);
   const menuRef = useRef<HTMLDivElement>(null);
   const setMenuRef = useRefStore((state) => state.setMenuRef);
@@ -43,8 +41,8 @@ export const OptionMenu = ({
       }
 
       // Check if the right-clicked element is an element
-      if (navigatorElementRefs) {
-        navigatorElementRefs.forEach((element, key) => {
+      if (elementRefs) {
+        elementRefs.forEach((element, key) => {
           if (element.current && element.current.contains(e.target as Node)) {
             setTargetElementKey(key);
             setMenuType('element');

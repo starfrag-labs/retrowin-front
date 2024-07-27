@@ -58,9 +58,7 @@ export const Element = memo(
       (state) => state.findWindowByTarget
     );
     const updateWindow = useWindowStore((state) => state.updateWindow);
-    const setNavigatorElementRef = useRefStore(
-      (state) => state.setNavigatorElementRef
-    );
+    const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
@@ -69,9 +67,9 @@ export const Element = memo(
 
     useEffect(() => {
       if (elementRef.current) {
-        setNavigatorElementRef(elementKey, elementRef);
+        setElementRef(elementKey, elementRef);
       }
-    }, [elementKey, setNavigatorElementRef]);
+    }, [elementKey, setElementRef]);
 
     useEffect(() => {
       setElementInfo(elementKey, {

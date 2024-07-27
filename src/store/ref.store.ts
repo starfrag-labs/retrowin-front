@@ -1,18 +1,15 @@
 import { create } from 'zustand';
 
 type State = {
-  navigatorElementRefs: Map<string, React.RefObject<HTMLElement>>;
+  elementRefs: Map<string, React.RefObject<HTMLElement>>;
   backgroundWindowRef: React.RefObject<HTMLElement> | null;
   windowRefs: Map<string, React.RefObject<HTMLElement>>;
   menuRef: React.RefObject<HTMLElement> | null;
 };
 
 type Action = {
-  setNavigatorElementRef: (
-    key: string,
-    ref: React.RefObject<HTMLElement>
-  ) => void;
-  getNavigatorElementRefByKey: (
+  setElementRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
+  getElementRefByKey: (
     key: string
   ) => React.RefObject<HTMLElement> | undefined;
   setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
@@ -22,27 +19,27 @@ type Action = {
 };
 
 const initialState: State = {
-  navigatorElementRefs: new Map(),
+  elementRefs: new Map(),
   backgroundWindowRef: null,
   windowRefs: new Map(),
   menuRef: null,
 };
 
 export const useRefStore = create<State & Action>((set, get) => ({
-  navigatorElementRefs: initialState.navigatorElementRefs,
+  elementRefs: initialState.elementRefs,
   windowRefs: initialState.windowRefs,
   backgroundWindowRef: initialState.backgroundWindowRef,
   menuRef: initialState.menuRef,
-  setNavigatorElementRef: (key, ref) => {
+  setElementRef: (key, ref) => {
     set((state) => {
-      if (state.navigatorElementRefs) {
-        state.navigatorElementRefs.set(key, ref);
+      if (state.elementRefs) {
+        state.elementRefs.set(key, ref);
       }
-      return { navigatorElementRefs: state.navigatorElementRefs };
+      return { elementRefs: state.elementRefs };
     });
   },
-  getNavigatorElementRefByKey: (key) => {
-    return get().navigatorElementRefs.get(key);
+  getElementRefByKey: (key) => {
+    return get().elementRefs.get(key);
   },
   setBackgroundWindowRef: (ref) => {
     set({ backgroundWindowRef: ref });

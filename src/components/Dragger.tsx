@@ -28,9 +28,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const navigatorElementsRefs = useRefStore(
-    (state) => state.navigatorElementRefs
-  );
+  const elementRefs = useRefStore((state) => state.elementRefs);
   const windowRefs = useRefStore((state) => state.windowRefs);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const menuRef = useRefStore((state) => state.menuRef);
@@ -79,7 +77,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Check if the mouse event is triggered on an element
       let isElement = false;
-      navigatorElementsRefs.forEach((elementRef, key) => {
+      elementRefs.forEach((elementRef, key) => {
         if (elementRef.current?.contains(e.target as Node)) {
           isElement = true;
           if (!isSelected(key) && !shiftKey) {
@@ -96,7 +94,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       setStartY(e.clientY);
     },
     [
-      navigatorElementsRefs,
+      elementRefs,
       isSelected,
       menuRef,
       renaming,
@@ -120,7 +118,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         setDisplayDraggingElements(true);
         setPointerMoved(true);
         setIsDragging(true);
-        navigatorElementsRefs.forEach((elementRef, key) => {
+        elementRefs.forEach((elementRef, key) => {
           let contained = false;
           if (elementRef.current?.contains(e.target as Node)) {
             contained = true;
@@ -137,7 +135,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       }
     },
     [
-      navigatorElementsRefs,
+      elementRefs,
       isDragging,
       isDraggingReady,
       isSelected,
@@ -191,7 +189,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       });
 
       // Search for the target folder from the elements
-      navigatorElementsRefs.forEach((elementRef, key) => {
+      elementRefs.forEach((elementRef, key) => {
         const info = getElementInfo(key);
         if (
           elementRef.current?.contains(e.target as Node) &&
@@ -203,7 +201,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Move the selected elements to the target folder
       if (targetFolderKey && pointerMoved) {
-        navigatorElementsRefs.forEach((_elementRef, key) => {
+        elementRefs.forEach((_elementRef, key) => {
           const info = getElementInfo(key);
           if (!isSelected(key) || key === targetFolderKey || !info) return;
           if (info.type === 'folder') {
@@ -226,7 +224,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     },
     [
       backgroundWindowRef,
-      navigatorElementsRefs,
+      elementRefs,
       findWindow,
       getElementInfo,
       isDragging,
