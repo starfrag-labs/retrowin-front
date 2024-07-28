@@ -1,18 +1,20 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../../store/ref.store';
+import { useRefStore } from '../../store/menu.store';
 import { defaultContainer } from '../../styles/global/container.css';
 import { ElementOptionMenu } from './ElementOptionMenu';
 import { menuContainer } from '../../styles/menu.css';
 import { BackgroundOptionMenu } from './BackgroundOptionMenu';
 import { WindowOptionsMenu } from './WindowOptionMenu';
+import { useElementStore } from '../../store/element.store';
+import { useWindowStore } from '../../store/window.store';
 
 export const OptionMenu = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const elementRefs = useRefStore((state) => state.elementRefs);
-  const windowRefs = useRefStore((state) => state.windowRefs);
+  const currentElement = useElementStore((state) => state.currentElement);
+  const windowRefs = useWindowStore((state) => state.windowRefs);
   const menuRef = useRef<HTMLDivElement>(null);
   const setMenuRef = useRefStore((state) => state.setMenuRef);
 
@@ -41,13 +43,9 @@ export const OptionMenu = ({
       }
 
       // Check if the right-clicked element is an element
-      if (elementRefs) {
-        elementRefs.forEach((element, key) => {
-          if (element.current && element.current.contains(e.target as Node)) {
-            setTargetElementKey(key);
-            setMenuType('element');
-          }
-        });
+      if (currentElement) {
+        setTargetElementKey(currentElement.key);
+        setMenuType('element');
       }
 
       currentMenu.style.display = 'block';

@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../../store/ref.store';
 import {
   windowContainer,
   windowHeader,
@@ -53,7 +52,7 @@ export const WindowV2 = ({
   // store functions
   const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
-  const setWindowRef = useRefStore((state) => state.setWindowRef);
+  const setWindowRef = useWindowStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);

@@ -9,7 +9,6 @@ import { OptionMenu } from '../components/OptionMenu';
 import { Progress } from '../components/Progress';
 import { Selector } from '../components/Selector';
 import { WindowV2 } from '../components/Window';
-import { useRefStore } from '../store/ref.store';
 import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
@@ -53,7 +52,7 @@ function IndexComponent() {
 
   const window = useWindowStore((state) => state.windows);
 
-  const setBackgroundWindowRef = useRefStore(
+  const setBackgroundWindowRef = useWindowStore(
     (state) => state.setBackgroundWindowRef
   );
 

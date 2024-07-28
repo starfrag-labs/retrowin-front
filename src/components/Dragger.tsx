@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../store/ref.store';
-import { draggingElementsIcon } from '../styles/element.css';
+import { useRefStore } from '../store/menu.store';
+import {
+  draggingElementsCount,
+  draggingElementsIcon,
+} from '../styles/element.css';
 import { moveFile, moveFolder } from '../api/cloud';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import {
-  getRootFolderKeyQueryOption,
-} from '../utils/queryOptions/folder.query';
+import { getRootFolderKeyQueryOption } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
@@ -28,16 +29,20 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const elementRefs = useRefStore((state) => state.elementRefs);
-  const windowRefs = useRefStore((state) => state.windowRefs);
-  const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
+  const windowRefs = useWindowStore((state) => state.windowRefs);
+  const backgroundWindowRef = useWindowStore(
+    (state) => state.backgroundWindowRef
+  );
   const menuRef = useRefStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
-  const getElementInfo = useElementStore((state) => state.getElementInfo);
+  const currentElement = useElementStore((state) => state.currentElement);
+  const selectedKeys = useElementStore((state) => state.selectedKeys);
+  const elementRefs = useElementStore((state) => state.elementRefs);
 
   // Store functions
   const findWindow = useWindowStore((state) => state.findWindow);
+  const getElementInfo = useElementStore((state) => state.getElementInfo);
 
   // Element v3
   const isSelected = useElementStore((state) => state.isSelected);
@@ -76,25 +81,25 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
 
       // Check if the mouse event is triggered on an element
-      let isElement = false;
-      elementRefs.forEach((elementRef, key) => {
-        if (elementRef.current?.contains(e.target as Node)) {
-          isElement = true;
-          if (!isSelected(key) && !shiftKey) {
-            unselectAllKeys();
-          }
-          selectKey(key);
+      if (
+        currentElement &&
+        currentElement.ref.current?.contains(e.target as Node)
+      ) {
+        if (!isSelected(currentElement.key) && !shiftKey) {
+          unselectAllKeys();
         }
-      });
-      // If the mouse event is not triggered on an element, return
-      if (!isElement) return;
+        selectKey(currentElement.key);
+      } else if (!currentElement) {
+        // if the mouse event is not triggered on an element
+        return;
+      }
       setPointerMoved(false); // Reset the pointerMoved state
       setIsDraggingReady(true);
       setStartX(e.clientX);
       setStartY(e.clientY);
     },
     [
-      elementRefs,
+      currentElement,
       isSelected,
       menuRef,
       renaming,
@@ -109,6 +114,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     (e: MouseEvent) => {
       if (e.button !== 0) return;
       if (
+        currentElement?.ref.current &&
         isDraggingReady &&
         !isDragging &&
         Math.abs(e.pageX - startX) > 5 &&
@@ -118,23 +124,49 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         setDisplayDraggingElements(true);
         setPointerMoved(true);
         setIsDragging(true);
-        elementRefs.forEach((elementRef, key) => {
-          let contained = false;
-          if (elementRef.current?.contains(e.target as Node)) {
-            contained = true;
-          }
-          if (!isSelected(key) && !contained) return;
+
+        // Create a clone of the selected elements
+        let count = 0;
+        let width = 0;
+        selectedKeys.forEach((key) => {
+          if (!isSelected(key) || count > 4) return;
+          const elementRef = elementRefs.get(key);
+          const elementWidth =
+            elementRef?.current?.getBoundingClientRect().width;
+          const elementHeight =
+            elementRef?.current?.getBoundingClientRect().height;
+          if (!elementRef || !elementWidth || !elementHeight) return;
           const clone = elementRef.current?.cloneNode(true) as HTMLDivElement;
           clone.style.position = 'absolute';
-          clone.style.left =
-            elementRef.current?.getBoundingClientRect().left + 'px';
-          clone.style.top =
-            elementRef.current?.getBoundingClientRect().top + 'px';
+          clone.style.left = -elementWidth / 2 + 'px';
+          clone.style.top = -elementHeight - count * 5 + 'px';
+          clone.style.zIndex = `${-count}`;
           draggingElementsRef.current?.appendChild(clone);
+
+          if (count === 0) {
+            width = elementWidth;
+          }
+          count++;
         });
+
+        // Update the count element
+        const countElement = document.createElement('div');
+        countElement.innerText = `${count}`;
+        countElement.className = draggingElementsCount;
+        countElement.style.left = `${width / 2 - 12}px`;
+        draggingElementsRef.current?.appendChild(countElement);
       }
     },
-    [elementRefs, isDragging, isDraggingReady, isSelected, startX, startY]
+    [
+      currentElement,
+      isDraggingReady,
+      isDragging,
+      startX,
+      startY,
+      selectedKeys,
+      isSelected,
+      elementRefs,
+    ]
   );
 
   const dragElement = useCallback(
@@ -142,10 +174,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       if (!isDragging) return;
       if (!draggingElementsRef.current) return;
       e.preventDefault();
-      draggingElementsRef.current.style.left = e.pageX - startX + 'px';
-      draggingElementsRef.current.style.top = e.pageY - startY + 'px';
+      draggingElementsRef.current.style.left = e.clientX + 'px';
+      draggingElementsRef.current.style.top = e.clientY + 'px';
     },
-    [isDragging, startX, startY]
+    [isDragging]
   );
 
   const dragElementEnd = useCallback(
@@ -182,19 +214,16 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       });
 
       // Search for the target folder from the elements
-      elementRefs.forEach((elementRef, key) => {
-        const info = getElementInfo(key);
-        if (
-          elementRef.current?.contains(e.target as Node) &&
-          info?.type === 'folder'
-        ) {
-          targetFolderKey = key;
-        }
-      });
+      if (
+        currentElement &&
+        getElementInfo(currentElement.key)?.type === 'folder'
+      ) {
+        targetFolderKey = currentElement.key;
+      }
 
       // Move the selected elements to the target folder
       if (targetFolderKey && pointerMoved) {
-        elementRefs.forEach((_elementRef, key) => {
+        selectedKeys.forEach((key) => {
           const info = getElementInfo(key);
           if (!isSelected(key) || key === targetFolderKey || !info) return;
           if (info.type === 'folder') {
@@ -221,7 +250,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     },
     [
       backgroundWindowRef,
-      elementRefs,
+      currentElement,
       findWindow,
       getElementInfo,
       isDragging,
@@ -230,6 +259,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       queryClient,
       rootKeyQuery.data,
       rootKeyQuery.isSuccess,
+      selectedKeys,
       windowRefs,
     ]
   );
@@ -268,7 +298,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         className={draggingElementsIcon}
         ref={draggingElementsRef}
         hidden={!displayDraggingElements}
-      />
+      ></div>
       {children}
     </div>
   );

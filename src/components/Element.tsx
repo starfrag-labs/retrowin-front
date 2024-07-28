@@ -18,11 +18,11 @@ import {
   windowElementNameText,
 } from '../styles/element.css';
 import { IElementState } from '../types/store';
-import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
 import { generateQueryKey } from '../utils/queryOptions/index.query';
+import { useSelectorStore } from '../store/selector.store';
 
 export const Element = memo(
   ({
@@ -50,8 +50,13 @@ export const Element = memo(
 
     // refs
     const elementRef = useRef<HTMLDivElement>(null);
+    const iconRef = useRef<HTMLDivElement>(null);
     const nameRef = useRef<HTMLInputElement>(null);
     const renameRef = useRef<HTMLTextAreaElement>(null);
+
+    // store states
+    const rect = useSelectorStore((state) => state.rect);
+    const shiftKey = useSelectorStore((state) => state.shiftKey);
 
     // store functions
     const newWindow = useWindowStore((state) => state.newWindow);
@@ -59,22 +64,47 @@ export const Element = memo(
       (state) => state.findWindowByTarget
     );
     const updateWindow = useWindowStore((state) => state.updateWindow);
-    const setElementRef = useRefStore((state) => state.setElementRef);
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
-    const setCurrentElementRef = useRefStore(
-      (state) => state.setCurrentElementRef
+    const setElementRef = useElementStore((state) => state.setElementRef);
+    const setCurrentElement = useElementStore(
+      (state) => state.setCurrentElement
     );
+    const selectKey = useElementStore((state) => state.selectKey);
+    const unselectKey = useElementStore((state) => state.unselectKey);
 
     const contentType = getContentType(name);
 
+    // check element in rect
+    const checkElementInRect = useCallback(() => {
+      if (elementRef.current && rect) {
+        const elementRect = elementRef.current.getBoundingClientRect();
+        if (
+          elementRect.top < rect.bottom &&
+          elementRect.bottom > rect.top &&
+          elementRect.left < rect.right &&
+          elementRect.right > rect.left
+        ) {
+          selectKey(elementKey);
+        } else if (!shiftKey) {
+          unselectKey(elementKey);
+        }
+      }
+    }, [elementKey, rect, selectKey, shiftKey, unselectKey]);
+
+    // update selected element
+    useEffect(() => {
+      checkElementInRect();
+    }, [checkElementInRect]);
+
     useEffect(() => {
       if (elementRef.current) {
-        setElementRef(elementKey, elementRef);
+        setElementRef(elementKey, iconRef);
       }
     }, [elementKey, setElementRef]);
 
+    // set element info
     useEffect(() => {
       setElementInfo(elementKey, {
         key: elementKey,
@@ -120,6 +150,7 @@ export const Element = memo(
       link.remove();
     };
 
+    // rename element event handler
     const handleTextareaChange = (
       event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
@@ -129,6 +160,7 @@ export const Element = memo(
       setNewNameState(textarea.value.replace(/\s/g, '_'));
     };
 
+    // handle enter key event for renaming
     const handleEnter = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (event.key === 'Enter' && event.shiftKey === false) {
         event.preventDefault();
@@ -136,6 +168,7 @@ export const Element = memo(
       }
     };
 
+    // start renaming effect
     useEffect(() => {
       if (renaming && renameRef.current) {
         renameRef.current.style.height = 'auto';
@@ -149,6 +182,7 @@ export const Element = memo(
       }
     }, [nameState, renaming, setRenaming]);
 
+    // highlight element effect
     const highlightElement = useCallback(async () => {
       if (elementRef.current && nameRef.current && selected) {
         elementRef.current.className = isWindowElement
@@ -167,6 +201,7 @@ export const Element = memo(
       highlightElement();
     }, [highlightElement]);
 
+    // rename element effect
     const renameElement = useCallback(
       (event: KeyboardEvent) => {
         if (event.key === 'Escape') {
@@ -254,12 +289,16 @@ export const Element = memo(
         className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
-        onMouseEnter={() => setCurrentElementRef(elementRef)}
-        onMouseLeave={() => setCurrentElementRef(null)}
+        onMouseEnter={() =>
+          setCurrentElement({ key: elementKey, ref: elementRef })
+        }
+        onMouseLeave={() => setCurrentElement(null)}
       >
-        {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
-        {type === 'folder' && <FaFolder className={folderIcon} />}
-        {type === 'file' && <FaFileAlt className={fileIcon} />}
+        <div ref={iconRef}>
+          {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
+          {type === 'folder' && <FaFolder className={folderIcon} />}
+          {type === 'file' && <FaFileAlt className={fileIcon} />}
+        </div>
         <div className={elementNameContainer}>
           {renaming ? (
             <textarea
