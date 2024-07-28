@@ -29,6 +29,7 @@ import {
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { deleteFile, downloadFile } from '../../../api/cloud';
 import { Modal } from '../../../components/mobile/Modal';
+import { generateQueryKey } from '../../../utils/queryOptions/index.query';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <CircularLoading />,
@@ -130,7 +131,9 @@ function Component() {
   const handleDelete = async () => {
     setIsDeleteModalOpen(false);
     await deleteFile(targetKey).then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(parentKey));
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('folder', parentKey),
+      });
       if (siblings.length > 1) {
         if (imageNumber > 0) {
           setTargetKey(siblings[imageNumber - 1]);

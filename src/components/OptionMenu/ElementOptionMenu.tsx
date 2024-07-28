@@ -1,10 +1,13 @@
 import { deleteFile, deleteFolder, downloadFile } from '../../api/cloud';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
 import { MenuGenerator } from './MenuGenerator';
-import { useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useWindowStore } from '../../store/window.store';
 import { useElementStore } from '../../store/element.store';
+import { generateQueryKey } from '../../utils/queryOptions/index.query';
+import { addFavoriteFolder, removeFavoriteFolder } from '../../api/user';
+import { getFavoriteFoldersQueryOption } from '../../utils/queryOptions/user.query';
+import { useCallback, useEffect, useState } from 'react';
 
 export const ElementOptionMenu = ({
   elementKey,
@@ -14,17 +17,32 @@ export const ElementOptionMenu = ({
   menuRef: React.RefObject<HTMLDivElement>;
 }): React.ReactElement => {
   const queryClient = useQueryClient();
+  const favoriteFoldersQuery = useQuery(getFavoriteFoldersQueryOption());
+  
   const currentMenu = menuRef.current;
+
+  // states
+  const [menuList, setMenuList] = useState<{ name: string; action: () => void }[]>([]);
+  const [isPinned, setIsPinned] = useState(false);
+
+  // store states 
   const elementInfo = useElementStore((state) =>
     state.getElementInfo(elementKey)
   );
   const selectedKeys = useElementStore((state) => state.selectedKeys);
 
+  // store functions
   const getElementInfo = useElementStore((state) => state.getElementInfo);
   const setRenamingKey = useElementStore((state) => state.setRenamingKey);
   const newWindow = useWindowStore((state) => state.newWindow);
 
-  const handleDownload = () => {
+  useEffect(() => {
+    if (favoriteFoldersQuery.isSuccess && favoriteFoldersQuery.data) {
+      setIsPinned(favoriteFoldersQuery.data.some((folder) => folder.key === elementKey));
+    }
+  }, [elementKey, favoriteFoldersQuery.data, favoriteFoldersQuery.isSuccess]);
+
+  const handleDownload = useCallback(() => {
     if (!currentMenu) return;
     downloadFile(elementKey, elementInfo?.name ?? 'unknown').then(
       (response) => {
@@ -38,9 +56,9 @@ export const ElementOptionMenu = ({
       }
     );
     currentMenu.style.display = 'none';
-  };
+  }, [currentMenu, elementInfo?.name, elementKey]);
 
-  const handleOpen = () => {
+  const handleOpen = useCallback(() => {
     if (!currentMenu) return;
     const contentType = getContentType(elementInfo?.type ?? '');
     if (contentType?.startsWith('image')) {
@@ -51,37 +69,60 @@ export const ElementOptionMenu = ({
       newWindow(elementKey, 'navigator');
     }
     currentMenu.style.display = 'none';
-  };
+  }, [currentMenu, elementInfo, elementKey, newWindow]);
 
-  const handleDelete = () => {
+  const handleDelete = useCallback(() => {
     if (!currentMenu) return;
     selectedKeys.forEach((key) => {
       const elementInfo = getElementInfo(key);
       if (!elementInfo) return;
       if (elementInfo?.type === 'file') {
         deleteFile(key).then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(elementInfo.parentKey)
-          );
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('file', elementInfo.parentKey),
+          });
         });
       } else {
         deleteFolder(key).then(() => {
-          queryClient.invalidateQueries(
-            readFolderQueryOption(elementInfo.parentKey)
-          );
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', elementInfo.parentKey),
+          });
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('favorite'),
+          });
         });
       }
     });
     currentMenu.style.display = 'none';
-  };
+  }, [currentMenu, getElementInfo, queryClient, selectedKeys]);
 
-  const handleRename = () => {
+  const handleRename = useCallback(() => {
     if (!currentMenu) return;
     setRenamingKey(elementKey);
     currentMenu.style.display = 'none';
-  };
+  }, [currentMenu, elementKey, setRenamingKey]);
 
-  const fileMenuList = [
+  const addFavorite = useCallback(async () => {
+    if (!currentMenu) return;
+    await addFavoriteFolder(elementKey).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('favorite'),
+      });
+    });
+    currentMenu.style.display = 'none';
+  }, [currentMenu, elementKey, queryClient]);
+
+  const removeFavorite = useCallback(async () => {
+    if (!currentMenu) return;
+    await removeFavoriteFolder(elementKey).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('favorite'),
+      });
+    });
+    currentMenu.style.display = 'none';
+  }, [currentMenu, elementKey, queryClient]);
+
+  const fileMenuList = useCallback(() => [
     {
       name: 'Open',
       action: handleOpen,
@@ -102,9 +143,9 @@ export const ElementOptionMenu = ({
       name: 'Rename',
       action: handleRename,
     },
-  ];
+  ], [handleDelete, handleDownload, handleOpen, handleRename]);
 
-  const folderMenuList = [
+  const folderMenuList = useCallback(() => [
     {
       name: 'Open',
       action: handleOpen,
@@ -121,29 +162,32 @@ export const ElementOptionMenu = ({
       name: 'Rename',
       action: handleRename,
     },
-  ];
+    {
+      name: '/',
+      action: () => {},
+    },
+    {
+      name: isPinned ? 'Unpin' : 'Pin to Favorite',
+      action: isPinned ? removeFavorite : addFavorite,
+    }
+  ], [handleOpen, handleDelete, handleRename, isPinned, removeFavorite, addFavorite]);
 
-  const multipleMenuList = [
+  const multipleMenuList = useCallback(() => [
     {
       name: 'Delete',
       action: handleDelete,
     },
-  ];
+  ], [handleDelete]);
 
-  let currentMenuList: {
-    name: string;
-    action: () => void;
-  }[] = [];
+  useEffect(() => {
+    if (selectedKeys.length > 1) {
+      setMenuList(multipleMenuList);
+    } else if (elementInfo?.type === 'file') {
+      setMenuList(fileMenuList);
+    } else if (elementInfo?.type === 'folder') {
+      setMenuList(folderMenuList);
+    }
+  }, [elementInfo, fileMenuList, folderMenuList, multipleMenuList, selectedKeys]);
 
-  if (selectedKeys.length > 1) {
-    currentMenuList = multipleMenuList;
-  } else if (elementInfo?.type === 'file') {
-    currentMenuList = fileMenuList;
-  } else if (elementInfo?.type === 'folder') {
-    currentMenuList = folderMenuList;
-  }
-
-  if (!elementInfo) return <></>;
-
-  return <MenuGenerator menuList={currentMenuList} />;
+  return <MenuGenerator menuList={menuList} />;
 };

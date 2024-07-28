@@ -5,12 +5,12 @@ import { moveFile, moveFolder } from '../api/cloud';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getRootFolderKeyQueryOption,
-  readFolderQueryOption,
 } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
+import { generateQueryKey } from '../utils/queryOptions/index.query';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -28,8 +28,8 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const elementsRef = useRefStore((state) => state.elementsRef);
-  const windowsRef = useRefStore((state) => state.windowsRef);
+  const elementRefs = useRefStore((state) => state.elementRefs);
+  const windowRefs = useRefStore((state) => state.windowRefs);
   const backgroundWindowRef = useRefStore((state) => state.backgroundWindowRef);
   const menuRef = useRefStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
@@ -77,7 +77,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Check if the mouse event is triggered on an element
       let isElement = false;
-      elementsRef.forEach((elementRef, key) => {
+      elementRefs.forEach((elementRef, key) => {
         if (elementRef.current?.contains(e.target as Node)) {
           isElement = true;
           if (!isSelected(key) && !shiftKey) {
@@ -94,7 +94,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       setStartY(e.clientY);
     },
     [
-      elementsRef,
+      elementRefs,
       isSelected,
       menuRef,
       renaming,
@@ -118,7 +118,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         setDisplayDraggingElements(true);
         setPointerMoved(true);
         setIsDragging(true);
-        elementsRef.forEach((elementRef, key) => {
+        elementRefs.forEach((elementRef, key) => {
           let contained = false;
           if (elementRef.current?.contains(e.target as Node)) {
             contained = true;
@@ -134,7 +134,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         });
       }
     },
-    [elementsRef, isDragging, isDraggingReady, isSelected, startX, startY]
+    [elementRefs, isDragging, isDraggingReady, isSelected, startX, startY]
   );
 
   const dragElement = useCallback(
@@ -170,7 +170,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Search for the target folder from the windows
-      windowsRef.forEach((windowRef, key) => {
+      windowRefs.forEach((windowRef, key) => {
         const window = findWindow(key);
         if (
           window &&
@@ -182,7 +182,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       });
 
       // Search for the target folder from the elements
-      elementsRef.forEach((elementRef, key) => {
+      elementRefs.forEach((elementRef, key) => {
         const info = getElementInfo(key);
         if (
           elementRef.current?.contains(e.target as Node) &&
@@ -194,22 +194,26 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
       // Move the selected elements to the target folder
       if (targetFolderKey && pointerMoved) {
-        elementsRef.forEach((_elementRef, key) => {
+        elementRefs.forEach((_elementRef, key) => {
           const info = getElementInfo(key);
           if (!isSelected(key) || key === targetFolderKey || !info) return;
           if (info.type === 'folder') {
             moveFolder(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries(
-                readFolderQueryOption(targetFolderKey)
-              );
-              queryClient.invalidateQueries(readFolderQueryOption(key));
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', targetFolderKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', info.parentKey),
+              });
             });
           } else if (info.type === 'file') {
             moveFile(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries(
-                readFolderQueryOption(targetFolderKey)
-              );
-              queryClient.invalidateQueries(readFolderQueryOption(key));
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', targetFolderKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('folder', info.parentKey),
+              });
             });
           }
         });
@@ -217,7 +221,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     },
     [
       backgroundWindowRef,
-      elementsRef,
+      elementRefs,
       findWindow,
       getElementInfo,
       isDragging,
@@ -226,7 +230,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       queryClient,
       rootKeyQuery.data,
       rootKeyQuery.isSuccess,
-      windowsRef,
+      windowRefs,
     ]
   );
 

@@ -17,6 +17,7 @@ import {
 import { Modal } from '../Modal';
 import { moveFile, moveFolder } from '../../../api/cloud';
 import { useElementStore } from '../../../store/element.store';
+import { generateQueryKey } from '../../../utils/queryOptions/index.query';
 
 export const MoveMenu = ({
   folderKey,
@@ -78,8 +79,9 @@ export const MoveMenu = ({
         }
       }),
     ]).then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(folderKey));
-      queryClient.invalidateQueries(readFolderQueryOption(targetFolderKey));
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('folder', targetFolderKey),
+      });
       unselectAllKeys();
       toggle();
     });

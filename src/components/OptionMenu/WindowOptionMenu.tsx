@@ -1,8 +1,8 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { createFolder } from '../../api/cloud';
 import { MenuGenerator } from './MenuGenerator';
-import { readFolderQueryOption } from '../../utils/queryOptions/folder.query';
 import { useWindowStore } from '../../store/window.store';
+import { generateQueryKey } from '../../utils/queryOptions/index.query';
 
 export const WindowOptionsMenu = ({
   windowKey,
@@ -31,14 +31,24 @@ export const WindowOptionsMenu = ({
   const handleCreateFolder = () => {
     if (!currentMenu || !window) return;
     createFolder(window.targetKey, 'NewFolder').then(() => {
-      queryClient.invalidateQueries(readFolderQueryOption(window.targetKey));
+      queryClient.invalidateQueries({
+        queryKey: generateQueryKey('folder', window.targetKey),
+      });
     });
     currentMenu.style.display = 'none';
   };
 
   const handleRefresh = () => {
     if (!currentMenu || !window) return;
-    queryClient.invalidateQueries(readFolderQueryOption(window.targetKey));
+    queryClient.invalidateQueries({
+      queryKey: generateQueryKey('folder'),
+    });
+    queryClient.invalidateQueries({
+      queryKey: generateQueryKey('file'),
+    });
+    queryClient.invalidateQueries({
+      queryKey: generateQueryKey('favorite'),
+    });
     currentMenu.style.display = 'none';
   };
 

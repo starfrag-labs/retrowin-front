@@ -22,6 +22,7 @@ import { useRefStore } from '../store/ref.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
+import { generateQueryKey } from '../utils/queryOptions/index.query';
 
 export const Element = memo(
   ({
@@ -62,6 +63,9 @@ export const Element = memo(
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
+    const setCurrentElementRef = useRefStore(
+      (state) => state.setCurrentElementRef
+    );
 
     const contentType = getContentType(name);
 
@@ -178,7 +182,10 @@ export const Element = memo(
           renameFolder(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ['folder', parentKey],
+                queryKey: generateQueryKey('folder', parentKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('favorite'),
               });
             })
             .catch(() => {
@@ -195,7 +202,10 @@ export const Element = memo(
           renameFile(elementKey, newNameState)
             .then(() => {
               queryClient.invalidateQueries({
-                queryKey: ['folder', parentKey],
+                queryKey: generateQueryKey('folder', parentKey),
+              });
+              queryClient.invalidateQueries({
+                queryKey: generateQueryKey('favorite'),
               });
             })
             .catch(() => {
@@ -241,11 +251,11 @@ export const Element = memo(
 
     return (
       <div
-        className={
-          isWindowElement ? windowElement : backgroundElement
-        }
+        className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
+        onMouseEnter={() => setCurrentElementRef(elementRef)}
+        onMouseLeave={() => setCurrentElementRef(null)}
       >
         {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
         {type === 'folder' && <FaFolder className={folderIcon} />}
@@ -263,11 +273,14 @@ export const Element = memo(
               onFocus={(e) => e.currentTarget.select()}
             />
           ) : (
-            <div className={
-              isWindowElement
-                ? windowElementNameText
-                : backgroundElementNameText
-            } ref={nameRef}>
+            <div
+              className={
+                isWindowElement
+                  ? windowElementNameText
+                  : backgroundElementNameText
+              }
+              ref={nameRef}
+            >
               {nameState}
             </div>
           )}
