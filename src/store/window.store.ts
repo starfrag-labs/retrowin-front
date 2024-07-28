@@ -65,7 +65,9 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   updateWindow: (key, targetKey) => {
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
-      if (window) {
+      if (window && window.targetKey === targetKey) {
+        return { windows: state.windows };
+      } else if (window) {
         window.targetKey = targetKey;
       }
       if (
