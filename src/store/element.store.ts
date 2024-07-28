@@ -10,7 +10,9 @@ type ElementInfo = {
 type State = {
   selectedKeys: string[];
   renamingKey: string | null;
-  info: Map<string, ElementInfo>;
+  info: ElementInfo[];
+  currentElement: { key: string; ref: React.RefObject<HTMLElement> } | null;
+  elementRefs: Map<string, React.RefObject<HTMLElement>>;
 };
 
 type Action = {
@@ -19,21 +21,27 @@ type Action = {
   unselectAllKeys: () => void;
   isSelected: (key: string) => boolean;
   setRenamingKey: (key: string | null) => void;
-  setElementInfo: (key: string, info: ElementInfo) => void;
+  setElementInfo: (info: ElementInfo) => void;
   getElementInfo: (key: string) => ElementInfo | undefined;
   getElementInfoByParentKey: (parentKey: string) => ElementInfo[];
+  setCurrentElement: (element: { key: string; ref: React.RefObject<HTMLElement> } | null) => void;
+  setElementRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
 };
 
 const initialState: State = {
   selectedKeys: [],
   renamingKey: null,
-  info: new Map(),
+  info: [],
+  currentElement: null,
+  elementRefs: new Map(),
 };
 
 export const useElementStore = create<State & Action>((set, get) => ({
   selectedKeys: initialState.selectedKeys,
   renamingKey: initialState.renamingKey,
   info: initialState.info,
+  currentElement: initialState.currentElement,
+  elementRefs: initialState.elementRefs,
   selectKey: (key) => {
     set((state) => {
       if (!state.selectedKeys.includes(key)) {
@@ -59,18 +67,31 @@ export const useElementStore = create<State & Action>((set, get) => ({
   setRenamingKey: (key) => {
     set({ renamingKey: key });
   },
-  setElementInfo: (key, info) => {
+  setElementInfo: (info) => {
     set((state) => {
-      state.info.set(key, info);
+      if (!state.info.find((i) => i.key === info.key)) {
+        state.info = [...state.info, info];
+      } else {
+        state.info = state.info.map((i) => (i.key === info.key ? info : i));
+      }
       return { info: state.info };
     });
   },
   getElementInfo: (key) => {
-    return get().info.get(key);
+    return get().info.find((info) => info.key === key);
   },
   getElementInfoByParentKey: (parentKey) => {
     return Array.from(get().info.values()).filter(
       (info) => info.parentKey === parentKey
     );
+  },
+  setCurrentElement: (element) => {
+    set({ currentElement: element });
+  },
+  setElementRef: (key, ref) => {
+    set((state) => {
+      state.elementRefs = new Map(state.elementRefs).set(key, ref);
+      return { elementRefs: state.elementRefs };
+    });
   },
 }));

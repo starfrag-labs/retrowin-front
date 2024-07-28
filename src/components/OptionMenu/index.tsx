@@ -1,24 +1,36 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../../store/ref.store';
+import { useMenuStore } from '../../store/menu.store';
 import { defaultContainer } from '../../styles/global/container.css';
 import { ElementOptionMenu } from './ElementOptionMenu';
 import { menuContainer } from '../../styles/menu.css';
 import { BackgroundOptionMenu } from './BackgroundOptionMenu';
 import { WindowOptionsMenu } from './WindowOptionMenu';
+import { useElementStore } from '../../store/element.store';
+import { useWindowStore } from '../../store/window.store';
+import { useEventStore } from '../../store/event.store';
 
 export const OptionMenu = ({
   children,
 }: {
   children: React.ReactNode;
 }): React.ReactElement => {
-  const elementRefs = useRefStore((state) => state.elementRefs);
-  const windowRefs = useRefStore((state) => state.windowRefs);
+  // Refs
   const menuRef = useRef<HTMLDivElement>(null);
-  const setMenuRef = useRefStore((state) => state.setMenuRef);
 
+  // states
   const [targetWindowKey, setTargetWindowKey] = useState('');
   const [targetElementKey, setTargetElementKey] = useState('');
   const [menuType, setMenuType] = useState('');
+
+  // store states
+  const currentElement = useElementStore((state) => state.currentElement);
+  const currentWindow = useWindowStore((state) => state.currentWindow);
+  const pressedKeys = useEventStore((state) => state.pressedKeys);
+
+  // store functions
+  const setMenuRef = useMenuStore((state) => state.setMenuRef);
+  const selectKey = useElementStore((state) => state.selectKey);
+  const unselectAllKys = useElementStore((state) => state.unselectAllKeys);
 
   const handleContextMenu = (e: React.MouseEvent) => {
     const currentMenu = menuRef.current;
@@ -31,23 +43,19 @@ export const OptionMenu = ({
       setMenuType('background');
 
       // Check if the right-clicked element is a window
-      if (windowRefs) {
-        windowRefs.forEach((window, key) => {
-          if (window.current && window.current.contains(e.target as Node)) {
-            setTargetWindowKey(key);
-            setMenuType('window');
-          }
-        });
+      if (currentWindow) {
+        setTargetWindowKey(currentWindow.key);
+        setMenuType('window');
       }
 
       // Check if the right-clicked element is an element
-      if (elementRefs) {
-        elementRefs.forEach((element, key) => {
-          if (element.current && element.current.contains(e.target as Node)) {
-            setTargetElementKey(key);
-            setMenuType('element');
-          }
-        });
+      if (currentElement) {
+        if (!pressedKeys.includes('Control')) {
+          unselectAllKys();
+        }
+        setTargetElementKey(currentElement.key);
+        setMenuType('element');
+        selectKey(currentElement.key);
       }
 
       currentMenu.style.display = 'block';

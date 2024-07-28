@@ -9,13 +9,13 @@ import { OptionMenu } from '../components/OptionMenu';
 import { Progress } from '../components/Progress';
 import { Selector } from '../components/Selector';
 import { WindowV2 } from '../components/Window';
-import { useRefStore } from '../store/ref.store';
 import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
 import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
 import MobileDetect from 'mobile-detect';
+import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -53,7 +53,7 @@ function IndexComponent() {
 
   const window = useWindowStore((state) => state.windows);
 
-  const setBackgroundWindowRef = useRefStore(
+  const setBackgroundWindowRef = useWindowStore(
     (state) => state.setBackgroundWindowRef
   );
 
@@ -76,6 +76,7 @@ function IndexComponent() {
 
   return (
     <Selector>
+      <KeyboardEventHandler />
       <Dragger>
         <Background>
           <OptionMenu>

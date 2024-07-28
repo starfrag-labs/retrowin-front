@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../../store/ref.store';
 import {
   windowContainer,
   windowHeader,
@@ -37,7 +36,9 @@ export const WindowV2 = ({
   const [title, setTitle] = useState('Window');
   const [maximized, setMaximized] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [window, setWindow] = useState(useWindowStore.getState().findWindow(windowKey));
+  const [window, setWindow] = useState(
+    useWindowStore.getState().findWindow(windowKey)
+  );
 
   // refs
   const windowSize = useRef({ width: 0, height: 0 });
@@ -53,19 +54,22 @@ export const WindowV2 = ({
   // store functions
   const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
-  const setWindowRef = useRefStore((state) => state.setWindowRef);
   const setResizing = useEventStore((state) => state.setResizing);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
   const nextWindow = useWindowStore((state) => state.nextWindow);
   const getElementInfo = useElementStore((state) => state.getElementInfo);
+  const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
 
-  // update ref store on mount
-  useEffect(() => {
-    if (windowContentRef.current) {
-      setWindowRef(windowKey, windowContentRef);
-    }
-  }, [setWindowRef, windowKey]);
+  // set current window effect
+  const onMouseEnter = useCallback(() => {
+    setCurrentWindow({ key: windowKey, ref: windowContentRef });
+  }, [setCurrentWindow, windowKey, windowContentRef]);
+
+  // reset current window effect
+  const onMouseLeave = useCallback(() => {
+    setCurrentWindow(null);
+  }, [setCurrentWindow]);
 
   // update window state
   useEffect(() => {
@@ -343,7 +347,12 @@ export const WindowV2 = ({
           />
         </div>
       </div>
-      <div className={windowContent} ref={windowContentRef}>
+      <div
+        className={windowContent}
+        ref={windowContentRef}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
+      >
         {window.type === 'image' ? (
           <ImageViewer fileKey={window.targetKey} setTitle={setTitle} />
         ) : window.type === 'video' ? (

@@ -1,7 +1,7 @@
 FROM node:22-alpine as build
 
 LABEL title="ifcloud-front"
-LABEL version="0.5.1"
+LABEL version="0.6.0"
 LABEL maintainer="ifelfi"
 
 RUN apk add --no-cache g++ make py3-pip

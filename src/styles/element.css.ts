@@ -98,9 +98,21 @@ export const elementNameContainer = style({
 });
 
 export const draggingElementsIcon = style({
-  ...defaultIcon,
   position: 'absolute',
   opacity: 0.5,
   pointerEvents: 'none',
   zIndex: 9999,
+});
+
+export const draggingElementsCount = style({
+  position: 'relative',
+  border: '1px solid black',
+  borderRadius: '50%',
+  backgroundColor: 'lightblue',
+  bottom: '1.5rem',
+  width: '1.5rem',
+  height: '1.5rem',
+  display: 'flex',
+  justifyContent: 'center',
+  alignItems: 'center',
 });

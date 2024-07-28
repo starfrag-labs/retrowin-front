@@ -3,6 +3,8 @@ import { IWindow } from '../types/window';
 
 type State = {
   windows: IWindow[];
+  currentWindow: { key: string; ref: React.RefObject<HTMLElement> } | null;
+  backgroundWindowRef: React.RefObject<HTMLElement> | null;
 };
 
 type Action = {
@@ -14,14 +16,24 @@ type Action = {
   highlightWindow: (key: string) => void;
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
+
+  // current window
+  setCurrentWindow: (window: { key: string; ref: React.RefObject<HTMLElement> } | null) => void;
+
+  // window ref
+  setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
 };
 
 const initialState: State = {
   windows: [],
+  currentWindow: null,
+  backgroundWindowRef: null,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
+  currentWindow: initialState.currentWindow,
+  backgroundWindowRef: initialState.backgroundWindowRef,
   newWindow: (targetKey, type) => {
     set((state) => {
       const existingWindow = state.windows.find(
@@ -52,13 +64,6 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   updateWindow: (key, targetKey) => {
     set((state) => {
-      // to prevent duplicate windows that have the same targetKey
-      // const targetKeyWindow = state.windows.find((w) => w.targetKey === targetKey);
-      // if (targetKeyWindow) {
-      //   state.windows = state.windows.filter((w) => w.key !== targetKeyWindow.key);
-      //   state.windows = [...state.windows, targetKeyWindow];
-      //   return { windows: state.windows };
-      // }
       const window = state.windows.find((w) => w.key === key);
       if (window) {
         window.targetKey = targetKey;
@@ -133,5 +138,15 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       }
       return { windows: state.windows };
     });
+  },
+
+  // current window
+  setCurrentWindow: (window) => {
+    set({ currentWindow: window });
+  },
+
+  // window ref
+  setBackgroundWindowRef: (ref) => {
+    set({ backgroundWindowRef: ref });
   },
 }));
