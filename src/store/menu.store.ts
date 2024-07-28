@@ -12,7 +12,7 @@ const initialState: State = {
   menuRef: null,
 };
 
-export const useRefStore = create<State & Action>((set) => ({
+export const useMenuStore = create<State & Action>((set) => ({
   menuRef: initialState.menuRef,
 
   setMenuRef: (ref) => {

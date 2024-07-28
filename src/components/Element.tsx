@@ -56,14 +56,14 @@ export const Element = memo(
 
     // store states
     const rect = useSelectorStore((state) => state.rect);
-    const shiftKey = useSelectorStore((state) => state.shiftKey);
+    const pressedKeys = useEventStore((state) => state.pressedKeys);
 
     // store functions
     const newWindow = useWindowStore((state) => state.newWindow);
+    const updateWindow = useWindowStore((state) => state.updateWindow);
     const findWindowByTarget = useWindowStore(
       (state) => state.findWindowByTarget
     );
-    const updateWindow = useWindowStore((state) => state.updateWindow);
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
@@ -81,17 +81,18 @@ export const Element = memo(
       if (elementRef.current && rect) {
         const elementRect = elementRef.current.getBoundingClientRect();
         if (
+          (type === 'folder' || type === 'file') &&
           elementRect.top < rect.bottom &&
           elementRect.bottom > rect.top &&
           elementRect.left < rect.right &&
           elementRect.right > rect.left
         ) {
           selectKey(elementKey);
-        } else if (!shiftKey) {
+        } else if (!pressedKeys.includes('Control')) {
           unselectKey(elementKey);
         }
       }
-    }, [elementKey, rect, selectKey, shiftKey, unselectKey]);
+    }, [elementKey, pressedKeys, rect, selectKey, type, unselectKey]);
 
     // update selected element
     useEffect(() => {
@@ -106,7 +107,7 @@ export const Element = memo(
 
     // set element info
     useEffect(() => {
-      setElementInfo(elementKey, {
+      setElementInfo({
         key: elementKey,
         name,
         type,
@@ -284,15 +285,25 @@ export const Element = memo(
       };
     }, [handleEndRenaming]);
 
+    // set current element effect
+    const onMouseEnter = useCallback(() => {
+      if (type === 'file' || type === 'folder') {
+        setCurrentElement({ key: elementKey, ref: elementRef });
+      }
+    }, [elementKey, setCurrentElement, type]);
+
+    // reset current element effect
+    const onMouseLeave = useCallback(() => {
+      setCurrentElement(null);
+    }, [setCurrentElement]);
+
     return (
       <div
         className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
-        onMouseEnter={() =>
-          setCurrentElement({ key: elementKey, ref: elementRef })
-        }
-        onMouseLeave={() => setCurrentElement(null)}
+        onMouseEnter={onMouseEnter}
+        onMouseLeave={onMouseLeave}
       >
         <div ref={iconRef}>
           {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}

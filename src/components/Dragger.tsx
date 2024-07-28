@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useRefStore } from '../store/menu.store';
+import { useMenuStore } from '../store/menu.store';
 import {
   draggingElementsCount,
   draggingElementsIcon,
@@ -17,7 +17,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
 
   // States
-  const [shiftKey, setShiftKey] = useState(false);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
@@ -29,47 +28,27 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const draggingElementsRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const windowRefs = useWindowStore((state) => state.windowRefs);
+  const currentWindow = useWindowStore((state) => state.currentWindow);
   const backgroundWindowRef = useWindowStore(
     (state) => state.backgroundWindowRef
   );
-  const menuRef = useRefStore((state) => state.menuRef);
+  const menuRef = useMenuStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
   const currentElement = useElementStore((state) => state.currentElement);
   const selectedKeys = useElementStore((state) => state.selectedKeys);
   const elementRefs = useElementStore((state) => state.elementRefs);
+  const pressedKeys = useEventStore((state) => state.pressedKeys);
 
   // Store functions
   const findWindow = useWindowStore((state) => state.findWindow);
   const getElementInfo = useElementStore((state) => state.getElementInfo);
-
-  // Element v3
   const isSelected = useElementStore((state) => state.isSelected);
   const selectKey = useElementStore((state) => state.selectKey);
   const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
 
   // Query
   const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setShiftKey(true);
-      }
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setShiftKey(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, []);
 
   const dragElementInit = useCallback(
     (e: MouseEvent) => {
@@ -85,7 +64,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
         currentElement &&
         currentElement.ref.current?.contains(e.target as Node)
       ) {
-        if (!isSelected(currentElement.key) && !shiftKey) {
+        if (!isSelected(currentElement.key) && !pressedKeys.includes('Control')) {
           unselectAllKeys();
         }
         selectKey(currentElement.key);
@@ -102,10 +81,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       currentElement,
       isSelected,
       menuRef,
+      pressedKeys,
       renaming,
       resizing,
       selectKey,
-      shiftKey,
       unselectAllKeys,
     ]
   );
@@ -202,16 +181,12 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       }
 
       // Search for the target folder from the windows
-      windowRefs.forEach((windowRef, key) => {
-        const window = findWindow(key);
-        if (
-          window &&
-          windowRef.current?.contains(e.target as Node) &&
-          window.type === 'navigator'
-        ) {
+      if (currentWindow && currentWindow.ref.current) {
+        const window = findWindow(currentWindow.key);
+        if (window && window.type === 'navigator') {
           targetFolderKey = window.targetKey;
         }
-      });
+      }
 
       // Search for the target folder from the elements
       if (
@@ -251,6 +226,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
     [
       backgroundWindowRef,
       currentElement,
+      currentWindow,
       findWindow,
       getElementInfo,
       isDragging,
@@ -260,7 +236,6 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       rootKeyQuery.data,
       rootKeyQuery.isSuccess,
       selectedKeys,
-      windowRefs,
     ]
   );
 

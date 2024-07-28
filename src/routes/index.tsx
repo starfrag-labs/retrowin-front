@@ -15,6 +15,7 @@ import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
 import MobileDetect from 'mobile-detect';
+import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -75,6 +76,7 @@ function IndexComponent() {
 
   return (
     <Selector>
+      <KeyboardEventHandler />
       <Dragger>
         <Background>
           <OptionMenu>

@@ -3,7 +3,7 @@ import { IWindow } from '../types/window';
 
 type State = {
   windows: IWindow[];
-  windowRefs: Map<string, React.RefObject<HTMLElement>>;
+  currentWindow: { key: string; ref: React.RefObject<HTMLElement> } | null;
   backgroundWindowRef: React.RefObject<HTMLElement> | null;
 };
 
@@ -17,20 +17,22 @@ type Action = {
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
 
+  // current window
+  setCurrentWindow: (window: { key: string; ref: React.RefObject<HTMLElement> } | null) => void;
+
   // window ref
-  setWindowRef: (key: string, ref: React.RefObject<HTMLElement>) => void;
   setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
 };
 
 const initialState: State = {
   windows: [],
-  windowRefs: new Map(),
+  currentWindow: null,
   backgroundWindowRef: null,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
-  windowRefs: initialState.windowRefs,
+  currentWindow: initialState.currentWindow,
   backgroundWindowRef: initialState.backgroundWindowRef,
   newWindow: (targetKey, type) => {
     set((state) => {
@@ -138,15 +140,12 @@ export const useWindowStore = create<State & Action>((set, get) => ({
     });
   },
 
-  // window ref
-  setWindowRef: (key, ref) => {
-    set((state) => {
-      if (state.windowRefs) {
-        state.windowRefs.set(key, ref);
-      }
-      return { windowRefs: state.windowRefs };
-    });
+  // current window
+  setCurrentWindow: (window) => {
+    set({ currentWindow: window });
   },
+
+  // window ref
   setBackgroundWindowRef: (ref) => {
     set({ backgroundWindowRef: ref });
   },

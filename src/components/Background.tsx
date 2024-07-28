@@ -19,6 +19,8 @@ import {
 import groundImg from '../assets/ground.png';
 import cloudImg from '../assets/clouds.png';
 import moonImg from '../assets/moon.png';
+import { useElementStore } from '../store/element.store';
+import { useWindowStore } from '../store/window.store';
 
 export const Background = ({
   children,
@@ -46,6 +48,9 @@ export const Background = ({
   const meteorContainerRef = useRef<HTMLDivElement>(null);
   const groundRef = useRef<HTMLDivElement>(null);
   const moonRef = useRef<HTMLDivElement>(null);
+
+  const setCurrentElement = useElementStore((state) => state.setCurrentElement);
+  const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
 
   // preload images
   const preloadImages = useCallback(() => {
@@ -329,7 +334,10 @@ export const Background = ({
   }, [setupMoon]);
 
   return (
-    <div className={backgroundContainer}>
+    <div className={backgroundContainer} onMouseEnter={() => {
+      setCurrentElement(null);
+      setCurrentWindow(null);
+    }}>
       <div ref={skyRef} className={sky} />
       {isDay ? null : <div ref={starContainerRef} className={starContainer} />}
       {!isDay && (

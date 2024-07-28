@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { selectBox, selector } from '../styles/selector.css';
-import { useRefStore } from '../store/menu.store';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { getRootFolderKeyQueryOption } from '../utils/queryOptions/folder.query';
 import { useQuery } from '@tanstack/react-query';
 import { useElementStore } from '../store/element.store';
 import { useSelectorStore } from '../store/selector.store';
+import { useMenuStore } from '../store/menu.store';
 
 export const Selector = ({
   children,
@@ -29,44 +29,22 @@ export const Selector = ({
   const boxRef = useRef<HTMLDivElement>(null);
 
   // Store states
-  const menuRef = useRefStore((state) => state.menuRef);
+  const menuRef = useMenuStore((state) => state.menuRef);
   const resizing = useEventStore((state) => state.resizing);
   const renaming = useEventStore((state) => state.renaming);
-  const windowRefs = useWindowStore((state) => state.windowRefs);
+  const currentWindow = useWindowStore((state) => state.currentWindow);
   const backgroundWindowRef = useWindowStore(
     (state) => state.backgroundWindowRef
   );
-  const shiftKey = useSelectorStore((state) => state.shiftKey);
+  const pressedKeys = useEventStore((state) => state.pressedKeys);
   const currentElement = useElementStore((state) => state.currentElement);
 
   // Store functions
   const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
-  const findWindow = useWindowStore((state) => state.findWindow);
   const setRect = useSelectorStore((state) => state.setRect);
-  const setShiftKey = useSelectorStore((state) => state.setShiftKey);
   const setCurrentWindowKey = useSelectorStore(
     (state) => state.setCurrentWindowKey
   );
-
-  // Keyboard event listeners
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setShiftKey(true);
-      }
-    };
-    const handleKeyUp = (e: KeyboardEvent) => {
-      if (e.key === 'Shift') {
-        setShiftKey(false);
-      }
-    };
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('keyup', handleKeyUp);
-    return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('keyup', handleKeyUp);
-    };
-  }, [setShiftKey]);
 
   // Selecting start event listener
   const selectingStart = useCallback(
@@ -82,7 +60,9 @@ export const Selector = ({
       setStartX(e.clientX);
       setStartY(e.clientY);
       document.body.style.cursor = 'default';
-      if (!shiftKey) unselectAllKeys();
+      if (!pressedKeys.includes('Control')) {
+        unselectAllKeys();
+      }
 
       // Get target window
       const currentBackgroundWindowRef = backgroundWindowRef?.current;
@@ -95,33 +75,26 @@ export const Selector = ({
         setCurrentWindowKey(rootKeyQuery.data);
         setIsSelecting(true);
       }
-      if (windowRefs) {
-        windowRefs.forEach((windowRef, windowKey) => {
-          // Check if target is on a window's corner
-          const currentWindowRef = windowRef.current;
-          const window = findWindow(windowKey); // Get window by key
-          if (!currentWindowRef || !window) return;
-          if (currentWindowRef && currentWindowRef.contains(e.target as Node)) {
-            setTargetWindowRect(currentWindowRef.getBoundingClientRect()); // Set target window rect
-            setCurrentWindowKey(windowKey); // Set current window target key
-            setIsSelecting(true); // Start selecting
-          }
-        });
+
+      // Get window refs
+      if (currentWindow && currentWindow.ref.current) {
+        setTargetWindowRect(currentWindow.ref.current.getBoundingClientRect());
+        setCurrentWindowKey(currentWindow.key);
+        setIsSelecting(true);
       }
     },
     [
       backgroundWindowRef,
       currentElement,
-      findWindow,
+      currentWindow,
       menuRef,
+      pressedKeys,
       renaming,
       resizing,
       rootKeyQuery.data,
       rootKeyQuery.isSuccess,
       setCurrentWindowKey,
-      shiftKey,
       unselectAllKeys,
-      windowRefs,
     ]
   );
 

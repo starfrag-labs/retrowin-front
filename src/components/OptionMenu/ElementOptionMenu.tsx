@@ -77,13 +77,13 @@ export const ElementOptionMenu = ({
       const elementInfo = getElementInfo(key);
       if (!elementInfo) return;
       if (elementInfo?.type === 'file') {
-        deleteFile(key).then(() => {
+        deleteFile(key).finally(() => {
           queryClient.invalidateQueries({
-            queryKey: generateQueryKey('file', elementInfo.parentKey),
+            queryKey: generateQueryKey('folder', elementInfo.parentKey),
           });
         });
       } else {
-        deleteFolder(key).then(() => {
+        deleteFolder(key).finally(() => {
           queryClient.invalidateQueries({
             queryKey: generateQueryKey('folder', elementInfo.parentKey),
           });
@@ -104,7 +104,7 @@ export const ElementOptionMenu = ({
 
   const addFavorite = useCallback(async () => {
     if (!currentMenu) return;
-    await addFavoriteFolder(elementKey).then(() => {
+    await addFavoriteFolder(elementKey).finally(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('favorite'),
       });
@@ -114,7 +114,7 @@ export const ElementOptionMenu = ({
 
   const removeFavorite = useCallback(async () => {
     if (!currentMenu) return;
-    await removeFavoriteFolder(elementKey).then(() => {
+    await removeFavoriteFolder(elementKey).finally(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('favorite'),
       });
