@@ -63,6 +63,9 @@ export const Element = memo(
     const setRenaming = useEventStore((state) => state.setRenaming);
     const setRenamingKey = useElementStore((state) => state.setRenamingKey);
     const setElementInfo = useElementStore((state) => state.setElementInfo);
+    const setCurrentElementRef = useRefStore(
+      (state) => state.setCurrentElementRef
+    );
 
     const contentType = getContentType(name);
 
@@ -251,6 +254,8 @@ export const Element = memo(
         className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
         ref={elementRef}
+        onMouseEnter={() => setCurrentElementRef(elementRef)}
+        onMouseLeave={() => setCurrentElementRef(null)}
       >
         {type === 'upload' && <FaFileMedical className={uploadFileIcon} />}
         {type === 'folder' && <FaFolder className={folderIcon} />}
