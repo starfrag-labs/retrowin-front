@@ -1,27 +1,22 @@
-import { globalStyle, keyframes, style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 export const loadingPageContainer = style({
+  display: 'flex',
   width: '100%',
   height: '100%',
-  color: 'lightgray',
+  backgroundColor: 'white',
+  alignItems: 'center',
+  justifyContent: 'center',
 });
 
-const loadingImage = keyframes({
-  '0%': {
-    transform: 'scale(1)',
-  },
-  '50%': {
-    transform: 'scale(1.1)',
-  },
-  '100%': {
-    transform: 'scale(1)',
-  },
-});
+export const logoContainer = style({
+  width: '20rem',
 
-globalStyle(`${loadingPageContainer} *`, {
-  // shadow
-  textShadow: '0 0 5px rgba(255, 255, 255, 0.5)',
-  animation: `${loadingImage} 2s infinite`,
+  '@media': {
+    'screen and (max-width: 600px)': {
+      blockSize: '10rem',
+    },
+  },
 })
 
 export const circularLoadingContainer = style({

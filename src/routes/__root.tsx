@@ -1,12 +1,12 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { QueryClient } from '@tanstack/react-query';
 import { defaultContainer } from '../styles/global/container.css';
-import { CircularLoading } from '../components/CircularLoading';
 import { AxiosError } from 'axios';
 import { getProfile } from '../api/auth';
 import { checkUser, enrollUser } from '../api/cloud';
 import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
+import { LoadingPage } from '../components/LoadingPage';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -35,7 +35,7 @@ export const Route = createRootRouteWithContext<{
       });
     }
   },
-  pendingComponent: () => <CircularLoading />,
+  pendingComponent: () => <LoadingPage />,
   component: RootComponent,
 });
 

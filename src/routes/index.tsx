@@ -1,6 +1,5 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
-import { CircularLoading } from '../components/CircularLoading';
 import { useRef, useEffect } from 'react';
 import { Background } from '../components/Background';
 import { Dragger } from '../components/Dragger';
@@ -16,6 +15,7 @@ import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
 import MobileDetect from 'mobile-detect';
 import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
+import { LoadingPage } from '../components/LoadingPage';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -43,7 +43,7 @@ export const Route = createFileRoute('/')({
   loader: async ({ context: { queryClient, rootFolderKey } }) => {
     queryClient.ensureQueryData(readFolderQueryOption(rootFolderKey));
   },
-  pendingComponent: () => <CircularLoading />,
+  pendingComponent: () => <LoadingPage />,
   component: IndexComponent,
 });
 

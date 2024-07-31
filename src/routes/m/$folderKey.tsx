@@ -11,6 +11,7 @@ import { IoMdReturnLeft } from 'react-icons/io';
 import {
   navContainer,
   navItemsContainer,
+  navLogoContainer,
   returnIcon,
   uploadIcon,
 } from '../../styles/mobile/nav.css';
@@ -79,7 +80,9 @@ function Component() {
             <div>{infoQuery.data.name}</div>
           </div>
         ) : (
-          <Logo />
+          <div className={navLogoContainer}>
+            <Logo logoSize='2rem' fontSize='1.5rem'/>
+          </div>
         )}
         <div className={navItemsContainer}>
           <ProgressSpinner />

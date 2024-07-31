@@ -14,6 +14,12 @@ export const navContainer = style({
   boxSizing: 'border-box',
 });
 
+export const navLogoContainer = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
+});
+
 export const navItemsContainer = style({
   display: 'flex',
   flexDirection: 'row',
