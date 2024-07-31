@@ -1,4 +1,28 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { globalStyle, keyframes, style } from '@vanilla-extract/css';
+
+export const loadingPageContainer = style({
+  width: '100%',
+  height: '100%',
+  color: 'lightgray',
+});
+
+const loadingImage = keyframes({
+  '0%': {
+    transform: 'scale(1)',
+  },
+  '50%': {
+    transform: 'scale(1.1)',
+  },
+  '100%': {
+    transform: 'scale(1)',
+  },
+});
+
+globalStyle(`${loadingPageContainer} *`, {
+  // shadow
+  textShadow: '0 0 5px rgba(255, 255, 255, 0.5)',
+  animation: `${loadingImage} 2s infinite`,
+})
 
 export const circularLoadingContainer = style({
   display: 'flex',
