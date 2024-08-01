@@ -15,7 +15,7 @@ import { createRootFolder, getRootFolderKey } from '../api/cloud';
 import { AxiosError } from 'axios';
 import MobileDetect from 'mobile-detect';
 import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
-import { LoadingPage } from '../components/LoadingPage';
+import { CircularLoading } from '../components/CircularLoading';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -41,9 +41,9 @@ export const Route = createFileRoute('/')({
     };
   },
   loader: async ({ context: { queryClient, rootFolderKey } }) => {
-    queryClient.ensureQueryData(readFolderQueryOption(rootFolderKey));
+    await queryClient.prefetchQuery(readFolderQueryOption(rootFolderKey));
   },
-  pendingComponent: () => <LoadingPage />,
+  pendingComponent: () => <CircularLoading />,
   component: IndexComponent,
 });
 

@@ -35,6 +35,9 @@ export const Route = createRootRouteWithContext<{
       });
     }
   },
+  loader: async () => {
+    await new Promise((resolve) => setTimeout(resolve, 6000));
+  },
   pendingComponent: () => <LoadingPage />,
   component: RootComponent,
 });

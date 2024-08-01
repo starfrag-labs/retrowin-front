@@ -35,18 +35,26 @@ const setupAnimation = keyframes({
     strokeDashoffset: '600%',
     strokeDasharray: '600%',
   },
-  '50%': {
+  '20%': {
     strokeDashoffset: '0%',
     strokeDasharray: '600%',
     fillOpacity: 0,
     strokeOpacity: 1,
   },
+  '40%': {
+    fillOpacity: 0,
+    strokeOpacity: 0,
+  },
   '60%': {
+    fillOpacity: 1,
+    strokeOpacity: 0,
+  },
+  '80%': {
     fillOpacity: 0,
     strokeOpacity: 0,
   },
   '100%': {
-    fillOpacity: 1,
+    fillOpacity: 0,
     strokeOpacity: 0,
   },
 });
@@ -84,7 +92,7 @@ export const svgPath = style({
 });
 
 export const setupLogo = style({
-  animation: `${setupAnimation} 2s linear`,
+  animation: `${setupAnimation} 6s linear`,
 });
 
 export const loadingLogo = style({
