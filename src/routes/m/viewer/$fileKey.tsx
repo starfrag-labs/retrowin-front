@@ -17,7 +17,7 @@ import { MdDownload } from 'react-icons/md';
 import { MdDelete } from 'react-icons/md';
 import {
   activeControllerButton,
-  imageContent,
+  mediaContent,
   imageViewerContainer,
   inactiveControllerButton,
   pageNumber,
@@ -25,6 +25,7 @@ import {
   viewControllerContainer,
   viewerBottom,
   viewerNav,
+  mediaContainer,
 } from '../../../styles/mobile/viewer.css';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { deleteFile, downloadFile } from '../../../api/cloud';
@@ -51,6 +52,7 @@ function Component() {
   const [sourceUrl, setSourceUrl] = useState<string>('');
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
+  const [showMenu, setShowMenu] = useState<boolean>(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] =
     useState<boolean>(false);
@@ -161,57 +163,63 @@ function Component() {
 
   return (
     <div className={imageViewerContainer}>
-      <nav className={viewerNav}>
-        <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
-          <IoIosReturnLeft className={returnButtonIcon} />
-        </Link>
-        <div className={viewControllerContainer}>
-          {imageNumber > 0 ? (
-            <MdNavigateBefore
-              className={activeControllerButton}
-              onTouchEnd={handlePrev}
+      {loading || !fileName || !sourceUrl ? (
+        <CircularLoading />
+      ) : (
+        <div className={mediaContainer}>
+          {getContentType(fileName)?.startsWith('image') ? (
+            <img
+              src={sourceUrl}
+              className={mediaContent}
+              onTouchEnd={() => setShowMenu(!showMenu)}
             />
           ) : (
-            <MdNavigateBefore className={inactiveControllerButton} />
-          )}
-          {imageNumber < siblings.length - 1 ? (
-            <MdNavigateNext
-              className={activeControllerButton}
-              onTouchEnd={handleNext}
-            />
-          ) : (
-            <MdNavigateNext className={inactiveControllerButton} />
+            getContentType(fileName)?.startsWith('video') && (
+              <video src={sourceUrl} controls className={mediaContent} />
+            )
           )}
         </div>
-      </nav>
-      <div>
-        {loading || !fileName || !sourceUrl ? (
-          <CircularLoading />
-        ) : (
-          <div>
-            {getContentType(fileName)?.startsWith('image') ? (
-              <img src={sourceUrl} className={imageContent} />
+      )}
+      {showMenu && (
+        <nav className={viewerNav}>
+          <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
+            <IoIosReturnLeft className={returnButtonIcon} />
+          </Link>
+          <div className={viewControllerContainer}>
+            {imageNumber > 0 ? (
+              <MdNavigateBefore
+                className={activeControllerButton}
+                onTouchEnd={handlePrev}
+              />
             ) : (
-              getContentType(fileName)?.startsWith('video') && (
-                <video src={sourceUrl} controls className={imageContent} />
-              )
+              <MdNavigateBefore className={inactiveControllerButton} />
+            )}
+            {imageNumber < siblings.length - 1 ? (
+              <MdNavigateNext
+                className={activeControllerButton}
+                onTouchEnd={handleNext}
+              />
+            ) : (
+              <MdNavigateNext className={inactiveControllerButton} />
             )}
           </div>
-        )}
-      </div>
-      <div className={viewerBottom}>
-        <MdDelete
-          className={activeControllerButton}
-          onTouchEnd={toggleDeleteModalOpen}
-        />
-        <div className={pageNumber}>
-          {imageNumber + 1} / {siblings.length}
+        </nav>
+      )}
+      {showMenu && (
+        <div className={viewerBottom}>
+          <MdDelete
+            className={activeControllerButton}
+            onTouchEnd={toggleDeleteModalOpen}
+          />
+          <div className={pageNumber}>
+            {imageNumber + 1} / {siblings.length}
+          </div>
+          <MdDownload
+            className={activeControllerButton}
+            onTouchEnd={toggleDownloadModalOpen}
+          />
         </div>
-        <MdDownload
-          className={activeControllerButton}
-          onTouchEnd={toggleDownloadModalOpen}
-        />
-      </div>
+      )}
       {isDeleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
           Are you sure you want to delete this file?

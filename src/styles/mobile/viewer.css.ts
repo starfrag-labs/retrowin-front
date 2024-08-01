@@ -2,15 +2,17 @@ import { style } from '@vanilla-extract/css';
 
 export const imageViewerContainer = style({
   display: 'flex',
+  flexDirection: 'column',
   width: '100%',
   height: '100%',
-  justifyContent: 'center',
+  justifyContent: 'space-between',
   alignItems: 'center',
   backgroundColor: 'rgb(0, 0, 0)',
 });
 
 export const viewControllerContainer = style({
   display: 'flex',
+  flexDirection: 'row',
 });
 
 export const activeControllerButton = style({
@@ -35,8 +37,15 @@ export const inactiveControllerButton = style({
   zIndex: 1,
 });
 
-export const imageContent = style({
+export const mediaContainer = style({
   display: 'flex',
+  width: '100%',
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
+});
+
+export const mediaContent = style({
   width: '100%',
   height: '100%',
   objectFit: 'contain',
@@ -46,6 +55,7 @@ export const viewerNav = style({
   display: 'flex',
   justifyContent: 'space-between',
   width: '100%',
+  height: 'auto',
   alignItems: 'center',
   position: 'fixed',
   top: 0,
@@ -72,6 +82,7 @@ export const viewerBottom = style({
   position: 'fixed',
   bottom: 0,
   width: '100%',
+  height: 'auto',
   padding: '10px',
   boxSizing: 'border-box',
   zIndex: 1,
