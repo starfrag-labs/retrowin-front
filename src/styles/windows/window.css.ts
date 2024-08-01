@@ -1,7 +1,7 @@
 import { StyleRule, style } from "@vanilla-extract/css";
 
 export const windowContainer = style({
-  position: 'absolute',
+  position: 'fixed',
   backgroundColor: 'rgba(250, 250, 250, 1)',
   border: '1px solid black',
 });

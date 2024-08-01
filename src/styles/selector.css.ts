@@ -1,7 +1,7 @@
 import { style } from '@vanilla-extract/css';
 
 export const selectBox = style({
-  position: 'absolute',
+  position: 'fixed',
   display: 'none',
   top: '0',
   left: '0',

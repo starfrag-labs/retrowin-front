@@ -6,7 +6,7 @@ import { getProfile } from '../api/auth';
 import { checkUser, enrollUser } from '../api/cloud';
 import config from '../utils/config';
 import { useUserStore } from '../store/user.store';
-import { LoadingPage } from '../components/LoadingPage';
+import { SetupPage } from '../components/SetupPage';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -36,9 +36,9 @@ export const Route = createRootRouteWithContext<{
     }
   },
   loader: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 6000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   },
-  pendingComponent: () => <LoadingPage />,
+  pendingComponent: () => <SetupPage />,
   component: RootComponent,
 });
 

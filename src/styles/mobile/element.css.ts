@@ -1,13 +1,19 @@
 import { style, StyleRule } from '@vanilla-extract/css';
 
+export const pageContentContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  padding: '4rem 1rem',
+  boxSizing: 'border-box',
+});
+
 export const elementsContainer = style({
   display: 'grid',
   gridTemplateColumns: 'repeat(auto-fill, minmax(8.75rem, 1fr))',
   gridAutoRows: '10rem',
   width: '100%',
   height: 'auto',
-  padding: '1rem',
-  boxSizing: 'border-box',
   gap: '5px',
 });
 
@@ -71,7 +77,7 @@ export const miniFolderIcon = style({
   color: 'orange',
 });
 
-export const emptyFolderMessage = style({
+export const folderPageMessage = style({
   display: 'flex',
   justifyContent: 'center',
   alignItems: 'center',
@@ -79,4 +85,6 @@ export const emptyFolderMessage = style({
   width: '100%',
   fontSize: '1.5rem',
   color: 'grey',
+  padding: '1rem',
+  boxSizing: 'border-box',
 });

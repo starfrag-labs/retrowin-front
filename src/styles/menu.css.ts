@@ -1,7 +1,7 @@
 import { style } from "@vanilla-extract/css";
 
 export const menuContainer = style({
-  position: "absolute",
+  position: "fixed",
   display: "none",
   backgroundColor: 'rgb(240, 240, 240)',
   border: '1px solid black',

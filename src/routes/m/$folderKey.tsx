@@ -20,8 +20,9 @@ import { Logo } from '../../components/Logo';
 import { Uploader } from '../../components/mobile/Menu/CreateMenu';
 import { EditMenu } from '../../components/mobile/Menu/EditMenu';
 import { ProgressSpinner } from '../../components/mobile/ProgressSpinner';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useElementStore } from '../../store/element.store';
+import { pageContentContainer } from '../../styles/mobile/element.css';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -42,7 +43,7 @@ function Component() {
   const [selecting, setSelecting] = useState<boolean>(false);
 
   // Query
-  const infoQuery = useSuspenseQuery(getFolderInfoQueryOption(folderKey));
+  const infoQuery = useQuery(getFolderInfoQueryOption(folderKey));
 
   // Store
   const selectedKeys = useElementStore((state) => state.selectedKeys);
@@ -81,7 +82,7 @@ function Component() {
           </div>
         ) : (
           <div className={navLogoContainer}>
-            <Logo logoSize='2rem' fontSize='1.5rem'/>
+            <Logo logoSize="2rem" fontSize="1.5rem" />
           </div>
         )}
         <div className={navItemsContainer}>
@@ -95,7 +96,9 @@ function Component() {
           />
         </div>
       </nav>
-      <Elements folderKey={folderKey} selecting={selecting} />
+      <div className={pageContentContainer}>
+        <Elements folderKey={folderKey} selecting={selecting} />
+      </div>
       {uploading && <Uploader folderKey={folderKey} toggle={toggleUploading} />}
       {selecting && !uploading && <EditMenu folderKey={folderKey} />}
     </div>

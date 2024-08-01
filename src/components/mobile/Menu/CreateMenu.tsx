@@ -95,7 +95,7 @@ export const Uploader = ({
           className={uploadForm}
         >
           <label htmlFor="file" className={menuLabel}>
-            upload files
+            Upload Files
           </label>
           <input
             type="file"
@@ -108,12 +108,10 @@ export const Uploader = ({
             }}
             style={{ display: 'none' }}
           />
-          <button type="submit" hidden ref={uploadFileButtonRef}>
-            upload
-          </button>
+          <button type="submit" hidden ref={uploadFileButtonRef} />
         </form>
         <div onTouchEnd={handleCreateFolder} className={menuLabel}>
-          create folder
+          Create Folder
         </div>
       </div>
     </div>

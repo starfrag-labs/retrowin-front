@@ -6,6 +6,7 @@ export const imageViewerContainer = style({
   height: '100%',
   justifyContent: 'center',
   alignItems: 'center',
+  backgroundColor: 'rgb(0, 0, 0)',
 });
 
 export const viewControllerContainer = style({
@@ -35,6 +36,7 @@ export const inactiveControllerButton = style({
 });
 
 export const imageContent = style({
+  display: 'flex',
   width: '100%',
   height: '100%',
   objectFit: 'contain',
@@ -45,12 +47,12 @@ export const viewerNav = style({
   justifyContent: 'space-between',
   width: '100%',
   alignItems: 'center',
-  position: 'absolute',
+  position: 'fixed',
   top: 0,
-  zIndex: 1,
   padding: '10px',
   boxSizing: 'border-box',
   backgroundColor: 'rgba(255, 255, 255, 0.05)',
+  zIndex: 1,
 });
 
 export const returnButtonIcon = style({
@@ -67,7 +69,7 @@ export const viewerBottom = style({
   display: 'flex',
   justifyContent: 'space-between',
   alignItems: 'center',
-  position: 'absolute',
+  position: 'fixed',
   bottom: 0,
   width: '100%',
   padding: '10px',

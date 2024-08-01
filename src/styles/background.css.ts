@@ -1,9 +1,18 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 export const backgroundSelectorContainer = style({
   height: '100%',
   width: '100%',
-  position: 'absolute',
+  position: 'fixed',
+});
+
+const popupBackground = keyframes({
+  'from': {
+    opacity: 0,
+  },
+  'to': {
+    opacity: 1,
+  },
 });
 
 export const backgroundContainer = style({
@@ -11,10 +20,11 @@ export const backgroundContainer = style({
   height: '100%',
   width: '100%',
   overflow: 'hidden',
+  animation: `${popupBackground} 1s`,
 });
 
 export const sky = style({
-  position: 'absolute',
+  position: 'fixed',
   width: '100%',
   height: '100%',
   backgroundRepeat: 'no-repeat',
@@ -22,7 +32,7 @@ export const sky = style({
 });
 
 export const clouds = style({
-  position: 'absolute',
+  position: 'fixed',
   background: 'url(/src/assets/clouds.png)',
   backgroundSize: 'cover',
   width: '100%',
@@ -32,13 +42,13 @@ export const clouds = style({
 });
 
 export const starContainer = style({
-  position: 'absolute',
+  position: 'fixed',
   width: '100%',
   height: '100%',
 });
 
 export const moon = style({
-  position: 'absolute',
+  position: 'fixed',
   background: 'url(/src/assets/moon.png)',
   backgroundSize: 'cover',
   width: '70px',
@@ -52,7 +62,7 @@ export const moon = style({
 export const ground = style({
   background: 'url(/src/assets/ground.png)',
   backgroundSize: 'cover',
-  position: 'absolute',
+  position: 'fixed',
   height: '100%',
   width: '100%',
   backgroundRepeat: 'no-repeat',
@@ -60,14 +70,14 @@ export const ground = style({
 });
 
 export const meteorContainer = style({
-  position: 'absolute',
+  position: 'fixed',
   display: 'none',
   width: '100vw',
   height: '100vh',
 });
 
 export const meteor = style({
-  position: 'absolute',
+  position: 'fixed',
   width: '100%',
   height: '100%',
   backgroundColor: 'white',
@@ -76,7 +86,7 @@ export const meteor = style({
 });
 
 export const meteorTail = style({
-  position: 'absolute',
+  position: 'fixed',
   top: '25%',
   left: '25%',
   width: '2000%',

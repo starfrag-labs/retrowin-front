@@ -98,7 +98,7 @@ export const elementNameContainer = style({
 });
 
 export const draggingElementsIcon = style({
-  position: 'absolute',
+  position: 'fixed',
   opacity: 0.5,
   pointerEvents: 'none',
   zIndex: 9999,

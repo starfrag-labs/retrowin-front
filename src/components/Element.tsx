@@ -301,6 +301,7 @@ export const Element = memo(
       <div
         className={isWindowElement ? windowElement : backgroundElement}
         onDoubleClick={handleClickIcon}
+        onTouchEnd={handleClickIcon}
         ref={elementRef}
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}

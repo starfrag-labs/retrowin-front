@@ -43,7 +43,6 @@ export const uploadForm = style({
 });
 
 const menuLabelBase = {
-  textTransform: 'capitalize',
   fontSize: '1rem',
   width: '100%',
   display: 'flex',

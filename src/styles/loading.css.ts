@@ -1,6 +1,6 @@
 import { keyframes, style } from '@vanilla-extract/css';
 
-export const loadingPageContainer = style({
+export const setupPageContainer = style({
   display: 'flex',
   width: '100%',
   height: '100%',
@@ -17,7 +17,7 @@ export const logoContainer = style({
       blockSize: '10rem',
     },
   },
-})
+});
 
 export const circularLoadingContainer = style({
   display: 'flex',
