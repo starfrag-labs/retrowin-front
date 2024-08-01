@@ -32,7 +32,8 @@ export const OptionMenu = ({
   const selectKey = useElementStore((state) => state.selectKey);
   const unselectAllKys = useElementStore((state) => state.unselectAllKeys);
 
-  const handleContextMenu = (e: React.MouseEvent) => {
+  
+  const handleContextMenu = useCallback((e: React.MouseEvent) => {
     const currentMenu = menuRef.current;
     if (currentMenu) {
       e.preventDefault();
@@ -60,7 +61,7 @@ export const OptionMenu = ({
 
       currentMenu.style.display = 'block';
     }
-  };
+  }, [currentElement, currentWindow, pressedKeys, selectKey, unselectAllKys]);
 
   const closeMenu = useCallback((e: MouseEvent) => {
     if (e.button === 0) {

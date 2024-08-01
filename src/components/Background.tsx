@@ -22,11 +22,7 @@ import moonImg from '../assets/moon.png';
 import { useElementStore } from '../store/element.store';
 import { useWindowStore } from '../store/window.store';
 
-export const Background = ({
-  children,
-}: {
-  children: React.ReactNode;
-}): React.ReactElement => {
+export const Background = (): React.ReactElement => {
   // const variables
   const oneDay = 1000 * 60 * 60 * 24;
   const dayStart = 6 * 60 * 60 * 1000;
@@ -349,7 +345,6 @@ export const Background = ({
       <div ref={moonRef} className={moon} />
       <div ref={cloudsRef} className={clouds} />
       <div ref={groundRef} className={ground} />
-      {children}
     </div>
   );
 };

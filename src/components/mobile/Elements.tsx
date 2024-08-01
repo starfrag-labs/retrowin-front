@@ -18,25 +18,19 @@ export const Elements = ({
 
   const isSelected = useElementStore((state) => state.isSelected);
 
-  if (readQuery.isFetching) {
-    return (
-      <div className={folderPageMessage}>Loading</div>
-    );
+  if (!readQuery.isFetched) {
+    return <div className={folderPageMessage}>Loading</div>;
   }
 
   if (
     !readQuery.data ||
     (!readQuery.data.files.length && !readQuery.data.folders.length)
   ) {
-    return (
-      <div className={folderPageMessage}>Empty folder</div>
-    );
+    return <div className={folderPageMessage}>Empty folder</div>;
   }
 
   if (readQuery.isError) {
-    return (
-      <div className={folderPageMessage}>Error loading folder</div>
-    );
+    return <div className={folderPageMessage}>Error loading folder</div>;
   }
 
   return (

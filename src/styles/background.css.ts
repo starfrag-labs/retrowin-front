@@ -1,4 +1,4 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 
 export const backgroundSelectorContainer = style({
   height: '100%',
@@ -6,21 +6,10 @@ export const backgroundSelectorContainer = style({
   position: 'fixed',
 });
 
-const popupBackground = keyframes({
-  'from': {
-    opacity: 0,
-  },
-  'to': {
-    opacity: 1,
-  },
-});
-
 export const backgroundContainer = style({
   position: 'fixed',
   height: '100%',
   width: '100%',
-  overflow: 'hidden',
-  animation: `${popupBackground} 1s`,
 });
 
 export const sky = style({
@@ -48,7 +37,7 @@ export const starContainer = style({
 });
 
 export const moon = style({
-  position: 'fixed',
+  position: 'absolute',
   background: 'url(/src/assets/moon.png)',
   backgroundSize: 'cover',
   width: '70px',
@@ -70,14 +59,14 @@ export const ground = style({
 });
 
 export const meteorContainer = style({
-  position: 'fixed',
+  position: 'absolute',
   display: 'none',
   width: '100vw',
   height: '100vh',
 });
 
 export const meteor = style({
-  position: 'fixed',
+  position: 'absolute',
   width: '100%',
   height: '100%',
   backgroundColor: 'white',
@@ -86,7 +75,7 @@ export const meteor = style({
 });
 
 export const meteorTail = style({
-  position: 'fixed',
+  position: 'absolute',
   top: '25%',
   left: '25%',
   width: '2000%',

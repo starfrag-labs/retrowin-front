@@ -1,9 +1,31 @@
-import { style } from '@vanilla-extract/css';
+import { keyframes, style } from '@vanilla-extract/css';
 
 export const defaultContainer = style({
   width: '100%',
   height: '100%',
   color: 'black',
+});
+
+const popupPageAnimation = keyframes({
+  'from': {
+    opacity: 0,
+  },
+  'to': {
+    opacity: 1,
+  },
+});
+
+export const pcPageContainer = style({
+  display: 'flex',
+  flexDirection: 'column',
+  width: '100%',
+  height: '100%',
+  justifyContent: 'center',
+  alignItems: 'center',
+  overflow: 'hidden',
+
+  animationName: popupPageAnimation,
+  animationDuration: '1s',
 });
 
 export const centerContainer = style({

@@ -16,6 +16,7 @@ import { AxiosError } from 'axios';
 import MobileDetect from 'mobile-detect';
 import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
 import { CircularLoading } from '../components/CircularLoading';
+import { pcPageContainer } from '../styles/global/container.css';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -75,10 +76,11 @@ function IndexComponent() {
   }, [backgroundWindowRef, setBackgroundWindowRef]);
 
   return (
-    <Selector>
-      <KeyboardEventHandler />
-      <Dragger>
-        <Background>
+    <div className={pcPageContainer}>
+      <Selector>
+        <KeyboardEventHandler />
+        <Dragger>
+          <Background />
           <OptionMenu>
             <div
               className={backgroundSelectorContainer}
@@ -91,8 +93,8 @@ function IndexComponent() {
             })}
             <Progress />
           </OptionMenu>
-        </Background>
-      </Dragger>
-    </Selector>
+        </Dragger>
+      </Selector>
+    </div>
   );
 }
