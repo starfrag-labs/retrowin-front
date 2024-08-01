@@ -65,16 +65,6 @@ export const viewerNav = style({
   zIndex: 1,
 });
 
-export const returnButtonIcon = style({
-  width: '50px',
-  height: '50px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  cursor: 'pointer',
-  color: 'rgba(255, 255, 255, 0.5)',
-});
-
 export const viewerBottom = style({
   display: 'flex',
   justifyContent: 'space-between',

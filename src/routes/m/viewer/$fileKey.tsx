@@ -7,7 +7,6 @@ import {
 import {
   useQuery,
   useQueryClient,
-  useSuspenseQuery,
 } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
@@ -21,7 +20,6 @@ import {
   imageViewerContainer,
   inactiveControllerButton,
   pageNumber,
-  returnButtonIcon,
   viewControllerContainer,
   viewerBottom,
   viewerNav,
@@ -58,8 +56,8 @@ function Component() {
     useState<boolean>(false);
 
   // Query
-  const readQuery = useSuspenseQuery(downloadFileQueryOption(targetKey));
-  const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
+  const readQuery = useQuery(downloadFileQueryOption(targetKey));
+  const infoQuery = useQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
   // Functions
@@ -183,7 +181,11 @@ function Component() {
       {showMenu && (
         <nav className={viewerNav}>
           <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
-            <IoIosReturnLeft className={returnButtonIcon} />
+            <IoIosReturnLeft
+              className={
+                parentKey ? activeControllerButton : inactiveControllerButton
+              }
+            />
           </Link>
           <div className={viewControllerContainer}>
             {imageNumber > 0 ? (
