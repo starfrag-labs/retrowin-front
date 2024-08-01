@@ -93,6 +93,7 @@ export const svgPath = style({
 
 export const setupLogo = style({
   animation: `${setupAnimation} 3s linear`,
+  fillOpacity: 0,
 });
 
 export const loadingLogo = style({
