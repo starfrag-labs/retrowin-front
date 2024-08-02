@@ -22,5 +22,6 @@ export interface IProgressState {
   name: string;
   type: 'upload' | 'download';
   loaded: number;
+  chunkLoaded: number[];
   total: number;
 }

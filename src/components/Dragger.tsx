@@ -4,14 +4,14 @@ import {
   draggingElementsCount,
   draggingElementsIcon,
 } from '../styles/element.css';
-import { moveFile, moveFolder } from '../api/cloud';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { getRootFolderKeyQueryOption } from '../utils/queryOptions/folder.query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getRootFolderKeyQueryOption, moveFolderMutationOption } from '../utils/queryOptions/folder.query';
 import { defaultContainer } from '../styles/global/container.css';
 import { useEventStore } from '../store/event.store';
 import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
 import { generateQueryKey } from '../utils/queryOptions/index.query';
+import { moveFileMutationOption } from '../utils/queryOptions/file.query';
 
 export const Dragger = ({ children }: { children: React.ReactNode }) => {
   const queryClient = useQueryClient();
@@ -49,6 +49,10 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
   // Query
   const rootKeyQuery = useQuery(getRootFolderKeyQueryOption());
+
+  // Mutations
+  const moveFile = useMutation(moveFileMutationOption);
+  const moveFolder = useMutation(moveFolderMutationOption);
 
   const dragElementInit = useCallback(
     (e: MouseEvent) => {
@@ -130,7 +134,7 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
 
         // Update the count element
         const countElement = document.createElement('div');
-        countElement.innerText = `${count}`;
+        countElement.innerText = `${selectedKeys.length}`;
         countElement.className = draggingElementsCount;
         countElement.style.left = `${width / 2 - 12}px`;
         draggingElementsRef.current?.appendChild(countElement);
@@ -202,23 +206,27 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
           const info = getElementInfo(key);
           if (!isSelected(key) || key === targetFolderKey || !info) return;
           if (info.type === 'folder') {
-            moveFolder(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries({
-                queryKey: generateQueryKey('folder', targetFolderKey),
+            moveFolder
+              .mutateAsync({ folderKey: key, targetKey: targetFolderKey })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: generateQueryKey('folder', targetFolderKey),
+                });
+                queryClient.invalidateQueries({
+                  queryKey: generateQueryKey('folder', info.parentKey),
+                });
               });
-              queryClient.invalidateQueries({
-                queryKey: generateQueryKey('folder', info.parentKey),
-              });
-            });
           } else if (info.type === 'file') {
-            moveFile(key, targetFolderKey).then(() => {
-              queryClient.invalidateQueries({
-                queryKey: generateQueryKey('folder', targetFolderKey),
+            moveFile
+              .mutateAsync({ fileKey: key, targetKey: targetFolderKey })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: generateQueryKey('folder', targetFolderKey),
+                });
+                queryClient.invalidateQueries({
+                  queryKey: generateQueryKey('folder', info.parentKey),
+                });
               });
-              queryClient.invalidateQueries({
-                queryKey: generateQueryKey('folder', info.parentKey),
-              });
-            });
           }
         });
       }
@@ -231,6 +239,8 @@ export const Dragger = ({ children }: { children: React.ReactNode }) => {
       getElementInfo,
       isDragging,
       isSelected,
+      moveFile,
+      moveFolder,
       pointerMoved,
       queryClient,
       rootKeyQuery.data,

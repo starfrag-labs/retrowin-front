@@ -3,11 +3,9 @@ import { CircularLoading } from '../../../components/CircularLoading';
 import {
   getFileInfoQueryOption,
   downloadFileQueryOption,
+  deleteFileMutationOption,
 } from '../../../utils/queryOptions/file.query';
-import {
-  useQuery,
-  useQueryClient,
-} from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
@@ -26,7 +24,6 @@ import {
   mediaContainer,
 } from '../../../styles/mobile/viewer.css';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
-import { deleteFile, downloadFile } from '../../../api/cloud';
 import { Modal } from '../../../components/mobile/Modal';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
 
@@ -38,6 +35,9 @@ export const Route = createFileRoute('/m/viewer/$fileKey')({
 function Component() {
   const queryClient = useQueryClient();
   const { fileKey } = Route.useParams();
+
+  // Mutations
+  const deleteFile = useMutation(deleteFileMutationOption);
 
   // Navigation
   const navigate = useNavigate({ from: '/m/viewer/$fileKey' });
@@ -67,6 +67,10 @@ function Component() {
 
   const toggleDownloadModalOpen = () => {
     setIsDownloadModalOpen(!isDownloadModalOpen);
+  };
+
+  const toggleShowMenu = () => {
+    setShowMenu(!showMenu);
   };
 
   // Effects
@@ -130,7 +134,7 @@ function Component() {
 
   const handleDelete = async () => {
     setIsDeleteModalOpen(false);
-    await deleteFile(targetKey).then(() => {
+    deleteFile.mutateAsync(targetKey).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', parentKey),
       });
@@ -148,15 +152,17 @@ function Component() {
 
   const handleDownload = async () => {
     toggleDownloadModalOpen();
-    await downloadFile(targetKey, fileName).then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    });
+    queryClient
+      .ensureQueryData(downloadFileQueryOption(targetKey, fileName))
+      .then((response) => {
+        const url = window.URL.createObjectURL(response);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
   };
 
   return (
@@ -169,11 +175,16 @@ function Component() {
             <img
               src={sourceUrl}
               className={mediaContent}
-              onTouchEnd={() => setShowMenu(!showMenu)}
+              onTouchEnd={toggleShowMenu}
             />
           ) : (
             getContentType(fileName)?.startsWith('video') && (
-              <video src={sourceUrl} controls className={mediaContent} />
+              <video
+                src={sourceUrl}
+                controls
+                className={mediaContent}
+                onTouchEnd={toggleShowMenu}
+              />
             )
           )}
         </div>

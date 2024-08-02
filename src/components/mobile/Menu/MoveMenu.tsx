@@ -1,7 +1,8 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getFolderInfoQueryOption,
   getFolderPathQueryOption,
+  moveFolderMutationOption,
   readFolderQueryOption,
 } from '../../../utils/queryOptions/folder.query';
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -15,9 +16,9 @@ import {
   menuContainer,
 } from '../../../styles/mobile/menu.css';
 import { Modal } from '../Modal';
-import { moveFile, moveFolder } from '../../../api/cloud';
 import { useElementStore } from '../../../store/element.store';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import { moveFileMutationOption } from '../../../utils/queryOptions/file.query';
 
 export const MoveMenu = ({
   folderKey,
@@ -45,6 +46,10 @@ export const MoveMenu = ({
   const infoQuery = useQuery(getFolderInfoQueryOption(targetFolderKey));
   const pathQuery = useQuery(getFolderPathQueryOption(targetFolderKey));
 
+  // Mutations
+  const moveFile = useMutation(moveFileMutationOption);
+  const moveFolder = useMutation(moveFolderMutationOption);
+
   const toggleModal = () => {
     setModalOpen(!modalOpen);
   };
@@ -70,12 +75,18 @@ export const MoveMenu = ({
     await Promise.all([
       readQuery.data.files.forEach(async (file) => {
         if (isSelected(file.key)) {
-          await moveFile(file.key, targetFolderKey);
+          moveFile.mutateAsync({
+            fileKey: file.key,
+            targetKey: targetFolderKey,
+          });
         }
       }),
       readQuery.data.folders.forEach(async (folder) => {
         if (isSelected(folder.key)) {
-          await moveFolder(folder.key, targetFolderKey);
+          moveFolder.mutateAsync({
+            folderKey: folder.key,
+            targetKey: targetFolderKey,
+          });
         }
       }),
     ]).then(() => {

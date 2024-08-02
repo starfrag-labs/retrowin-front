@@ -30,38 +30,51 @@ export const OptionMenu = ({
   // store functions
   const setMenuRef = useMenuStore((state) => state.setMenuRef);
   const selectKey = useElementStore((state) => state.selectKey);
+  const isSelected = useElementStore((state) => state.isSelected);         
   const unselectAllKys = useElementStore((state) => state.unselectAllKeys);
 
-  
-  const handleContextMenu = useCallback((e: React.MouseEvent) => {
-    const currentMenu = menuRef.current;
-    if (currentMenu) {
-      e.preventDefault();
-      currentMenu.style.top = `${e.clientY}px`;
-      currentMenu.style.left = `${e.clientX}px`;
+  const handleContextMenu = useCallback(
+    (e: React.MouseEvent) => {
+      const currentMenu = menuRef.current;
+      if (currentMenu) {
+        e.preventDefault();
+        currentMenu.style.top = `${e.clientY}px`;
+        currentMenu.style.left = `${e.clientX}px`;
 
-      // Set the menu type to background by default
-      setMenuType('background');
+        // Set the menu type to background by default
+        setMenuType('background');
 
-      // Check if the right-clicked element is a window
-      if (currentWindow) {
-        setTargetWindowKey(currentWindow.key);
-        setMenuType('window');
-      }
-
-      // Check if the right-clicked element is an element
-      if (currentElement) {
-        if (!pressedKeys.includes('Control')) {
-          unselectAllKys();
+        // Check if the right-clicked element is a window
+        if (currentWindow) {
+          setTargetWindowKey(currentWindow.key);
+          setMenuType('window');
         }
-        setTargetElementKey(currentElement.key);
-        setMenuType('element');
-        selectKey(currentElement.key);
-      }
 
-      currentMenu.style.display = 'block';
-    }
-  }, [currentElement, currentWindow, pressedKeys, selectKey, unselectAllKys]);
+        // Check if the right-clicked element is an element
+        if (currentElement) {
+          if (
+            !pressedKeys.includes('Control') &&
+            !isSelected(currentElement.key)
+          ) {
+            unselectAllKys();
+          }
+          setTargetElementKey(currentElement.key);
+          setMenuType('element');
+          selectKey(currentElement.key);
+        }
+
+        currentMenu.style.display = 'block';
+      }
+    },
+    [
+      currentElement,
+      currentWindow,
+      isSelected,
+      pressedKeys,
+      selectKey,
+      unselectAllKys,
+    ]
+  );
 
   const closeMenu = useCallback((e: MouseEvent) => {
     if (e.button === 0) {

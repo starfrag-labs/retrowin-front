@@ -1,5 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { uploadChunk } from '../../api/cloud';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   uploadButton,
   uploadForm,
@@ -11,14 +10,15 @@ import {
   uploaderContainer,
 } from '../../styles/windows/uploader.css';
 import { memo, useRef } from 'react';
-import { useProgressStore } from '../../store/progress.store';
 import { useWindowStore } from '../../store/window.store';
 import { generateQueryKey } from '../../utils/queryOptions/index.query';
+import { uploadFileMutationOption } from '../../utils/queryOptions/file.query';
 
 export const Uploader = memo(
   ({ folderKey }: { folderKey: string }): React.ReactElement => {
-    const chunkSize = 1024 * 1024 * 5;
     const queryClient = useQueryClient();
+
+    const uploadFile = useMutation(uploadFileMutationOption);
 
     // refs
     const uploadNameRef = useRef<HTMLInputElement>(null);
@@ -26,44 +26,20 @@ export const Uploader = memo(
     // store functions
     const closeWindow = useWindowStore((state) => state.closeWindow);
 
-    const uploadFile = async (file: File) => {
-      const totalChunks = Math.ceil(file.size / chunkSize);
-      const fileName = file.name.replace(/\s/g, '_');
-
-      // check if progress exists
-      if (
-        useProgressStore.getState().findProgress(`${folderKey}-${fileName}`)
-      ) {
-        return;
-      }
-
-      // add progress
-      useProgressStore.getState().addProgress({
-        key: `${folderKey}-${fileName}`,
-        name: `${fileName}`,
-        type: 'upload',
-      });
-
-      // upload chunks
-      for (let i = 0; i < totalChunks; i++) {
-        const start = i * chunkSize;
-        const end = Math.min(file.size, (i + 1) * chunkSize);
-        const chunk = file.slice(start, end);
-        await uploadChunk(folderKey, chunk, fileName, totalChunks, i);
-      }
-      useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
-      queryClient.invalidateQueries({
-        queryKey: generateQueryKey('folder', folderKey),
-      });
-    };
-
+    // handlers
     const uploadFileHandler = async (
       event: React.FormEvent<HTMLFormElement>
     ) => {
       event.preventDefault();
       const files = Array.from(event.currentTarget.file.files) as File[];
       files.forEach((file) => {
-        uploadFile(file);
+        uploadFile
+          .mutateAsync({file, folderKey})
+          .then(() => {
+            queryClient.invalidateQueries({
+              queryKey: generateQueryKey('folder', folderKey),
+            });
+          })
       });
       closeWindow(folderKey);
     };

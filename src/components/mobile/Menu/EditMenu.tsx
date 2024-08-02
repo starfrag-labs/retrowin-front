@@ -6,23 +6,23 @@ import { editMenu, editMenuItemIcon } from '../../../styles/mobile/menu.css';
 import { useEffect, useState } from 'react';
 import { MoveMenu } from './MoveMenu';
 import { Modal } from '../Modal';
-import {
-  deleteFile,
-  deleteFolder,
-  downloadFile,
-  renameFile,
-  renameFolder,
-} from '../../../api/cloud';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { deleteFolderMutationOption, readFolderQueryOption, renameFolderMutationOption } from '../../../utils/queryOptions/folder.query';
 import { useElementStore } from '../../../store/element.store';
 import { modalInput } from '../../../styles/mobile/modal.css';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import { deleteFileMutationOption, downloadFileQueryOption, renameFileMutationOption } from '../../../utils/queryOptions/file.query';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
 
   const queryClient = useQueryClient();
+
+  //Mutations
+  const deleteFile = useMutation(deleteFileMutationOption);
+  const deleteFolder = useMutation(deleteFolderMutationOption);
+  const renameFile = useMutation(renameFileMutationOption);
+  const renameFolder = useMutation(renameFolderMutationOption);
 
   const [isFolderSelected, setIsFolderSelected] = useState(false);
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
@@ -76,10 +76,10 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
 
     await Promise.all([
       readQuery.data.folders.forEach(
-        (folder) => isSelected(folder.key) && deleteFolder(folder.key)
+        (folder) => isSelected(folder.key) && deleteFolder.mutateAsync(folder.key)
       ),
       readQuery.data.files.forEach(
-        (file) => isSelected(file.key) && deleteFile(file.key)
+        (file) => isSelected(file.key) && deleteFile.mutateAsync(file.key)
       ),
     ]).then(() => {
       queryClient.invalidateQueries({
@@ -119,13 +119,19 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     }
 
     if (folder && folder.name !== modifiedNewName) {
-      await renameFolder(folder.key, modifiedNewName).then(() => {
+      await renameFolder.mutateAsync({
+        folderKey: folder.key,
+        folderName: modifiedNewName,
+      }).then(() => {
         queryClient.invalidateQueries({
           queryKey: generateQueryKey('folder', folderKey),
         })
       });
     } else if (file && file.name !== modifiedNewName) {
-      await renameFile(file.key, modifiedNewName).then(() => {
+      await renameFile.mutateAsync({
+        fileKey: file.key,
+        fileName: modifiedNewName,
+      }).then(() => {
         queryClient.invalidateQueries({
           queryKey: generateQueryKey('folder', folderKey),
         }) 
@@ -153,8 +159,8 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     unselectAllKeys();
 
     selectedFiles.forEach(async (file) => {
-      await downloadFile(file.key, file.name).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
+      queryClient.ensureQueryData(downloadFileQueryOption(file.key, file.name)).then((response) => {
+        const url = window.URL.createObjectURL(response);
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', file.name);

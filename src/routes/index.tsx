@@ -10,9 +10,7 @@ import { Selector } from '../components/Selector';
 import { WindowV2 } from '../components/Window';
 import { useWindowStore } from '../store/window.store';
 import { backgroundSelectorContainer } from '../styles/background.css';
-import { readFolderQueryOption } from '../utils/queryOptions/folder.query';
-import { createRootFolder, getRootFolderKey } from '../api/cloud';
-import { AxiosError } from 'axios';
+import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import MobileDetect from 'mobile-detect';
 import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
 import { CircularLoading } from '../components/CircularLoading';
@@ -24,18 +22,8 @@ const codeSchema = z.object({
 
 export const Route = createFileRoute('/')({
   validateSearch: codeSchema,
-  beforeLoad: async () => {
-    const rootFolderKey = await getRootFolderKey()
-      .then((response) => {
-        return response.data;
-      })
-      .catch(async (error: AxiosError) => {
-        if (error.response?.status === 404) {
-          const result = await createRootFolder();
-          return result.data;
-        }
-        throw error;
-      });
+  beforeLoad: async ({context: {queryClient}}) => {
+    const rootFolderKey = await queryClient.ensureQueryData(getRootFolderKeyQueryOption(true))
 
     return {
       rootFolderKey: rootFolderKey,

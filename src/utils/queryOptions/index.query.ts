@@ -1,7 +1,8 @@
 export const retryCount = 3;
+export const strongRetryCount = 5;
 
 export const generateQueryKey = (
-  type: 'file' | 'folder' | 'favorite',
+  type: 'file' | 'folder' | 'user',
   key?: string,
   method?: 'read' | 'info' | 'path'
 ) => {

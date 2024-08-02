@@ -1,8 +1,8 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { createFolder } from '../../api/cloud';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { MenuGenerator } from './MenuGenerator';
 import { useWindowStore } from '../../store/window.store';
 import { generateQueryKey } from '../../utils/queryOptions/index.query';
+import { createFolderMutationOption } from '../../utils/queryOptions/folder.query';
 
 export const WindowOptionsMenu = ({
   windowKey,
@@ -12,6 +12,9 @@ export const WindowOptionsMenu = ({
   menuRef: React.RefObject<HTMLDivElement>;
 }): React.ReactElement => {
   const queryClient = useQueryClient();
+
+  // Mutations
+  const createFolder = useMutation(createFolderMutationOption);
 
   // refs
   const currentMenu = menuRef.current;
@@ -30,7 +33,10 @@ export const WindowOptionsMenu = ({
 
   const handleCreateFolder = () => {
     if (!currentMenu || !window) return;
-    createFolder(window.targetKey, 'NewFolder').then(() => {
+    createFolder.mutateAsync({
+      parentKey: window.targetKey,
+      folderName: 'NewFolder',
+    }).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', window.targetKey),
       });
@@ -47,7 +53,7 @@ export const WindowOptionsMenu = ({
       queryKey: generateQueryKey('file'),
     });
     queryClient.invalidateQueries({
-      queryKey: generateQueryKey('favorite'),
+      queryKey: generateQueryKey('user', 'favorite'),
     });
     currentMenu.style.display = 'none';
   };

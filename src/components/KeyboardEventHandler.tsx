@@ -1,14 +1,20 @@
 import { useCallback, useEffect } from 'react';
 import { useEventStore } from '../store/event.store';
 import { useElementStore } from '../store/element.store';
-import { deleteFile, deleteFolder } from '../api/cloud';
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { generateQueryKey } from '../utils/queryOptions/index.query';
+import { deleteFileMutationOption } from '../utils/queryOptions/file.query';
+import { deleteFolderMutationOption } from '../utils/queryOptions/folder.query';
 
 export const KeyboardEventHandler = (): React.ReactNode => {
   const queryClient = useQueryClient();
 
-  const { selectedKeys, getElementInfo } = useElementStore.getState();
+  // Mutations
+  const deleteFile = useMutation(deleteFileMutationOption);
+  const deleteFolder = useMutation(deleteFolderMutationOption);
+
+  // Store states
+  const { selectedKeys, getElementInfo, unselectAllKeys } = useElementStore.getState();
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const { keyup, keydown } = useEventStore.getState();
 
@@ -32,13 +38,13 @@ export const KeyboardEventHandler = (): React.ReactNode => {
       selectedKeys.forEach((key) => {
         const info = getElementInfo(key);
         if (info && info.type === 'folder') {
-          deleteFolder(key).finally(() => {
+          deleteFolder.mutateAsync(key).finally(() => {
             queryClient.invalidateQueries({
               queryKey: generateQueryKey('folder', info.parentKey),
             });
           });
         } else if (info && info.type === 'file') {
-          deleteFile(key).finally(() => {
+          deleteFile.mutateAsync(key).finally(() => {
             queryClient.invalidateQueries({
               queryKey: generateQueryKey('folder', info.parentKey),
             });
@@ -48,8 +54,9 @@ export const KeyboardEventHandler = (): React.ReactNode => {
           });
         }
       });
+      unselectAllKeys();  
     }
-  }, [getElementInfo, queryClient, selectedKeys]);
+  }, [deleteFile, deleteFolder, getElementInfo, queryClient, selectedKeys, unselectAllKeys]);
 
   useEffect(() => {
     if (pressedKeys.includes('Delete')) {

@@ -1,6 +1,5 @@
-import { useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
-import { downloadFile, renameFile, renameFolder } from '../api/cloud';
 import { getContentType } from '../utils/customFn/contentTypeGetter';
 import { FaFileMedical, FaFolder } from 'react-icons/fa';
 import { FaFileAlt } from 'react-icons/fa';
@@ -23,6 +22,8 @@ import { useWindowStore } from '../store/window.store';
 import { useElementStore } from '../store/element.store';
 import { generateQueryKey } from '../utils/queryOptions/index.query';
 import { useSelectorStore } from '../store/selector.store';
+import { downloadFileQueryOption, renameFileMutationOption } from '../utils/queryOptions/file.query';
+import { renameFolderMutationOption } from '../utils/queryOptions/folder.query';
 
 export const Element = memo(
   ({
@@ -43,6 +44,10 @@ export const Element = memo(
     isWindowElement: boolean;
   }): React.ReactElement => {
     const queryClient = useQueryClient();
+
+    // Mutations
+    const renameFile = useMutation(renameFileMutationOption);
+    const renameFolder = useMutation(renameFolderMutationOption);
 
     // states
     const [nameState, setNameState] = useState(name);
@@ -88,11 +93,11 @@ export const Element = memo(
           elementRect.right > rect.left
         ) {
           selectKey(elementKey);
-        } else if (!pressedKeys.includes('Control')) {
+        } else if (!pressedKeys.includes('Control') && selected) {
           unselectKey(elementKey);
         }
       }
-    }, [elementKey, pressedKeys, rect, selectKey, type, unselectKey]);
+    }, [elementKey, pressedKeys, rect, selectKey, selected, type, unselectKey]);
 
     // update selected element
     useEffect(() => {
@@ -136,38 +141,37 @@ export const Element = memo(
     };
 
     // download file event handler
-    const handleDownload = async () => {
-      const response = await downloadFile(elementKey, name);
-      if (!response) {
-        return;
-      }
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', name);
-      link.style.cssText = 'display:none';
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    };
+    const handleDownload = useCallback(async () => {
+      queryClient
+        .ensureQueryData(downloadFileQueryOption(elementKey, name))
+        .then((response) => {
+          const url = window.URL.createObjectURL(response);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        });
+    }, [elementKey, name, queryClient]);
 
     // rename element event handler
-    const handleTextareaChange = (
+    const handleTextareaChange = useCallback((
       event: React.ChangeEvent<HTMLTextAreaElement>
     ) => {
       const textarea = event.currentTarget;
       textarea.style.height = 'auto';
       textarea.style.height = `${textarea.scrollHeight}px`;
       setNewNameState(textarea.value.replace(/\s/g, '_'));
-    };
+    }, []);
 
     // handle enter key event for renaming
-    const handleEnter = (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    const handleEnter = useCallback((event: React.KeyboardEvent<HTMLTextAreaElement>) => {
       if (event.key === 'Enter' && event.shiftKey === false) {
         event.preventDefault();
         event.currentTarget.closest('form')?.submit();
       }
-    };
+    }, []);
 
     // start renaming effect
     useEffect(() => {
@@ -215,13 +219,17 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          renameFolder(elementKey, newNameState)
+          renameFolder
+            .mutateAsync({
+              folderKey: elementKey,
+              folderName: newNameState,
+            })
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: generateQueryKey('folder', parentKey),
               });
               queryClient.invalidateQueries({
-                queryKey: generateQueryKey('favorite'),
+                queryKey: generateQueryKey('user', 'favorite'),
               });
             })
             .catch(() => {
@@ -235,13 +243,17 @@ export const Element = memo(
           event.preventDefault();
           const tempName = name;
           setNameState(newNameState);
-          renameFile(elementKey, newNameState)
+          renameFile
+            .mutateAsync({
+              fileKey: elementKey,
+              fileName: newNameState,
+            })
             .then(() => {
               queryClient.invalidateQueries({
                 queryKey: generateQueryKey('folder', parentKey),
               });
               queryClient.invalidateQueries({
-                queryKey: generateQueryKey('favorite'),
+                queryKey: generateQueryKey('user', 'favorite'),
               });
             })
             .catch(() => {
@@ -257,6 +269,8 @@ export const Element = memo(
         newNameState,
         parentKey,
         queryClient,
+        renameFile,
+        renameFolder,
         setRenamingKey,
         type,
       ]
