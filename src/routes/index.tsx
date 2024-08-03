@@ -1,20 +1,20 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
 import { z } from 'zod';
 import { useRef, useEffect } from 'react';
-import { Background } from '../components/Background';
-import { Dragger } from '../components/Dragger';
-import { Elements } from '../components/Elements';
-import { OptionMenu } from '../components/OptionMenu';
-import { Progress } from '../components/Progress';
-import { Selector } from '../components/Selector';
-import { WindowV2 } from '../components/Window';
+import { Background } from '../components/pc/Background';
+import { Dragger } from '../components/pc/Dragger';
+import { Elements } from '../components/pc/Elements';
+import { OptionMenu } from '../components/pc/OptionMenu';
+import { Progress } from '../components/pc/Progress';
+import { Selector } from '../components/pc/Selector';
+import { WindowV2 } from '../components/pc/Window';
 import { useWindowStore } from '../store/window.store';
-import { backgroundSelectorContainer } from '../styles/background.css';
-import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
 import MobileDetect from 'mobile-detect';
-import { KeyboardEventHandler } from '../components/KeyboardEventHandler';
-import { CircularLoading } from '../components/CircularLoading';
-import { pcPageContainer } from '../styles/global/container.css';
+import { CircularLoading } from '../components/pc/CircularLoading';
+import { pcPageContainer } from '../styles/common/page.css';
+import { backgroundSelectorContainer } from '../styles/pc/background.css';
+import { KeyboardEventHandler } from '../components/pc/KeyboardEventHandler';
+import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -22,8 +22,10 @@ const codeSchema = z.object({
 
 export const Route = createFileRoute('/')({
   validateSearch: codeSchema,
-  beforeLoad: async ({context: {queryClient}}) => {
-    const rootFolderKey = await queryClient.ensureQueryData(getRootFolderKeyQueryOption(true))
+  beforeLoad: async ({ context: { queryClient } }) => {
+    const rootFolderKey = await queryClient.ensureQueryData(
+      getRootFolderKeyQueryOption(true)
+    );
 
     return {
       rootFolderKey: rootFolderKey,

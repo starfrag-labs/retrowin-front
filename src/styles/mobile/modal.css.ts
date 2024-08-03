@@ -1,16 +1,12 @@
-import { style } from "@vanilla-extract/css";
+import { style, StyleRule } from "@vanilla-extract/css";
+import { flexCenter } from "../common/container.css";
 
-export const modalContainer = style({
+export const modalContainer = style([flexCenter, {
   position: 'fixed',
   top: 0,
   left: 0,
-  width: '100%',
-  height: '100%',
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-})
+}])
 
 export const modal = style({
   width: '80%',
@@ -40,7 +36,7 @@ export const modalButtonContainer = style({
   borderTop: '1px solid rgba(0, 0, 0, 0.4)',
 })
 
-const modalButtonBase = {
+const modalButtonBase: StyleRule = {
   display: 'flex',
   width: '100%',
   justifyContent: 'center',

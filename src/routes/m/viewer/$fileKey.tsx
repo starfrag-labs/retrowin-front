@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { CircularLoading } from '../../../components/CircularLoading';
+import { CircularLoading } from '../../../components/pc/CircularLoading';
 import {
   getFileInfoQueryOption,
   downloadFileQueryOption,

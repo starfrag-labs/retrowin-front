@@ -1,11 +1,4 @@
-import {
-  gradEnd,
-  gradStart,
-  logo,
-  setupLogo,
-  svgContainer,
-  svgPath,
-} from '../styles/logo.css';
+import { logo, svgContainer, gradStart, gradEnd, svgPath, setupLogo } from "../styles/common/logo.css";
 
 export const Logo = ({
   text = true,
@@ -18,6 +11,7 @@ export const Logo = ({
   fontSize?: string;
   setup?: boolean;
 }) => {
+  console.log(gradStart)
   return (
     <div
       className={logo}

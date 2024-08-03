@@ -1,55 +1,38 @@
 import { style } from '@vanilla-extract/css';
+import { flexCenter } from '../common/container.css';
 
-export const imageViewerContainer = style({
-  display: 'flex',
+export const imageViewerContainer = style([flexCenter, {
   flexDirection: 'column',
-  width: '100%',
-  height: '100%',
   justifyContent: 'space-between',
-  alignItems: 'center',
   backgroundColor: 'rgb(0, 0, 0)',
-});
+}]);
 
 export const viewControllerContainer = style({
   display: 'flex',
   flexDirection: 'row',
 });
 
-export const activeControllerButton = style({
+export const activeControllerButton = style([flexCenter, {
   width: '50px',
   height: '50px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
   cursor: 'pointer',
   color: 'rgba(255, 255, 255, 0.5)',
   zIndex: 1,
-});
+}]);
 
-export const inactiveControllerButton = style({
+export const inactiveControllerButton = style([flexCenter, {
   width: '50px',
   height: '50px',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
   cursor: 'pointer',
   color: 'rgba(255, 255, 255, 0.1)',
   zIndex: 1,
-});
+}]);
 
-export const mediaContainer = style({
-  display: 'flex',
-  width: '100%',
-  height: '100%',
-  justifyContent: 'center',
-  alignItems: 'center',
-});
+export const mediaContainer = flexCenter;
 
-export const mediaContent = style({
-  width: '100%',
-  height: '100%',
+export const mediaContent = style([flexCenter, {
   objectFit: 'contain',
-});
+}]);
 
 export const viewerNav = style({
   display: 'flex',

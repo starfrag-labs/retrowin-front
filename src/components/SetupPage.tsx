@@ -1,4 +1,4 @@
-import { setupPageContainer, logoContainer } from '../styles/loading.css';
+import { setupPageContainer, logoContainer } from '../styles/common/loading.css';
 import { Logo } from './Logo';
 
 export const SetupPage = (): React.ReactElement => {

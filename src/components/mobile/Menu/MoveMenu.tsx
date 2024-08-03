@@ -9,7 +9,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaFolder } from 'react-icons/fa';
 import { RiFolderTransferLine } from 'react-icons/ri';
 import { miniFolderIcon } from '../../../styles/mobile/element.css';
-import { CircularLoading } from '../../CircularLoading';
+import { CircularLoading } from '../../pc/CircularLoading';
 import {
   leftJustifiedMenuLabel,
   menu,

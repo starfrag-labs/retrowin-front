@@ -1,12 +1,12 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { QueryClient } from '@tanstack/react-query';
-import { defaultContainer } from '../styles/global/container.css';
 import config from '../utils/config';
 import { SetupPage } from '../components/SetupPage';
 import {
   checkUserQueryOption,
   getProfileQueryOption,
 } from '../utils/queryOptions/user.query';
+import { defaultContainer } from '../styles/common/container.css';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;

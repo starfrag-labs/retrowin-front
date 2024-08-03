@@ -1,38 +1,25 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
+import { popup, slideUp } from '../common/keyframes.css';
+import { flexCenter } from '../common/container.css';
 
-export const slideUp = keyframes({
-  from: {
-    transform: 'translateY(100%)',
-  },
-  to: {
-    transform: 'translateY(0)',
-  },
-});
-
-export const menuContainer = style({
-  display: 'flex',
+export const menuContainer = style([flexCenter, {
   position: 'fixed',
   top: '0',
   flexDirection: 'column',
-  width: '100%',
-  height: '100%',
   // place items at the bottom of the screen
   justifyContent: 'flex-end',
   backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  transition: 'ease-in-out 0.5s',
-});
+  animation: `${popup} 0.1s ease-in-out`,
+}]);
 
-export const menu = style({
-  display: 'flex',
+export const menu = style([flexCenter, {
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
+  height: 'auto',
   backgroundColor: 'whitesmoke',
   borderTop: '1px solid rgba(0, 0, 0, 0.1)',
   borderRadius: '15px 10px 0 0',
   animation: `${slideUp} 0.5s ease-in-out`,
-});
+}]);
 
 export const uploadForm = style({
   display: 'flex',
@@ -42,27 +29,22 @@ export const uploadForm = style({
   justifyContent: 'center',
 });
 
-const menuLabelBase = {
-  fontSize: '1rem',
-  width: '100%',
-  display: 'flex',
-  borderBottom: '1px solid black',
+export const menuLabel = style([flexCenter, {
+  // borderBottom: '1px solid black',
   padding: '10px',
   boxSizing: 'border-box',
-  justifyContent: 'center',
-  alignItems: 'center',
   gap: '1rem',
-} as const;
 
-export const menuLabel = style({
-  ...menuLabelBase,
-  justifyContent: 'center',
-});
+  selectors: {
+    '&:not(:last-child)': {
+      borderBottom: '1px solid rgba(0, 0, 0, 0.5)',
+    },
+  }
+}]);
 
-export const leftJustifiedMenuLabel = style({
-  ...menuLabelBase,
+export const leftJustifiedMenuLabel = style([menuLabel, {
   justifyContent: 'flex-start',
-});
+}]);
 
 export const editMenu = style({
   display: 'flex',

@@ -1,12 +1,5 @@
-import { style, StyleRule } from '@vanilla-extract/css';
-
-export const pageContentContainer = style({
-  display: 'flex',
-  flexDirection: 'column',
-  width: '100%',
-  padding: '4rem 1rem',
-  boxSizing: 'border-box',
-});
+import { style } from '@vanilla-extract/css';
+import { flexCenter } from '../common/container.css';
 
 export const elementsContainer = style({
   display: 'grid',
@@ -17,25 +10,17 @@ export const elementsContainer = style({
   gap: '5px',
 });
 
-const elementContainerBase = {
-  display: 'flex',
+export const elementContainer = style([flexCenter, {
   flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '10px',
-  width: '100%',
   height: 'auto',
+  borderRadius: '10px',
   maxWidth: '50vw',
   boxSizing: 'border-box',
   padding: '10px',
   ':active': {
     backgroundColor: '#f0f0f0',
   },
-} as const;
-
-export const elementContainer = style({
-  ...elementContainerBase,
-});
+}]);
 
 export const selectedElement = style({
   backgroundColor: '#f0f0f0',
@@ -51,40 +36,33 @@ export const elementNameContainer = style({
   textAlign: 'center',
 });
 
-const defaultIcon: StyleRule = {
+export const defaultIcon = style({
   width: '50%',
   height: '50%',
   filter: 'drop-shadow(0 0 1px black)',
-} as const;
+});
 
-export const uploadFileIcon = style({
-  ...defaultIcon,
+export const uploadFileIcon = style([defaultIcon, {
   color: 'lightblue',
-});
+}]);
 
-export const fileIcon = style({
-  ...defaultIcon,
+export const fileIcon = style([defaultIcon, {
   color: 'lightgrey',
-});
+}]);
 
-export const folderIcon = style({
-  ...defaultIcon,
+export const folderIcon = style([defaultIcon, {
   color: 'orange',
-});
+}]);
 
 export const miniFolderIcon = style({
+  display: 'block',
   fontSize: '1.5rem',
   color: 'orange',
 });
 
-export const folderPageMessage = style({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100%',
-  width: '100%',
+export const folderPageMessage = style([flexCenter,{
   fontSize: '1.5rem',
   color: 'grey',
   padding: '1rem',
   boxSizing: 'border-box',
-});
+}]);

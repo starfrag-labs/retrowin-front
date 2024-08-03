@@ -1,10 +1,6 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { CircularLoading } from '../../components/CircularLoading';
+import { CircularLoading } from '../../components/pc/CircularLoading';
 import { useCallback, useEffect, useState } from 'react';
-import {
-  backgroundContainer,
-  background,
-} from '../../styles/mobile/background.css';
 import { getFolderInfoQueryOption } from '../../utils/queryOptions/folder.query';
 import { Elements } from '../../components/mobile/Elements';
 import { IoMdReturnLeft } from 'react-icons/io';
@@ -22,7 +18,10 @@ import { EditMenu } from '../../components/mobile/Menu/EditMenu';
 import { ProgressSpinner } from '../../components/mobile/ProgressSpinner';
 import { useQuery } from '@tanstack/react-query';
 import { useElementStore } from '../../store/element.store';
-import { pageContentContainer } from '../../styles/mobile/element.css';
+import {
+  mobilePageContainer,
+  mobilePageContent,
+} from '../../styles/common/page.css';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -64,8 +63,7 @@ function Component() {
   }, [selectedKeys.length, setSelecting]);
 
   return (
-    <div className={backgroundContainer}>
-      <div className={background} />
+    <div className={mobilePageContainer}>
       <nav className={navContainer}>
         {infoQuery.data?.parentKey ? (
           <div className={navItemsContainer}>
@@ -96,7 +94,7 @@ function Component() {
           />
         </div>
       </nav>
-      <div className={pageContentContainer}>
+      <div className={mobilePageContent}>
         <Elements folderKey={folderKey} selecting={selecting} />
       </div>
       {uploading && <Uploader folderKey={folderKey} toggle={toggleUploading} />}
