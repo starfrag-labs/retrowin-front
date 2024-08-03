@@ -19,7 +19,7 @@ export const imageSrc = style({
 const defaultButton: StyleRule = {
   width: '50px',
   height: '50px',
-  color: 'white',
+  color: 'rgb(255, 255, 255)',
   padding: '10px',
   cursor: 'pointer',
   position: 'absolute',

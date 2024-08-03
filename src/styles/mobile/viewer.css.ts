@@ -4,7 +4,7 @@ import { flexCenter } from '../common/container.css';
 export const imageViewerContainer = style([flexCenter, {
   flexDirection: 'column',
   justifyContent: 'space-between',
-  backgroundColor: 'rgb(0, 0, 0)',
+  backgroundColor: 'black',
 }]);
 
 export const viewControllerContainer = style({

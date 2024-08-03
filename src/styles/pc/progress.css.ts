@@ -1,9 +1,10 @@
 import { style } from '@vanilla-extract/css';
+import { theme } from '../themes/theme.css';
 
 export const progressWindow = style({
   position: 'fixed',
-  backgroundColor: 'rgba(250, 250, 250, 1)',
-  border: '1px solid black',
+  backgroundColor: theme.primary.normal,
+  border: theme.border.normal,
   overflow: 'hidden',
   bottom: '0',
   right: '0',

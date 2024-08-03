@@ -1,9 +1,13 @@
 import { setupPageContainer, logoContainer } from '../styles/common/loading.css';
 import { Logo } from './Logo';
 
-export const SetupPage = (): React.ReactElement => {
+export const SetupPage = ({
+  theme,
+}: {
+  theme?: string;
+}): React.ReactElement => {
   return (
-    <div className={setupPageContainer}>
+    <div className={`${setupPageContainer} ${theme}`}>
       <div className={logoContainer}>
         <Logo text={false} setup />
       </div>

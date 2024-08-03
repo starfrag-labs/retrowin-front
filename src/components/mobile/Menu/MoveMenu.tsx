@@ -72,24 +72,26 @@ export const MoveMenu = ({
     if (readQuery.isLoading || !readQuery.data) {
       return;
     }
-    await Promise.all([
-      readQuery.data.files.forEach(async (file) => {
-        if (isSelected(file.key)) {
-          moveFile.mutateAsync({
-            fileKey: file.key,
-            targetKey: targetFolderKey,
-          });
-        }
-      }),
-      readQuery.data.folders.forEach(async (folder) => {
-        if (isSelected(folder.key)) {
-          moveFolder.mutateAsync({
-            folderKey: folder.key,
-            targetKey: targetFolderKey,
-          });
-        }
-      }),
-    ]).then(() => {
+
+    const folderPromise = readQuery.data.folders
+      .filter((folder) => isSelected(folder.key))
+      .map((folder) =>
+        moveFolder.mutateAsync({
+          folderKey: folder.key,
+          targetKey: targetFolderKey,
+        })
+      );
+
+    const filePromise = readQuery.data.files
+      .filter((file) => isSelected(file.key))
+      .map((file) =>
+        moveFile.mutateAsync({
+          fileKey: file.key,
+          targetKey: targetFolderKey,
+        })
+      );
+
+    await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', targetFolderKey),
       });

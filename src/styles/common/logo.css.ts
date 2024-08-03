@@ -1,24 +1,28 @@
 import { createVar, keyframes, style } from '@vanilla-extract/css';
 import { flexCenter } from './container.css';
+import { theme } from '../themes/theme.css';
 
 export const gradStart = createVar();
 export const gradEnd = createVar();
 
-export const logo = style([flexCenter, {
-  flexDirection: 'row',
-  fontWeight: 'bold',
-  // gradient text
-  background: `linear-gradient(to right, ${gradStart}, ${gradEnd})`,
-  WebkitBackgroundClip: 'text',
-  WebkitTextFillColor: 'transparent',
-  // border to text
-  WebkitTextStroke: '0.25px black',
+export const logo = style([
+  flexCenter,
+  {
+    flexDirection: 'row',
+    fontWeight: 'bold',
+    // gradient text
+    background: `linear-gradient(to bottom, ${gradStart}, ${gradEnd})`,
+    WebkitBackgroundClip: 'text',
+    WebkitTextFillColor: 'transparent',
+    // border to text
+    WebkitTextStroke: '0.25px black',
 
-  vars: {
-    [gradStart]: '#00aad2',
-    [gradEnd]: '#008cbb',
+    vars: {
+      [gradStart]: theme.logo.gradStart,
+      [gradEnd]: theme.logo.gradEnd,
+    },
   },
-}]);
+]);
 
 export const svgContainer = style({
   display: 'flex',
@@ -80,7 +84,7 @@ export const svgPath = style({
   fill: 'url(#custom-grad)',
   width: '100%',
   height: '100%',
-  stroke: '#231916',
+  stroke: theme.logo.stroke,
   strokeOpacity: 0,
   strokeWidth: '0.1rem',
 

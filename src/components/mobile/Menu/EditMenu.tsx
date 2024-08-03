@@ -7,11 +7,19 @@ import { useEffect, useState } from 'react';
 import { MoveMenu } from './MoveMenu';
 import { Modal } from '../Modal';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { deleteFolderMutationOption, readFolderQueryOption, renameFolderMutationOption } from '../../../utils/queryOptions/folder.query';
+import {
+  deleteFolderMutationOption,
+  readFolderQueryOption,
+  renameFolderMutationOption,
+} from '../../../utils/queryOptions/folder.query';
 import { useElementStore } from '../../../store/element.store';
 import { modalInput } from '../../../styles/mobile/modal.css';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
-import { deleteFileMutationOption, downloadFileQueryOption, renameFileMutationOption } from '../../../utils/queryOptions/file.query';
+import {
+  deleteFileMutationOption,
+  downloadFileQueryOption,
+  renameFileMutationOption,
+} from '../../../utils/queryOptions/file.query';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
@@ -74,17 +82,17 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
       return;
     }
 
-    await Promise.all([
-      readQuery.data.folders.forEach(
-        (folder) => isSelected(folder.key) && deleteFolder.mutateAsync(folder.key)
-      ),
-      readQuery.data.files.forEach(
-        (file) => isSelected(file.key) && deleteFile.mutateAsync(file.key)
-      ),
-    ]).then(() => {
+    const folderPromise = readQuery.data.folders
+      .filter((folder) => isSelected(folder.key))
+      .map((folder) => deleteFolder.mutateAsync(folder.key));
+    const filePromise = readQuery.data.files
+      .filter((file) => isSelected(file.key))
+      .map((file) => deleteFile.mutateAsync(file.key));
+
+    await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', folderKey),
-      })
+      });
       unselectAllKeys();
     });
   };
@@ -119,23 +127,27 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     }
 
     if (folder && folder.name !== modifiedNewName) {
-      await renameFolder.mutateAsync({
-        folderKey: folder.key,
-        folderName: modifiedNewName,
-      }).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: generateQueryKey('folder', folderKey),
+      await renameFolder
+        .mutateAsync({
+          folderKey: folder.key,
+          folderName: modifiedNewName,
         })
-      });
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', folderKey),
+          });
+        });
     } else if (file && file.name !== modifiedNewName) {
-      await renameFile.mutateAsync({
-        fileKey: file.key,
-        fileName: modifiedNewName,
-      }).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: generateQueryKey('folder', folderKey),
-        }) 
-      });
+      await renameFile
+        .mutateAsync({
+          fileKey: file.key,
+          fileName: modifiedNewName,
+        })
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', folderKey),
+          });
+        });
     }
 
     unselectKey(selectedKeys[0]);
@@ -159,15 +171,17 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     unselectAllKeys();
 
     selectedFiles.forEach(async (file) => {
-      queryClient.ensureQueryData(downloadFileQueryOption(file.key, file.name)).then((response) => {
-        const url = window.URL.createObjectURL(response);
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+      queryClient
+        .ensureQueryData(downloadFileQueryOption(file.key, file.name))
+        .then((response) => {
+          const url = window.URL.createObjectURL(response);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file.name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        });
     });
   };
 

@@ -1,4 +1,5 @@
 import { style } from '@vanilla-extract/css';
+import { theme } from '../themes/theme.css';
 
 export const navContainer = style({
   display: 'flex',
@@ -13,7 +14,7 @@ export const navContainer = style({
   // shadow under nav
   boxShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
   boxSizing: 'border-box',
-  backgroundColor: 'rgba(255, 255, 255, 0.9)',
+  backgroundColor: theme.primary.normal,
   zIndex: 1,
 });
 
@@ -40,6 +41,6 @@ export const uploadIcon = style({
   height: '30px',
   width: '30px',
   cursor: 'pointer',
-  color: 'rgba(0, 0, 0, 0.8)',
+  color: theme.text.normal,
   transitionDuration: '0.3s',
 });

@@ -1,4 +1,5 @@
 import { StyleRule, style } from '@vanilla-extract/css';
+import { theme } from '../themes/theme.css';
 
 export const elementsContainer = style({
   display: 'grid',
@@ -28,12 +29,12 @@ export const backgroundSelectedElement = style([element, {
 
 export const windowElement = style([element, {
   ':hover': {
-    backgroundColor: 'rgba(0, 0, 0, 0.1)',
+    backgroundColor: theme.highlight.h1,
   },
 }]);
 
 export const windowSelectedElement = style([element, {
-  backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  backgroundColor: theme.highlight.h2,
 }]);
 
 const defaultIcon: StyleRule = {
@@ -43,17 +44,17 @@ const defaultIcon: StyleRule = {
 
 export const uploadFileIcon = style({
   ...defaultIcon,
-  color: 'lightblue',
+  color: theme.icon.upload,
 });
 
 export const fileIcon = style({
   ...defaultIcon,
-  color: 'lightgrey',
+  color: theme.icon.file,
 });
 
 export const folderIcon = style({
   ...defaultIcon,
-  color: 'orange',
+  color: theme.icon.folder,
 });
 
 const defaultText: StyleRule = {
@@ -74,7 +75,7 @@ export const backgroundElementNameText = style({
 
 export const windowElementNameText = style({
   ...defaultText,
-  color: 'black',
+  color: theme.text.normal,
 });
 
 export const elementNameTextarea = style({
@@ -102,7 +103,7 @@ export const draggingElementsIcon = style({
 
 export const draggingElementsCount = style({
   position: 'relative',
-  border: '1px solid black',
+  border: theme.border.normal,
   borderRadius: '50%',
   backgroundColor: 'lightblue',
   bottom: '1.5rem',

@@ -15,5 +15,4 @@ globalStyle("body", {
   WebkitUserSelect: 'none',
   MozUserSelect: 'none',
   msUserSelect: 'none',
-  color: 'rgb(255, 255, 255)',
 })

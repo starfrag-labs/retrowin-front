@@ -6,7 +6,6 @@ import {
   checkUserQueryOption,
   getProfileQueryOption,
 } from '../utils/queryOptions/user.query';
-import { defaultContainer } from '../styles/common/container.css';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
@@ -29,7 +28,7 @@ export const Route = createRootRouteWithContext<{
     }
   },
   loader: async () => {
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    // await new Promise((resolve) => setTimeout(resolve, 3000));
   },
   pendingComponent: () => <SetupPage />,
   component: RootComponent,
@@ -37,8 +36,6 @@ export const Route = createRootRouteWithContext<{
 
 function RootComponent() {
   return (
-    <div className={defaultContainer}>
-      <Outlet />
-    </div>
+    <Outlet />
   );
 }

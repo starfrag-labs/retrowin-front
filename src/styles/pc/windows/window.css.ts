@@ -1,13 +1,14 @@
-import { StyleRule, style } from "@vanilla-extract/css";
+import { StyleRule, style } from '@vanilla-extract/css';
+import { theme } from '../../themes/theme.css';
 
 export const windowContainer = style({
   position: 'fixed',
-  backgroundColor: 'rgba(250, 250, 250, 1)',
-  border: '1px solid black',
+  backgroundColor: theme.primary.normal,
+  border: theme.border.normal,
 });
 
 export const windowContent = style({
-  width: '100%',  
+  width: '100%',
 });
 
 export const windowHeader = style({
@@ -16,8 +17,8 @@ export const windowHeader = style({
   justifyContent: 'space-between',
   alignItems: 'center',
   padding: '0.5rem',
-  backgroundColor: 'rgb(200, 200, 200)',
-  borderBottom: '1px solid black',
+  backgroundColor: theme.primary.dark,
+  color: theme.text.normal,
 });
 
 export const windowHeaderLeft = style({
@@ -48,7 +49,7 @@ export const maximizeBtn = style({
   backgroundColor: 'rgb(100, 255, 100)',
 });
 
-export const minimizeBtn = style({  
+export const minimizeBtn = style({
   ...btn,
   backgroundColor: 'rgb(100, 100, 255)',
 });

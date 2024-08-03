@@ -5,6 +5,7 @@ export const menuContainer = style({
   display: "none",
   backgroundColor: 'rgb(240, 240, 240)',
   border: '1px solid black',
+  color: 'black',
   boxShadow: '2px 2px 2px rgba(0, 0, 0, 0.5)',
 });
 

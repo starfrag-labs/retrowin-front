@@ -1,9 +1,13 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { flexCenter } from './container.css';
+import { theme } from '../themes/theme.css';
 
-export const setupPageContainer = style([flexCenter,{
-  backgroundColor: 'white',
-}]);
+export const setupPageContainer = style([
+  flexCenter,
+  {
+    backgroundColor: theme.primary.normal,
+  },
+]);
 
 export const logoContainer = style({
   width: '20rem',
@@ -47,12 +51,15 @@ const gradient = keyframes({
   },
 });
 
-export const boxLoading = style([flexCenter, {
-  background:
-    'linear-gradient(270deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.01))',
-  backgroundSize: '600% 600%',
-  animation: `${gradient} 2s linear infinite`,
-}]);
+export const boxLoading = style([
+  flexCenter,
+  {
+    background:
+      'linear-gradient(270deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.01))',
+    backgroundSize: '600% 600%',
+    animation: `${gradient} 2s linear infinite`,
+  },
+]);
 
 export const boxLoadingDots = style({
   fontSize: '2rem',

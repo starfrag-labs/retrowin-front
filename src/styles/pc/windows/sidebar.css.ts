@@ -1,8 +1,9 @@
-import { style } from "@vanilla-extract/css";
+import { style } from '@vanilla-extract/css';
+import { theme } from '../../themes/theme.css';
 
 export const sidebarContainer = style({
   display: 'flex',
-  borderRight: '1px solid rgba(0, 0, 0, 0.5)',
+  borderRight: theme.border.light,
   width: '8rem',
   overflow: 'auto',
 });
@@ -15,13 +16,13 @@ export const favoriteSidebar = style({
 
 export const favoriteTitle = style({
   fontSize: '0.8rem',
-  borderBottom: '1px solid rgba(0, 0, 0, 0.2)',
+  borderBottom: theme.border.light,
   padding: '0.25rem 0.5rem',
   paddingTop: '0.5rem',
   marginBottom: '0.25rem',
   textTransform: 'capitalize',
   fontWeight: 'bold',
-  color: 'rgba(0, 0, 0, 0.8)',
+  color: theme.text.normal,
 });
 
 export const favoriteItem = style({
@@ -32,9 +33,9 @@ export const favoriteItem = style({
   justifyContent: 'flex-start',
   padding: '0.1rem 0.75rem',
   gap: '0.1rem',
-  color: 'rgba(0, 0, 0, 0.8)',
+  color: theme.text.normal,
   ':hover': {
-    backgroundColor: '#f0f0f0',
+    backgroundColor: theme.highlight.h1,
   },
 });
 
