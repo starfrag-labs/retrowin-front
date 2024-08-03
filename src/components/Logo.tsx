@@ -11,7 +11,6 @@ export const Logo = ({
   fontSize?: string;
   setup?: boolean;
 }) => {
-  console.log(gradStart)
   return (
     <div
       className={logo}
