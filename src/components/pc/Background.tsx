@@ -29,7 +29,9 @@ export const Background = (): React.ReactElement => {
   const dayEnd = 18 * 60 * 60 * 1000;
   const changeDayTime = 2 * 60 * 60 * 1000;
   const timeRefreshInterval = 60000;
-  const initStarCount = 300;
+  const initStarCount = window.innerWidth / 3;
+  console.log(initStarCount);
+  
   const meteorInterval = 5000;
 
   // states
