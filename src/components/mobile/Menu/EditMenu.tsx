@@ -78,10 +78,10 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   const handleDelete = async () => {
+    toggleDeleteModalOpen();
     if (readQuery.isLoading || !readQuery.data) {
       return;
     }
-
     const folderPromise = readQuery.data.folders
       .filter((folder) => isSelected(folder.key))
       .map((folder) => deleteFolder.mutateAsync(folder.key));
@@ -91,21 +91,20 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
 
     await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
-        queryKey: generateQueryKey('folder', folderKey),
+        queryKey: generateQueryKey('folder'),
       });
       unselectAllKeys();
     });
   };
 
   const handleRename = async () => {
+    toggleRenameModalOpen();
     if (selectedKeys.length !== 1 || newName === '') {
       return;
     }
-
     if (readQuery.isLoading || !readQuery.data) {
       return;
     }
-
     const file = readQuery.data.files.find(
       (file) => file.key === selectedKeys[0]
     );
@@ -149,13 +148,12 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
           });
         });
     }
-
     unselectKey(selectedKeys[0]);
     setNewName('');
-    toggleRenameModalOpen();
   };
 
   const handleDownload = async () => {
+    toggleDownloadModalOpen();
     if (selectedKeys.length === 0) {
       return;
     }
@@ -166,10 +164,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     const selectedFiles = readQuery.data.files.filter((file) =>
       isSelected(file.key)
     );
-
-    toggleDownloadModalOpen();
     unselectAllKeys();
-
     selectedFiles.forEach(async (file) => {
       queryClient
         .ensureQueryData(downloadFileQueryOption(file.key, file.name))

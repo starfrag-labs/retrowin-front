@@ -42,6 +42,7 @@ export const MoveMenu = ({
   const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
 
   // Queries
+  const readCurrentFolderQuery = useQuery(readFolderQueryOption(folderKey));
   const readQuery = useQuery(readFolderQueryOption(targetFolderKey));
   const infoQuery = useQuery(getFolderInfoQueryOption(targetFolderKey));
   const pathQuery = useQuery(getFolderPathQueryOption(targetFolderKey));
@@ -69,11 +70,11 @@ export const MoveMenu = ({
   );
 
   const handleMove = async () => {
-    if (readQuery.isLoading || !readQuery.data) {
+    toggle();
+    if (readQuery.isLoading || !readQuery.data || !readCurrentFolderQuery.data) {
       return;
     }
-
-    const folderPromise = readQuery.data.folders
+    const folderPromise = readCurrentFolderQuery.data.folders
       .filter((folder) => isSelected(folder.key))
       .map((folder) =>
         moveFolder.mutateAsync({
@@ -81,8 +82,7 @@ export const MoveMenu = ({
           targetKey: targetFolderKey,
         })
       );
-
-    const filePromise = readQuery.data.files
+    const filePromise = readCurrentFolderQuery.data.files
       .filter((file) => isSelected(file.key))
       .map((file) =>
         moveFile.mutateAsync({
@@ -90,13 +90,11 @@ export const MoveMenu = ({
           targetKey: targetFolderKey,
         })
       );
-
     await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
-        queryKey: generateQueryKey('folder', targetFolderKey),
+        queryKey: generateQueryKey('folder'),
       });
       unselectAllKeys();
-      toggle();
     });
   };
 
