@@ -31,7 +31,7 @@ export const ProgressSpinner = (): React.ReactElement => {
 
   useEffect(() => {
     if (spinnerRef.current) {
-      spinnerRef.current.style.background = `conic-gradient(${theme.mobile.spinner.loaded} ${totalProgress * 3.6}deg, ${theme.mobile.spinner.total} 0deg)`;
+      spinnerRef.current.style.background = `conic-gradient(${theme.text.normal} ${totalProgress * 3.6}deg, ${theme.primary.normal} 0deg)`;
     }
   }, [totalProgress]);
 
