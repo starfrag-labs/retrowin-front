@@ -10,7 +10,7 @@ export const appContainer = style([
   defaultContainer,
   {
     backgroundColor: theme.primary.normal,
-    color: theme.text.normal,
+   color: theme.text.normal,
   },
 ]);
 

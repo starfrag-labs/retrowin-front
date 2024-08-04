@@ -1,7 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { flexCenter, defaultContainer } from './container.css';
 import { opacityAnimation } from './keyframes.css';
-import { theme } from '../themes/theme.css';
 
 export const pcPageContainer = style([
   flexCenter,
@@ -18,8 +17,6 @@ export const mobilePageContainer = style([
   {
     display: 'flex',
     flexDirection: 'column',
-    backgroundColor: theme.primary.normal,
-    color: theme.text.normal,
   },
 ]);
 

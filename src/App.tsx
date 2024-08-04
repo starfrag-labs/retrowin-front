@@ -6,6 +6,12 @@ import { appContainer } from './styles/common/container.css';
 import { useThemeStore } from './store/theme.store';
 import { useEffect } from 'react';
 import type { ThemeKey } from './store/theme.store';
+import {
+  darkPrimary,
+  darkTheme,
+  lightPrimary,
+  lightTheme,
+} from './styles/themes/theme.css';
 
 const queryClient = new QueryClient();
 const router = createRouter({
@@ -35,6 +41,14 @@ export function App() {
       setTheme(prefersDark ? 'dark' : 'light');
     } else setTheme(themeKey as ThemeKey);
   }, [setTheme]);
+
+  useEffect(() => {
+    if (theme === lightTheme) {
+      document.body.style.backgroundColor = lightPrimary;
+    } else if (theme === darkTheme) {
+      document.body.style.backgroundColor = darkPrimary;
+    }
+  }, [theme]);
 
   return (
     <div className={`${theme} ${appContainer}`}>

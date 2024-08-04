@@ -33,6 +33,9 @@ export const theme = createThemeContract({
   }
 });
 
+export const lightPrimary = '#ffffff';
+export const darkPrimary = '#424242';
+
 export const darkTheme = createTheme(theme, {
   text: {
     normal: '#f0f0f0',
@@ -45,7 +48,7 @@ export const darkTheme = createTheme(theme, {
     bold: '2px solid #f0f0f0',
   },
   primary: {
-    normal: '#424242',
+    normal: darkPrimary,
     dark: '#2e2e2e',
     light: '#6e6e6e',
   },
@@ -78,7 +81,7 @@ export const lightTheme = createTheme(theme, {
     bold: '2px solid #000',
   },
   primary: {
-    normal: '#ffffff',
+    normal: lightPrimary,
     dark: '#e0e0e0',
     light: '#ffffff',
   },

@@ -15,7 +15,7 @@ import { MdDelete } from 'react-icons/md';
 import {
   activeControllerButton,
   mediaContent,
-  imageViewerContainer,
+  viewerContainer,
   inactiveControllerButton,
   pageNumber,
   viewControllerContainer,
@@ -166,7 +166,7 @@ function Component() {
   };
 
   return (
-    <div className={imageViewerContainer}>
+    <div className={viewerContainer}>
       {loading || !fileName || !sourceUrl ? (
         <CircularLoading />
       ) : (
