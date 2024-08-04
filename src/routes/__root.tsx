@@ -28,7 +28,7 @@ export const Route = createRootRouteWithContext<{
     }
   },
   loader: async () => {
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
   },
   pendingComponent: () => <SetupPage />,
   component: RootComponent,
