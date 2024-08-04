@@ -50,7 +50,7 @@ export const darkTheme = createTheme(theme, {
     light: '#6e6e6e',
   },
   logo: {
-    gradStart: '#00C3F!',
+    gradStart: '#00C3F1',
     gradEnd: '#00a8f0',
     stroke: '#fff',
   },

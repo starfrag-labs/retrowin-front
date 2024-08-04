@@ -1,11 +1,11 @@
-import { keyframes } from "@vanilla-extract/css";
+import { keyframes } from '@vanilla-extract/css';
 
-export const popup = keyframes({
-  '0%': { opacity: 0 },
-  '100%': { opacity: 1 },
+export const opacityAnimation = keyframes({
+  from: { opacity: 0 },
+  to: { opacity: 1 },
 });
 
-export const slideUp = keyframes({
+export const slideUpAnimation = keyframes({
   from: {
     transform: 'translateY(100%)',
   },
@@ -13,4 +13,3 @@ export const slideUp = keyframes({
     transform: 'translateY(0)',
   },
 });
-

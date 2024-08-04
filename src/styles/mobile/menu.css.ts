@@ -1,5 +1,5 @@
 import { style } from '@vanilla-extract/css';
-import { popup, slideUp } from '../common/keyframes.css';
+import { opacityAnimation, slideUpAnimation } from '../common/keyframes.css';
 import { flexCenter } from '../common/container.css';
 import { theme } from '../themes/theme.css';
 
@@ -12,7 +12,7 @@ export const menuContainer = style([
     // place items at the bottom of the screen
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
-    animation: `${popup} 0.1s ease-in-out`,
+    animation: `${opacityAnimation} 0.1s ease-in-out`,
   },
 ]);
 
@@ -23,7 +23,7 @@ export const menu = style([
     height: 'auto',
     backgroundColor: theme.primary.light,
     borderRadius: '10px 10px 0 0',
-    animation: `${slideUp} 0.5s ease-in-out`,
+    animation: `${slideUpAnimation} 0.5s ease-in-out`,
   },
 ]);
 

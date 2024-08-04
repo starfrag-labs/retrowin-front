@@ -31,16 +31,15 @@ export const navItemsContainer = style({
   gap: '0.5rem',
 });
 
-export const returnIcon = style({
-  height: '30px',
-  width: '30px',
-  cursor: 'pointer',
-});
-
-export const uploadIcon = style({
-  height: '30px',
-  width: '30px',
-  cursor: 'pointer',
+export const icon = style({
+  width: '2rem',
+  height: '2rem',
   color: theme.text.normal,
   transitionDuration: '0.3s',
 });
+
+export const smallIcon = style([icon, {
+  width: '1.5rem',
+  height: '1.5rem',
+}]);
+

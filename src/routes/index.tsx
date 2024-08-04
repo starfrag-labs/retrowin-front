@@ -12,9 +12,12 @@ import { useWindowStore } from '../store/window.store';
 import MobileDetect from 'mobile-detect';
 import { CircularLoading } from '../components/pc/CircularLoading';
 import { pcPageContainer } from '../styles/common/page.css';
-import { backgroundSelectorContainer } from '../styles/pc/background.css';
+import { backgroundSelectorContainer, moonThemeIcon, sunThemeIcon } from '../styles/pc/background.css';
 import { KeyboardEventHandler } from '../components/pc/KeyboardEventHandler';
 import { getRootFolderKeyQueryOption, readFolderQueryOption } from '../utils/queryOptions/folder.query';
+import { useThemeStore } from '../store/theme.store';
+import { FaSun } from 'react-icons/fa';
+import { FaMoon } from 'react-icons/fa';
 
 const codeSchema = z.object({
   mobile: z.boolean().optional().default(false),
@@ -42,8 +45,12 @@ function IndexComponent() {
   const { rootFolderKey } = Route.useRouteContext();
   const { mobile } = Route.useSearch();
 
+  // Store
   const window = useWindowStore((state) => state.windows);
-
+  const themeKey = useThemeStore((state) => state.getCurrentThemeKey());
+  
+  // Actions
+  const setTheme = useThemeStore((state) => state.setTheme);
   const setBackgroundWindowRef = useWindowStore(
     (state) => state.setBackgroundWindowRef
   );
@@ -85,6 +92,22 @@ function IndexComponent() {
           </OptionMenu>
         </Dragger>
       </Selector>
+      {themeKey === 'light' && ( 
+        <FaSun
+          className={sunThemeIcon}
+          onClick={() => {
+            setTheme('dark');
+          }}
+        />
+      )}
+      {themeKey === 'dark' && (
+        <FaMoon
+        className={moonThemeIcon}
+          onClick={() => {
+            setTheme('light');
+          }}
+        />
+      )}
     </div>
   );
 }

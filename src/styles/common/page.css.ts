@@ -1,6 +1,6 @@
 import { style } from '@vanilla-extract/css';
 import { flexCenter, defaultContainer } from './container.css';
-import { popup } from './keyframes.css';
+import { opacityAnimation } from './keyframes.css';
 import { theme } from '../themes/theme.css';
 
 export const pcPageContainer = style([
@@ -8,7 +8,7 @@ export const pcPageContainer = style([
   {
     flexDirection: 'column',
     overflow: 'hidden',
-    animationName: popup,
+    animationName: opacityAnimation,
     animationDuration: '1s',
   },
 ]);

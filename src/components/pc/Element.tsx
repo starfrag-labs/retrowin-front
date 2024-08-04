@@ -169,17 +169,6 @@ export const Element = memo(
       []
     );
 
-    // handle enter key event for renaming
-    const handleEnter = useCallback(
-      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
-        if (event.key === 'Enter' && event.shiftKey === false) {
-          event.preventDefault();
-          event.currentTarget.closest('form')?.submit();
-        }
-      },
-      []
-    );
-
     // start renaming effect
     useEffect(() => {
       if (renaming && renameRef.current) {
@@ -214,8 +203,8 @@ export const Element = memo(
     }, [highlightElement]);
 
     // rename element effect
-    const renameElement = useCallback(
-      (event: KeyboardEvent) => {
+    const handleKeydown = useCallback(
+      (event: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (event.key === 'Escape') {
           setRenamingKey(null);
         } else if (
@@ -224,6 +213,7 @@ export const Element = memo(
           type === 'folder'
         ) {
           event.preventDefault();
+          setRenamingKey(null);
           const tempName = name;
           setNameState(newNameState);
           renameFolder
@@ -248,6 +238,7 @@ export const Element = memo(
           type === 'file'
         ) {
           event.preventDefault();
+          setRenamingKey(null);
           const tempName = name;
           setNameState(newNameState);
           renameFile
@@ -282,13 +273,6 @@ export const Element = memo(
         type,
       ]
     );
-
-    useEffect(() => {
-      document.addEventListener('keydown', renameElement);
-      return () => {
-        document.removeEventListener('keydown', renameElement);
-      };
-    }, [renameElement]);
 
     const handleEndRenaming = useCallback(
       (e: MouseEvent) => {
@@ -340,7 +324,7 @@ export const Element = memo(
               ref={renameRef}
               className={elementNameTextarea}
               onChange={handleTextareaChange}
-              onKeyDown={handleEnter}
+              onKeyDown={handleKeydown}
               spellCheck="false"
               onFocus={(e) => e.currentTarget.select()}
             />

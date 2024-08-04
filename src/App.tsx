@@ -2,8 +2,10 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { darkTheme, lightTheme } from './styles/themes/theme.css';
 import { appContainer } from './styles/common/container.css';
+import { useThemeStore } from './store/theme.store';
+import { useEffect } from 'react';
+import type { ThemeKey } from './store/theme.store';
 
 const queryClient = new QueryClient();
 const router = createRouter({
@@ -21,14 +23,24 @@ declare module '@tanstack/react-router' {
 }
 
 export function App() {
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
+
+  useEffect(() => {
+    const themeKey = localStorage.getItem('theme');
+    if (themeKey) {
+      setTheme(themeKey as ThemeKey);
+    }
+  }, [setTheme]);
+
   return (
-    <div className={`${darkTheme} ${appContainer}`}>
+    <div className={`${theme} ${appContainer}`}>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
         {import.meta.env.DEV && (
           <ReactQueryDevtools
             initialIsOpen={false}
-            buttonPosition="bottom-right"
+            buttonPosition="bottom-left"
             position="bottom"
           />
         )}

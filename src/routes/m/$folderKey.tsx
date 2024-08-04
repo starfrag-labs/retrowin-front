@@ -4,12 +4,14 @@ import { useCallback, useEffect, useState } from 'react';
 import { getFolderInfoQueryOption } from '../../utils/queryOptions/folder.query';
 import { Elements } from '../../components/mobile/Elements';
 import { IoMdReturnLeft } from 'react-icons/io';
+import { FaRegSun } from 'react-icons/fa';
+import { FaRegMoon } from 'react-icons/fa';
 import {
   navContainer,
   navItemsContainer,
   navLogoContainer,
-  returnIcon,
-  uploadIcon,
+  icon,
+  smallIcon,
 } from '../../styles/mobile/nav.css';
 import { FaPlus } from 'react-icons/fa6';
 import { Logo } from '../../components/Logo';
@@ -22,6 +24,7 @@ import {
   mobilePageContainer,
   mobilePageContent,
 } from '../../styles/common/page.css';
+import { useThemeStore } from '../../store/theme.store';
 
 export const Route = createFileRoute('/m/$folderKey')({
   loader: async ({ params }) => {
@@ -38,7 +41,7 @@ function Component() {
   const folderKey = Route.useParams().folderKey;
 
   // States
-  const [uploading, setUploading] = useState<boolean>(false);
+  const [openMenu, setOpenMenu] = useState<boolean>(false);
   const [selecting, setSelecting] = useState<boolean>(false);
 
   // Query
@@ -46,6 +49,8 @@ function Component() {
 
   // Store
   const selectedKeys = useElementStore((state) => state.selectedKeys);
+  const themeKey = useThemeStore((state) => state.getCurrentThemeKey());
+  const setTheme = useThemeStore((state) => state.setTheme);
 
   // Actions
   const unselectAll = useElementStore((state) => state.unselectAllKeys);
@@ -54,9 +59,9 @@ function Component() {
   const navigate = useNavigate({ from: '/m/$folderKey' });
 
   // Functions
-  const toggleUploading = useCallback(() => {
-    setUploading(!uploading);
-  }, [uploading, setUploading]);
+  const toggleOpenMenu = useCallback(() => {
+    setOpenMenu(!openMenu);
+  }, [openMenu, setOpenMenu]);
 
   useEffect(() => {
     setSelecting(selectedKeys.length > 0);
@@ -74,7 +79,7 @@ function Component() {
                   params: { folderKey: infoQuery.data.parentKey },
                 });
               }}
-              className={returnIcon}
+              className={icon}
             />
             <div>{infoQuery.data.name}</div>
           </div>
@@ -85,11 +90,18 @@ function Component() {
         )}
         <div className={navItemsContainer}>
           <ProgressSpinner />
+          {openMenu && themeKey === 'light' && (
+            <FaRegMoon onTouchEnd={() => setTheme('dark')} className={smallIcon} />
+          )}
+          {openMenu && themeKey === 'dark' && (
+            <FaRegSun onTouchEnd={() => setTheme('light')} className={smallIcon} />
+          )}
           <FaPlus
-            className={uploadIcon}
-            onTouchEnd={selecting ? unselectAll : toggleUploading}
+            className={icon}
+            onTouchEnd={selecting ? unselectAll : toggleOpenMenu}
             style={{
-              transform: selecting ? 'rotate(45deg)' : 'rotate(0deg)',
+              transform:
+                selecting || openMenu ? 'rotate(45deg)' : 'rotate(0deg)',
             }}
           />
         </div>
@@ -97,8 +109,8 @@ function Component() {
       <div className={mobilePageContent}>
         <Elements folderKey={folderKey} selecting={selecting} />
       </div>
-      {uploading && <Uploader folderKey={folderKey} toggle={toggleUploading} />}
-      {selecting && !uploading && <EditMenu folderKey={folderKey} />}
+      {openMenu && <Uploader folderKey={folderKey} toggle={toggleOpenMenu} />}
+      {selecting && !openMenu && <EditMenu folderKey={folderKey} />}
     </div>
   );
 }
