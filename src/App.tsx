@@ -28,9 +28,12 @@ export function App() {
 
   useEffect(() => {
     const themeKey = localStorage.getItem('theme');
-    if (themeKey) {
-      setTheme(themeKey as ThemeKey);
-    }
+    if (themeKey === 'prefers-color-scheme' || !themeKey) {
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    } else setTheme(themeKey as ThemeKey);
   }, [setTheme]);
 
   return (
