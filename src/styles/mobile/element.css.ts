@@ -9,6 +9,13 @@ export const elementsContainer = style({
   width: '100%',
   height: 'auto',
   gap: '5px',
+
+  '@media': {
+    'screen and (min-width: 600px)': {
+      gridTemplateColumns: 'repeat(auto-fill, minmax(15rem, 1fr))',
+      gridAutoRows: '15rem',
+    },
+  },
 });
 
 export const elementContainer = style([

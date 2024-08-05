@@ -1,4 +1,4 @@
-import { StyleRule, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
 import { theme } from '../themes/theme.css';
 
 export const elementsContainer = style({
@@ -37,27 +37,30 @@ export const windowSelectedElement = style([element, {
   backgroundColor: theme.highlight.h2,
 }]);
 
-const defaultIcon: StyleRule = {
+const defaultIcon = style({
   fontSize: '3rem',
   filter: 'drop-shadow(0 0 1px black)',
-} as const;
 
-export const uploadFileIcon = style({
-  ...defaultIcon,
+  '@media': {
+    'screen and (min-width: 600px)': {
+      fontSize: '4rem',
+    },
+  },
+});
+
+export const uploadFileIcon = style([defaultIcon, {
   color: theme.icon.upload,
-});
+}]);
 
-export const fileIcon = style({
-  ...defaultIcon,
+export const fileIcon = style([defaultIcon, {
   color: theme.icon.file,
-});
+}]);
 
-export const folderIcon = style({
-  ...defaultIcon,
+export const folderIcon = style([defaultIcon, {
   color: theme.icon.folder,
-});
+}]);
 
-const defaultText: StyleRule = {
+const defaultText = style({
   width: '100%',
   height: 'auto',
   textOverflow: 'ellipsis',
@@ -65,18 +68,16 @@ const defaultText: StyleRule = {
   overflow: 'hidden',
   whiteSpace: 'wrap',
   textAlign: 'center',
-} as const;
+});
 
-export const backgroundElementNameText = style({
-  ...defaultText,
+export const backgroundElementNameText = style([defaultText, {
   color: 'white',
   filter: 'drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black)',
-});
+}]);
 
-export const windowElementNameText = style({
-  ...defaultText,
+export const windowElementNameText = style([defaultText, {
   color: theme.text.normal,
-});
+}]);
 
 export const elementNameTextarea = style({
   textAlign: 'center',
