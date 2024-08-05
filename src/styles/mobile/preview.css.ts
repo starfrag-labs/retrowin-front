@@ -11,9 +11,16 @@ export const previewContainer = style([
   },
 ]);
 
-export const imagePreview = style({
+export const previewImageContainer = style([
+  flexCenter,
+  {
+    backgroundColor: 'black',
+  },
+]);
+
+export const previewImage = style({
   display: 'block',
   width: '100%',
-  height: '100%',
+  maxHeight: '100%',
   objectFit: 'cover',
 });

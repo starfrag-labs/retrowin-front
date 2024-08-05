@@ -1,10 +1,13 @@
 import { useQuery } from '@tanstack/react-query';
 import { downloadFileQueryOption } from '../../utils/queryOptions/file.query';
 import { useCallback, useEffect, useState } from 'react';
-import { imagePreview } from '../../styles/mobile/preview.css';
+import {
+  previewImageContainer,
+  previewImage,
+} from '../../styles/mobile/preview.css';
 import { BoxLoading } from '../pc/BoxLoading';
 
-export const ImagePreview = ({
+export const PreviewImage = ({
   elementKey,
 }: {
   elementKey: string;
@@ -24,7 +27,11 @@ export const ImagePreview = ({
   }, [createUrl]);
 
   if (sourceUrl) {
-    return <img src={sourceUrl} alt="preview" className={imagePreview} />;
+    return (
+      <div className={previewImageContainer}>
+        <img src={sourceUrl} alt="preview" className={previewImage} />
+      </div>
+    );
   } else {
     return <BoxLoading />;
   }

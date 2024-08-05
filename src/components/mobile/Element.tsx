@@ -8,7 +8,7 @@ import {
 } from '../../styles/mobile/element.css';
 import { previewContainer } from '../../styles/mobile/preview.css';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
-import { ImagePreview } from './ImagePreview';
+import { PreviewImage } from './PreviewImage';
 import { useNavigate } from '@tanstack/react-router';
 import React, { memo, useState } from 'react';
 import { useElementStore } from '../../store/element.store';
@@ -116,7 +116,7 @@ export const Element = memo(
           {type === 'folder' ? (
             <FaFolder className={folderIcon} />
           ) : contentType?.match('image') ? (
-            <ImagePreview elementKey={elementKey} />
+            <PreviewImage elementKey={elementKey} />
           ) : (
             <FaFileAlt className={fileIcon} />
           )}
