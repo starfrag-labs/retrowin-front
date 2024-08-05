@@ -11,6 +11,7 @@ import { useElementStore } from '../../../store/element.store';
 import { srcUrl } from '../../../api/urls';
 import { useQueryClient } from '@tanstack/react-query';
 import { downloadFileQueryOption } from '../../../utils/queryOptions/file.query';
+import { CircularLoading } from '../CircularLoading';
 
 export const Viewer = memo(
   ({
@@ -27,6 +28,7 @@ export const Viewer = memo(
     const [siblings, setSiblings] = useState<string[]>([]);
     const [contentIdx, setContentIdx] = useState<number>(0);
     const [url, setUrl] = useState<string>(srcUrl(fileKey));
+    const [loading, setLoading] = useState<boolean>(false);
     const [contentType, setContentType] = useState<string>('');
 
     // store functions
@@ -40,10 +42,13 @@ export const Viewer = memo(
       setContentIdx(siblings.indexOf(targetKey));
       setTitle(info?.name ?? '');
       setContentType(getContentType(info?.name ?? '') ?? '');
+      setLoading(true);
       queryClient.ensureQueryData(
         downloadFileQueryOption(targetKey),
       ).then((data) => {
         setUrl(URL.createObjectURL(data));
+      }).finally(() => {
+        setLoading(false);
       });
     }, [targetKey, getElementInfo, siblings, setTitle, queryClient]);
 
@@ -81,10 +86,11 @@ export const Viewer = memo(
         {contentIdx + 1 < siblings.length && (
           <MdNavigateNext onClick={handleNext} className={nextButton} />
         )}
-        {contentType.startsWith('image') && (
+        {loading && <CircularLoading />}
+        {!loading && contentType.startsWith('image') && (
           <img className={imageSrc} src={url} alt={'image'} />
         )}
-        {contentType.startsWith('video') && (
+        {!loading && contentType.startsWith('video') && (
           <video className={imageSrc} src={url} controls />
         )}
       </div>
