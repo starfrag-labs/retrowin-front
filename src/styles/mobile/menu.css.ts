@@ -1,69 +1,61 @@
-import { keyframes, style } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
+import { opacityAnimation, slideUpAnimation } from '../common/keyframes.css';
+import { flexCenter } from '../common/container.css';
+import { theme } from '../themes/theme.css';
 
-export const slideUp = keyframes({
-  from: {
-    transform: 'translateY(100%)',
+export const menuContainer = style([
+  flexCenter,
+  {
+    position: 'fixed',
+    top: '0',
+    flexDirection: 'column',
+    // place items at the bottom of the screen
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    animation: `${opacityAnimation} 0.1s ease-in-out`,
   },
-  to: {
-    transform: 'translateY(0)',
+]);
+
+export const menu = style([
+  flexCenter,
+  {
+    flexDirection: 'column',
+    height: 'auto',
+    backgroundColor: theme.primary.light,
+    borderRadius: '10px 10px 0 0',
+    animation: `${slideUpAnimation} 0.5s ease-in-out`,
   },
-});
+]);
 
-export const menuContainer = style({
-  display: 'flex',
-  position: 'fixed',
-  top: '0',
-  flexDirection: 'column',
-  width: '100%',
-  height: '100%',
-  // place items at the bottom of the screen
-  justifyContent: 'flex-end',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  transition: 'ease-in-out 0.5s',
-});
+export const uploadForm = style([
+  flexCenter,
+  {
+    flexDirection: 'row',
+  },
+]);
 
-export const menu = style({
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  width: '100%',
-  backgroundColor: 'whitesmoke',
-  borderTop: '1px solid rgba(0, 0, 0, 0.1)',
-  borderRadius: '15px 10px 0 0',
-  animation: `${slideUp} 0.5s ease-in-out`,
-});
+export const menuLabel = style([
+  flexCenter,
+  {
+    // borderBottom: '1px solid black',
+    padding: '10px',
+    boxSizing: 'border-box',
+    gap: '1rem',
 
-export const uploadForm = style({
-  display: 'flex',
-  width: '100%',
-  flexDirection: 'row',
-  alignContent: 'center',
-  justifyContent: 'center',
-});
+    selectors: {
+      '&:not(:last-child)': {
+        borderBottom: theme.border.normal,
+      },
+    },
+  },
+]);
 
-const menuLabelBase = {
-  textTransform: 'capitalize',
-  fontSize: '1rem',
-  width: '100%',
-  display: 'flex',
-  borderBottom: '1px solid black',
-  padding: '10px',
-  boxSizing: 'border-box',
-  justifyContent: 'center',
-  alignItems: 'center',
-  gap: '1rem',
-} as const;
-
-export const menuLabel = style({
-  ...menuLabelBase,
-  justifyContent: 'center',
-});
-
-export const leftJustifiedMenuLabel = style({
-  ...menuLabelBase,
-  justifyContent: 'flex-start',
-});
+export const leftJustifiedMenuLabel = style([
+  menuLabel,
+  {
+    justifyContent: 'flex-start',
+  },
+]);
 
 export const editMenu = style({
   display: 'flex',
@@ -74,12 +66,12 @@ export const editMenu = style({
   justifyContent: 'space-around',
   padding: '15px',
   boxSizing: 'border-box',
-  backgroundColor: 'whitesmoke',
+  backgroundColor: theme.primary.light,
 });
 
 export const editMenuItemIcon = style({
   display: 'flex',
   width: '30px',
   height: '30px',
-  color: 'rgba(0, 0, 0, 0.7)',
+  color: theme.text.normal,
 });

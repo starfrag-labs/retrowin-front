@@ -1,7 +1,9 @@
 import { style } from '@vanilla-extract/css';
+import { theme } from '../themes/theme.css';
 
 export const navContainer = style({
   display: 'flex',
+  position: 'fixed',
   flexDirection: 'row',
   alignItems: 'center',
   justifyContent: 'space-between',
@@ -10,27 +12,34 @@ export const navContainer = style({
   width: '100%',
   padding: '10px 20px',
   // shadow under nav
-  boxShadow: '0 0 10px rgba(0, 0, 0, 0.3)',
+  boxShadow: '0 0 5px rgba(0, 0, 0, 0.3)',
   boxSizing: 'border-box',
+  backgroundColor: theme.primary.normal,
+  zIndex: 1,
+});
+
+export const navLogoContainer = style({
+  display: 'flex',
+  flexDirection: 'row',
+  alignItems: 'center',
 });
 
 export const navItemsContainer = style({
   display: 'flex',
   flexDirection: 'row',
   alignItems: 'center',
-  gap: '1rem',
+  gap: '0.5rem',
 });
 
-export const returnIcon = style({
-  height: '30px',
-  width: '30px',
-  cursor: 'pointer',
-});
-
-export const uploadIcon = style({
-  height: '30px',
-  width: '30px',
-  cursor: 'pointer',
-  color: 'rgba(0, 0, 0, 0.8)',
+export const icon = style({
+  width: '2rem',
+  height: '2rem',
+  color: theme.text.normal,
   transitionDuration: '0.3s',
 });
+
+export const smallIcon = style([icon, {
+  width: '1.5rem',
+  height: '1.5rem',
+}]);
+

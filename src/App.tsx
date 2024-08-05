@@ -2,6 +2,16 @@ import { RouterProvider, createRouter } from '@tanstack/react-router';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { routeTree } from './routeTree.gen';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+import { appContainer } from './styles/common/container.css';
+import { useThemeStore } from './store/theme.store';
+import { useEffect } from 'react';
+import type { ThemeKey } from './store/theme.store';
+import {
+  darkPrimary,
+  darkTheme,
+  lightPrimary,
+  lightTheme,
+} from './styles/themes/theme.css';
 
 const queryClient = new QueryClient();
 const router = createRouter({
@@ -19,16 +29,39 @@ declare module '@tanstack/react-router' {
 }
 
 export function App() {
+  const theme = useThemeStore((state) => state.theme);
+  const setTheme = useThemeStore((state) => state.setTheme);
+
+  useEffect(() => {
+    const themeKey = localStorage.getItem('theme');
+    if (themeKey === 'prefers-color-scheme' || !themeKey) {
+      const prefersDark = window.matchMedia(
+        '(prefers-color-scheme: dark)'
+      ).matches;
+      setTheme(prefersDark ? 'dark' : 'light');
+    } else setTheme(themeKey as ThemeKey);
+  }, [setTheme]);
+
+  useEffect(() => {
+    if (theme === lightTheme) {
+      document.body.style.backgroundColor = lightPrimary;
+    } else if (theme === darkTheme) {
+      document.body.style.backgroundColor = darkPrimary;
+    }
+  }, [theme]);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <RouterProvider router={router} />
-      {import.meta.env.DEV && (
-        <ReactQueryDevtools
-          initialIsOpen={false}
-          buttonPosition="bottom-right"
-          position="bottom"
-        />
-      )}
-    </QueryClientProvider>
+    <div className={`${theme} ${appContainer}`}>
+      <QueryClientProvider client={queryClient}>
+        <RouterProvider router={router} />
+        {import.meta.env.DEV && (
+          <ReactQueryDevtools
+            initialIsOpen={false}
+            buttonPosition="bottom-left"
+            position="bottom"
+          />
+        )}
+      </QueryClientProvider>
+    </div>
   );
 }

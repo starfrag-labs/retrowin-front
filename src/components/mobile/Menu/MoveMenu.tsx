@@ -1,23 +1,24 @@
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   getFolderInfoQueryOption,
   getFolderPathQueryOption,
+  moveFolderMutationOption,
   readFolderQueryOption,
 } from '../../../utils/queryOptions/folder.query';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaFolder } from 'react-icons/fa';
 import { RiFolderTransferLine } from 'react-icons/ri';
 import { miniFolderIcon } from '../../../styles/mobile/element.css';
-import { CircularLoading } from '../../CircularLoading';
+import { CircularLoading } from '../../pc/CircularLoading';
 import {
   leftJustifiedMenuLabel,
   menu,
   menuContainer,
 } from '../../../styles/mobile/menu.css';
 import { Modal } from '../Modal';
-import { moveFile, moveFolder } from '../../../api/cloud';
 import { useElementStore } from '../../../store/element.store';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import { moveFileMutationOption } from '../../../utils/queryOptions/file.query';
 
 export const MoveMenu = ({
   folderKey,
@@ -41,9 +42,14 @@ export const MoveMenu = ({
   const unselectAllKeys = useElementStore((state) => state.unselectAllKeys);
 
   // Queries
+  const readCurrentFolderQuery = useQuery(readFolderQueryOption(folderKey));
   const readQuery = useQuery(readFolderQueryOption(targetFolderKey));
   const infoQuery = useQuery(getFolderInfoQueryOption(targetFolderKey));
   const pathQuery = useQuery(getFolderPathQueryOption(targetFolderKey));
+
+  // Mutations
+  const moveFile = useMutation(moveFileMutationOption);
+  const moveFolder = useMutation(moveFolderMutationOption);
 
   const toggleModal = () => {
     setModalOpen(!modalOpen);
@@ -64,26 +70,31 @@ export const MoveMenu = ({
   );
 
   const handleMove = async () => {
-    if (readQuery.isLoading || !readQuery.data) {
+    toggle();
+    if (readQuery.isLoading || !readQuery.data || !readCurrentFolderQuery.data) {
       return;
     }
-    await Promise.all([
-      readQuery.data.files.forEach(async (file) => {
-        if (isSelected(file.key)) {
-          await moveFile(file.key, targetFolderKey);
-        }
-      }),
-      readQuery.data.folders.forEach(async (folder) => {
-        if (isSelected(folder.key)) {
-          await moveFolder(folder.key, targetFolderKey);
-        }
-      }),
-    ]).then(() => {
+    const folderPromise = readCurrentFolderQuery.data.folders
+      .filter((folder) => isSelected(folder.key))
+      .map((folder) =>
+        moveFolder.mutateAsync({
+          folderKey: folder.key,
+          targetKey: targetFolderKey,
+        })
+      );
+    const filePromise = readCurrentFolderQuery.data.files
+      .filter((file) => isSelected(file.key))
+      .map((file) =>
+        moveFile.mutateAsync({
+          fileKey: file.key,
+          targetKey: targetFolderKey,
+        })
+      );
+    await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
-        queryKey: generateQueryKey('folder', targetFolderKey),
+        queryKey: generateQueryKey('folder'),
       });
       unselectAllKeys();
-      toggle();
     });
   };
 

@@ -1,46 +1,45 @@
-import { style } from "@vanilla-extract/css";
+import { style, StyleRule } from '@vanilla-extract/css';
+import { flexCenter } from '../common/container.css';
 
-export const modalContainer = style({
-  position: 'fixed',
-  top: 0,
-  left: 0,
-  width: '100%',
-  height: '100%',
-  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-})
+export const modalContainer = style([
+  flexCenter,
+  {
+    position: 'fixed',
+    top: 0,
+    left: 0,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+  },
+]);
 
 export const modal = style({
   width: '80%',
   backgroundColor: 'white',
   borderRadius: '8px',
-})
+});
 
 export const modalContent = style({
   display: 'flex',
   padding: '1rem',
-  color: 'rgba(0, 0, 0, 0.8)',
-})
+  color: '#2e2e2e',
+});
 
 export const modalInput = style({
   display: 'flex',
   width: '100%',
   padding: '0.5rem',
   fontSize: '1rem',
-  border: '1px solid rgba(0, 0, 0, 0.4)',
-  borderRadius: '4px',
-})
+  border: '1px solid #b2b2b2',
+  borderRadius: '5px',
+});
 
 export const modalButtonContainer = style({
   display: 'flex',
   justifyContent: 'space-around',
   // line on top
-  borderTop: '1px solid rgba(0, 0, 0, 0.4)',
-})
+  borderTop: '1px solid #b2b2b2',
+});
 
-const modalButtonBase = {
+const modalButtonBase: StyleRule = {
   display: 'flex',
   width: '100%',
   justifyContent: 'center',
@@ -49,16 +48,16 @@ const modalButtonBase = {
   ':active': {
     backgroundColor: 'rgba(0, 0, 0, 0.1)',
   },
-} as const
+} as const;
 
 export const modalAccept = style({
   ...modalButtonBase,
   color: 'rgb(0, 122, 255)',
-})
+});
 
 export const modalCancel = style({
   ...modalButtonBase,
   color: 'rgb(255, 59, 48)',
   // line on right
-  borderRight: '1px solid rgba(0, 0, 0, 0.4)',
-})
+  borderRight: '1px solid #b2b2b2',
+});

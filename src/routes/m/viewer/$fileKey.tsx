@@ -1,15 +1,12 @@
 import { createFileRoute, Link, useNavigate } from '@tanstack/react-router';
-import { CircularLoading } from '../../../components/CircularLoading';
+import { CircularLoading } from '../../../components/pc/CircularLoading';
 import {
   getFileInfoQueryOption,
   downloadFileQueryOption,
+  deleteFileMutationOption,
 } from '../../../utils/queryOptions/file.query';
-import {
-  useQuery,
-  useQueryClient,
-  useSuspenseQuery,
-} from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { IoIosReturnLeft } from 'react-icons/io';
@@ -17,17 +14,16 @@ import { MdDownload } from 'react-icons/md';
 import { MdDelete } from 'react-icons/md';
 import {
   activeControllerButton,
-  imageContent,
-  imageViewerContainer,
+  mediaContent,
+  viewerContainer,
   inactiveControllerButton,
   pageNumber,
-  returnButtonIcon,
   viewControllerContainer,
   viewerBottom,
   viewerNav,
+  mediaContainer,
 } from '../../../styles/mobile/viewer.css';
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
-import { deleteFile, downloadFile } from '../../../api/cloud';
 import { Modal } from '../../../components/mobile/Modal';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
 
@@ -40,24 +36,26 @@ function Component() {
   const queryClient = useQueryClient();
   const { fileKey } = Route.useParams();
 
+  // Mutations
+  const deleteFile = useMutation(deleteFileMutationOption);
+
   // Navigation
   const navigate = useNavigate({ from: '/m/viewer/$fileKey' });
 
   // States
+  const [srcUrl, setSrcUrl] = useState<string>(''); 
   const [fileName, setFileName] = useState<string>('');
   const [targetKey, setTargetKey] = useState<string>(fileKey);
   const [parentKey, setParentKey] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [sourceUrl, setSourceUrl] = useState<string>('');
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
+  const [showMenu, setShowMenu] = useState<boolean>(true);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState<boolean>(false);
   const [isDownloadModalOpen, setIsDownloadModalOpen] =
     useState<boolean>(false);
 
   // Query
-  const readQuery = useSuspenseQuery(downloadFileQueryOption(targetKey));
-  const infoQuery = useSuspenseQuery(getFileInfoQueryOption(targetKey));
+  const infoQuery = useQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
   // Functions
@@ -67,6 +65,10 @@ function Component() {
 
   const toggleDownloadModalOpen = () => {
     setIsDownloadModalOpen(!isDownloadModalOpen);
+  };
+
+  const toggleShowMenu = () => {
+    setShowMenu(!showMenu);
   };
 
   // Effects
@@ -99,23 +101,6 @@ function Component() {
     setImageNumber(siblings.indexOf(targetKey));
   }, [siblings, targetKey]);
 
-  const createUrl = useCallback(async () => {
-    setLoading(true);
-    if (!fileName) {
-      setLoading(false);
-      return;
-    }
-    const contentType = getContentType(fileName);
-    if (readQuery.isSuccess && readQuery.data && contentType) {
-      setSourceUrl(URL.createObjectURL(readQuery.data));
-      setLoading(false);
-    }
-  }, [fileName, readQuery.data, readQuery.isSuccess]);
-
-  useEffect(() => {
-    createUrl();
-  }, [createUrl]);
-
   const handlePrev = () => {
     if (imageNumber > 0) {
       setTargetKey(siblings[imageNumber - 1]);
@@ -130,7 +115,7 @@ function Component() {
 
   const handleDelete = async () => {
     setIsDeleteModalOpen(false);
-    await deleteFile(targetKey).then(() => {
+    deleteFile.mutateAsync(targetKey).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', parentKey),
       });
@@ -148,70 +133,93 @@ function Component() {
 
   const handleDownload = async () => {
     toggleDownloadModalOpen();
-    await downloadFile(targetKey, fileName).then((response) => {
-      const url = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', fileName);
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-    });
+    queryClient
+      .ensureQueryData(downloadFileQueryOption(targetKey, fileName))
+      .then((response) => {
+        const url = URL.createObjectURL(response);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      });
   };
 
+  useEffect(() => {
+    setSrcUrl('');
+    queryClient.ensureQueryData(downloadFileQueryOption(targetKey, fileName))
+    .then((response) => {
+      setSrcUrl(URL.createObjectURL(response));
+    });
+  }, [targetKey, fileName, queryClient]);
+
   return (
-    <div className={imageViewerContainer}>
-      <nav className={viewerNav}>
-        <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
-          <IoIosReturnLeft className={returnButtonIcon} />
-        </Link>
-        <div className={viewControllerContainer}>
-          {imageNumber > 0 ? (
-            <MdNavigateBefore
-              className={activeControllerButton}
-              onTouchEnd={handlePrev}
-            />
-          ) : (
-            <MdNavigateBefore className={inactiveControllerButton} />
-          )}
-          {imageNumber < siblings.length - 1 ? (
-            <MdNavigateNext
-              className={activeControllerButton}
-              onTouchEnd={handleNext}
-            />
-          ) : (
-            <MdNavigateNext className={inactiveControllerButton} />
-          )}
-        </div>
-      </nav>
-      <div>
-        {loading || !fileName || !sourceUrl ? (
-          <CircularLoading />
+    <div className={viewerContainer}>
+      <div className={mediaContainer}>
+        {!srcUrl && <CircularLoading />}
+        {srcUrl && getContentType(fileName)?.startsWith('image') ? (
+          // cache
+          <img
+            src={srcUrl}
+            className={mediaContent}
+            onTouchEnd={toggleShowMenu}
+          />
         ) : (
-          <div>
-            {getContentType(fileName)?.startsWith('image') ? (
-              <img src={sourceUrl} className={imageContent} />
-            ) : (
-              getContentType(fileName)?.startsWith('video') && (
-                <video src={sourceUrl} controls className={imageContent} />
-              )
-            )}
-          </div>
+          srcUrl && getContentType(fileName)?.startsWith('video') && (
+            <video
+              src={srcUrl}
+              controls
+              className={mediaContent}
+              onTouchEnd={toggleShowMenu}
+            />
+          )
         )}
       </div>
-      <div className={viewerBottom}>
-        <MdDelete
-          className={activeControllerButton}
-          onTouchEnd={toggleDeleteModalOpen}
-        />
-        <div className={pageNumber}>
-          {imageNumber + 1} / {siblings.length}
+      {showMenu && (
+        <nav className={viewerNav}>
+          <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
+            <IoIosReturnLeft
+              className={
+                parentKey ? activeControllerButton : inactiveControllerButton
+              }
+            />
+          </Link>
+          <div className={viewControllerContainer}>
+            {imageNumber > 0 ? (
+              <MdNavigateBefore
+                className={activeControllerButton}
+                onTouchEnd={handlePrev}
+              />
+            ) : (
+              <MdNavigateBefore className={inactiveControllerButton} />
+            )}
+            {imageNumber < siblings.length - 1 ? (
+              <MdNavigateNext
+                className={activeControllerButton}
+                onTouchEnd={handleNext}
+              />
+            ) : (
+              <MdNavigateNext className={inactiveControllerButton} />
+            )}
+          </div>
+        </nav>
+      )}
+      {showMenu && (
+        <div className={viewerBottom}>
+          <MdDelete
+            className={activeControllerButton}
+            onTouchEnd={toggleDeleteModalOpen}
+          />
+          <div className={pageNumber}>
+            {imageNumber + 1} / {siblings.length}
+          </div>
+          <MdDownload
+            className={activeControllerButton}
+            onTouchEnd={toggleDownloadModalOpen}
+          />
         </div>
-        <MdDownload
-          className={activeControllerButton}
-          onTouchEnd={toggleDownloadModalOpen}
-        />
-      </div>
+      )}
       {isDeleteModalOpen && (
         <Modal onAccept={handleDelete} onClose={toggleDeleteModalOpen}>
           Are you sure you want to delete this file?

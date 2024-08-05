@@ -8,10 +8,12 @@ import {
 } from '../../styles/mobile/element.css';
 import { previewContainer } from '../../styles/mobile/preview.css';
 import { getContentType } from '../../utils/customFn/contentTypeGetter';
-import { ImagePreview } from './ImagePreview';
+import { PreviewImage } from './PreviewImage';
 import { useNavigate } from '@tanstack/react-router';
 import React, { memo, useState } from 'react';
 import { useElementStore } from '../../store/element.store';
+import { useQueryClient } from '@tanstack/react-query';
+import { generateQueryKey } from '../../utils/queryOptions/index.query';
 
 export const Element = memo(
   ({
@@ -32,6 +34,8 @@ export const Element = memo(
     const selectTime = 400;
     const selectThreshold = 10;
 
+    const queryClient = useQueryClient();
+
     // State
     const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
     const [startX, setStartX] = useState<number>(0);
@@ -49,9 +53,12 @@ export const Element = memo(
         unselectKey(elementKey);
         return;
       }
+
       if (type === 'folder') {
+        queryClient.cancelQueries({ queryKey: generateQueryKey('file') });
         navigate({ to: '/m/$folderKey', params: { folderKey: elementKey } });
       } else if (contentType?.match('image') || contentType?.match('video')) {
+        queryClient.cancelQueries({ queryKey: generateQueryKey('file') });
         navigate({ to: '/m/viewer/$fileKey', params: { fileKey: elementKey } });
       } else {
         // setActiveElementKey(elementKey);
@@ -109,7 +116,7 @@ export const Element = memo(
           {type === 'folder' ? (
             <FaFolder className={folderIcon} />
           ) : contentType?.match('image') ? (
-            <ImagePreview elementKey={elementKey} />
+            <PreviewImage elementKey={elementKey} />
           ) : (
             <FaFileAlt className={fileIcon} />
           )}

@@ -1,38 +1,45 @@
-import { style, StyleRule } from '@vanilla-extract/css';
+import { style } from '@vanilla-extract/css';
+import { flexCenter } from '../common/container.css';
+import { theme } from '../themes/theme.css';
 
 export const elementsContainer = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(8.75rem, 1fr))',
+  gridTemplateColumns: 'repeat(auto-fit, minmax(10rem, 1fr))',
   gridAutoRows: '10rem',
   width: '100%',
   height: 'auto',
-  padding: '1rem',
-  boxSizing: 'border-box',
   gap: '5px',
-});
 
-const elementContainerBase = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  justifyContent: 'center',
-  borderRadius: '10px',
-  width: '100%',
-  height: 'auto',
-  maxWidth: '50vw',
-  boxSizing: 'border-box',
-  padding: '10px',
-  ':active': {
-    backgroundColor: '#f0f0f0',
+  '@media': {
+    'screen and (min-width: 600px)': {
+      gridTemplateColumns: '1fr 1fr 1fr',
+      gridAutoRows: '12.5rem',
+    },
+
+    'screen and (min-width: 900px)': {
+      gridTemplateColumns: '1fr 1fr 1fr 1fr',
+      gridAutoRows: '15rem',
+    },
   },
-} as const;
-
-export const elementContainer = style({
-  ...elementContainerBase,
 });
+
+export const elementContainer = style([
+  flexCenter,
+  {
+    flexDirection: 'column',
+    height: 'auto',
+    borderRadius: '10px',
+    maxWidth: '50vw',
+    boxSizing: 'border-box',
+    padding: '10px',
+    ':active': {
+      backgroundColor: theme.highlight.h1,
+    },
+  },
+]);
 
 export const selectedElement = style({
-  backgroundColor: '#f0f0f0',
+  backgroundColor: theme.highlight.h2,
 });
 
 export const elementNameContainer = style({
@@ -45,38 +52,38 @@ export const elementNameContainer = style({
   textAlign: 'center',
 });
 
-const defaultIcon: StyleRule = {
+export const defaultIcon = style({
   width: '50%',
   height: '50%',
   filter: 'drop-shadow(0 0 1px black)',
-} as const;
-
-export const uploadFileIcon = style({
-  ...defaultIcon,
-  color: 'lightblue',
 });
 
-export const fileIcon = style({
-  ...defaultIcon,
-  color: 'lightgrey',
-});
+export const fileIcon = style([
+  defaultIcon,
+  {
+    color: theme.icon.file,
+  },
+]);
 
-export const folderIcon = style({
-  ...defaultIcon,
-  color: 'orange',
-});
+export const folderIcon = style([
+  defaultIcon,
+  {
+    color: theme.icon.folder,
+  },
+]);
 
 export const miniFolderIcon = style({
+  display: 'block',
   fontSize: '1.5rem',
-  color: 'orange',
+  color: theme.icon.folder,
 });
 
-export const emptyFolderMessage = style({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  height: '100%',
-  width: '100%',
-  fontSize: '1.5rem',
-  color: 'grey',
-});
+export const folderPageMessage = style([
+  flexCenter,
+  {
+    fontSize: '1.5rem',
+    color: theme.text.normal,
+    padding: '1rem',
+    boxSizing: 'border-box',
+  },
+]);

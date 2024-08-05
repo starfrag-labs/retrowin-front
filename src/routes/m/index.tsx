@@ -1,21 +1,13 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { AxiosError } from 'axios';
 import { useEffect } from 'react';
-import { createRootFolder } from '../../api/cloud';
-import { CircularLoading } from '../../components/CircularLoading';
+import { CircularLoading } from '../../components/pc/CircularLoading';
 import { getRootFolderKeyQueryOption } from '../../utils/queryOptions/folder.query';
 
 export const Route = createFileRoute('/m/')({
   beforeLoad: async ({ context: { queryClient } }) => {
-    const rootFolderKey = await queryClient
-      .ensureQueryData(getRootFolderKeyQueryOption())
-      .catch(async (error: AxiosError) => {
-        if (error.response?.status === 404) {
-          const result = await createRootFolder();
-          return result.data;
-        }
-        throw error;
-      });
+    const rootFolderKey = await queryClient.ensureQueryData(
+      getRootFolderKeyQueryOption(true)
+    );
 
     return {
       rootFolderKey: rootFolderKey,

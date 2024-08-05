@@ -1,3 +1,4 @@
+import { GenericAbortSignal } from 'axios';
 import { api } from '.';
 import { useProgressStore } from '../store/progress.store';
 import {
@@ -145,10 +146,10 @@ export const uploadChunk = async (
       data: formData,
       onUploadProgress: (event) => {
         const progressName = `${folderKey}-${fileName}`;
-        useProgressStore.getState().updateProgress({
+        useProgressStore.getState().updateChunkLoaded({
           key: progressName,
-          loaded: event.loaded + chunkNumber * chunk.size,
-          total: chunk.size * totalChunks,
+          chunkIndex: chunkNumber,
+          loaded: event.loaded,
         });
       },
     })
@@ -159,7 +160,11 @@ export const uploadChunk = async (
   return response;
 };
 
-export const downloadFile = async (fileKey: string, progressName?: string) => {
+export const downloadFile = async (
+  fileKey: string,
+  progressName?: string,
+  signal?: GenericAbortSignal
+) => {
   if (progressName) {
     useProgressStore.getState().addProgress({
       key: fileKey,
@@ -182,6 +187,7 @@ export const downloadFile = async (fileKey: string, progressName?: string) => {
           });
         }
       },
+      signal,
     })
     .then((response) => {
       useProgressStore.getState().removeProgress(fileKey);

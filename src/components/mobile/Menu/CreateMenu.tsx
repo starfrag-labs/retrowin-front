@@ -1,6 +1,4 @@
-import { useQueryClient } from '@tanstack/react-query';
-import { useProgressStore } from '../../../store/progress.store';
-import { createFolder, uploadChunk } from '../../../api/cloud';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useRef } from 'react';
 import {
   menu,
@@ -9,6 +7,8 @@ import {
   menuLabel,
 } from '../../../styles/mobile/menu.css';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import { uploadFileMutationOption } from '../../../utils/queryOptions/file.query';
+import { createFolderMutationOption } from '../../../utils/queryOptions/folder.query';
 
 export const Uploader = ({
   folderKey,
@@ -17,48 +17,25 @@ export const Uploader = ({
   folderKey: string;
   toggle: () => void;
 }) => {
-  const chunkSize = 1024 * 1024 * 5;
   const queryClient = useQueryClient();
+
+  const uploadFile = useMutation(uploadFileMutationOption);
+  const createFolder = useMutation(createFolderMutationOption)
 
   // refs
   const menuRef = useRef<HTMLDivElement>(null);
   const uploadFileFormRef = useRef<HTMLFormElement>(null);
   const uploadFileButtonRef = useRef<HTMLButtonElement>(null);
 
-  const uploadFile = async (file: File) => {
-    const totalChunks = Math.ceil(file.size / chunkSize);
-    const fileName = file.name.replace(/\s/g, '_');
-
-    // check if progress exists
-    if (useProgressStore.getState().findProgress(`${folderKey}-${fileName}`)) {
-      return;
-    }
-
-    // add progress
-    useProgressStore.getState().addProgress({
-      key: `${folderKey}-${fileName}`,
-      name: `${fileName}`,
-      type: 'upload',
-    });
-
-    // upload chunks
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * chunkSize;
-      const end = Math.min(file.size, (i + 1) * chunkSize);
-      const chunk = file.slice(start, end);
-      await uploadChunk(folderKey, chunk, fileName, totalChunks, i);
-    }
-    useProgressStore.getState().removeProgress(`${folderKey}-${fileName}`);
-    queryClient.invalidateQueries({
-      queryKey: generateQueryKey('folder', folderKey),
-    });
-  };
-
   const uploadFileHandler = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const files = Array.from(event.currentTarget.file.files) as File[];
     files.forEach((file) => {
-      uploadFile(file);
+      uploadFile.mutateAsync({file, folderKey}).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: generateQueryKey('folder', folderKey),
+        });
+      });
     });
     toggle();
   };
@@ -78,13 +55,13 @@ export const Uploader = ({
   );
 
   const handleCreateFolder = useCallback(() => {
-    createFolder(folderKey, 'NewFolder').then(() => {
+    createFolder.mutateAsync({parentKey: folderKey, folderName: 'NewFolder'}).then(() => {
       queryClient.invalidateQueries({
         queryKey: generateQueryKey('folder', folderKey),
       });
     });
     toggle();
-  }, [folderKey, queryClient, toggle]);
+  }, [createFolder, folderKey, queryClient, toggle]);
 
   return (
     <div className={menuContainer} onTouchEnd={handleCloseMenu}>
@@ -95,7 +72,7 @@ export const Uploader = ({
           className={uploadForm}
         >
           <label htmlFor="file" className={menuLabel}>
-            upload files
+            Upload Files
           </label>
           <input
             type="file"
@@ -108,12 +85,10 @@ export const Uploader = ({
             }}
             style={{ display: 'none' }}
           />
-          <button type="submit" hidden ref={uploadFileButtonRef}>
-            upload
-          </button>
+          <button type="submit" hidden ref={uploadFileButtonRef} />
         </form>
         <div onTouchEnd={handleCreateFolder} className={menuLabel}>
-          create folder
+          Create Folder
         </div>
       </div>
     </div>

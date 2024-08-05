@@ -1,48 +1,41 @@
 import { Outlet, createRootRouteWithContext } from '@tanstack/react-router';
 import { QueryClient } from '@tanstack/react-query';
-import { defaultContainer } from '../styles/global/container.css';
-import { CircularLoading } from '../components/CircularLoading';
-import { AxiosError } from 'axios';
-import { getProfile } from '../api/auth';
-import { checkUser, enrollUser } from '../api/cloud';
 import config from '../utils/config';
-import { useUserStore } from '../store/user.store';
+import { SetupPage } from '../components/SetupPage';
+import {
+  checkUserQueryOption,
+  getProfileQueryOption,
+} from '../utils/queryOptions/user.query';
 
 export const Route = createRootRouteWithContext<{
   queryClient: QueryClient;
 }>()({
-  beforeLoad: async () => {
+  beforeLoad: async ({ context: { queryClient } }) => {
     if (import.meta.env.PROD) {
       return new Promise((resolve, reject) => {
-        const setProfile = useUserStore.getState().setProfile;
-        getProfile()
-          .then((response) => {
-            setProfile(response.data.data);
+        queryClient
+          .ensureQueryData(getProfileQueryOption)
+          .then(() => {
             resolve('done');
           })
           .catch(() => {
             window.location.href = `${config.auth}?redirect=${config.redirectUrl}`;
             reject();
           });
-      }).then(() => {
-        checkUser().catch(async (error: AxiosError) => {
-          if (error.response?.status === 404) {
-            await enrollUser();
-            return;
-          }
-          throw error;
-        });
+      }).then(async () => {
+        await queryClient.ensureQueryData(checkUserQueryOption);
       });
     }
   },
-  pendingComponent: () => <CircularLoading />,
+  loader: async () => {
+    await new Promise((resolve) => setTimeout(resolve, 3000));
+  },
+  pendingComponent: () => <SetupPage />,
   component: RootComponent,
 });
 
 function RootComponent() {
   return (
-    <div className={defaultContainer}>
-      <Outlet />
-    </div>
+    <Outlet />
   );
 }

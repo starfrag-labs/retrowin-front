@@ -6,23 +6,31 @@ import { editMenu, editMenuItemIcon } from '../../../styles/mobile/menu.css';
 import { useEffect, useState } from 'react';
 import { MoveMenu } from './MoveMenu';
 import { Modal } from '../Modal';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
-  deleteFile,
-  deleteFolder,
-  downloadFile,
-  renameFile,
-  renameFolder,
-} from '../../../api/cloud';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
+  deleteFolderMutationOption,
+  readFolderQueryOption,
+  renameFolderMutationOption,
+} from '../../../utils/queryOptions/folder.query';
 import { useElementStore } from '../../../store/element.store';
 import { modalInput } from '../../../styles/mobile/modal.css';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import {
+  deleteFileMutationOption,
+  downloadFileQueryOption,
+  renameFileMutationOption,
+} from '../../../utils/queryOptions/file.query';
 
 export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   const readQuery = useQuery(readFolderQueryOption(folderKey));
 
   const queryClient = useQueryClient();
+
+  //Mutations
+  const deleteFile = useMutation(deleteFileMutationOption);
+  const deleteFolder = useMutation(deleteFolderMutationOption);
+  const renameFile = useMutation(renameFileMutationOption);
+  const renameFolder = useMutation(renameFolderMutationOption);
 
   const [isFolderSelected, setIsFolderSelected] = useState(false);
   const [moveMenuOpen, setMoveMenuOpen] = useState(false);
@@ -70,34 +78,33 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
   };
 
   const handleDelete = async () => {
+    toggleDeleteModalOpen();
     if (readQuery.isLoading || !readQuery.data) {
       return;
     }
+    const folderPromise = readQuery.data.folders
+      .filter((folder) => isSelected(folder.key))
+      .map((folder) => deleteFolder.mutateAsync(folder.key));
+    const filePromise = readQuery.data.files
+      .filter((file) => isSelected(file.key))
+      .map((file) => deleteFile.mutateAsync(file.key));
 
-    await Promise.all([
-      readQuery.data.folders.forEach(
-        (folder) => isSelected(folder.key) && deleteFolder(folder.key)
-      ),
-      readQuery.data.files.forEach(
-        (file) => isSelected(file.key) && deleteFile(file.key)
-      ),
-    ]).then(() => {
+    await Promise.all([...folderPromise, ...filePromise]).then(() => {
       queryClient.invalidateQueries({
-        queryKey: generateQueryKey('folder', folderKey),
-      })
+        queryKey: generateQueryKey('folder'),
+      });
       unselectAllKeys();
     });
   };
 
   const handleRename = async () => {
+    toggleRenameModalOpen();
     if (selectedKeys.length !== 1 || newName === '') {
       return;
     }
-
     if (readQuery.isLoading || !readQuery.data) {
       return;
     }
-
     const file = readQuery.data.files.find(
       (file) => file.key === selectedKeys[0]
     );
@@ -119,25 +126,34 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     }
 
     if (folder && folder.name !== modifiedNewName) {
-      await renameFolder(folder.key, modifiedNewName).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: generateQueryKey('folder', folderKey),
+      await renameFolder
+        .mutateAsync({
+          folderKey: folder.key,
+          folderName: modifiedNewName,
         })
-      });
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', folderKey),
+          });
+        });
     } else if (file && file.name !== modifiedNewName) {
-      await renameFile(file.key, modifiedNewName).then(() => {
-        queryClient.invalidateQueries({
-          queryKey: generateQueryKey('folder', folderKey),
-        }) 
-      });
+      await renameFile
+        .mutateAsync({
+          fileKey: file.key,
+          fileName: modifiedNewName,
+        })
+        .then(() => {
+          queryClient.invalidateQueries({
+            queryKey: generateQueryKey('folder', folderKey),
+          });
+        });
     }
-
     unselectKey(selectedKeys[0]);
     setNewName('');
-    toggleRenameModalOpen();
   };
 
   const handleDownload = async () => {
+    toggleDownloadModalOpen();
     if (selectedKeys.length === 0) {
       return;
     }
@@ -148,20 +164,19 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     const selectedFiles = readQuery.data.files.filter((file) =>
       isSelected(file.key)
     );
-
-    toggleDownloadModalOpen();
     unselectAllKeys();
-
     selectedFiles.forEach(async (file) => {
-      await downloadFile(file.key, file.name).then((response) => {
-        const url = window.URL.createObjectURL(new Blob([response.data]));
-        const link = document.createElement('a');
-        link.href = url;
-        link.setAttribute('download', file.name);
-        document.body.appendChild(link);
-        link.click();
-        link.remove();
-      });
+      await queryClient
+        .ensureQueryData(downloadFileQueryOption(file.key, file.name ?? 'file'))
+        .then((response) => {
+          const url = URL.createObjectURL(response);
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', file.name);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+        });
     });
   };
 

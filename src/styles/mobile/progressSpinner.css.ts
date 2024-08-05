@@ -1,26 +1,26 @@
-import { style } from "@vanilla-extract/css";
+import { style } from '@vanilla-extract/css';
+import { flexCenter } from '../common/container.css';
+import { theme } from '../themes/theme.css';
 
-export const spinnerContainer = style({
+export const spinnerContainer = style([flexCenter,{
   position: 'relative',
-  display: 'flex',
   borderRadius: '50%',
-  backgroundColor: 'rgba(0, 0, 0, 0.8)',
   width: '2rem',
   height: '2rem',
-  background: 'conic-gradient(gray 0deg, white 0deg)',
-});
+  background: `conic-gradient(${theme.text.normal} 0deg, ${theme.primary.normal} 0deg)`,
+}]);
 
-export const spinner = style({
-  display: 'flex',
-  justifyContent: 'center',
-  alignItems: 'center',
-  width: '75%',
-  height: '75%',
-  borderRadius: "inherit",
-  backgroundColor: 'white',
-  color: 'black',
-  margin: 'auto',
-  fontSize: '0.7rem',
-  fontWeight: 'bold',
-  textAlign: 'center',
-});
+export const spinner = style([
+  flexCenter,
+  {
+    width: '75%',
+    height: '75%',
+    borderRadius: 'inherit',
+    backgroundColor: theme.primary.normal,
+    color: theme.text.normal,
+    margin: 'auto',
+    fontSize: '0.7rem',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+]);

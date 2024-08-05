@@ -1,6 +1,6 @@
 import {
   elementsContainer,
-  emptyFolderMessage,
+  folderPageMessage,
 } from '../../styles/mobile/element.css';
 import { Element } from './Element';
 import { useQuery } from '@tanstack/react-query';
@@ -18,24 +18,19 @@ export const Elements = ({
 
   const isSelected = useElementStore((state) => state.isSelected);
 
+  if (!readQuery.isFetched) {
+    return <div className={folderPageMessage}>Loading</div>;
+  }
+
   if (
-    readQuery.isLoading ||
     !readQuery.data ||
     (!readQuery.data.files.length && !readQuery.data.folders.length)
   ) {
-    return (
-      <div className={elementsContainer}>
-        <div className={emptyFolderMessage}>Empty folder</div>
-      </div>
-    );
+    return <div className={folderPageMessage}>Empty folder</div>;
   }
 
   if (readQuery.isError) {
-    return (
-      <div className={elementsContainer}>
-        <div className={emptyFolderMessage}>Error loading folder</div>
-      </div>
-    );
+    return <div className={folderPageMessage}>Error loading folder</div>;
   }
 
   return (

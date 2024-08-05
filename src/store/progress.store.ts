@@ -26,6 +26,15 @@ type Action = {
     total: number;
   }) => void;
   removeProgress: (key: string) => void;
+  updateChunkLoaded: ({
+    key,
+    chunkIndex,
+    loaded,
+  }: {
+    key: string;
+    chunkIndex: number;
+    loaded: number;
+  }) => void;
 };
 
 const initialState: State = {
@@ -43,6 +52,7 @@ export const useProgressStore = create<State & Action>((set, get) => ({
           name,
           type,
           loaded: 0,
+          chunkLoaded: [],
           total: 1,
         },
       ],
@@ -58,6 +68,22 @@ export const useProgressStore = create<State & Action>((set, get) => ({
     set((state) => ({
       progresses: state.progresses.filter(
         (p) => p.key !== key && p.total > p.loaded
+      ),
+    })),
+  updateChunkLoaded: ({ key, chunkIndex, loaded }) =>
+    set((state) => ({
+      progresses: state.progresses.map((p) =>
+        p.key === key
+          ? {
+              ...p,
+              chunkLoaded: [
+                ...p.chunkLoaded.slice(0, chunkIndex),
+                loaded,
+                ...p.chunkLoaded.slice(chunkIndex + 1),
+              ],
+              loaded: p.chunkLoaded.reduce((a, b) => a + b, 0),
+            }
+          : p
       ),
     })),
 }));

@@ -4,6 +4,7 @@ import {
   spinner,
   spinnerContainer,
 } from '../../styles/mobile/progressSpinner.css';
+import { theme } from '../../styles/themes/theme.css';
 
 export const ProgressSpinner = (): React.ReactElement => {
   const [totalProgress, setTotalProgress] = useState<number>(0);
@@ -30,7 +31,7 @@ export const ProgressSpinner = (): React.ReactElement => {
 
   useEffect(() => {
     if (spinnerRef.current) {
-      spinnerRef.current.style.background = `conic-gradient(gray ${totalProgress * 3.6}deg, white 0deg)`;
+      spinnerRef.current.style.background = `conic-gradient(${theme.text.normal} ${totalProgress * 3.6}deg, ${theme.primary.normal} 0deg)`;
     }
   }, [totalProgress]);
 
