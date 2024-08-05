@@ -167,7 +167,7 @@ function Component() {
         ) : (
           srcUrl && getContentType(fileName)?.startsWith('video') && (
             <video
-              src={`${srcUrl}#t=0.001`}
+              src={srcUrl}
               controls
               className={mediaContent}
               onTouchEnd={toggleShowMenu}
