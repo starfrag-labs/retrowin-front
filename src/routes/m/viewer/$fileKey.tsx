@@ -147,6 +147,7 @@ function Component() {
   };
 
   useEffect(() => {
+    setSrcUrl('');
     queryClient.ensureQueryData(downloadFileQueryOption(targetKey, fileName))
     .then((response) => {
       setSrcUrl(URL.createObjectURL(response));
