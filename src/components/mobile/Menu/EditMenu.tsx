@@ -166,8 +166,8 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
     );
     unselectAllKeys();
     selectedFiles.forEach(async (file) => {
-      queryClient
-        .ensureQueryData(downloadFileQueryOption(file.key, file.name))
+      await queryClient
+        .ensureQueryData(downloadFileQueryOption(file.key, file.name ?? 'file'))
         .then((response) => {
           const url = window.URL.createObjectURL(response);
           const link = document.createElement('a');

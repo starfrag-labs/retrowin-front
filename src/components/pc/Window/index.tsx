@@ -14,8 +14,7 @@ import {
 } from '../../../styles/pc/windows/window.css';
 import { useEventStore } from '../../../store/event.store';
 import { useWindowStore } from '../../../store/window.store';
-import { VideoViewer } from './VideoViewer';
-import { ImageViewer } from './ImageViewer';
+import { Viewer } from './Viewer';
 import { Uploader } from './Uploader';
 import { Navigator } from './Navigator';
 import { MdNavigateBefore } from 'react-icons/md';
@@ -272,16 +271,6 @@ export const WindowV2 = ({
     };
   }, [startResizing]);
 
-  // set window title
-  useEffect(() => {
-    const info = getElementInfo(window?.targetKey ?? '');
-    if (info && info.name) {
-      setTitle(info.name);
-    } else if (window && window.type === 'uploader') {
-      setTitle('Upload Files');
-    }
-  }, [getElementInfo, window]);
-
   // handle mouse down event on window
   const handleMouseDown = () => {
     // highlight window on click
@@ -353,10 +342,8 @@ export const WindowV2 = ({
         onMouseEnter={onMouseEnter}
         onMouseLeave={onMouseLeave}
       >
-        {window.type === 'image' ? (
-          <ImageViewer fileKey={window.targetKey} setTitle={setTitle} />
-        ) : window.type === 'video' ? (
-          <VideoViewer fileKey={window.targetKey} />
+        {window.type === 'image' || window.type === 'video' ? (
+          <Viewer fileKey={window.targetKey} setTitle={setTitle} />
         ) : window.type === 'navigator' ? (
           <Navigator folderKey={window.targetKey} setLoading={setLoading} />
         ) : window.type === 'uploader' ? (

@@ -29,6 +29,7 @@ const defaultButton: StyleRule = {
   ':hover': {
     color: 'lightgrey',
   },
+  zIndex: 1,
 } as const;
 
 export const nextButton = style({

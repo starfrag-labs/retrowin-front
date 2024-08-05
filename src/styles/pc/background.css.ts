@@ -1,6 +1,5 @@
 import { keyframes, style } from '@vanilla-extract/css';
 import { defaultContainer, fixedFull } from '../common/container.css';
-// import { opacityAnimation } from '../common/keyframes.css';
 
 export const backgroundSelectorContainer = fixedFull;
 

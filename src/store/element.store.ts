@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-type ElementInfo = {
+export type ElementInfo = {
   key: string;
   type: 'file' | 'folder' | 'upload';
   name: string;

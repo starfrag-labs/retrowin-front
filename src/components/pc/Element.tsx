@@ -128,7 +128,7 @@ export const Element = memo(
       if (type === 'file' && contentType) {
         if (contentType.startsWith('image')) {
           newWindow(elementKey, 'image');
-        } else if (contentType.includes('video')) {
+        } else if (contentType.startsWith('video')) {
           newWindow(elementKey, 'video');
         }
       } else if (type === 'file') {

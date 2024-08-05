@@ -35,9 +35,6 @@ export const ElementOptionMenu = ({
   const removeFavoriteFolder = useMutation(removeFavoriteFolderMutationOption);
 
   // states
-  // const [menuList, setMenuList] = useState<
-  //   { name: string; action: () => void }[]
-  // >([]);
   const [isPinned, setIsPinned] = useState(false);
 
   // store states
@@ -220,22 +217,6 @@ export const ElementOptionMenu = ({
     ],
     [handleDelete]
   );
-
-  // useEffect(() => {
-  //   if (selectedKeys.length > 1) {
-  //     setMenuList(multipleMenuList);
-  //   } else if (elementInfo?.type === 'file') {
-  //     setMenuList(fileMenuList);
-  //   } else if (elementInfo?.type === 'folder') {
-  //     setMenuList(folderMenuList);
-  //   }
-  // }, [
-  //   elementInfo,
-  //   fileMenuList,
-  //   folderMenuList,
-  //   multipleMenuList,
-  //   selectedKeys,
-  // ]);
 
   if (selectedKeys.length > 1) {
     return <MenuGenerator menuList={multipleMenuList()} />;
