@@ -4,15 +4,25 @@ import { theme } from '../themes/theme.css';
 
 export const elementsContainer = style({
   display: 'grid',
-  gridTemplateColumns: 'repeat(auto-fill, minmax(8.75rem, 1fr))',
+  gridTemplateColumns: '1fr',
   gridAutoRows: '10rem',
   width: '100%',
   height: 'auto',
   gap: '5px',
 
   '@media': {
+    'screen and (min-width: 300px)': {
+      gridTemplateColumns: '1fr 1fr',
+      gridAutoRows: '10rem',
+    },
+
     'screen and (min-width: 600px)': {
-      gridTemplateColumns: 'repeat(auto-fill, minmax(15rem, 1fr))',
+      gridTemplateColumns: '1fr 1fr 1fr',
+      gridAutoRows: '12.5rem',
+    },
+    
+    'screen and (min-width: 900px)': {
+      gridTemplateColumns: '1fr 1fr 1fr 1fr',
       gridAutoRows: '15rem',
     },
   },
