@@ -41,13 +41,13 @@ export const circularLoadingSpinner = style({
 
 const gradient = keyframes({
   '0%': {
-    backgroundPosition: '0% 50%',
+    backgroundPosition: '0% 0%',
   },
   '50%': {
-    backgroundPosition: '100% 50%',
+    backgroundPosition: '100% 100%',
   },
   '100%': {
-    backgroundPosition: '0% 50%',
+    backgroundPosition: '0% 0%',
   },
 });
 
@@ -55,7 +55,7 @@ export const boxLoading = style([
   flexCenter,
   {
     background:
-      'linear-gradient(270deg, rgba(0, 0, 0, 0.01), rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.01))',
+      `linear-gradient(135deg, ${theme.primary.normal}, ${theme.highlight.h1}, ${theme.primary.normal})`,
     backgroundSize: '600% 600%',
     animation: `${gradient} 2s linear infinite`,
   },
