@@ -1,4 +1,4 @@
-import { authPrefix, cloudPrefix } from '../utils/config';
+import config, { authPrefix, cloudPrefix } from '../utils/config';
 
 export const memberUrls = {
   profile: {
@@ -101,3 +101,5 @@ export const cloudUrls = {
     }),
   },
 };
+
+export const srcUrl = (fileKey: string) => `${config.gate}${cloudUrls.file.download(fileKey).url}`;

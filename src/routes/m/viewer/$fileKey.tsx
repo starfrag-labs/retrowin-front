@@ -6,7 +6,7 @@ import {
   deleteFileMutationOption,
 } from '../../../utils/queryOptions/file.query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { getContentType } from '../../../utils/customFn/contentTypeGetter';
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { IoIosReturnLeft } from 'react-icons/io';
@@ -26,6 +26,7 @@ import {
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { Modal } from '../../../components/mobile/Modal';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
+import { srcUrl } from '../../../api/urls';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <CircularLoading />,
@@ -46,8 +47,6 @@ function Component() {
   const [fileName, setFileName] = useState<string>('');
   const [targetKey, setTargetKey] = useState<string>(fileKey);
   const [parentKey, setParentKey] = useState<string>('');
-  const [loading, setLoading] = useState<boolean>(true);
-  const [sourceUrl, setSourceUrl] = useState<string>('');
   const [siblings, setSiblings] = useState<string[]>([]);
   const [imageNumber, setImageNumber] = useState<number>(0);
   const [showMenu, setShowMenu] = useState<boolean>(true);
@@ -56,7 +55,6 @@ function Component() {
     useState<boolean>(false);
 
   // Query
-  const readQuery = useQuery(downloadFileQueryOption(targetKey));
   const infoQuery = useQuery(getFileInfoQueryOption(targetKey));
   const readFolderQuery = useQuery(readFolderQueryOption(parentKey));
 
@@ -102,23 +100,6 @@ function Component() {
   useEffect(() => {
     setImageNumber(siblings.indexOf(targetKey));
   }, [siblings, targetKey]);
-
-  const createUrl = useCallback(async () => {
-    setLoading(true);
-    if (!fileName) {
-      setLoading(false);
-      return;
-    }
-    const contentType = getContentType(fileName);
-    if (readQuery.isSuccess && readQuery.data && contentType) {
-      setSourceUrl(URL.createObjectURL(readQuery.data));
-      setLoading(false);
-    }
-  }, [fileName, readQuery.data, readQuery.isSuccess]);
-
-  useEffect(() => {
-    createUrl();
-  }, [createUrl]);
 
   const handlePrev = () => {
     if (imageNumber > 0) {
@@ -167,28 +148,24 @@ function Component() {
 
   return (
     <div className={viewerContainer}>
-      {loading || !fileName || !sourceUrl ? (
-        <CircularLoading />
-      ) : (
-        <div className={mediaContainer}>
-          {getContentType(fileName)?.startsWith('image') ? (
-            <img
-              src={sourceUrl}
+      <div className={mediaContainer}>
+        {getContentType(fileName)?.startsWith('image') ? (
+          <img
+            src={srcUrl(targetKey)}
+            className={mediaContent}
+            onTouchEnd={toggleShowMenu}
+          />
+        ) : (
+          getContentType(fileName)?.startsWith('video') && (
+            <video
+              src={`${srcUrl(targetKey)}#t=0.001`}
+              controls
               className={mediaContent}
               onTouchEnd={toggleShowMenu}
             />
-          ) : (
-            getContentType(fileName)?.startsWith('video') && (
-              <video
-                src={sourceUrl}
-                controls
-                className={mediaContent}
-                onTouchEnd={toggleShowMenu}
-              />
-            )
-          )}
-        </div>
-      )}
+          )
+        )}
+      </div>
       {showMenu && (
         <nav className={viewerNav}>
           <Link to="/m/$folderKey" params={{ folderKey: parentKey }}>
