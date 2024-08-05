@@ -61,7 +61,7 @@ function IndexComponent() {
 
   useEffect(() => {
     const md = new MobileDetect(navigator.userAgent);
-    if (!mobile && (md.isPhoneSized() || md.tablet())) {
+    if (!mobile && (md.mobile() || md.isPhoneSized() )) {
       navigate({ to: '/m' });
     }
   }, [mobile, navigate]);
