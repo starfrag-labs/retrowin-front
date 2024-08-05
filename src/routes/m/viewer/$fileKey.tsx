@@ -26,7 +26,6 @@ import {
 import { readFolderQueryOption } from '../../../utils/queryOptions/folder.query';
 import { Modal } from '../../../components/mobile/Modal';
 import { generateQueryKey } from '../../../utils/queryOptions/index.query';
-import { srcUrl } from '../../../api/urls';
 
 export const Route = createFileRoute('/m/viewer/$fileKey')({
   pendingComponent: () => <CircularLoading />,
@@ -44,6 +43,7 @@ function Component() {
   const navigate = useNavigate({ from: '/m/viewer/$fileKey' });
 
   // States
+  const [srcUrl, setSrcUrl] = useState<string>(''); 
   const [fileName, setFileName] = useState<string>('');
   const [targetKey, setTargetKey] = useState<string>(fileKey);
   const [parentKey, setParentKey] = useState<string>('');
@@ -136,7 +136,7 @@ function Component() {
     queryClient
       .ensureQueryData(downloadFileQueryOption(targetKey, fileName))
       .then((response) => {
-        const url = window.URL.createObjectURL(response);
+        const url = URL.createObjectURL(response);
         const link = document.createElement('a');
         link.href = url;
         link.setAttribute('download', fileName);
@@ -146,19 +146,28 @@ function Component() {
       });
   };
 
+  useEffect(() => {
+    queryClient.ensureQueryData(downloadFileQueryOption(targetKey, fileName))
+    .then((response) => {
+      setSrcUrl(URL.createObjectURL(response));
+    });
+  }, [targetKey, fileName, queryClient]);
+
   return (
     <div className={viewerContainer}>
       <div className={mediaContainer}>
-        {getContentType(fileName)?.startsWith('image') ? (
+        {!srcUrl && <CircularLoading />}
+        {srcUrl && getContentType(fileName)?.startsWith('image') ? (
+          // cache
           <img
-            src={srcUrl(targetKey)}
+            src={srcUrl}
             className={mediaContent}
             onTouchEnd={toggleShowMenu}
           />
         ) : (
-          getContentType(fileName)?.startsWith('video') && (
+          srcUrl && getContentType(fileName)?.startsWith('video') && (
             <video
-              src={`${srcUrl(targetKey)}#t=0.001`}
+              src={`${srcUrl}#t=0.001`}
               controls
               className={mediaContent}
               onTouchEnd={toggleShowMenu}

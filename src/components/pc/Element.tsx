@@ -148,7 +148,7 @@ export const Element = memo(
       queryClient
         .ensureQueryData(downloadFileQueryOption(elementKey, name))
         .then((response) => {
-          const url = window.URL.createObjectURL(response);
+          const url = URL.createObjectURL(response);
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', name);

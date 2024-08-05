@@ -169,7 +169,7 @@ export const EditMenu = ({ folderKey }: { folderKey: string }) => {
       await queryClient
         .ensureQueryData(downloadFileQueryOption(file.key, file.name ?? 'file'))
         .then((response) => {
-          const url = window.URL.createObjectURL(response);
+          const url = URL.createObjectURL(response);
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', file.name);

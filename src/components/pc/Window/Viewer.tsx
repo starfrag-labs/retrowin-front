@@ -9,6 +9,8 @@ import {
 import { MdNavigateBefore, MdNavigateNext } from 'react-icons/md';
 import { useElementStore } from '../../../store/element.store';
 import { srcUrl } from '../../../api/urls';
+import { useQueryClient } from '@tanstack/react-query';
+import { downloadFileQueryOption } from '../../../utils/queryOptions/file.query';
 
 export const Viewer = memo(
   ({
@@ -18,6 +20,8 @@ export const Viewer = memo(
     fileKey: string;
     setTitle: (title: string) => void;
   }): React.ReactElement => {
+    const queryClient = useQueryClient();
+
     // states
     const [targetKey, setTargetKey] = useState<string>(fileKey);
     const [siblings, setSiblings] = useState<string[]>([]);
@@ -34,10 +38,14 @@ export const Viewer = memo(
     useEffect(() => {
       const info = getElementInfo(targetKey);
       setContentIdx(siblings.indexOf(targetKey));
-      setUrl(srcUrl(targetKey));
       setTitle(info?.name ?? '');
       setContentType(getContentType(info?.name ?? '') ?? '');
-    }, [targetKey, getElementInfo, siblings, setTitle]);
+      queryClient.ensureQueryData(
+        downloadFileQueryOption(targetKey),
+      ).then((data) => {
+        setUrl(URL.createObjectURL(data));
+      });
+    }, [targetKey, getElementInfo, siblings, setTitle, queryClient]);
 
     useEffect(() => {
       const info = getElementInfo(fileKey);
