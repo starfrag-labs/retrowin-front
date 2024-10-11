@@ -1,9 +1,13 @@
-import { CustomResponse, file_type } from "@/interfaces/api";
+import {
+  CustomResponse,
+  CustomStorageResponse,
+  file_type,
+} from "@/interfaces/api";
 
 const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
 const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
 
-const url = {
+export const url = {
   member: {
     get: "/member",
     create: "/member",
@@ -35,16 +39,22 @@ const url = {
         `/file/parent/${fileKey}?parent_key=${parentKey}`,
     },
     upload: {
-      writeToken: (fileKey: string, fileName: string, byteSize: number) =>
-        `/file/upload/write-token/${fileKey}?file_name=${fileName}&byte_size=${byteSize}`,
+      writeToken: (parentKey: string, fileName: string, byteSize: number) =>
+        `/file/upload/write-token/${parentKey}?file_name=${fileName}&byte_size=${byteSize}`,
       complete: (fileKey: string, totalChunks: number) =>
         `/file/upload/complete/${fileKey}?total_chunks=${totalChunks}`,
+    },
+    stream: {
+      readToken: (fileKey: string) => `/file/stream/read-token/${fileKey}`,
     },
   },
   storage: {
     file: {
-      read: (fileKey: string) => `/storage/file/${fileKey}`,
-      write: (fileKey: string) => `/storage/file/${fileKey}`,
+      src: (fileKey: string, fileName: string) =>
+        new URL(`/file/${fileKey}?file_name=${fileName}`, storageApiBase),
+      read: (fileKey: string, fileName: string) =>
+        `/file/${fileKey}?file_name=${fileName}`,
+      write: (fileKey: string) => `/file/${fileKey}`,
     },
     session: {
       issue: (token: string) => `/session/issue/${token}`,
@@ -63,6 +73,7 @@ const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
   base: "cloud" | "storage" = "cloud",
+  bodyType: "json" | "blob" = "json",
 ) => {
   // create a new URL object with the input string
   let url: URL;
@@ -76,16 +87,31 @@ const customFetch = async <T = unknown>(
   }
   const response = await fetch(url, {
     ...init,
-    headers: {
-      ...init?.headers,
-      // set the content type to application/json
-      "Content-Type": "application/json",
-    },
+    //headers: {
+    //  // pass the other headers along
+    //  ...init?.headers,
+    //},
     credentials: "include",
   });
+
   const headers = response.headers;
   const status = response.status;
-  const body = (await response.json()) as T;
+  let body: T;
+  switch (bodyType) {
+    case "json":
+      body = (await response.json()) as T;
+      break;
+    case "blob":
+      if (response.status !== 200) {
+        body = (await response.json()) as T;
+      } else {
+        body = (await response.blob()) as T;
+      }
+      break;
+    default:
+      body = (await response.json()) as T;
+      break;
+  }
 
   return {
     headers, // pass the headers along
@@ -224,13 +250,13 @@ export const fileApi = {
       }),
   },
   upload: {
-    writeToken: (fileKey: string, fileName: string, byteSize: number) =>
+    writeToken: (parentKey: string, fileName: string, byteSize: number) =>
       customFetch<
         CustomResponse<{
           token: string;
           fileKey: string;
         }>
-      >(url.file.upload.writeToken(fileKey, fileName, byteSize)),
+      >(url.file.upload.writeToken(parentKey, fileName, byteSize)),
     complete: (fileKey: string, totalChunks: number) =>
       customFetch<
         CustomResponse<{
@@ -241,5 +267,65 @@ export const fileApi = {
       >(url.file.upload.complete(fileKey, totalChunks), {
         method: "PATCH",
       }),
+  },
+  stream: {
+    readToken: (fileKey: string) =>
+      customFetch<
+        CustomResponse<{
+          token: string;
+        }>
+      >(url.file.stream.readToken(fileKey)),
+  },
+};
+export const storageApi = {
+  file: {
+    read: (fileKey: string, fileName: string) =>
+      customFetch<
+        | Blob
+        | CustomStorageResponse<{
+            message: string;
+          }>
+      >(
+        url.storage.file.read(fileKey, fileName),
+        {
+          //headers: {
+          //  responseType: "blob",
+          //},
+          method: "GET",
+        },
+        "storage",
+        "blob",
+      ),
+    write: (fileKey: string, chunkCount: number, fileData: Blob) => {
+      const formData = new FormData();
+      formData.append("chunkCount", chunkCount.toString());
+      formData.append("fileData", fileData);
+      return customFetch<
+        CustomStorageResponse<{
+          message: string;
+        }>
+      >(
+        url.storage.file.write(fileKey),
+        {
+          method: "POST",
+          body: formData,
+        },
+        "storage",
+      );
+    },
+  },
+  session: {
+    issue: (token: string) =>
+      customFetch<
+        CustomStorageResponse<{
+          message: string;
+        }>
+      >(
+        url.storage.session.issue(token),
+        {
+          method: "GET",
+        },
+        "storage",
+      ),
   },
 };
