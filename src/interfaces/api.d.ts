@@ -11,3 +11,8 @@ export interface ErrorResponseData {
 }
 
 export type file_type = "block" | "container" | "link";
+
+export interface CustomStorageResponse<T = unknown> {
+  message: string;
+  data: T;
+}
