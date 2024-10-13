@@ -1,12 +1,15 @@
-import Uploader from "@/components/uploader";
+import FileContainer from "@/components/file/file_container";
 import styles from "./page.module.css";
-import Downloader from "@/components/downloader";
+import Background from "@/components/layout/background";
+import Navbar from "@/components/layout/navbar/navbar_container";
 
 export default function Home() {
   return (
     <div className={styles.page}>
-      <Uploader />
-      <Downloader />
+      <Background>
+        <FileContainer />
+      </Background>
+      <Navbar />
     </div>
   );
 }
