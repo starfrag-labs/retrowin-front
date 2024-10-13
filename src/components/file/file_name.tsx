@@ -1,3 +1,3 @@
-export default function FileName() {
-  return <div>file name</div>;
+export default function FileName({ name }: { name: string }) {
+  return <div>{name}</div>;
 }
