@@ -5,7 +5,7 @@
   flex-direction: column;
 }
 
-.item {
+.item_wrapper {
   display: flex;
   width: 100%;
   height: auto;
@@ -21,4 +21,8 @@
   &:hover {
     background-color: #f0f0f022;
   }
+}
+
+.item {
+  flex-direction: column;
 }

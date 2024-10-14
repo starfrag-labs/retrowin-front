@@ -1,7 +1,12 @@
+.icon_container {
+  display: flex;
+  width: auto;
+  height: auto;
+}
+
 .icon {
   display: inline-block;
-  width: 60px;
-  height: 60px;
+  font-size: 4rem;
   filter: drop-shadow(0 0 1px black);
 }
 

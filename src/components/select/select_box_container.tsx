@@ -6,6 +6,7 @@ import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./select_box_container.module.css";
+import { useEventStore } from "@/store/event.store";
 
 export default function SelectBoxContainer({
   children,
@@ -19,8 +20,10 @@ export default function SelectBoxContainer({
     (state) => state.backgroundWindowRef,
   );
   const currentWindow = useWindowStore((state) => state.currentWindow);
+  const pressedKeys = useEventStore((state) => state.pressedKeys);
   // Store actions
   const setRect = useSelectBoxStore((state) => state.setRect);
+  const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
 
   // States
   const [isSelecting, setIsSelecting] = useState(false);
@@ -39,6 +42,11 @@ export default function SelectBoxContainer({
       // Check if the click is inside the highlighted file
       if (highlightedFile) return;
 
+      // If Shift key not pressed, unselect all files
+      if (!pressedKeys.includes("Shift")) {
+        unselectAllFiles();
+      }
+
       // Select start
       setIsSelecting(true);
       setStart({ x: e.clientX, y: e.clientY });
@@ -53,7 +61,14 @@ export default function SelectBoxContainer({
         );
       }
     },
-    [backgroundWindowRef, currentWindow, highlightedFile, menuRef],
+    [
+      backgroundWindowRef,
+      currentWindow,
+      highlightedFile,
+      menuRef,
+      pressedKeys,
+      unselectAllFiles,
+    ],
   );
 
   const selecting = useCallback(

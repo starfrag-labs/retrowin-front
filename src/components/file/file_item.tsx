@@ -32,13 +32,14 @@ export default memo(function FileItem({
   const selectBox = useSelectBoxStore((state) => state.rect);
   const targetWindow = useSelectBoxStore((state) => state.currentWindowKey);
   // Store actions
-  const setFileRef = useFileStore((state) => state.setFileRef);
+  const setFileIconRef = useFileStore((state) => state.setFileIconRef);
   const setHighlightedFile = useFileStore((state) => state.setHighlightedFile);
   const selectFile = useFileStore((state) => state.selectFile);
   const unselectFile = useFileStore((state) => state.unselectFile);
 
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLDivElement>(null);
 
   const handleMouseEnter = useCallback(() => {
     setHighlightedFile({
@@ -85,8 +86,8 @@ export default memo(function FileItem({
 
   // Assign fileRef to store
   useEffect(() => {
-    setFileRef(fileKey, windowKey, fileRef);
-  }, [fileKey, fileRef, setFileRef, windowKey]);
+    setFileIconRef(fileKey, windowKey, iconRef);
+  }, [fileKey, setFileIconRef, windowKey]);
 
   // Check if the file is in the select box
   useEffect(() => {
@@ -96,16 +97,17 @@ export default memo(function FileItem({
   return (
     <div className={`full-size ${styles.container}`}>
       <div
-        className={`${styles.item}`}
-        ref={fileRef}
+        className={`${styles.item_wrapper}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
           backgroundColor: isSelected ? selectedFileBackground : "",
         }}
       >
-        <FileIcon type={type} />
-        <FileName name={name} />
+        <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
+          <FileIcon type={type} ref={iconRef} />
+          <FileName name={name} />
+        </div>
       </div>
     </div>
   );

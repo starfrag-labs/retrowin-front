@@ -15,6 +15,7 @@ export type State = {
     ref: React.RefObject<HTMLElement>;
   } | null;
   fileRefs: Map<string, React.RefObject<HTMLElement>>;
+  fileIconRefs: Map<string, React.RefObject<HTMLElement>>;
 };
 
 export type Action = {
@@ -23,7 +24,7 @@ export type Action = {
   unselectAllFiles: () => void;
   isFileKeySelected: (fileKey: string) => boolean;
   setHighlightedFile: (highlightedFile: State["highlightedFile"]) => void;
-  setFileRef: (
+  setFileIconRef: (
     fileKey: string,
     windowKey: string,
     ref: React.RefObject<HTMLElement>,
@@ -34,12 +35,14 @@ const initialState: State = {
   selectedFileSerials: [],
   highlightedFile: null,
   fileRefs: new Map(),
+  fileIconRefs: new Map(),
 };
 
-export const useFileStore = create<State & Action>((set) => ({
+export const useFileStore = create<State & Action>((set, get) => ({
   selectedFileSerials: initialState.selectedFileSerials,
   highlightedFile: initialState.highlightedFile,
   fileRefs: initialState.fileRefs,
+  fileIconRefs: initialState.fileIconRefs,
   selectFile: (fileKey, windowKey) => {
     set((state) => {
       const serialKey = `${fileKey}:${windowKey}`;
@@ -62,18 +65,16 @@ export const useFileStore = create<State & Action>((set) => ({
     set({ selectedFileSerials: [] });
   },
   isFileKeySelected: (fileKey) => {
-    return initialState.selectedFileSerials.some((key) =>
-      key.startsWith(fileKey),
-    );
+    return get().selectedFileSerials.some((key) => key.startsWith(fileKey));
   },
   setHighlightedFile: (highlightedFile) => {
     set({ highlightedFile });
   },
-  setFileRef: (fileKey, windowKey, ref) => {
+  setFileIconRef: (fileKey, windowKey, ref) => {
     const serialKey = `${fileKey}:${windowKey}`;
     set((state) => {
-      state.fileRefs.set(serialKey, ref);
-      return { fileRefs: state.fileRefs };
+      state.fileIconRefs.set(serialKey, ref);
+      return { fileIconRefs: state.fileIconRefs };
     });
   },
 }));

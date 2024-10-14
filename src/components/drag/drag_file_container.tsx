@@ -27,7 +27,7 @@ export default function DragFileContainer({
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials,
   );
-  const fileRefs = useFileStore((state) => state.fileRefs);
+  const fileIconRefs = useFileStore((state) => state.fileIconRefs);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
 
   // Store actions
@@ -87,11 +87,11 @@ export default function DragFileContainer({
         // Create a clone of the highlighted file
         let count = 0;
         let width = 0;
-        selectedFileSerials.forEach((key) => {
-          const fileRef = fileRefs.get(key);
-          if (fileRef?.current) {
-            const fileRect = fileRef.current.getBoundingClientRect();
-            const clone = fileRef.current.cloneNode(true) as HTMLElement;
+        selectedFileSerials.forEach((serialKey) => {
+          const fileIconRef = fileIconRefs.get(serialKey);
+          if (fileIconRef?.current && count < 4 ) {
+            const fileRect = fileIconRef.current.getBoundingClientRect();
+            const clone = fileIconRef.current.cloneNode(true) as HTMLElement;
             clone.style.position = "absolute";
             clone.style.left = -fileRect.width / 2 + "px";
             clone.style.top = -fileRect.height - count * 5 + "px";
@@ -114,7 +114,7 @@ export default function DragFileContainer({
       }
     },
     [
-      fileRefs,
+      fileIconRefs,
       highlightedFile?.ref,
       isDragging,
       isDraggingReady,
@@ -242,11 +242,7 @@ export default function DragFileContainer({
         ref={draggingFileRef}
         hidden={!displayDraggingElements}
         className={`${styles.dragging_files}`}
-      >
-        <div className={`${styles.dragging_file_count}`}>
-        {selectedFileSerials.length}
-        </div>
-      </div>
+      ></div>
       {children}
     </div>
   );
