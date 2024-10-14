@@ -1,16 +1,17 @@
-import { FaRegFileAlt } from "react-icons/fa";
-import { FaRegFolder } from "react-icons/fa";
+import { FaFileAlt } from "react-icons/fa";
+import { FaFolder } from "react-icons/fa";
 import styles from "./file_icon.module.css";
+import { memo } from "react";
 
-export default function FileIcon({
+export default memo(function FileIcon({
   type = "block",
 }: {
-  type: "block" | "container";
+  type: "block" | "container" | "upload";
 }) {
-  if (type === "block") {
-    return <FaRegFolder />;
-  }
   if (type === "container") {
-    return <FaRegFileAlt className={styles.icon} />;
+    return <FaFolder className={`${styles.icon} ${styles.folder_icon}`} />;
   }
-}
+  if (type === "block") {
+    return <FaFileAlt className={`${styles.icon} ${styles.file_icon}`} />;
+  }
+});

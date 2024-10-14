@@ -1,0 +1,19 @@
+.dragging_files {
+  position: fixed;
+  opacity: 0.5;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.dragging_file_count {
+  position: relative;
+  border: 1px solid black;
+  border-radius: "50%";
+  background-color: "lightblue";
+  bottom: "1.5rem";
+  width: "1.5rem";
+  height: "1.5rem";
+  display: "flex";
+  justify-content: "center";
+  align-items: "center";
+}
