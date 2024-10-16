@@ -1,59 +1,77 @@
-import { IWindow } from '@/interfaces/window';
-import { create } from 'zustand';
+import { AppWindow } from "@/interfaces/window";
+import { create } from "zustand";
 
 type State = {
-  windows: IWindow[];
-  currentWindow: { key: string; ref: React.RefObject<HTMLElement> } | null;
+  windows: AppWindow[];
+  currentWindow: {
+    key: string;
+    windowRef: React.RefObject<HTMLElement>;
+    contentRef: React.RefObject<HTMLElement>;
+    headerRef: React.RefObject<HTMLElement>;
+  } | null;
   backgroundWindowRef: React.RefObject<HTMLElement> | null;
+  mouseEnter: boolean;
 };
 
 type Action = {
-  newWindow: (targetKey: string, type: IWindow['type']) => void;
+  newWindow: (targetKey: string, type: AppWindow["type"]) => void;
   updateWindow: (key: string, targetKey: string) => void;
-  findWindow: (key: string) => IWindow | undefined;
-  findWindowByTarget: (targetKey: string) => IWindow | undefined;
+  findWindow: (key: string) => AppWindow | undefined;
+  findWindowByTarget: (targetKey: string) => AppWindow | undefined;
   closeWindow: (key: string) => void;
   highlightWindow: (key: string) => void;
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
 
   // current window
-  setCurrentWindow: (window: { key: string; ref: React.RefObject<HTMLElement> } | null) => void;
+  setCurrentWindow: (
+    window: {
+      key: string;
+      windowRef: React.RefObject<HTMLElement>;
+      contentRef: React.RefObject<HTMLElement>;
+      headerRef: React.RefObject<HTMLElement>;
+    } | null,
+  ) => void;
 
   // window ref
   setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
+
+  // mouse enter
+  setMouseEnter: (enter: boolean) => void;
 };
 
 const initialState: State = {
   windows: [],
   currentWindow: null,
   backgroundWindowRef: null,
+  mouseEnter: false,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
   backgroundWindowRef: initialState.backgroundWindowRef,
+  mouseEnter: initialState.mouseEnter,
   newWindow: (targetKey, type) => {
     set((state) => {
       const existingWindow = state.windows.find(
-        (w) => w.targetKey === targetKey
+        (w) => w.targetKey === targetKey,
       );
       if (existingWindow) {
         // highlight existing window
         const filteredWindows = state.windows.filter(
-          (w) => w.targetKey !== targetKey
+          (w) => w.targetKey !== targetKey,
         );
         state.windows = [...filteredWindows, existingWindow];
         return { windows: state.windows };
       } else {
         // create new window
-        const newWindow: IWindow = {
+        const newWindow: AppWindow = {
           key: Math.random().toString(36).substring(7),
           targetKey: targetKey,
           type,
         };
-        if (type === 'navigator') {
+        if (type === "navigator") {
           newWindow.targetHistory = [targetKey];
           newWindow.historyIndex = 0;
         }
@@ -71,7 +89,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
         window.targetKey = targetKey;
       }
       if (
-        window?.type === 'navigator' &&
+        window?.type === "navigator" &&
         window.targetHistory &&
         window.historyIndex !== undefined
       ) {
@@ -111,7 +129,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
       if (
-        window?.type === 'navigator' &&
+        window?.type === "navigator" &&
         window.targetHistory &&
         window.historyIndex !== undefined
       ) {
@@ -128,7 +146,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
       if (
-        window?.type === 'navigator' &&
+        window?.type === "navigator" &&
         window.targetHistory &&
         window.historyIndex !== undefined
       ) {
@@ -150,5 +168,10 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   // window ref
   setBackgroundWindowRef: (ref) => {
     set({ backgroundWindowRef: ref });
+  },
+
+  // mouse enter
+  setMouseEnter: (enter) => {
+    set({ mouseEnter: enter });
   },
 }));
