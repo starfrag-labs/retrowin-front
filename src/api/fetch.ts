@@ -94,8 +94,6 @@ const customFetch = async <T = unknown>(
     credentials: "include",
   });
 
-  const headers = response.headers;
-  const status = response.status;
   let body: T;
   switch (bodyType) {
     case "json":
@@ -114,8 +112,9 @@ const customFetch = async <T = unknown>(
   }
 
   return {
-    headers, // pass the headers along
-    status, // pass the status along
+    ok: response.ok, // pass the ok along
+    headers: response.headers, // pass the headers along
+    status: response.headers , // pass the status along
     body, // pass the body along
   };
 };
