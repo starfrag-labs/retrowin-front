@@ -1,4 +1,4 @@
-export interface IWindow {
+export interface AppWindow {
   key: string;
   targetKey: string;
   type:
