@@ -38,11 +38,17 @@ export default function Home() {
   }, [backgroundWindowRef, setBackgroundWindowRef]);
 
   return (
-    <div className={styles.page}>
+    <div
+      className={`${styles.page} flex-center full-size`}
+      onContextMenu={(e) => e.preventDefault()}
+    >
       <Background>
         <SelectBoxContainer>
           <DragFileContainer>
-            <div ref={backgroundWindowRef} className="full-size">
+            <div
+              ref={backgroundWindowRef}
+              className={`full-size flex-center ${styles.background_window}`}
+            >
               <FileContainer
                 windowKey={generatedWindowKey}
                 containerKey={rootKey}
