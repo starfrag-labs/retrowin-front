@@ -21,6 +21,7 @@ export default function SelectBoxContainer({
   );
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
+  const mouseEnter = useWindowStore((state) => state.mouseEnter);
   // Store actions
   const setRect = useSelectBoxStore((state) => state.setRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
@@ -47,15 +48,18 @@ export default function SelectBoxContainer({
         unselectAllFiles();
       }
 
-      // Select start
-      setIsSelecting(true);
-      setStart({ x: e.clientX, y: e.clientY });
-      document.body.style.cursor = "default";
-
-      // Get target window rect
-      if (currentWindow?.ref.current) {
-        setTargetWindowRect(currentWindow.ref.current.getBoundingClientRect());
-      } else if (backgroundWindowRef?.current) {
+      // Get target window rect and start selecting
+      if (currentWindow?.contentRef.current && mouseEnter) {
+        setIsSelecting(true);
+        setStart({ x: e.clientX, y: e.clientY });
+        document.body.style.cursor = "default";
+        setTargetWindowRect(
+          currentWindow.contentRef.current.getBoundingClientRect(),
+        );
+      } else if (backgroundWindowRef?.current && !mouseEnter) {
+        setIsSelecting(true);
+        setStart({ x: e.clientX, y: e.clientY });
+        document.body.style.cursor = "default";
         setTargetWindowRect(
           backgroundWindowRef.current.getBoundingClientRect(),
         );
@@ -63,6 +67,7 @@ export default function SelectBoxContainer({
     },
     [
       backgroundWindowRef,
+      mouseEnter,
       currentWindow,
       highlightedFile,
       menuRef,
@@ -88,11 +93,11 @@ export default function SelectBoxContainer({
       const top = Math.max(Math.min(start.y, e.clientY), targetWindowRect.top);
       const right = Math.min(
         Math.max(start.x, e.clientX),
-        targetWindowRect.right - 2,
+        targetWindowRect.right,
       );
       const bottom = Math.min(
         Math.max(start.y, e.clientY),
-        targetWindowRect.bottom - 3,
+        targetWindowRect.bottom,
       );
       const width = right - left;
       const height = bottom - top;

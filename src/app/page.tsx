@@ -9,11 +9,15 @@ import { useWindowStore } from "@/store/window.store";
 import SelectBoxContainer from "@/components/select/select_box_container";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import DragFileContainer from "@/components/drag/drag_file_container";
+import Window from "@/components/window/window";
 
 export default function Home() {
   // Constants
   const generatedWindowKey = "generated";
+  const rootKey = "root";
 
+  // Store states
+  const windows = useWindowStore((state) => state.windows);
   // Store actions
   const setBackgroundWindowRef = useWindowStore(
     (state) => state.setBackgroundWindowRef,
@@ -39,8 +43,14 @@ export default function Home() {
         <SelectBoxContainer>
           <DragFileContainer>
             <div ref={backgroundWindowRef} className="full-size">
-              <FileContainer windowKey={generatedWindowKey} />
+              <FileContainer
+                windowKey={generatedWindowKey}
+                containerKey={rootKey}
+              />
             </div>
+            {windows.map((window) => (
+              <Window key={window.key} windowKey={window.key} />
+            ))}
           </DragFileContainer>
         </SelectBoxContainer>
       </Background>

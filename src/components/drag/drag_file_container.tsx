@@ -150,7 +150,7 @@ export default function DragFileContainer({
       let targetFolderKey: string = "";
 
       // Search for the target folder from the background
-      if (currentWindow && currentWindow.ref.current) {
+      if (currentWindow && currentWindow.windowRef.current) {
         const window = findWindow(currentWindow.key);
         if (window && window.type === "navigator") {
           targetFolderKey = window.targetKey;

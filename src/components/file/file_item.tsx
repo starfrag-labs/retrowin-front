@@ -4,8 +4,9 @@ import FileIcon from "./file_icon";
 import FileName from "./file_name";
 import styles from "./file_item.module.css";
 import { useFileStore } from "@/store/file.store";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
+import { useWindowStore } from "@/store/window.store";
 
 export default memo(function FileItem({
   name,
@@ -22,9 +23,6 @@ export default memo(function FileItem({
   const serialKey = `${fileKey}:${windowKey}`;
   const selectedFileBackground = "#f0f0f033";
 
-  // State
-  const [isSelected, setIsSelected] = useState(false);
-
   // Store state
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials,
@@ -36,6 +34,7 @@ export default memo(function FileItem({
   const setHighlightedFile = useFileStore((state) => state.setHighlightedFile);
   const selectFile = useFileStore((state) => state.selectFile);
   const unselectFile = useFileStore((state) => state.unselectFile);
+  const newWindow = useWindowStore((state) => state.newWindow);
 
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
@@ -89,10 +88,10 @@ export default memo(function FileItem({
     setFileIconRef(fileKey, windowKey, iconRef);
   }, [fileKey, setFileIconRef, windowKey]);
 
-  // Check if the file is in the select box
-  useEffect(() => {
-    setIsSelected(selectedFileSerials.includes(serialKey));
-  }, [selectedFileSerials, serialKey]);
+  const iconClick = useCallback(() => {
+    newWindow("target key", "navigator");
+    console.log("icon clicked");
+  }, [newWindow]);
 
   return (
     <div className={`full-size ${styles.container}`}>
@@ -101,11 +100,13 @@ export default memo(function FileItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          backgroundColor: isSelected ? selectedFileBackground : "",
+          backgroundColor: selectedFileSerials.includes(serialKey)
+            ? selectedFileBackground
+            : "",
         }}
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
-          <FileIcon type={type} ref={iconRef} />
+          <FileIcon type={type} ref={iconRef} onClick={iconClick} />
           <FileName name={name} />
         </div>
       </div>

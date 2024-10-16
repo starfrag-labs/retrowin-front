@@ -1,6 +1,12 @@
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
-export default function FileContainer({ windowKey }: { windowKey: string }) {
+export default function FileContainer({
+  windowKey,
+  containerKey,
+}: {
+  windowKey: string;
+  containerKey: string;
+}) {
   const file_count = 25;
   return (
     <div className={`${styles.container} full-size`}>
