@@ -1,30 +1,30 @@
 import { create } from "zustand";
 
 type State = {
-  resizing: boolean;
+  resizingCursor: boolean;
   renaming: boolean;
   pressedKeys: string[];
 }
 
 type Action = {
-  setResizing: (resizing: boolean) => void;
+  setResizingCursor: (resizing: boolean) => void;
   setRenaming: (renaming: boolean) => void;
   keyup: (pressedKey: string) => void;
   keydown: (pressedKey: string) => void;
 }
 
 const initialState: State = {
-  resizing: false,
+  resizingCursor: false,
   renaming: false,
   pressedKeys: []
 }
 
 export const useEventStore = create<State & Action>((set) => ({
-  resizing: initialState.resizing,
+  resizingCursor: initialState.resizingCursor,
   renaming: initialState.renaming,
   pressedKeys: initialState.pressedKeys,
 
-  setResizing: (resizing) => set({ resizing }),
+  setResizingCursor: (resizing) => set({ resizingCursor: resizing }),
   setRenaming: (renaming) => set({ renaming }),
   keyup: (pressedKey) => {
     set((state) => {

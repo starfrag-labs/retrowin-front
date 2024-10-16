@@ -8,6 +8,16 @@ import { memo, useCallback, useEffect, useRef } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 
+/**
+ * File item component
+ * @param name - name of the file
+ * @param type - type of the file
+ * @param fileKey - key of the file
+ * @param windowKey - key of the window
+ * @returns - File item component
+ * @example
+ * <FileItem name="name" type="container" fileKey="fileKey" windowKey="windowKey" />
+ */
 export default memo(function FileItem({
   name,
   type,

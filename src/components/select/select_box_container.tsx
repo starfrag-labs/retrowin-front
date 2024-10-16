@@ -22,6 +22,8 @@ export default function SelectBoxContainer({
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const mouseEnter = useWindowStore((state) => state.mouseEnter);
+  const resizingCursor = useEventStore((state) => state.resizingCursor);
+  const renaming = useEventStore((state) => state.renaming);
   // Store actions
   const setRect = useSelectBoxStore((state) => state.setRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
@@ -42,6 +44,7 @@ export default function SelectBoxContainer({
       if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
       // Check if the click is inside the highlighted file
       if (highlightedFile) return;
+      if (resizingCursor || renaming) return;
 
       // If Shift key not pressed, unselect all files
       if (!pressedKeys.includes("Shift")) {
@@ -72,6 +75,8 @@ export default function SelectBoxContainer({
       highlightedFile,
       menuRef,
       pressedKeys,
+      renaming,
+      resizingCursor,
       unselectAllFiles,
     ],
   );

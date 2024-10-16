@@ -34,11 +34,11 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
 
   // Store state
   const windows = useWindowStore((state) => state.windows);
-  const resizing = useEventStore((state) => state.resizing);
+  const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
   const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
-  const setResizing = useEventStore((state) => state.setResizing);
+  const setResizingCursor = useEventStore((state) => state.setResizingCursor);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
   const nextWindow = useWindowStore((state) => state.nextWindow);
@@ -148,7 +148,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         windowHeaderRef.current &&
         e.clientX > 0 &&
         e.clientY > 0 &&
-        !resizing
+        !resizingCursor
       ) {
         const headerRect = windowHeaderRef.current.getBoundingClientRect();
         const x = e.clientX - headerRect.left;
@@ -198,8 +198,75 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         window.addEventListener("mouseup", handleMouseUp);
       }
     },
-    [resizing, windowSize.height, windowSize.width],
+    [resizingCursor, windowSize.height, windowSize.width],
   );
+
+  // change cursor on resize
+  const changeCursor = useCallback(
+    (e: MouseEvent) => {
+      if (!windowRef.current) return;
+      const rect = windowRef.current.getBoundingClientRect();
+      if (e.clientX > rect.right - 10 && e.clientY > rect.bottom - 10) {
+        setResizingCursor(true);
+        windowRef.current.style.cursor = "nwse-resize";
+      } else {
+        setResizingCursor(false);
+        windowRef.current.style.cursor = "default";
+      }
+    },
+    [setResizingCursor],
+  );
+  useEffect(() => {
+    const currentWindow = windowRef.current;
+    if (!currentWindow) return;
+    currentWindow.addEventListener("mousemove", changeCursor);
+    return () => {
+      currentWindow.removeEventListener("mousemove", changeCursor);
+    };
+  }, [changeCursor]);
+
+  // Resize window
+  const resizeWindow = useCallback(
+    (e: MouseEvent) => {
+      if (!windowRef.current) return;
+      const rect = windowRef.current.getBoundingClientRect();
+      if (
+        resizingCursor &&
+        e.clientX > rect.right - 10 &&
+        e.clientY > rect.bottom - 10
+      ) {
+        const handleMouseMove = (e: MouseEvent) => {
+          if (
+            !windowRef.current ||
+            !windowContentRef.current ||
+            !windowHeaderRef.current
+          )
+            return;
+          const width = Math.max(e.clientX - rect.left, minWindowSize.width);
+          const height = Math.max(e.clientY - rect.top, minWindowSize.height);
+          windowRef.current.style.width = `${width}px`;
+          windowRef.current.style.height = `${height}px`;
+          windowContentRef.current.style.width = `${width}px`;
+          windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
+        };
+        const handleMouseUp = () => {
+          document.removeEventListener("mousemove", handleMouseMove);
+          document.removeEventListener("mouseup", handleMouseUp);
+        };
+        document.addEventListener("mousemove", handleMouseMove);
+        document.addEventListener("mouseup", handleMouseUp);
+      }
+    },
+    [minWindowSize.width, minWindowSize.height, resizingCursor],
+  );
+  useEffect(() => {
+    const currentWindow = windowRef.current;
+    if (!currentWindow) return;
+    currentWindow.addEventListener("mousedown", resizeWindow);
+    return () => {
+      currentWindow.removeEventListener("mousedown", resizeWindow);
+    };
+  }, [resizeWindow]);
 
   return (
     <div
@@ -224,15 +291,17 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
             : defaultWindowButtonColorPallete
         }
       />
-      <WindowContent
-        fileKey={targetWindow?.targetKey || ""}
-        windowKey={windowKey}
-        setLoading={setContentLoading}
-        type={targetWindow?.type || "other"}
-        ref={windowContentRef}
-        onMouseEnter={enterWindow}
-        onMouseLeave={leaveWindow}
-      />
+      {targetWindow && (
+        <WindowContent
+          fileKey={targetWindow.targetKey}
+          windowKey={windowKey}
+          setLoading={setContentLoading}
+          type={targetWindow.type}
+          ref={windowContentRef}
+          onMouseEnter={enterWindow}
+          onMouseLeave={leaveWindow}
+        />
+      )}
     </div>
   );
 });

@@ -12,7 +12,11 @@ export default function Navigator({
   return (
     <div className="flex-center full-size">
       <div className="flex-center full-size">
-        <FileContainer windowKey={windowKey} containerKey={fileKey} />
+        <FileContainer
+          windowKey={windowKey}
+          containerKey={fileKey}
+          setLoading={setLoading}
+        />
       </div>
     </div>
   );
