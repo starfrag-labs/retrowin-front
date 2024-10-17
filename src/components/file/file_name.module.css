@@ -1,0 +1,18 @@
+.container {
+  display: block;
+  width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.stale_text {
+  display: block;
+  width: 100%;
+  color: #FFFFFF;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  text-align: center;
+  filter: drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black);
+}

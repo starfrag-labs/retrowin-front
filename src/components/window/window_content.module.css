@@ -1,0 +1,6 @@
+.container {
+  background-color: #444444;
+  /* scroll when overflow*/
+  overflow: auto;
+  padding: 0 0.5rem;
+}

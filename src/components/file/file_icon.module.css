@@ -1,0 +1,19 @@
+.icon_container {
+  display: flex;
+  width: auto;
+  height: auto;
+}
+
+.icon {
+  display: inline-block;
+  font-size: 4rem;
+  filter: drop-shadow(0 0 1px black);
+}
+
+.file_icon {
+  color: lightgray;
+}
+
+.folder_icon {
+  color: orange;
+}
