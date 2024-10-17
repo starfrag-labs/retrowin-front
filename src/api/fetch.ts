@@ -1,7 +1,7 @@
+import { ApiFileType } from "@/interfaces/api";
 import {
   CustomResponse,
   CustomStorageResponse,
-  file_type,
 } from "@/interfaces/api";
 
 const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
@@ -25,7 +25,7 @@ export const url = {
     },
     read: {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
-      root: (fileKey: string) => `/file/root/${fileKey}`,
+      root: "/file/root",
       info: (fileKey: string) => `/file/info/${fileKey}`,
       parent: (fileKey: string) => `/file/parent/${fileKey}`,
       children: (fileKey: string) => `/file/children/${fileKey}`,
@@ -114,7 +114,7 @@ const customFetch = async <T = unknown>(
   return {
     ok: response.ok, // pass the ok along
     headers: response.headers, // pass the headers along
-    status: response.headers , // pass the status along
+    status: response.headers, // pass the status along
     body, // pass the body along
   };
 };
@@ -155,7 +155,7 @@ export const fileApi = {
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.create.container(parentKey, fileName), {
         method: "POST",
@@ -167,7 +167,7 @@ export const fileApi = {
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.delete.permanent(fileKey), {
         method: "DELETE",
@@ -188,18 +188,18 @@ export const fileApi = {
           token: string;
         }>
       >(url.file.read.storage(fileKey)),
-    root: (fileKey: string) =>
-      customFetch<
-        CustomResponse<{
-          fileKey: string;
-          fileName: string;
-          type: file_type;
-        }>
-      >(url.file.read.root(fileKey)),
+    root: customFetch<
+      CustomResponse<{
+        fileKey: string;
+        fileName: string;
+        type: ApiFileType;
+      }>
+    >(url.file.read.root),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{
           fileName: string;
+          type: ApiFileType;
           createDate: Date;
           updateDate: Date;
           byteSize: number;
@@ -210,21 +210,23 @@ export const fileApi = {
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.read.parent(fileKey)),
     children: (fileKey: string) =>
       customFetch<
         CustomResponse<{
           fileKey: string;
-        }>
+          fileName: string;
+          type: ApiFileType;
+        }[]>
       >(url.file.read.children(fileKey)),
     find: (fileKey: string, fileName: string) =>
       customFetch<
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.read.find(fileKey, fileName)),
   },
@@ -234,7 +236,7 @@ export const fileApi = {
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.update.name(fileKey, fileName), {
         method: "PATCH",
@@ -261,7 +263,7 @@ export const fileApi = {
         CustomResponse<{
           fileKey: string;
           fileName: string;
-          type: file_type;
+          type: ApiFileType;
         }>
       >(url.file.upload.complete(fileKey, totalChunks), {
         method: "PATCH",

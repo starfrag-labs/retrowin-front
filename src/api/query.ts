@@ -60,7 +60,7 @@ const createFile: UseMutationOptions<
 };
 // fileApi.delete
 const deleteFilePermanent: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.delete.permanent>>['body'],
+  Awaited<ReturnType<typeof fileApi.delete.permanent>>["body"],
   Error,
   { fileKey: string }
 > = {
@@ -71,7 +71,7 @@ const deleteFilePermanent: UseMutationOptions<
   },
 };
 const deleteFileToTrash: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.delete.trash>>['body'],
+  Awaited<ReturnType<typeof fileApi.delete.trash>>["body"],
   Error,
   { fileKey: string }
 > = {
@@ -84,67 +84,71 @@ const deleteFileToTrash: UseMutationOptions<
 // fileApi.read
 const readFileStorage = (fileKey: string) =>
   queryOptions({
-    queryKey: ["file", "storage", fileKey],
+    queryKey: ["file", fileKey, "storage"],
     queryFn: async () => {
       const response = await fileApi.read.storage(fileKey);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
-const readFileRoot = (fileKey: string) =>
-  queryOptions({
-    queryKey: ["file", "root", fileKey],
-    queryFn: async () => {
-      const response = await fileApi.read.root(fileKey);
-      return response.body;
-    },
-    retry: normalRetryCount,
-    staleTime: normalStaleTime,
-  });
+const readFileRoot = queryOptions({
+  queryKey: ["file", "root"],
+  queryFn: async () => {
+    const response = await fileApi.read.root;
+    return response.body;
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
 const readFileInfo = (fileKey: string) =>
   queryOptions({
-    queryKey: ["file", "info", fileKey],
+    queryKey: ["file", fileKey, "info"],
     queryFn: async () => {
       const response = await fileApi.read.info(fileKey);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
 const readFileParent = (fileKey: string) =>
   queryOptions({
-    queryKey: ["file", "parent", fileKey],
+    queryKey: ["file", fileKey, "parent"],
     queryFn: async () => {
       const response = await fileApi.read.parent(fileKey);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
 const readFileChildren = (fileKey: string) =>
   queryOptions({
-    queryKey: ["file", "children", fileKey],
+    queryKey: ["file", fileKey, "children"],
     queryFn: async () => {
       const response = await fileApi.read.children(fileKey);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
 const readFileFind = (fileKey: string, fileName: string) =>
   queryOptions({
-    queryKey: ["file", "find", fileKey],
+    queryKey: ["file", fileKey, "find", fileName],
     queryFn: async () => {
       const response = await fileApi.read.find(fileKey, fileName);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey && !!fileName,
   });
 // fileApi.update
 const updateFileName: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.update.name>>['body'],
+  Awaited<ReturnType<typeof fileApi.update.name>>["body"],
   Error,
   { fileKey: string; fileName: string }
 > = {
@@ -152,10 +156,10 @@ const updateFileName: UseMutationOptions<
   mutationFn: async ({ fileKey, fileName }) => {
     const response = await fileApi.update.name(fileKey, fileName);
     return response.body;
-  }
+  },
 };
 const updateFileParent: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.update.parent>>['body'],
+  Awaited<ReturnType<typeof fileApi.update.parent>>["body"],
   Error,
   { fileKey: string; parentKey: string }
 > = {
@@ -163,7 +167,7 @@ const updateFileParent: UseMutationOptions<
   mutationFn: async ({ fileKey, parentKey }) => {
     const response = await fileApi.update.parent(fileKey, parentKey);
     return response.body;
-  }
+  },
 };
 // fileApi.upload
 const uploadFileWriteToken = (
@@ -172,16 +176,21 @@ const uploadFileWriteToken = (
   byteSize: number,
 ) =>
   queryOptions({
-    queryKey: ["file", "writeToken", parentKey, fileName],
+    queryKey: ["file", parentKey, "writeToken", fileName],
     queryFn: async () => {
-      const response = await fileApi.upload.writeToken(parentKey, fileName, byteSize);
+      const response = await fileApi.upload.writeToken(
+        parentKey,
+        fileName,
+        byteSize,
+      );
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!parentKey && !!fileName,
   });
 const uploadFileComplete: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.upload.complete>>['body'],
+  Awaited<ReturnType<typeof fileApi.upload.complete>>["body"],
   Error,
   { fileKey: string; totalChunks: number }
 > = {
@@ -194,10 +203,11 @@ const uploadFileComplete: UseMutationOptions<
 // fileApi.stream
 const streamFileReadToken = (fileKey: string) =>
   queryOptions({
-    queryKey: ["file", "stream", fileKey],
+    queryKey: ["file", fileKey, "stream"],
     queryFn: async () => await fileApi.stream.readToken(fileKey),
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
 export const fileQuery = {
   create: {
@@ -232,16 +242,17 @@ export const fileQuery = {
 // storageApi.file
 const readStorageFile = (fileKey: string, fileName: string) =>
   queryOptions({
-    queryKey: ["storage", "file", fileKey, fileName],
+    queryKey: ["storage", fileKey, fileName],
     queryFn: async () => {
       const response = await storageApi.file.read(fileKey, fileName);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!fileKey && !!fileName,
   });
 const writeStorageFile: UseMutationOptions<
-  Awaited<ReturnType<typeof storageApi.file.write>>['body'],
+  Awaited<ReturnType<typeof storageApi.file.write>>["body"],
   Error,
   { fileKey: string; chunkCount: number; fileData: Blob }
 > = {
@@ -261,6 +272,7 @@ const issueSession = (token: string) =>
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+    enabled: !!token,
   });
 export const storageQuery = {
   file: {

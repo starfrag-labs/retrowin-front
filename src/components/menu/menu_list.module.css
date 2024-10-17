@@ -1,0 +1,28 @@
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
+.list_item_container {
+  display: block;
+  align-items: center;
+  justify-content: center;
+}
+
+.list_split {
+  display: block;
+  width: 100%;
+  border-top: 1px solid black;
+  margin: 2px 0;
+}
+
+.list_item {
+  display: block;
+  padding: 2px 5px;
+  width: 100%;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #00000022;
+  }
+}

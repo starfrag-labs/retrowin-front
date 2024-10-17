@@ -1,8 +1,9 @@
+import { FileType } from "@/interfaces/api";
 import { create } from "zustand";
 
 export type FileInfo = {
   key: string;
-  type: "block" | "container" | "upload";
+  type: FileType;
   name: string;
   parentKey: string;
 };
@@ -12,6 +13,8 @@ export type State = {
   highlightedFile: {
     fileKey: string;
     windowKey: string;
+    fileName: string;
+    type: FileType;
     ref: React.RefObject<HTMLElement>;
   } | null;
   fileRefs: Map<string, React.RefObject<HTMLElement>>;

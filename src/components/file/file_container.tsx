@@ -1,5 +1,8 @@
+import { useQuery } from "@tanstack/react-query";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
+import { fileQuery } from "@/api/query";
+import { useEffect } from "react";
 
 /**
  * File container component
@@ -18,15 +21,34 @@ export default function FileContainer({
   containerKey: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const file_count = 25;
+  const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
+
+  useEffect(() => {
+    if (setLoading) {
+      setLoading(readContainerQuery.isFetching);
+    }
+  }, [readContainerQuery.isFetching, setLoading]);
+
+  if (readContainerQuery.isFetching || !readContainerQuery.data) {
+    return null;
+  }
+
+  if (readContainerQuery.data.status !== 200) {
+    return (
+      <div className="flex-center full-size">
+        {readContainerQuery.data.message}
+      </div>
+    );
+  }
+
   return (
     <div className={`${styles.container} full-size`}>
-      {Array.from({ length: file_count }).map((_, index) => (
+      {readContainerQuery.data.data.map((file) => (
         <FileItem
-          key={index}
-          name="name"
-          type="container"
-          fileKey={index.toString()}
+          key={file.fileKey}
+          name={file.fileName}
+          type={file.type}
+          fileKey={file.fileKey}
           windowKey={windowKey}
         />
       ))}

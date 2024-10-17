@@ -1,6 +1,6 @@
 import { forwardRef } from "react";
 import styles from "./window_content.module.css";
-import { AppWindow } from "@/interfaces/window";
+import { WindowType } from "@/interfaces/window";
 import Navigator from "./window_content/navigator";
 
 export default forwardRef(function WindowContent(
@@ -15,7 +15,7 @@ export default forwardRef(function WindowContent(
     fileKey: string;
     windowKey: string;
     setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-    type: AppWindow["type"];
+    type: WindowType;
     onMouseEnter?: () => void;
     onMouseLeave?: () => void;
   },
@@ -28,7 +28,7 @@ export default forwardRef(function WindowContent(
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
     >
-      {type === "navigator" && setLoading && (
+      {type === WindowType.Navigator && setLoading && (
         <Navigator
           fileKey={fileKey}
           windowKey={windowKey}

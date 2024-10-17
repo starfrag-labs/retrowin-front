@@ -7,6 +7,8 @@ import { useFileStore } from "@/store/file.store";
 import { memo, useCallback, useEffect, useRef } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
+import { WindowType } from "@/interfaces/window";
+import { ApiFileType, FileType } from "@/interfaces/api";
 
 /**
  * File item component
@@ -25,7 +27,7 @@ export default memo(function FileItem({
   windowKey,
 }: {
   name: string;
-  type: "block" | "container" | "upload";
+  type: FileType;
   fileKey: string;
   windowKey: string;
 }) {
@@ -54,9 +56,11 @@ export default memo(function FileItem({
     setHighlightedFile({
       fileKey,
       windowKey,
+      fileName: name,
+      type,
       ref: fileRef,
     });
-  }, [setHighlightedFile, fileKey, windowKey]);
+  }, [setHighlightedFile, fileKey, windowKey, name, type]);
 
   const handleMouseLeave = useCallback(() => {
     setHighlightedFile(null);
@@ -69,7 +73,7 @@ export default memo(function FileItem({
     if (windowKey !== targetWindow) return;
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
-      (type === "container" || type === "block") &&
+      (type === ApiFileType.Container || type === ApiFileType.Block) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
       fileRect.left < selectBox.right &&
@@ -99,9 +103,12 @@ export default memo(function FileItem({
   }, [fileKey, setFileIconRef, windowKey]);
 
   const iconClick = useCallback(() => {
-    newWindow("target key", "navigator");
-    console.log("icon clicked");
-  }, [newWindow]);
+    switch (type) {
+      case ApiFileType.Container:
+        newWindow(fileKey, WindowType.Navigator, name);
+        break;
+    }
+  }, [fileKey, name, newWindow, type]);
 
   return (
     <div className={`full-size ${styles.container}`}>

@@ -1,4 +1,4 @@
-import { AppWindow } from "@/interfaces/window";
+import { AppWindow, WindowType } from "@/interfaces/window";
 import { create } from "zustand";
 
 type State = {
@@ -14,7 +14,7 @@ type State = {
 };
 
 type Action = {
-  newWindow: (targetKey: string, type: AppWindow["type"]) => void;
+  newWindow: (targetKey: string, type: WindowType, title: string) => void;
   updateWindow: (key: string, targetKey: string) => void;
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
@@ -22,6 +22,7 @@ type Action = {
   highlightWindow: (key: string) => void;
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
+  setTitle: (key: string, title: string) => void;
 
   // current window
   setCurrentWindow: (
@@ -52,7 +53,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   currentWindow: initialState.currentWindow,
   backgroundWindowRef: initialState.backgroundWindowRef,
   mouseEnter: initialState.mouseEnter,
-  newWindow: (targetKey, type) => {
+  newWindow: (targetKey, type, title) => {
     set((state) => {
       const existingWindow = state.windows.find(
         (w) => w.targetKey === targetKey,
@@ -68,6 +69,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
         // create new window
         const newWindow: AppWindow = {
           key: Math.random().toString(36).substring(7),
+          title: title || "New Window",
           targetKey: targetKey,
           type,
         };
@@ -155,6 +157,16 @@ export const useWindowStore = create<State & Action>((set, get) => ({
           window.targetKey = window.targetHistory[window.historyIndex];
           state.windows = [...state.windows];
         }
+      }
+      return { windows: state.windows };
+    });
+  },
+  setTitle: (key, title) => {
+    set((state) => {
+      const window = state.windows.find((w) => w.key === key);
+      if (window) {
+        window.title = title;
+        state.windows = [...state.windows];
       }
       return { windows: state.windows };
     });

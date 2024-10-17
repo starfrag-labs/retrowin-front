@@ -16,7 +16,14 @@ export interface ErrorResponseData {
   timestamp: string;
 }
 
-export type file_type = "block" | "container" | "link";
+export enum ApiFileType {
+  Block = "block",
+  Container = "container",
+  Link = "link",
+}
+
+export type FileType = ApiFileType | "upload";
+
 
 export interface CustomStorageResponse<T = unknown> {
   message: string;

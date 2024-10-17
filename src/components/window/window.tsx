@@ -15,7 +15,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowSize2 = useMemo(() => ({ width: 600, height: 300 }), []); // Medium window size
 
   // States
-  const [title, setTitle] = useState("Window");
   const [maximized, setMaximized] = useState(false);
   const [targetWindow, setTargetWindow] = useState<AppWindow | null>(null);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
@@ -44,6 +43,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const nextWindow = useWindowStore((state) => state.nextWindow);
   const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
   const setMouseEnter = useWindowStore((state) => state.setMouseEnter);
+  const setTitle = useWindowStore((state) => state.setTitle);
 
   // Refs
   const windowRef = useRef<HTMLDivElement>(null);
@@ -51,19 +51,23 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowContentRef = useRef<HTMLDivElement>(null);
 
   // Queries
-  //const fileInfo = useQuery(fileQuery.read.info(targetWindow?.targetKey || ""));
+  const fileInfo = useQuery(fileQuery.read.info(targetWindow?.targetKey || ""));
 
   // Set window title
   useEffect(() => {
     if (targetWindow?.type === "uploader") {
-      setTitle("Uploader");
-      //} else if (fileInfo.isSuccess) {
-    } else {
-      //setTitle(fileInfo.data.data.fileName);
-      setTitle("File");
+      setTitle(windowKey, "Uploader");
+    } else if (fileInfo.isSuccess) {
+      setTitle(windowKey, fileInfo.data.data.fileName);
     }
     //}, [fileInfo.data, fileInfo.isSuccess, targetWindow?.type]);
-  }, [targetWindow?.type]);
+  }, [
+    fileInfo.data,
+    fileInfo.isSuccess,
+    setTitle,
+    targetWindow?.type,
+    windowKey,
+  ]);
 
   // Set current window
   const enterWindow = useCallback(() => {
@@ -280,7 +284,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         ref={windowHeaderRef}
         onMouseDown={moveWindow}
         loading={contentLoading}
-        title={title}
+        title={targetWindow?.title || ""}
         prevWindowButtonAction={() => prevWindow(windowKey)}
         nextWindowButtonAction={() => nextWindow(windowKey)}
         firstWindowButtonAction={maximized ? revertWindowSize : maximizeWindow}
