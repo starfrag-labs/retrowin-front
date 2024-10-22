@@ -4,6 +4,7 @@ import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./drag_file_container.module.css";
+import { parseSerialKey } from "@/utils/serial_key";
 
 export default function DragFileContainer({
   children,
@@ -89,7 +90,7 @@ export default function DragFileContainer({
         let width = 0;
         selectedFileSerials.forEach((serialKey) => {
           const fileIconRef = fileIconRefs.get(serialKey);
-          if (fileIconRef?.current && count < 4 ) {
+          if (fileIconRef?.current && count < 4) {
             const fileRect = fileIconRef.current.getBoundingClientRect();
             const clone = fileIconRef.current.cloneNode(true) as HTMLElement;
             clone.style.position = "absolute";
@@ -167,7 +168,7 @@ export default function DragFileContainer({
       // Move the selected elements to the target folder
       if (targetFolderKey && pointerMoved) {
         selectedFileSerials.forEach((serialKey) => {
-          const fileKey = serialKey.split(":")[0];
+          const { fileKey } = parseSerialKey(serialKey);
           //const info = getElementInfo(fileKey);
           if (!isFileKeySelected(fileKey) || fileKey === targetFolderKey)
             return;

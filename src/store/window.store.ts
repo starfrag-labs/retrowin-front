@@ -1,4 +1,5 @@
 import { AppWindow, WindowType } from "@/interfaces/window";
+import { createWindowKey } from "@/utils/random_key";
 import { create } from "zustand";
 
 type State = {
@@ -68,7 +69,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       } else {
         // create new window
         const newWindow: AppWindow = {
-          key: Math.random().toString(36).substring(7),
+          key: createWindowKey(),
           title: title || "New Window",
           targetKey: targetKey,
           type,

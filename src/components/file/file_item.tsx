@@ -9,6 +9,7 @@ import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { WindowType } from "@/interfaces/window";
 import { ApiFileType, FileType } from "@/interfaces/api";
+import { createSerialKey } from "@/utils/serial_key";
 
 /**
  * File item component
@@ -32,7 +33,7 @@ export default memo(function FileItem({
   windowKey: string;
 }) {
   // constants
-  const serialKey = `${fileKey}:${windowKey}`;
+  const serialKey = createSerialKey(fileKey, windowKey);
   const selectedFileBackground = "#f0f0f033";
 
   // Store state

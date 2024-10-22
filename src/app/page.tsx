@@ -13,10 +13,11 @@ import Window from "@/components/window/window";
 import { useQuery } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
 import MenuBox from "@/components/menu/menu_box";
+import { createWindowKey } from "@/utils/random_key";
 
 export default function Home() {
   // Constants
-  const generatedWindowKey = "generated";
+  const [backgroundWindowKey] = useState<string>(createWindowKey());
 
   // States
   const [rootKey, setRootKey] = useState<string | null>(null);
@@ -38,8 +39,8 @@ export default function Home() {
   const rootKeyQuery = useQuery(fileQuery.read.root);
 
   useEffect(() => {
-    setCurrentWindowKey(generatedWindowKey);
-  }, [setCurrentWindowKey]);
+    setCurrentWindowKey(backgroundWindowKey);
+  }, [backgroundWindowKey, setCurrentWindowKey]);
 
   useEffect(() => {
     setBackgroundWindowRef(backgroundWindowRef);
@@ -69,7 +70,7 @@ export default function Home() {
                 className={`full-size flex-center ${styles.background_window}`}
               >
                 <FileContainer
-                  windowKey={generatedWindowKey}
+                  windowKey={backgroundWindowKey}
                   containerKey={rootKey}
                 />
               </div>

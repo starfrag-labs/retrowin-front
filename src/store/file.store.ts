@@ -1,4 +1,5 @@
 import { FileType } from "@/interfaces/api";
+import { createSerialKey } from "@/utils/serial_key";
 import { create } from "zustand";
 
 export type FileInfo = {
@@ -48,7 +49,7 @@ export const useFileStore = create<State & Action>((set, get) => ({
   fileIconRefs: initialState.fileIconRefs,
   selectFile: (fileKey, windowKey) => {
     set((state) => {
-      const serialKey = `${fileKey}:${windowKey}`;
+      const serialKey = createSerialKey(fileKey, windowKey);
       if (!state.selectedFileSerials.includes(serialKey)) {
         state.selectedFileSerials = [...state.selectedFileSerials, serialKey];
       }
@@ -56,7 +57,7 @@ export const useFileStore = create<State & Action>((set, get) => ({
     });
   },
   unselectFile: (fileKey, windowKey) => {
-    const serialKey = `${fileKey}:${windowKey}`;
+    const serialKey = createSerialKey(fileKey, windowKey);
     set((state) => {
       state.selectedFileSerials = state.selectedFileSerials.filter(
         (k) => k !== serialKey,
@@ -74,7 +75,7 @@ export const useFileStore = create<State & Action>((set, get) => ({
     set({ highlightedFile });
   },
   setFileIconRef: (fileKey, windowKey, ref) => {
-    const serialKey = `${fileKey}:${windowKey}`;
+    const serialKey = createSerialKey(fileKey, windowKey);
     set((state) => {
       state.fileIconRefs.set(serialKey, ref);
       return { fileIconRefs: state.fileIconRefs };
