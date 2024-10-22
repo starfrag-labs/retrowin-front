@@ -21,7 +21,7 @@ export default memo(
     ref: React.Ref<HTMLDivElement>,
   ) {
     return (
-      <div className={styles.icon_container} ref={ref} onClick={onClick}>
+      <div className={styles.icon_container} ref={ref} onDoubleClick={onClick}>
         {icon === FileIconType.Container && (
           <FaFolder
             className={`${styles.icon}`}

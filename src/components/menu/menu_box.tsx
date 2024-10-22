@@ -6,8 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./menu_box.module.css";
 import BackgroundMenu from "./background_menu";
 import FileMenu from "./file_menu";
-import { FileType } from "@/interfaces/api";
 import WindowMenu from "./window_menu";
+import { FileType } from "@/interfaces/file";
 
 export default function MenuBox({ children }: { children: React.ReactNode }) {
   // States

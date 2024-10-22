@@ -5,6 +5,7 @@ import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./drag_file_container.module.css";
 import { parseSerialKey } from "@/utils/serial_key";
+import { ApiFileType } from "@/interfaces/api";
 
 export default function DragFileContainer({
   children,
@@ -23,6 +24,7 @@ export default function DragFileContainer({
 
   // Store states
   const currentWindow = useWindowStore((state) => state.currentWindow);
+  const backgroundWindow = useWindowStore((state) => state.backgroundWindow);
   const menuRef = useMenuStore((state) => state.menuRef);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const selectedFileSerials = useFileStore(
@@ -148,29 +150,45 @@ export default function DragFileContainer({
       document.body.style.cursor = "default";
       draggingFileRef.current.innerHTML = "";
       document.body.style.cursor = "default";
-      let targetFolderKey: string = "";
+      let targetContainerKey: string | null = null;
 
-      // Search for the target folder from the background
+      // Set the target folder key as the background window key by default
+      if (
+        backgroundWindow &&
+        backgroundWindow.targetKey &&
+        backgroundWindow.targetKey !== currentWindow?.key &&
+        backgroundWindow.ref.current &&
+        backgroundWindow.ref.current.contains(e.target as Node)
+      ) {
+        console.log("backgroundWindow.targetKey", backgroundWindow.targetKey);
+        targetContainerKey = backgroundWindow.targetKey;
+      }
+
+      // Set the target folder key as the navigator window target key
       if (currentWindow && currentWindow.windowRef.current) {
         const window = findWindow(currentWindow.key);
         if (window && window.type === "navigator") {
-          targetFolderKey = window.targetKey;
+          targetContainerKey = window.targetKey;
+        } else if (window) {
+          targetContainerKey = null;
         }
       }
 
-      //if (
-      //  currentElement &&
-      //  getElementInfo(currentElement.key)?.type === "folder"
-      //) {
-      //  targetFolderKey = currentElement.key;
-      //}
+      // Set the target folder key as the highlighted file key
+      if (highlightedFile && highlightedFile.type === ApiFileType.Container) {
+        targetContainerKey = highlightedFile.fileKey;
+      } else if (highlightedFile) {
+        targetContainerKey = null;
+      }
+
+      console.log("targetContainerKey", targetContainerKey);
 
       // Move the selected elements to the target folder
-      if (targetFolderKey && pointerMoved) {
+      if (targetContainerKey && pointerMoved) {
         selectedFileSerials.forEach((serialKey) => {
           const { fileKey } = parseSerialKey(serialKey);
           //const info = getElementInfo(fileKey);
-          if (!isFileKeySelected(fileKey) || fileKey === targetFolderKey)
+          if (!isFileKeySelected(fileKey) || fileKey === targetContainerKey)
             return;
           //if (info.type === 'folder') {
           //  moveFolder
@@ -199,8 +217,10 @@ export default function DragFileContainer({
       }
     },
     [
+      backgroundWindow,
       currentWindow,
       findWindow,
+      highlightedFile,
       isDragging,
       isFileKeySelected,
       pointerMoved,

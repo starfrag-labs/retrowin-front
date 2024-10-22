@@ -4,7 +4,7 @@ import { useWindowStore } from "@/store/window.store";
 import { fileQuery } from "@/api/query";
 import { useCallback } from "react";
 import { WindowType } from "@/interfaces/window";
-import { FileType } from "@/interfaces/api";
+import { FileType } from "@/interfaces/file";
 
 export default function FileMenu({
   fileKey,

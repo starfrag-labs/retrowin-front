@@ -1,4 +1,5 @@
 export enum WindowType {
+  Background = 'background',
   Navigator = 'navigator',
   Image = 'image',
   Video = 'video',

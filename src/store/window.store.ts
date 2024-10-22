@@ -7,10 +7,14 @@ type State = {
   currentWindow: {
     key: string;
     windowRef: React.RefObject<HTMLElement>;
-    contentRef: React.RefObject<HTMLElement>;
-    headerRef: React.RefObject<HTMLElement>;
+    contentRef: React.RefObject<HTMLElement> | null;
+    headerRef: React.RefObject<HTMLElement> | null;
   } | null;
-  backgroundWindowRef: React.RefObject<HTMLElement> | null;
+  backgroundWindow: {
+    key: string;
+    targetKey: string;
+    ref: React.RefObject<HTMLElement>;
+  } | null;
   mouseEnter: boolean;
 };
 
@@ -36,7 +40,7 @@ type Action = {
   ) => void;
 
   // window ref
-  setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
+  setBackgroundWindow: (window: State["backgroundWindow"]) => void;
 
   // mouse enter
   setMouseEnter: (enter: boolean) => void;
@@ -45,14 +49,14 @@ type Action = {
 const initialState: State = {
   windows: [],
   currentWindow: null,
-  backgroundWindowRef: null,
   mouseEnter: false,
+  backgroundWindow: null,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
-  backgroundWindowRef: initialState.backgroundWindowRef,
+  backgroundWindow: initialState.backgroundWindow,
   mouseEnter: initialState.mouseEnter,
   newWindow: (targetKey, type, title) => {
     set((state) => {
@@ -179,8 +183,8 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
 
   // window ref
-  setBackgroundWindowRef: (ref) => {
-    set({ backgroundWindowRef: ref });
+  setBackgroundWindow: (window) => {
+    set({ backgroundWindow: window });
   },
 
   // mouse enter

@@ -4,7 +4,7 @@ import FileContainer from "@/components/file/file_container";
 import styles from "./page.module.css";
 import Background from "@/components/layout/background";
 import Navbar from "@/components/layout/navbar/navbar_container";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useWindowStore } from "@/store/window.store";
 import SelectBoxContainer from "@/components/select/select_box_container";
 import { useSelectBoxStore } from "@/store/select_box.store";
@@ -17,7 +17,7 @@ import { createWindowKey } from "@/utils/random_key";
 
 export default function Home() {
   // Constants
-  const [backgroundWindowKey] = useState<string>(createWindowKey());
+  const backgroundWindowKey = useMemo(() => createWindowKey(), []);
 
   // States
   const [rootKey, setRootKey] = useState<string | null>(null);
@@ -25,8 +25,8 @@ export default function Home() {
   // Store states
   const windows = useWindowStore((state) => state.windows);
   // Store actions
-  const setBackgroundWindowRef = useWindowStore(
-    (state) => state.setBackgroundWindowRef,
+  const setBackgroundWindow = useWindowStore(
+    (state) => state.setBackgroundWindow,
   );
   const setCurrentWindowKey = useSelectBoxStore(
     (state) => state.setCurrentWindowKey,
@@ -43,15 +43,20 @@ export default function Home() {
   }, [backgroundWindowKey, setCurrentWindowKey]);
 
   useEffect(() => {
-    setBackgroundWindowRef(backgroundWindowRef);
-  }, [backgroundWindowRef, setBackgroundWindowRef]);
+    if (rootKey) {
+      setBackgroundWindow({
+        key: backgroundWindowKey,
+        targetKey: rootKey,
+        ref: backgroundWindowRef,
+      });
+    }
+  }, [backgroundWindowKey, backgroundWindowRef, rootKey, setBackgroundWindow]);
 
   useEffect(() => {
     if (rootKeyQuery.isSuccess && rootKeyQuery.data) {
       setRootKey(rootKeyQuery.data.data.fileKey);
     }
   }, [rootKeyQuery.data, rootKeyQuery.isSuccess]);
-
 
   if (rootKeyQuery.isLoading || !rootKey) {
     return <div></div>;

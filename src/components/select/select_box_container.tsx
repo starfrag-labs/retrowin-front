@@ -16,9 +16,7 @@ export default function SelectBoxContainer({
   // Store states
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const menuRef = useMenuStore((state) => state.menuRef);
-  const backgroundWindowRef = useWindowStore(
-    (state) => state.backgroundWindowRef,
-  );
+  const backgroundWindow = useWindowStore((state) => state.backgroundWindow);
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const mouseEnter = useWindowStore((state) => state.mouseEnter);
@@ -27,6 +25,9 @@ export default function SelectBoxContainer({
   // Store actions
   const setRect = useSelectBoxStore((state) => state.setRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
+  const setCurrentWindowKey = useSelectBoxStore(
+    (state) => state.setCurrentWindowKey,
+  );
 
   // States
   const [isSelecting, setIsSelecting] = useState(false);
@@ -52,24 +53,26 @@ export default function SelectBoxContainer({
       }
 
       // Get target window rect and start selecting
-      if (currentWindow?.contentRef.current && mouseEnter) {
+      if (currentWindow?.contentRef?.current && mouseEnter) {
         setIsSelecting(true);
         setStart({ x: e.clientX, y: e.clientY });
         document.body.style.cursor = "default";
         setTargetWindowRect(
           currentWindow.contentRef.current.getBoundingClientRect(),
         );
-      } else if (backgroundWindowRef?.current && !mouseEnter) {
+        setCurrentWindowKey(currentWindow.key);
+      } else if (backgroundWindow?.ref.current && !mouseEnter) {
         setIsSelecting(true);
         setStart({ x: e.clientX, y: e.clientY });
         document.body.style.cursor = "default";
         setTargetWindowRect(
-          backgroundWindowRef.current.getBoundingClientRect(),
+          backgroundWindow.ref.current.getBoundingClientRect(),
         );
+        setCurrentWindowKey(backgroundWindow.key);
       }
     },
     [
-      backgroundWindowRef,
+      backgroundWindow,
       mouseEnter,
       currentWindow,
       highlightedFile,
@@ -78,6 +81,7 @@ export default function SelectBoxContainer({
       renaming,
       resizingCursor,
       unselectAllFiles,
+      setCurrentWindowKey,
     ],
   );
 
