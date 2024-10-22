@@ -7,7 +7,6 @@ import Navbar from "@/components/layout/navbar/navbar_container";
 import { useEffect, useRef, useState } from "react";
 import { useWindowStore } from "@/store/window.store";
 import SelectBoxContainer from "@/components/select/select_box_container";
-import { useSelectBoxStore } from "@/store/select_box.store";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import Window from "@/components/window/window";
 import { useQuery } from "@tanstack/react-query";
@@ -28,19 +27,12 @@ export default function Home() {
   const setBackgroundWindowRef = useWindowStore(
     (state) => state.setBackgroundWindowRef,
   );
-  const setCurrentWindowKey = useSelectBoxStore(
-    (state) => state.setCurrentWindowKey,
-  );
 
   // Refs
   const backgroundWindowRef = useRef(null);
 
   // Queries
   const rootKeyQuery = useQuery(fileQuery.read.root);
-
-  useEffect(() => {
-    setCurrentWindowKey(backgroundWindowKey);
-  }, [backgroundWindowKey, setCurrentWindowKey]);
 
   useEffect(() => {
     setBackgroundWindowRef(backgroundWindowRef);
