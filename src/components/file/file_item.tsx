@@ -4,12 +4,13 @@ import FileIcon from "./file_icon";
 import FileName from "./file_name";
 import styles from "./file_item.module.css";
 import { useFileStore } from "@/store/file.store";
-import { memo, useCallback, useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { WindowType } from "@/interfaces/window";
-import { ApiFileType, FileType } from "@/interfaces/api";
+import { ApiFileType } from "@/interfaces/api";
 import { createSerialKey } from "@/utils/serial_key";
+import { FileType, FileIconType } from "@/interfaces/file";
 
 /**
  * File item component
@@ -35,6 +36,9 @@ export default memo(function FileItem({
   // constants
   const serialKey = createSerialKey(fileKey, windowKey);
   const selectedFileBackground = "#f0f0f033";
+
+  // States
+  const [icon, setIcon] = useState<FileIconType | null>(null);
 
   // Store state
   const selectedFileSerials = useFileStore(
@@ -94,9 +98,33 @@ export default memo(function FileItem({
     windowKey,
   ]);
 
+  // Check if the file is in the select box
   useEffect(() => {
     checkFileInSelectBox();
   }, [checkFileInSelectBox]);
+
+  // Set icon type
+  useEffect(() => {
+    switch (type) {
+      case ApiFileType.Container:
+        setIcon(FileIconType.Container);
+        break;
+      case ApiFileType.Block:
+        setIcon(FileIconType.Block);
+        break;
+    }
+    switch (name) {
+      case "home":
+        setIcon(FileIconType.Home);
+        break;
+      case "trash":
+        setIcon(FileIconType.Trash);
+        break;
+      case "upload":
+        setIcon(FileIconType.Upload);
+        break;
+    }
+  }, [name, type]);
 
   // Assign fileRef to store
   useEffect(() => {
@@ -124,7 +152,7 @@ export default memo(function FileItem({
         }}
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
-          <FileIcon type={type} ref={iconRef} onClick={iconClick} />
+          {icon && <FileIcon ref={iconRef} onClick={iconClick} icon={icon} />}
           <FileName name={name} />
         </div>
       </div>

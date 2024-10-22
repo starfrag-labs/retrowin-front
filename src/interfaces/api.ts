@@ -22,9 +22,6 @@ export enum ApiFileType {
   Link = "link",
 }
 
-export type FileType = ApiFileType | "upload";
-
-
 export interface CustomStorageResponse<T = unknown> {
   message: string;
   data: T;

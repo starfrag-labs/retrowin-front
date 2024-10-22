@@ -1,4 +1,4 @@
-import { FileType } from "@/interfaces/api";
+import { FileType } from "@/interfaces/file";
 import { createSerialKey } from "@/utils/serial_key";
 import { create } from "zustand";
 

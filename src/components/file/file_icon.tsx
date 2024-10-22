@@ -1,33 +1,74 @@
 import { FaFileAlt } from "react-icons/fa";
 import { FaFolder } from "react-icons/fa";
+import { FaHome } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa";
+import { FaUpload } from "react-icons/fa";
 import styles from "./file_icon.module.css";
-import { forwardRef, memo } from "react";
-import { ApiFileType, FileType } from "@/interfaces/api";
+import { CSSProperties, forwardRef, memo } from "react";
+import { FileIconType } from "@/interfaces/file";
 
 export default memo(
   forwardRef(function FileIcon(
     {
-      type = "upload",
+      icon,
       onClick,
+      style,
     }: {
-      type: FileType;
+      icon: FileIconType;
       onClick?: () => void;
+      style?: CSSProperties;
     },
     ref: React.Ref<HTMLDivElement>,
   ) {
-    if (type === ApiFileType.Container) {
-      return (
-        <div className={styles.icon_container} ref={ref} onClick={onClick}>
-          <FaFolder className={`${styles.icon} ${styles.folder_icon}`} />
-        </div>
-      );
-    }
-    if (type === ApiFileType.Block) {
-      return (
-        <div className={styles.icon_container} ref={ref} onClick={onClick}>
-          <FaFileAlt className={`${styles.icon} ${styles.file_icon}`} />
-        </div>
-      );
-    }
+    return (
+      <div className={styles.icon_container} ref={ref} onClick={onClick}>
+        {icon === FileIconType.Container && (
+          <FaFolder
+            className={`${styles.icon}`}
+            style={{
+              color: "#ffa400",
+              ...style,
+            }}
+          />
+        )}
+        {icon === FileIconType.Block && (
+          <FaFileAlt
+            className={`${styles.icon}`}
+            style={{
+              color: "#999999",
+              ...style,
+            }}
+          />
+        )}
+        {icon === FileIconType.Home && (
+          <FaHome
+            className={`${styles.icon}`}
+            style={{
+              color: "#90b75e",
+              ...style,
+            }}
+          />
+        )}
+        {icon === FileIconType.Trash && (
+          <FaTrash
+            className={`${styles.icon}`}
+            style={{
+              color: "#677381",
+              padding: "0.25rem",
+              ...style,
+            }}
+          />
+        )}
+        {icon === FileIconType.Upload && (
+          <FaUpload
+            className={`${styles.icon}`}
+            style={{
+              color: "#9296f0",
+              ...style,
+            }}
+          />
+        )}
+      </div>
+    );
   }),
 );
