@@ -60,7 +60,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     } else if (fileInfo.isSuccess) {
       setTitle(windowKey, fileInfo.data.data.fileName);
     }
-    //}, [fileInfo.data, fileInfo.isSuccess, targetWindow?.type]);
   }, [
     fileInfo.data,
     fileInfo.isSuccess,

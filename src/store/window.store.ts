@@ -10,16 +10,11 @@ type State = {
     contentRef: React.RefObject<HTMLElement> | null;
     headerRef: React.RefObject<HTMLElement> | null;
   } | null;
-  backgroundWindow: {
-    key: string;
-    targetKey: string;
-    ref: React.RefObject<HTMLElement>;
-  } | null;
   mouseEnter: boolean;
 };
 
 type Action = {
-  newWindow: (targetKey: string, type: WindowType, title: string) => void;
+  newWindow: (targetKey: string, type: WindowType, title: string, key?: string) => void;
   updateWindow: (key: string, targetKey: string) => void;
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
@@ -28,19 +23,12 @@ type Action = {
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
   setTitle: (key: string, title: string) => void;
+  getBackgroundWindow: () => AppWindow | undefined;
 
   // current window
   setCurrentWindow: (
-    window: {
-      key: string;
-      windowRef: React.RefObject<HTMLElement>;
-      contentRef: React.RefObject<HTMLElement>;
-      headerRef: React.RefObject<HTMLElement>;
-    } | null,
+    window: State["currentWindow"] | null,
   ) => void;
-
-  // window ref
-  setBackgroundWindow: (window: State["backgroundWindow"]) => void;
 
   // mouse enter
   setMouseEnter: (enter: boolean) => void;
@@ -50,15 +38,13 @@ const initialState: State = {
   windows: [],
   currentWindow: null,
   mouseEnter: false,
-  backgroundWindow: null,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
-  backgroundWindow: initialState.backgroundWindow,
   mouseEnter: initialState.mouseEnter,
-  newWindow: (targetKey, type, title) => {
+  newWindow: (targetKey, type, title, key) => {
     set((state) => {
       const existingWindow = state.windows.find(
         (w) => w.targetKey === targetKey,
@@ -73,7 +59,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       } else {
         // create new window
         const newWindow: AppWindow = {
-          key: createWindowKey(),
+          key: key || createWindowKey(),
           title: title || "New Window",
           targetKey: targetKey,
           type,
@@ -176,15 +162,13 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       return { windows: state.windows };
     });
   },
+  getBackgroundWindow: () => {
+    return get().windows.find((w) => w.type === WindowType.Background);
+  },
 
   // current window
   setCurrentWindow: (window) => {
     set({ currentWindow: window });
-  },
-
-  // window ref
-  setBackgroundWindow: (window) => {
-    set({ backgroundWindow: window });
   },
 
   // mouse enter

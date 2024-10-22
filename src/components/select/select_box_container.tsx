@@ -7,6 +7,7 @@ import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./select_box_container.module.css";
 import { useEventStore } from "@/store/event.store";
+import { WindowType } from "@/interfaces/window";
 
 export default function SelectBoxContainer({
   children,
@@ -16,7 +17,6 @@ export default function SelectBoxContainer({
   // Store states
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const menuRef = useMenuStore((state) => state.menuRef);
-  const backgroundWindow = useWindowStore((state) => state.backgroundWindow);
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const mouseEnter = useWindowStore((state) => state.mouseEnter);
@@ -28,6 +28,7 @@ export default function SelectBoxContainer({
   const setCurrentWindowKey = useSelectBoxStore(
     (state) => state.setCurrentWindowKey,
   );
+  const findWindow = useWindowStore((state) => state.findWindow);
 
   // States
   const [isSelecting, setIsSelecting] = useState(false);
@@ -53,34 +54,43 @@ export default function SelectBoxContainer({
       }
 
       // Get target window rect and start selecting
-      if (currentWindow?.contentRef?.current && mouseEnter) {
-        setIsSelecting(true);
-        setStart({ x: e.clientX, y: e.clientY });
-        document.body.style.cursor = "default";
-        setTargetWindowRect(
-          currentWindow.contentRef.current.getBoundingClientRect(),
-        );
-        setCurrentWindowKey(currentWindow.key);
-      } else if (backgroundWindow?.ref.current && !mouseEnter) {
-        setIsSelecting(true);
-        setStart({ x: e.clientX, y: e.clientY });
-        document.body.style.cursor = "default";
-        setTargetWindowRect(
-          backgroundWindow.ref.current.getBoundingClientRect(),
-        );
-        setCurrentWindowKey(backgroundWindow.key);
+      setCurrentWindowKey(null);
+      if (currentWindow) {
+        const window = findWindow(currentWindow.key);
+        // If the window is a background window
+        if (
+          window?.type === WindowType.Background &&
+          currentWindow.windowRef.current
+        ) {
+          setIsSelecting(true);
+          setStart({ x: e.clientX, y: e.clientY });
+          document.body.style.cursor = "default";
+          setTargetWindowRect(
+            currentWindow.windowRef.current.getBoundingClientRect(),
+          );
+          setCurrentWindowKey(currentWindow.key);
+          // If the window is a content window
+        } else if (currentWindow.contentRef?.current && mouseEnter) {
+          setIsSelecting(true);
+          setStart({ x: e.clientX, y: e.clientY });
+          document.body.style.cursor = "default";
+          setTargetWindowRect(
+            currentWindow.contentRef.current.getBoundingClientRect(),
+          );
+          setCurrentWindowKey(currentWindow.key);
+        }
       }
     },
     [
-      backgroundWindow,
-      mouseEnter,
-      currentWindow,
-      highlightedFile,
       menuRef,
-      pressedKeys,
-      renaming,
+      highlightedFile,
       resizingCursor,
+      renaming,
+      pressedKeys,
+      currentWindow,
       unselectAllFiles,
+      findWindow,
+      mouseEnter,
       setCurrentWindowKey,
     ],
   );

@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./drag_file_container.module.css";
 import { parseSerialKey } from "@/utils/serial_key";
 import { ApiFileType } from "@/interfaces/api";
+import { WindowType } from "@/interfaces/window";
 
 export default function DragFileContainer({
   children,
@@ -24,7 +25,6 @@ export default function DragFileContainer({
 
   // Store states
   const currentWindow = useWindowStore((state) => state.currentWindow);
-  const backgroundWindow = useWindowStore((state) => state.backgroundWindow);
   const menuRef = useMenuStore((state) => state.menuRef);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const selectedFileSerials = useFileStore(
@@ -141,7 +141,7 @@ export default function DragFileContainer({
 
   // Drag file end
   const dragFileEnd = useCallback(
-    (e: MouseEvent) => {
+    () => {
       setIsDragging(false);
       setIsDraggingReady(false);
       setDisplayDraggingElements(false);
@@ -152,25 +152,15 @@ export default function DragFileContainer({
       document.body.style.cursor = "default";
       let targetContainerKey: string | null = null;
 
-      // Set the target folder key as the background window key by default
-      if (
-        backgroundWindow &&
-        backgroundWindow.targetKey &&
-        backgroundWindow.targetKey !== currentWindow?.key &&
-        backgroundWindow.ref.current &&
-        backgroundWindow.ref.current.contains(e.target as Node)
-      ) {
-        console.log("backgroundWindow.targetKey", backgroundWindow.targetKey);
-        targetContainerKey = backgroundWindow.targetKey;
-      }
-
-      // Set the target folder key as the navigator window target key
+      // Set target container key as the current window key
       if (currentWindow && currentWindow.windowRef.current) {
         const window = findWindow(currentWindow.key);
-        if (window && window.type === "navigator") {
+        if (
+          window &&
+          (window.type === WindowType.Background ||
+            window.type === WindowType.Navigator)
+        ) {
           targetContainerKey = window.targetKey;
-        } else if (window) {
-          targetContainerKey = null;
         }
       }
 
@@ -180,8 +170,6 @@ export default function DragFileContainer({
       } else if (highlightedFile) {
         targetContainerKey = null;
       }
-
-      console.log("targetContainerKey", targetContainerKey);
 
       // Move the selected elements to the target folder
       if (targetContainerKey && pointerMoved) {
@@ -217,7 +205,6 @@ export default function DragFileContainer({
       }
     },
     [
-      backgroundWindow,
       currentWindow,
       findWindow,
       highlightedFile,
