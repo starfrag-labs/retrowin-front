@@ -40,7 +40,9 @@ export default function WindowMenu({
           fileName: "New Folder",
         })
         .finally(() => {
-          queryClient.invalidateQueries();
+          queryClient.invalidateQueries({
+            queryKey: ["file", window.targetKey],
+          });
           closeMenu();
         });
     }

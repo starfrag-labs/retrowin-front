@@ -148,7 +148,7 @@ export default function DragFileContainer({
   );
 
   // Drag file end
-  const dragFileEnd = useCallback(() => {
+  const dragFileEnd = useCallback(async () => {
     setIsDragging(false);
     setIsDraggingReady(false);
     setDisplayDraggingElements(false);
@@ -180,27 +180,33 @@ export default function DragFileContainer({
 
     // Move the selected elements to the target folder
     if (targetContainerKey && pointerMoved) {
-      selectedFileSerials.forEach(async (serialKey) => {
-        const { fileKey } = parseSerialKey(serialKey);
-        //const info = getElementInfo(fileKey);
-        if (isFileKeySelected(fileKey) && fileKey !== targetContainerKey) {
-          const parent = await queryClient.fetchQuery(
-            fileQuery.read.parent(fileKey),
-          );
-          moveFile
-            .mutateAsync({ fileKey, parentKey: targetContainerKey })
-            .finally(() => {
-              queryClient.invalidateQueries({
-                queryKey: ["file", targetContainerKey],
-              });
-              queryClient.invalidateQueries({
-                queryKey: ["file", fileKey],
-              });
-              queryClient.invalidateQueries({
-                queryKey: ["file", parent.data.fileKey],
-              });
+      Promise.all(
+        selectedFileSerials.map(async (serialKey) => {
+          const { fileKey } = parseSerialKey(serialKey);
+          const parentFileKey = await queryClient
+            .fetchQuery(fileQuery.read.parent(fileKey))
+            .then((data) => data.data.fileKey);
+          if (
+            isFileKeySelected(fileKey) &&
+            parentFileKey !== targetContainerKey
+          ) {
+            await moveFile.mutateAsync({
+              fileKey,
+              parentKey: targetContainerKey,
             });
-        }
+            queryClient.invalidateQueries({
+              queryKey: ["file", targetContainerKey],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["file", fileKey],
+            });
+            queryClient.invalidateQueries({
+              queryKey: ["file", parentFileKey],
+            });
+          }
+        }),
+      ).then(() => {
+        unselectAllFiles();
       });
     }
   }, [
@@ -213,6 +219,7 @@ export default function DragFileContainer({
     pointerMoved,
     queryClient,
     selectedFileSerials,
+    unselectAllFiles,
   ]);
 
   // Event listeners
