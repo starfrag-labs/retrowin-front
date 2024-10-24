@@ -78,8 +78,8 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     });
   }, [setCurrentWindow, windowKey]);
 
-  // Leave window
-  const leaveWindow = useCallback(() => {
+  // Set current window to null when the mouse enters the window header
+  const enterWindowHeader = useCallback(() => {
     setCurrentWindow(null);
   }, [setCurrentWindow]);
 
@@ -293,6 +293,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
             ? maximizedWindowButtonColorPallete
             : defaultWindowButtonColorPallete
         }
+        onMouseEnter={enterWindowHeader}
       />
       {targetWindow && (
         <WindowContent
@@ -302,7 +303,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
           type={targetWindow.type}
           ref={windowContentRef}
           onMouseEnter={enterWindow}
-          onMouseLeave={leaveWindow}
         />
       )}
     </div>

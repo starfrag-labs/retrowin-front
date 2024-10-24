@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import MenuList from "./menu_list";
 import { fileQuery } from "@/api/query";
 import { useWindowStore } from "@/store/window.store";
@@ -6,52 +6,43 @@ import { useCallback } from "react";
 import { WindowType } from "@/interfaces/window";
 
 export default function BackgroundMenu({
+  backgroundFileKey,
   closeMenu,
 }: {
+  backgroundFileKey: string;
   closeMenu: () => void;
 }) {
   // Query client
   const queryClient = useQueryClient();
 
   // Queries
-  const rootKeyQuery = useQuery(fileQuery.read.root);
   const createContainerMutation = useMutation(fileQuery.create.container);
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleUpload = useCallback(() => {
-    if (rootKeyQuery.isSuccess && rootKeyQuery.data) {
-      newWindow(
-        rootKeyQuery.data.data.fileKey,
-        WindowType.Uploader,
-        "Uploader",
-      );
+    if (backgroundFileKey) {
+      newWindow(backgroundFileKey, WindowType.Uploader, "Uploader");
       closeMenu();
     }
-  }, [newWindow, rootKeyQuery, closeMenu]);
+  }, [backgroundFileKey, newWindow, closeMenu]);
 
   const handleCreateFolder = useCallback(async () => {
-    if (rootKeyQuery.isSuccess && rootKeyQuery.data) {
+    if (backgroundFileKey) {
       closeMenu();
       createContainerMutation
         .mutateAsync({
-          parentKey: rootKeyQuery.data.data.fileKey,
+          parentKey: backgroundFileKey,
           fileName: "New_Folder",
         })
         .finally(() => {
           queryClient.invalidateQueries({
-            queryKey: ["file", rootKeyQuery.data.data.fileKey],
+            queryKey: ["file", backgroundFileKey],
           });
         });
     }
-  }, [
-    rootKeyQuery.isSuccess,
-    rootKeyQuery.data,
-    createContainerMutation,
-    queryClient,
-    closeMenu,
-  ]);
+  }, [backgroundFileKey, closeMenu, createContainerMutation, queryClient]);
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries();
