@@ -4,7 +4,7 @@ import FileIcon from "./file_icon";
 import FileName from "./file_name";
 import styles from "./file_item.module.css";
 import { useFileStore } from "@/store/file.store";
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { WindowType } from "@/interfaces/window";
@@ -52,10 +52,20 @@ export default memo(function FileItem({
   const selectFile = useFileStore((state) => state.selectFile);
   const unselectFile = useFileStore((state) => state.unselectFile);
   const newWindow = useWindowStore((state) => state.newWindow);
+  const getBackgroundWindow = useWindowStore(
+    (state) => state.getBackgroundWindow,
+  );
+  const updateWindow = useWindowStore((state) => state.updateWindow);
 
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
+
+  // Get background window key
+  const backgroundWindowKey = useMemo(() => {
+    const backgroundWindow = getBackgroundWindow();
+    return backgroundWindow?.key || "";
+  }, [getBackgroundWindow]);
 
   const handleMouseEnter = useCallback(() => {
     setHighlightedFile({
@@ -134,10 +144,22 @@ export default memo(function FileItem({
   const iconClick = useCallback(() => {
     switch (type) {
       case ApiFileType.Container:
-        newWindow(fileKey, WindowType.Navigator, name);
+        if (backgroundWindowKey === windowKey) {
+          newWindow(fileKey, WindowType.Navigator, name);
+        } else {
+          updateWindow(windowKey, fileKey);
+        }
         break;
     }
-  }, [fileKey, name, newWindow, type]);
+  }, [
+    backgroundWindowKey,
+    fileKey,
+    name,
+    newWindow,
+    type,
+    updateWindow,
+    windowKey,
+  ]);
 
   return (
     <div className={`full-size ${styles.container}`}>
