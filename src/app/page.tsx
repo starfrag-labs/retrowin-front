@@ -20,7 +20,7 @@ export default function Home() {
   const backgroundWindowKey = useMemo(() => createWindowKey(), []);
 
   // States
-  const [rootKey, setRootKey] = useState<string | null>(null);
+  const [homeKey, setHomeKey] = useState<string | null>(null);
 
   // Store states
   const windows = useWindowStore((state) => state.windows);
@@ -32,19 +32,19 @@ export default function Home() {
   const backgroundWindowRef = useRef(null);
 
   // Queries
-  const rootKeyQuery = useQuery(fileQuery.read.root);
+  const homeKeyQuery = useQuery(fileQuery.read.home);
 
   useEffect(() => {
-    if (rootKey) {
-      newBackgroundWindow(rootKey, WindowType.Background, "background", backgroundWindowKey);
+    if (homeKey) {
+      newBackgroundWindow(homeKey, WindowType.Background, "background", backgroundWindowKey);
     }
-  }, [backgroundWindowKey, backgroundWindowRef, newBackgroundWindow, rootKey]);
+  }, [backgroundWindowKey, backgroundWindowRef, newBackgroundWindow, homeKey]);
 
   useEffect(() => {
-    if (rootKeyQuery.isSuccess && rootKeyQuery.data) {
-      setRootKey(rootKeyQuery.data.data.fileKey);
+    if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
+      setHomeKey(homeKeyQuery.data.data.fileKey);
     }
-  }, [rootKeyQuery.data, rootKeyQuery.isSuccess]);
+  }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
@@ -55,7 +55,7 @@ export default function Home() {
     });
   }, [backgroundWindowKey, backgroundWindowRef, setCurrentWindow]);
 
-  if (rootKeyQuery.isLoading || !rootKey) {
+  if (homeKeyQuery.isLoading || !homeKey) {
     return <div></div>;
   }
 
@@ -75,7 +75,7 @@ export default function Home() {
               >
                 <FileContainer
                   windowKey={backgroundWindowKey}
-                  containerKey={rootKey}
+                  containerKey={homeKey}
                 />
               </div>
               {windows
