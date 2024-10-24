@@ -102,6 +102,15 @@ const readFileRoot = queryOptions({
   retry: normalRetryCount,
   staleTime: normalStaleTime,
 });
+const readFileHome = queryOptions({
+  queryKey: ["file", "home"],
+  queryFn: async () => {
+    const response = await fileApi.read.home;
+    return response.body;
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
 const readFileInfo = (fileKey: string) =>
   queryOptions({
     queryKey: ["file", fileKey, "info"],
@@ -220,6 +229,7 @@ export const fileQuery = {
   read: {
     storage: readFileStorage,
     root: readFileRoot,
+    home: readFileHome,
     info: readFileInfo,
     parent: readFileParent,
     children: readFileChildren,

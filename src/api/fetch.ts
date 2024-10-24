@@ -1,8 +1,5 @@
 import { ApiFileType } from "@/interfaces/api";
-import {
-  CustomResponse,
-  CustomStorageResponse,
-} from "@/interfaces/api";
+import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
 const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
 const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
@@ -26,6 +23,7 @@ export const url = {
     read: {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
       root: "/file/root",
+      home: "/file/home",
       info: (fileKey: string) => `/file/info/${fileKey}`,
       parent: (fileKey: string) => `/file/parent/${fileKey}`,
       children: (fileKey: string) => `/file/children/${fileKey}`,
@@ -195,6 +193,13 @@ export const fileApi = {
         type: ApiFileType;
       }>
     >(url.file.read.root),
+    home: customFetch<
+      CustomResponse<{
+        fileKey: string;
+        fileName: string;
+        type: ApiFileType;
+      }>
+    >(url.file.read.home),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{
@@ -215,11 +220,13 @@ export const fileApi = {
       >(url.file.read.parent(fileKey)),
     children: (fileKey: string) =>
       customFetch<
-        CustomResponse<{
-          fileKey: string;
-          fileName: string;
-          type: ApiFileType;
-        }[]>
+        CustomResponse<
+          {
+            fileKey: string;
+            fileName: string;
+            type: ApiFileType;
+          }[]
+        >
       >(url.file.read.children(fileKey)),
     find: (fileKey: string, fileName: string) =>
       customFetch<
