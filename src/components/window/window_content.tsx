@@ -2,6 +2,7 @@ import { forwardRef } from "react";
 import styles from "./window_content.module.css";
 import { WindowType } from "@/interfaces/window";
 import Navigator from "./window_content/navigator";
+import Uploader from "./window_content/uploader";
 
 export default forwardRef(function WindowContent(
   {
@@ -35,6 +36,12 @@ export default forwardRef(function WindowContent(
           setLoading={setLoading}
         />
       )}
+        {type === WindowType.Uploader && setLoading && (
+          <Uploader
+            targetContainerKey={fileKey}
+            setLoading={setLoading}
+          />
+        )}
     </div>
   );
 });
