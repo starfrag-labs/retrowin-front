@@ -36,7 +36,12 @@ export default function Home() {
 
   useEffect(() => {
     if (homeKey) {
-      newBackgroundWindow(homeKey, WindowType.Background, "background", backgroundWindowKey);
+      newBackgroundWindow({
+        targetKey: homeKey,
+        type: WindowType.Background,
+        title: "background",
+        key: backgroundWindowKey,
+      });
     }
   }, [backgroundWindowKey, backgroundWindowRef, newBackgroundWindow, homeKey]);
 
@@ -76,6 +81,7 @@ export default function Home() {
                 <FileContainer
                   windowKey={backgroundWindowKey}
                   containerKey={homeKey}
+                  uploadIcon
                 />
               </div>
               {windows

@@ -1,11 +1,14 @@
-import { ApiFileType } from "./api";
-
-export type FileType = ApiFileType | "upload";
-
-export enum FileIconType {
+export enum FileType {
   Container = "container",
   Block = "block",
+  Link = "link",
+  Upload = "upload",
+}
+
+export enum FileIconType {
+  Container = FileType.Container,
+  Block = FileType.Block,
   Home = "home",
   Trash = "trash",
-  Upload = "upload",
+  Upload = FileType.Upload,
 }

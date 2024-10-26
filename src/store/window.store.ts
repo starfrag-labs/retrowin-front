@@ -14,8 +14,28 @@ type State = {
 };
 
 type Action = {
-  newWindow: (targetKey: string, type: WindowType, title: string, key?: string) => void;
-  updateWindow: (key: string, targetKey: string) => void;
+  newWindow: ({
+    targetKey,
+    type,
+    title,
+    key,
+  }: {
+    targetKey: string;
+    type: WindowType;
+    title: string;
+    key?: string;
+  }) => void;
+  updateWindow: ({
+    targetWindowKey,
+    type,
+    targetFileKey,
+    title,
+  }: {
+    targetWindowKey: string;
+    type?: WindowType;
+    targetFileKey: string;
+    title?: string;
+  }) => void;
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
   closeWindow: (key: string) => void;
@@ -26,9 +46,7 @@ type Action = {
   getBackgroundWindow: () => AppWindow | undefined;
 
   // current window
-  setCurrentWindow: (
-    window: State["currentWindow"] | null,
-  ) => void;
+  setCurrentWindow: (window: State["currentWindow"] | null) => void;
 
   // mouse enter
   setMouseEnter: (enter: boolean) => void;
@@ -44,10 +62,10 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
   mouseEnter: initialState.mouseEnter,
-  newWindow: (targetKey, type, title, key) => {
+  newWindow: ({ targetKey, type, title, key }) => {
     set((state) => {
       const existingWindow = state.windows.find(
-        (w) => w.targetKey === targetKey,
+        (w) => w.targetKey === targetKey && w.type === type,
       );
       if (existingWindow) {
         // highlight existing window
@@ -64,7 +82,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
           targetKey: targetKey,
           type,
         };
-        if (type === "navigator") {
+        if (type === WindowType.Navigator) {
           newWindow.targetHistory = [targetKey];
           newWindow.historyIndex = 0;
         }
@@ -73,22 +91,28 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       }
     });
   },
-  updateWindow: (key, targetKey) => {
+  updateWindow: ({ targetWindowKey, type, targetFileKey, title }) => {
     set((state) => {
-      const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetKey === targetKey) {
+      const window = state.windows.find((w) => w.key === targetWindowKey);
+      if (
+        window &&
+        window.targetKey === targetFileKey &&
+        window.type === type
+      ) {
         return { windows: state.windows };
       } else if (window) {
-        window.targetKey = targetKey;
+        window.targetKey = targetFileKey;
+        if (type) {
+          window.type = type;
+        }
+        if (title) {
+          window.title = title;
+        }
       }
-      if (
-        window?.type === "navigator" &&
-        window.targetHistory &&
-        window.historyIndex !== undefined
-      ) {
+      if (window && window.targetHistory && window.historyIndex !== undefined) {
         window.targetHistory = [
           ...window.targetHistory.slice(0, window.historyIndex + 1),
-          targetKey,
+          targetFileKey,
         ];
         window.historyIndex = window.targetHistory.length - 1;
       }

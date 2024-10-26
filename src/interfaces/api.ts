@@ -1,3 +1,5 @@
+import { FileType } from "./file";
+
 export interface CustomFetchResponse<T = unknown> {
   headers: Headers;
   status: number;
@@ -16,11 +18,7 @@ export interface ErrorResponseData {
   timestamp: string;
 }
 
-export enum ApiFileType {
-  Block = "block",
-  Container = "container",
-  Link = "link",
-}
+export type ApiFileType = FileType.Block | FileType.Container | FileType.Link;
 
 export interface CustomStorageResponse<T = unknown> {
   message: string;

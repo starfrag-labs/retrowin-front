@@ -1,13 +1,6 @@
 import { FileType } from "@/interfaces/file";
-import { createSerialKey } from "@/utils/serial_key";
+import { createSerialKey, parseSerialKey } from "@/utils/serial_key";
 import { create } from "zustand";
-
-export type FileInfo = {
-  key: string;
-  type: FileType;
-  name: string;
-  parentKey: string;
-};
 
 export type State = {
   selectedFileSerials: string[];
@@ -33,6 +26,7 @@ export type Action = {
     windowKey: string,
     ref: React.RefObject<HTMLElement>,
   ) => void;
+  getSelectedFileKeys: () => string[];
 };
 
 const initialState: State = {
@@ -80,5 +74,14 @@ export const useFileStore = create<State & Action>((set, get) => ({
       state.fileIconRefs.set(serialKey, ref);
       return { fileIconRefs: state.fileIconRefs };
     });
+  },
+  getSelectedFileKeys: () => {
+    // delete duplicated file keys
+    const fileKeys = new Set<string>();
+    get().selectedFileSerials.forEach((serial) => {
+      const { fileKey } = parseSerialKey(serial);
+      fileKeys.add(fileKey);
+    });
+    return Array.from(fileKeys);
   },
 }));
