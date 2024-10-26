@@ -3,6 +3,7 @@ import styles from "./file_container.module.css";
 import FileItem from "./file_item";
 import { fileQuery } from "@/api/query";
 import { useEffect } from "react";
+import { FileType } from "@/interfaces/file";
 
 /**
  * File container component
@@ -16,10 +17,12 @@ export default function FileContainer({
   windowKey,
   containerKey,
   setLoading,
+  uploadIcon = false,
 }: {
   windowKey: string;
   containerKey: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+  uploadIcon?: boolean;
 }) {
   const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
 
@@ -43,6 +46,14 @@ export default function FileContainer({
 
   return (
     <div className={`${styles.container} full-size`}>
+      {uploadIcon && (
+        <FileItem
+          name={FileType.Upload}
+          type={FileType.Upload}
+          fileKey={containerKey}
+          windowKey={windowKey}
+        />
+      )}
       {readContainerQuery.data.data.map((file) => (
         <FileItem
           key={file.fileKey}

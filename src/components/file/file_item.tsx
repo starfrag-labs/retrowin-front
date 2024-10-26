@@ -8,7 +8,6 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { WindowType } from "@/interfaces/window";
-import { ApiFileType } from "@/interfaces/api";
 import { createSerialKey } from "@/utils/serial_key";
 import { FileType, FileIconType } from "@/interfaces/file";
 
@@ -88,7 +87,7 @@ export default memo(function FileItem({
     if (windowKey !== targetWindow) return;
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
-      (type === ApiFileType.Container || type === ApiFileType.Block) &&
+      (type === FileType.Container || type === FileType.Block) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
       fileRect.left < selectBox.right &&
@@ -116,22 +115,22 @@ export default memo(function FileItem({
   // Set icon type
   useEffect(() => {
     switch (type) {
-      case ApiFileType.Container:
+      case FileType.Container:
         setIcon(FileIconType.Container);
         break;
-      case ApiFileType.Block:
+      case FileType.Upload:
+        setIcon(FileIconType.Upload);
+        break;
+      case FileType.Block:
         setIcon(FileIconType.Block);
         break;
     }
     switch (name) {
-      case "home":
+      case FileIconType.Home:
         setIcon(FileIconType.Home);
         break;
-      case "trash":
+      case FileIconType.Trash:
         setIcon(FileIconType.Trash);
-        break;
-      case "upload":
-        setIcon(FileIconType.Upload);
         break;
     }
   }, [name, type]);
@@ -143,12 +142,38 @@ export default memo(function FileItem({
 
   const iconClick = useCallback(() => {
     switch (type) {
-      case ApiFileType.Container:
+      case FileType.Container:
         if (backgroundWindowKey === windowKey) {
-          newWindow(fileKey, WindowType.Navigator, name);
+          newWindow({
+            targetKey: fileKey,
+            type: WindowType.Navigator,
+            title: name,
+          });
         } else {
-          updateWindow(windowKey, fileKey);
+          updateWindow({
+            targetWindowKey: windowKey,
+            targetFileKey: fileKey,
+          });
         }
+        break;
+      case FileType.Block:
+        break;
+      case FileType.Upload:
+        if (backgroundWindowKey === windowKey) {
+          newWindow({
+            targetKey: fileKey,
+            type: WindowType.Uploader,
+            title: name,
+          });
+        } else {
+          updateWindow({
+            targetWindowKey: windowKey,
+            targetFileKey: fileKey,
+            type: WindowType.Uploader,
+          });
+        }
+        break;
+      case FileType.Link:
         break;
     }
   }, [

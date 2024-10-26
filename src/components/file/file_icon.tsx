@@ -64,6 +64,7 @@ export default memo(
             className={`${styles.icon}`}
             style={{
               color: "#9296f0",
+              padding: "0.25rem",
               ...style,
             }}
           />
