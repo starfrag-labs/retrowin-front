@@ -6,10 +6,10 @@ import { useCallback } from "react";
 import { WindowType } from "@/interfaces/window";
 
 export default function WindowMenu({
-  windowKey,
+  targetFileKey,
   closeMenu,
 }: {
-  windowKey: string;
+  targetFileKey: string;
   closeMenu: () => void;
 }) {
   // Query client
@@ -17,36 +17,33 @@ export default function WindowMenu({
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
-  const findWindow = useWindowStore((state) => state.findWindow);
 
   // Mutations
   const createContainerMutation = useMutation(fileQuery.create.container);
 
   // Handle upload action
   const handleUpload = useCallback(() => {
-    const window = findWindow(windowKey);
-    if (window) {
-      newWindow(window.targetKey, WindowType.Uploader, "Uploader");
-      closeMenu();
-    }
-  }, [closeMenu, findWindow, newWindow, windowKey]);
+    newWindow({
+      targetKey: targetFileKey,
+      type: WindowType.Uploader,
+      title: "Uploader",
+    });
+    closeMenu();
+  }, [closeMenu, newWindow, targetFileKey]);
 
   const handleCreateContainer = useCallback(() => {
-    const window = findWindow(windowKey);
-    if (window) {
-      createContainerMutation
-        .mutateAsync({
-          parentKey: window.targetKey,
-          fileName: "New Folder",
-        })
-        .finally(() => {
-          queryClient.invalidateQueries({
-            queryKey: ["file", window.targetKey],
-          });
-          closeMenu();
+    createContainerMutation
+      .mutateAsync({
+        parentKey: targetFileKey,
+        fileName: "New Folder",
+      })
+      .finally(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["file", targetFileKey],
         });
-    }
-  }, [closeMenu, createContainerMutation, findWindow, queryClient, windowKey]);
+        closeMenu();
+      });
+  }, [closeMenu, createContainerMutation, queryClient, targetFileKey]);
 
   const menuList = [
     { name: "Upload", action: handleUpload },

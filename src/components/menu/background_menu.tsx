@@ -23,7 +23,11 @@ export default function BackgroundMenu({
 
   const handleUpload = useCallback(() => {
     if (backgroundFileKey) {
-      newWindow(backgroundFileKey, WindowType.Uploader, "Uploader");
+      newWindow({
+        targetKey: backgroundFileKey,
+        type: WindowType.Uploader,
+        title: "Uploader",
+      });
       closeMenu();
     }
   }, [backgroundFileKey, newWindow, closeMenu]);

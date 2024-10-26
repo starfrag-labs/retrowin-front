@@ -36,7 +36,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
     fileName: string;
     fileType: FileType;
   } | null>(null);
-  const [targetWindowKey, setTargetWindowKey] = useState<string | null>(null);
+  const [targetFileKey, setTargetFileKey] = useState<string | null>(null);
 
   const handleContextMenu = useCallback(
     (e: React.MouseEvent) => {
@@ -54,11 +54,11 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
           switch (window.type) {
             case WindowType.Background:
               setMenuType("background");
-              setTargetWindowKey(window.targetKey);
+              setTargetFileKey(window.targetKey);
               break;
             case WindowType.Navigator:
               setMenuType("window");
-              setTargetWindowKey(window.targetKey);
+              setTargetFileKey(window.targetKey);
               break;
           }
         }
@@ -125,9 +125,9 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex-center full-size" onMouseUp={handleContextMenu}>
       <div className={styles.menu_box} ref={menuRef} hidden={menuType === null}>
-        {menuType === "background" && targetWindowKey && (
+        {menuType === "background" && targetFileKey && (
           <BackgroundMenu
-            backgroundFileKey={targetWindowKey}
+            backgroundFileKey={targetFileKey}
             closeMenu={closeMenu}
           />
         )}
@@ -139,8 +139,8 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
             closeMenu={closeMenu}
           />
         )}
-        {menuType === "window" && targetWindowKey && (
-          <WindowMenu windowKey={targetWindowKey} closeMenu={closeMenu} />
+        {menuType === "window" && targetFileKey && (
+          <WindowMenu targetFileKey={targetFileKey} closeMenu={closeMenu} />
         )}
       </div>
       {children}

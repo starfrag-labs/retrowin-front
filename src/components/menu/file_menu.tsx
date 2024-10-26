@@ -5,6 +5,7 @@ import { fileQuery } from "@/api/query";
 import { useCallback } from "react";
 import { WindowType } from "@/interfaces/window";
 import { FileType } from "@/interfaces/file";
+import { useFileStore } from "@/store/file.store";
 
 export default function FileMenu({
   fileKey,
@@ -26,6 +27,9 @@ export default function FileMenu({
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
+  const getSelectedFileKeys = useFileStore(
+    (state) => state.getSelectedFileKeys,
+  );
 
   const handleOpen = useCallback(() => {
     let windowType: WindowType;
@@ -40,27 +44,41 @@ export default function FileMenu({
         windowType = WindowType.Document;
         break;
     }
-    newWindow(fileKey, windowType, fileName);
+    newWindow({
+      targetKey: fileKey,
+      type: windowType,
+      title: fileName,
+    });
     closeMenu();
   }, [closeMenu, fileKey, fileName, fileType, newWindow]);
 
   const handleMoveToTrash = useCallback(() => {
     closeMenu();
-    moveToTrashMutation.mutateAsync({ fileKey }).finally(() => {
+    const selectedFileKeys = getSelectedFileKeys();
+    Promise.all(
+      selectedFileKeys.map((fileKey) =>
+        moveToTrashMutation.mutateAsync({ fileKey }),
+      ),
+    ).finally(() => {
       queryClient.invalidateQueries({
         queryKey: ["file"],
       });
     });
-  }, [closeMenu, fileKey, moveToTrashMutation, queryClient]);
+  }, [closeMenu, getSelectedFileKeys, moveToTrashMutation, queryClient]);
 
   const handlePermanentDelete = useCallback(() => {
     closeMenu();
-    permanentDeleteMutation.mutateAsync({ fileKey }).finally(() => {
+    const selectedFileKeys = getSelectedFileKeys();
+    Promise.all(
+      selectedFileKeys.map((fileKey) =>
+        permanentDeleteMutation.mutateAsync({ fileKey }),
+      ),
+    ).finally(() => {
       queryClient.invalidateQueries({
         queryKey: ["file"],
       });
     });
-  }, [closeMenu, fileKey, permanentDeleteMutation, queryClient]);
+  }, [closeMenu, getSelectedFileKeys, permanentDeleteMutation, queryClient]);
 
   const menuList = [
     { name: "Open", action: handleOpen },

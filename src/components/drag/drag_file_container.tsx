@@ -5,10 +5,10 @@ import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./drag_file_container.module.css";
 import { parseSerialKey } from "@/utils/serial_key";
-import { ApiFileType } from "@/interfaces/api";
 import { WindowType } from "@/interfaces/window";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
+import { FileType } from "@/interfaces/file";
 
 export default function DragFileContainer({
   children,
@@ -172,7 +172,7 @@ export default function DragFileContainer({
     }
 
     // Set the target folder key as the highlighted file key
-    if (highlightedFile && highlightedFile.type === ApiFileType.Container) {
+    if (highlightedFile && highlightedFile.type === FileType.Container) {
       targetContainerKey = highlightedFile.fileKey;
     } else if (highlightedFile) {
       targetContainerKey = null;
@@ -180,32 +180,41 @@ export default function DragFileContainer({
 
     // Move the selected elements to the target folder
     if (targetContainerKey && pointerMoved) {
-      Promise.all(
-        selectedFileSerials.map(async (serialKey) => {
-          const { fileKey } = parseSerialKey(serialKey);
-          const parentFileKey = await queryClient
+      // Get the file keys of the selected files
+      const fileKeys = selectedFileSerials.map(
+        (serialKey) => parseSerialKey(serialKey).fileKey,
+      );
+      // Get the parent file keys of the selected files
+      const parentFileKeys = await Promise.all(
+        fileKeys.map((fileKey) =>
+          queryClient
             .fetchQuery(fileQuery.read.parent(fileKey))
-            .then((data) => data.data.fileKey);
-          if (
-            isFileKeySelected(fileKey) &&
-            parentFileKey !== targetContainerKey
-          ) {
-            await moveFile.mutateAsync({
-              fileKey,
-              parentKey: targetContainerKey,
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["file", targetContainerKey],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["file", fileKey],
-            });
-            queryClient.invalidateQueries({
-              queryKey: ["file", parentFileKey],
-            });
+            .then((data) => data.data.fileKey),
+        ),
+      );
+      // Move the selected files to the target folder
+      Promise.all(
+        fileKeys.map((fileKey, index) => {
+          if (parentFileKeys[index] !== targetContainerKey) {
+            return moveFile
+              .mutateAsync({
+                fileKey,
+                parentKey: targetContainerKey,
+              })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["file", targetContainerKey],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ["file", fileKey],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ["file", parentFileKeys[index]],
+                });
+              });
           }
         }),
-      ).then(() => {
+      ).finally(() => {
         unselectAllFiles();
       });
     }
@@ -214,7 +223,6 @@ export default function DragFileContainer({
     findWindow,
     highlightedFile,
     isDragging,
-    isFileKeySelected,
     moveFile,
     pointerMoved,
     queryClient,
