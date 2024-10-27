@@ -2,6 +2,7 @@ import { queryOptions, UseMutationOptions } from "@tanstack/react-query";
 import { fileApi, memberApi, storageApi } from "./fetch";
 
 const normalRetryCount = 3;
+const shortStaleTime = 1000 * 60 * 1;
 const normalStaleTime = 1000 * 60 * 10;
 
 // member
@@ -273,16 +274,47 @@ const writeStorageFile: UseMutationOptions<
   },
 };
 // storageApi.session
-const issueSession = (token: string) =>
+const issueWriteSession: UseMutationOptions<
+  {
+    fileKey: string;
+    sessionResponse: Awaited<
+      ReturnType<typeof storageApi.session.issue>
+    >["body"];
+  },
+  Error,
+  {
+    targetContainerKey: string;
+    fileName: string;
+    size: number;
+  }
+> = {
+  retry: normalRetryCount,
+  mutationFn: async ({ targetContainerKey, fileName, size }) => {
+    const response = await fileApi.upload.writeToken(
+      targetContainerKey,
+      fileName,
+      size,
+    );
+    const token = response.body.data.token;
+    const fileKey = response.body.data.fileKey;
+    const sessionResposne = await storageApi.session.issue(token);
+    return { fileKey, sessionResponse: sessionResposne.body };
+  },
+};
+const issueReadSession = (fileKey: string) =>
   queryOptions({
     queryKey: ["storage", "session", "issue"],
     queryFn: async () => {
+      let token = "";
+      token = await fileApi.stream
+        .readToken(fileKey)
+        .then((res) => res.body.data.token);
       const response = await storageApi.session.issue(token);
       return response.body;
     },
     retry: normalRetryCount,
-    staleTime: normalStaleTime,
-    enabled: !!token,
+    staleTime: shortStaleTime,
+    enabled: !!fileKey,
   });
 export const storageQuery = {
   file: {
@@ -290,6 +322,7 @@ export const storageQuery = {
     write: writeStorageFile,
   },
   session: {
-    issue: issueSession,
+    read: issueReadSession,
+    write: issueWriteSession,
   },
 };
