@@ -10,6 +10,7 @@ import { useWindowStore } from "@/store/window.store";
 import { WindowType } from "@/interfaces/window";
 import { createSerialKey } from "@/utils/serial_key";
 import { FileType, FileIconType } from "@/interfaces/file";
+import { ContentTypes, getContentTypes } from "@/utils/content_types";
 
 /**
  * File item component
@@ -153,10 +154,28 @@ export default memo(function FileItem({
           updateWindow({
             targetWindowKey: windowKey,
             targetFileKey: fileKey,
+            title: name,
           });
         }
         break;
       case FileType.Block:
+        const contentType = getContentTypes(name);
+        switch (contentType) {
+          case ContentTypes.Image:
+            newWindow({
+              targetKey: fileKey,
+              type: WindowType.Image,
+              title: name,
+            });
+            break;
+          case ContentTypes.Video:
+            newWindow({
+              targetKey: fileKey,
+              type: WindowType.Video,
+              title: name,
+            });
+            break;
+        }
         break;
       case FileType.Upload:
         if (backgroundWindowKey === windowKey) {
@@ -170,6 +189,7 @@ export default memo(function FileItem({
             targetWindowKey: windowKey,
             targetFileKey: fileKey,
             type: WindowType.Uploader,
+            title: name,
           });
         }
         break;
