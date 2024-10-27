@@ -18,7 +18,8 @@ export default function ImageViewer({
         <img
           src={`${storageApiBase}${url.storage.file.read(fileKey, fileName)}`}
           alt={fileName}
-          className="full-size"
+          className="full-size flex-center"
+          style={{ objectFit: "contain" }}
         />
       )}
     </div>

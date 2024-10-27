@@ -15,10 +15,15 @@ export default function VideoViewer({
     <div className="full-size flex-center">
       {sessionQuery.isFetched && sessionQuery.data && (
         <video
-          src={`${storageApiBase}${url.storage.file.read(fileKey, fileName)}`}
           controls
-          className="full-size"
-        />
+          className="full-size flex-center"
+          style={{ objectFit: "contain" }}
+        >
+          <source
+            src={`${storageApiBase}${url.storage.file.read(fileKey, fileName)}`}
+            type="video/mp4"
+          />
+        </video>
       )}
     </div>
   );

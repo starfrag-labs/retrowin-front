@@ -303,7 +303,7 @@ const issueWriteSession: UseMutationOptions<
 };
 const issueReadSession = (fileKey: string) =>
   queryOptions({
-    queryKey: ["storage", "session", "issue"],
+    queryKey: ["storage", "session", "read", fileKey],
     queryFn: async () => {
       let token = "";
       token = await fileApi.stream

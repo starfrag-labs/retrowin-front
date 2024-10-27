@@ -46,7 +46,7 @@ export default forwardRef(function WindowContent(
       {type === WindowType.Image && fileName && (
         <ImageViewer fileKey={fileKey} fileName={fileName} />
       )}
-      {type === WindowType.Video && (
+      {type === WindowType.Video && fileName && (
         <VideoViewer fileKey={fileKey} fileName={fileName} />
       )}
     </div>
