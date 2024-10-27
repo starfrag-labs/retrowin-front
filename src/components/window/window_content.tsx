@@ -3,10 +3,13 @@ import styles from "./window_content.module.css";
 import { WindowType } from "@/interfaces/window";
 import Navigator from "./window_content/navigator";
 import Uploader from "./window_content/uploader";
+import ImageViewer from "./window_content/image";
+import VideoViewer from "./window_content/video";
 
 export default forwardRef(function WindowContent(
   {
     fileKey,
+    fileName,
     windowKey,
     setLoading,
     type,
@@ -14,6 +17,7 @@ export default forwardRef(function WindowContent(
     onMouseLeave,
   }: {
     fileKey: string;
+    fileName: string;
     windowKey: string;
     setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
     type: WindowType;
@@ -36,12 +40,15 @@ export default forwardRef(function WindowContent(
           setLoading={setLoading}
         />
       )}
-        {type === WindowType.Uploader && setLoading && (
-          <Uploader
-            targetContainerKey={fileKey}
-            setLoading={setLoading}
-          />
-        )}
+      {type === WindowType.Uploader && (
+        <Uploader targetContainerKey={fileKey} />
+      )}
+      {type === WindowType.Image && fileName && (
+        <ImageViewer fileKey={fileKey} fileName={fileName} />
+      )}
+      {type === WindowType.Video && (
+        <VideoViewer fileKey={fileKey} fileName={fileName} />
+      )}
     </div>
   );
 });

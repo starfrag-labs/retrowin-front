@@ -298,6 +298,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
+          fileName={fileInfo.data?.data.fileName || ""}
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}
