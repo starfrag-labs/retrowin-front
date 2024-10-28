@@ -143,14 +143,16 @@ export default memo(function FileItem({
 
   const iconClick = useCallback(() => {
     switch (type) {
-      case FileType.Container:
+      case FileType.Container: // If the file is a container, open the navigator window
         if (backgroundWindowKey === windowKey) {
+          // If the window is a background window, open a new window
           newWindow({
             targetKey: fileKey,
             type: WindowType.Navigator,
             title: name,
           });
         } else {
+          // If the window is not a background window, update the window
           updateWindow({
             targetWindowKey: windowKey,
             targetFileKey: fileKey,
@@ -158,7 +160,7 @@ export default memo(function FileItem({
           });
         }
         break;
-      case FileType.Block:
+      case FileType.Block: // If the file is a block, open the file by its content type
         const contentType = getContentTypes(name);
         switch (contentType) {
           case ContentTypes.Image:
@@ -175,16 +177,25 @@ export default memo(function FileItem({
               title: name,
             });
             break;
+          case ContentTypes.Audio:
+            newWindow({
+              targetKey: fileKey,
+              type: WindowType.Audio,
+              title: name,
+            });
+            break;
         }
         break;
-      case FileType.Upload:
+      case FileType.Upload: // If the file is an upload, open uploader
         if (backgroundWindowKey === windowKey) {
+          // If the window is a background window, open a new window
           newWindow({
             targetKey: fileKey,
             type: WindowType.Uploader,
             title: name,
           });
         } else {
+          // If the window is not a background window, update the window
           updateWindow({
             targetWindowKey: windowKey,
             targetFileKey: fileKey,
@@ -220,7 +231,7 @@ export default memo(function FileItem({
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
           {icon && <FileIcon ref={iconRef} onClick={iconClick} icon={icon} />}
-          <FileName name={name} />
+          <FileName name={name} fileKey={fileKey} windowKey={windowKey} />
         </div>
       </div>
     </div>

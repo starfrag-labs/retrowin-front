@@ -11,11 +11,13 @@ export default function FileMenu({
   fileKey,
   fileType,
   fileName,
+  windowKey,
   closeMenu,
 }: {
   fileKey: string;
   fileType: FileType;
   fileName: string;
+  windowKey: string;
   closeMenu: () => void;
 }) {
   // Query client
@@ -30,6 +32,7 @@ export default function FileMenu({
   const getSelectedFileKeys = useFileStore(
     (state) => state.getSelectedFileKeys,
   );
+  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
   const handleOpen = useCallback(() => {
     let windowType: WindowType;
@@ -51,6 +54,11 @@ export default function FileMenu({
     });
     closeMenu();
   }, [closeMenu, fileKey, fileName, fileType, newWindow]);
+
+  const handleRename = useCallback(() => {
+    closeMenu();
+    setRenamingFile({ fileKey, windowKey });
+  }, [closeMenu, fileKey, setRenamingFile, windowKey]);
 
   const handleMoveToTrash = useCallback(() => {
     closeMenu();
@@ -82,6 +90,7 @@ export default function FileMenu({
 
   const menuList = [
     { name: "Open", action: handleOpen },
+    { name: "Rename", action: handleRename },
     { name: "/", action: () => {} },
     { name: "Move to Trash", action: handleMoveToTrash },
     { name: "Permanent Delete", action: handlePermanentDelete },

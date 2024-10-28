@@ -131,11 +131,12 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
             closeMenu={closeMenu}
           />
         )}
-        {menuType === "file" && targetFile && (
+        {menuType === "file" && targetFile && currentWindow && (
           <FileMenu
             fileKey={targetFile.fileKey}
             fileName={targetFile.fileName}
             fileType={targetFile.fileType}
+            windowKey={currentWindow.key}
             closeMenu={closeMenu}
           />
         )}

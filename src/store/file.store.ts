@@ -4,6 +4,7 @@ import { create } from "zustand";
 
 export type State = {
   selectedFileSerials: string[];
+  renamingFileSerial: string | null;
   highlightedFile: {
     fileKey: string;
     windowKey: string;
@@ -20,6 +21,10 @@ export type Action = {
   unselectFile: (fileKey: string, windowKey: string) => void;
   unselectAllFiles: () => void;
   isFileKeySelected: (fileKey: string) => boolean;
+  setRenamingFile: (
+    file: { fileKey: string; windowKey: string } | null,
+  ) => void;
+  getRenamingFile: () => { fileKey: string; windowKey: string } | null;
   setHighlightedFile: (highlightedFile: State["highlightedFile"]) => void;
   setFileIconRef: (
     fileKey: string,
@@ -31,6 +36,7 @@ export type Action = {
 
 const initialState: State = {
   selectedFileSerials: [],
+  renamingFileSerial: null,
   highlightedFile: null,
   fileRefs: new Map(),
   fileIconRefs: new Map(),
@@ -38,6 +44,7 @@ const initialState: State = {
 
 export const useFileStore = create<State & Action>((set, get) => ({
   selectedFileSerials: initialState.selectedFileSerials,
+  renamingFileSerial: initialState.renamingFileSerial,
   highlightedFile: initialState.highlightedFile,
   fileRefs: initialState.fileRefs,
   fileIconRefs: initialState.fileIconRefs,
@@ -64,6 +71,21 @@ export const useFileStore = create<State & Action>((set, get) => ({
   },
   isFileKeySelected: (fileKey) => {
     return get().selectedFileSerials.some((key) => key.startsWith(fileKey));
+  },
+  setRenamingFile: (
+    file: { fileKey: string; windowKey: string } | null,
+  ) => {
+    if (file) {
+      const serialKey = createSerialKey(file.fileKey, file.windowKey);
+      set({ renamingFileSerial: serialKey });
+    } else {
+      set({ renamingFileSerial: null });
+    }
+  },
+  getRenamingFile: () => {
+    const { renamingFileSerial } = get();
+    if (!renamingFileSerial) return null;
+    return parseSerialKey(renamingFileSerial);
   },
   setHighlightedFile: (highlightedFile) => {
     set({ highlightedFile });
