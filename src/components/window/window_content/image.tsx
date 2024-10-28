@@ -1,4 +1,4 @@
-import { storageApiBase, url } from "@/api/fetch";
+import { url } from "@/api/fetch";
 import { storageQuery } from "@/api/query";
 import { useQuery } from "@tanstack/react-query";
 
@@ -9,6 +9,10 @@ export default function ImageViewer({
   fileKey: string;
   fileName: string;
 }) {
+  // Constants
+  const fileUrl = url.storage.file.src(fileKey);
+
+  // Queries
   const sessionQuery = useQuery(storageQuery.session.read(fileKey));
 
   return (
@@ -16,7 +20,7 @@ export default function ImageViewer({
       {sessionQuery.isFetched && sessionQuery.data && (
         // eslint-disable-next-line @next/next/no-img-element
         <img
-          src={`${storageApiBase}${url.storage.file.read(fileKey, fileName)}`}
+          src={fileUrl.toString()}
           alt={fileName}
           className="full-size flex-center"
           style={{ objectFit: "contain" }}

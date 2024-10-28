@@ -9,9 +9,7 @@ export default function Downloader() {
     const readToken = response.body.data.token;
     await storageApi.session.issue(readToken);
 
-    const fileName = "downloaded.txt";
-
-    const fileUrl = url.storage.file.src(fileKey, fileName);
+    const fileUrl = url.storage.file.src(fileKey);
 
     const iframe = document.getElementById("downloader") as HTMLIFrameElement;
     iframe.src = fileUrl.toString();

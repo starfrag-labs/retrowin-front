@@ -48,11 +48,13 @@ export const url = {
   },
   storage: {
     file: {
-      src: (fileKey: string, fileName: string) =>
-        new URL(`/file/${fileKey}?file_name=${fileName}`, storageApiBase),
+      // get source directly from storage
+      src: (fileKey: string, type: "original" = "original") =>
+        new URL(`/read/${fileKey}/${type}`, storageApiBase),
+      // deprecated - use src instead
       read: (fileKey: string, fileName: string) =>
         `/file/${fileKey}?file_name=${fileName}`,
-      write: (fileKey: string) => `/file/${fileKey}`,
+      write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
       issue: (token: string) => `/session/issue/${token}`,
