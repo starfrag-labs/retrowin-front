@@ -18,7 +18,7 @@ export default memo(
       onClick?: () => void;
       style?: CSSProperties;
     },
-    ref: React.Ref<HTMLDivElement>,
+    ref?: React.Ref<HTMLDivElement>,
   ) {
     return (
       <div className={styles.icon_container} ref={ref} onDoubleClick={onClick}>

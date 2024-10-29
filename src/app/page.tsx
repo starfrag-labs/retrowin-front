@@ -93,7 +93,7 @@ export default function Home() {
           </SelectBoxContainer>
         </MenuBox>
       </Background>
-      <Navbar />
+      <Navbar windows={windows} />
     </div>
   );
 }

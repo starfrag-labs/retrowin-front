@@ -1,11 +1,13 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import MenuList from "./menu_list";
 import { useWindowStore } from "@/store/window.store";
-import { fileQuery } from "@/api/query";
+import { fileQuery, storageQuery } from "@/api/query";
 import { useCallback } from "react";
 import { WindowType } from "@/interfaces/window";
 import { FileType } from "@/interfaces/file";
 import { useFileStore } from "@/store/file.store";
+import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import { url } from "@/api/fetch";
 
 export default function FileMenu({
   fileKey,
@@ -22,6 +24,7 @@ export default function FileMenu({
 }) {
   // Query client
   const queryClient = useQueryClient();
+  // Queries
 
   // Mutations
   const moveToTrashMutation = useMutation(fileQuery.delete.trash);
@@ -34,14 +37,29 @@ export default function FileMenu({
   );
   const setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
+  // Open file action
   const handleOpen = useCallback(() => {
     let windowType: WindowType;
     switch (fileType) {
-      case "container":
+      case FileType.Container:
         windowType = WindowType.Navigator;
         break;
-      case "block":
-        windowType = WindowType.Document;
+      case FileType.Block:
+        const contentType = getContentTypes(fileName);
+        switch (contentType) {
+          case ContentTypes.Image:
+            windowType = WindowType.Image;
+            break;
+          case ContentTypes.Video:
+            windowType = WindowType.Video;
+            break;
+          case ContentTypes.Audio:
+            windowType = WindowType.Audio;
+            break;
+          default:
+            windowType = WindowType.Other;
+            break;
+        }
         break;
       default:
         windowType = WindowType.Document;
@@ -55,11 +73,34 @@ export default function FileMenu({
     closeMenu();
   }, [closeMenu, fileKey, fileName, fileType, newWindow]);
 
+  // Update file actions
   const handleRename = useCallback(() => {
     closeMenu();
     setRenamingFile({ fileKey, windowKey });
   }, [closeMenu, fileKey, setRenamingFile, windowKey]);
 
+  // Download file actions
+  const handleDownload = useCallback(async () => {
+    closeMenu();
+    await queryClient.fetchQuery(storageQuery.session.read(fileKey));
+    //const downloadedFile = await queryClient.fetchQuery(
+    //  storageQuery.file.download({ fileKey }),
+    //);
+    //
+    //const downloadUrl = URL.createObjectURL(downloadedFile);
+    //const a = document.createElement("a");
+    //a.href = downloadUrl;
+    //a.download = fileName;
+    //a.click();
+
+    const downloadUrl = `${url.storage.file.readWithName(fileKey, fileName)}`;
+    const a = document.createElement("a");
+    a.href = downloadUrl;
+    a.download = fileName;
+    a.click();
+  }, [closeMenu, fileKey, fileName, queryClient]);
+
+  // Delete file actions
   const handleMoveToTrash = useCallback(() => {
     closeMenu();
     const selectedFileKeys = getSelectedFileKeys();
@@ -90,6 +131,7 @@ export default function FileMenu({
 
   const menuList = [
     { name: "Open", action: handleOpen },
+    { name: "Download", action: handleDownload },
     { name: "Rename", action: handleRename },
     { name: "/", action: () => {} },
     { name: "Move to Trash", action: handleMoveToTrash },

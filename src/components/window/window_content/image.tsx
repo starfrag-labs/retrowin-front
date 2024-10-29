@@ -10,7 +10,7 @@ export default function ImageViewer({
   fileName: string;
 }) {
   // Constants
-  const fileUrl = url.storage.file.src(fileKey);
+  const fileUrl = url.storage.file.read(fileKey);
 
   // Queries
   const sessionQuery = useQuery(storageQuery.session.read(fileKey));

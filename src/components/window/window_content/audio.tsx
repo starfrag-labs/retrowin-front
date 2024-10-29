@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export default function Audio({ fileKey }: { fileKey: string }) {
   // Constants
-  const fileUrl = url.storage.file.src(fileKey);
+  const fileUrl = url.storage.file.read(fileKey);
 
   // Queries
   const sessionQuery = useQuery(storageQuery.session.read(fileKey));

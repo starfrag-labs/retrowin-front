@@ -15,7 +15,6 @@ export default function SelectBoxContainer({
   children: React.ReactNode;
 }) {
   // Store states
-  const renamingFileSerial = useFileStore((state) => state.renamingFileSerial);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const menuRef = useMenuStore((state) => state.menuRef);
   const currentWindow = useWindowStore((state) => state.currentWindow);
@@ -25,7 +24,6 @@ export default function SelectBoxContainer({
   // Store actions
   const setRect = useSelectBoxStore((state) => state.setRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
-  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
   const setCurrentWindowKey = useSelectBoxStore(
     (state) => state.setCurrentWindowKey,
   );
@@ -48,7 +46,6 @@ export default function SelectBoxContainer({
       // Check if the click is inside the highlighted file
       if (highlightedFile) return;
       if (resizingCursor) return;
-      if (renamingFileSerial) setRenamingFile(null);
 
       // If Shift key not pressed, unselect all files
       if (!pressedKeys.includes("Shift")) {
@@ -87,11 +84,9 @@ export default function SelectBoxContainer({
       menuRef,
       highlightedFile,
       resizingCursor,
-      renamingFileSerial,
       pressedKeys,
       setCurrentWindowKey,
       currentWindow,
-      setRenamingFile,
       unselectAllFiles,
       findWindow,
       mouseEnter,

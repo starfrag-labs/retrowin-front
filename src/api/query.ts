@@ -251,16 +251,22 @@ export const fileQuery = {
 
 // storage
 // storageApi.file
-const readStorageFile = (fileKey: string, fileName: string) =>
+const downloadStorageFile = ({
+  fileKey,
+  type = "original",
+}: {
+  fileKey: string;
+  type?: "original";
+}) =>
   queryOptions({
-    queryKey: ["storage", fileKey, fileName],
+    queryKey: ["storage", fileKey],
     queryFn: async () => {
-      const response = await storageApi.file.read(fileKey, fileName);
+      const response = await storageApi.file.download(fileKey, type);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
-    enabled: !!fileKey && !!fileName,
+    enabled: !!fileKey,
   });
 const writeStorageFile: UseMutationOptions<
   Awaited<ReturnType<typeof storageApi.file.write>>["body"],
@@ -318,7 +324,7 @@ const issueReadSession = (fileKey: string) =>
   });
 export const storageQuery = {
   file: {
-    read: readStorageFile,
+    download: downloadStorageFile,
     write: writeStorageFile,
   },
   session: {

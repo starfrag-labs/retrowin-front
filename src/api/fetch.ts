@@ -49,11 +49,10 @@ export const url = {
   storage: {
     file: {
       // get source directly from storage
-      src: (fileKey: string, type: "original" = "original") =>
-        new URL(`/read/${fileKey}/${type}`, storageApiBase),
-      // deprecated - use src instead
-      read: (fileKey: string, fileName: string) =>
-        `/file/${fileKey}?file_name=${fileName}`,
+      read: (fileKey: string, type: "original" = "original") =>
+        new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
+      readWithName: (fileKey: string, fileName: string) =>
+        new URL(`/read/with_name/${fileKey}?file_name=${fileName}`, storageApiBase),
       write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
@@ -289,18 +288,10 @@ export const fileApi = {
 };
 export const storageApi = {
   file: {
-    read: (fileKey: string, fileName: string) =>
-      customFetch<
-        | Blob
-        | CustomStorageResponse<{
-            message: string;
-          }>
-      >(
-        url.storage.file.read(fileKey, fileName),
+    download: (fileKey: string, type: "original" = "original") =>
+      customFetch<Blob>(
+        url.storage.file.read(fileKey, type),
         {
-          //headers: {
-          //  responseType: "blob",
-          //},
           method: "GET",
         },
         "storage",

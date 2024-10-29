@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import styles from "./file_name.module.css";
 import { useFileStore } from "@/store/file.store";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
 import { parseSerialKey } from "@/utils/serial_key";
 export default function FileName({
@@ -18,8 +18,6 @@ export default function FileName({
 
   // Query renaming file
   const renamingFileQuery = useMutation(fileQuery.update.name);
-  // Query parent file
-  const parentFileQuery = useQuery(fileQuery.read.parent(fileKey));
 
   // States
   const [isRenaming, setIsRenaming] = useState(false);
@@ -32,7 +30,9 @@ export default function FileName({
 
   // Update file name
   const updateFileName = async () => {
-    const parentFileKey = parentFileQuery.data?.data.fileKey;
+    const parentFileKey = await queryClient
+      .fetchQuery(fileQuery.read.parent(fileKey))
+      .then((data) => data.data.fileKey);
     if (!parentFileKey) return;
     await renamingFileQuery
       .mutateAsync({
@@ -54,23 +54,19 @@ export default function FileName({
     if (renamingFileSerial) {
       const { fileKey: renamingFileKey, windowKey: renamingWindowKey } =
         parseSerialKey(renamingFileSerial);
-      if (
-        fileKey === renamingFileKey &&
-        windowKey === renamingWindowKey &&
-        parentFileQuery.isFetched
-      ) {
+      if (fileKey === renamingFileKey && windowKey === renamingWindowKey) {
         setIsRenaming(true);
       }
     } else {
       setIsRenaming(false);
     }
-  }, [fileKey, parentFileQuery.isFetched, renamingFileSerial, windowKey]);
+  }, [fileKey, renamingFileSerial, windowKey]);
 
   return (
-    <div>
+    <div className={`flex-center full-size`}>
       {isRenaming ? (
         <form
-          className={styles.file_name_form}
+          className={styles.rename_form}
           onSubmit={(e) => {
             e.preventDefault();
             updateFileName();
@@ -80,15 +76,22 @@ export default function FileName({
         >
           <input
             type="text"
-            className={styles.file_name_input}
+            className={styles.rename_input}
             value={newName}
             onChange={(e) => {
               setNewName(e.target.value);
             }}
+            onBlur={() => {
+              setIsRenaming(false);
+              setRenamingFile(null);
+            }}
+            autoFocus
           />
         </form>
       ) : (
-        <div className={styles.stale_text}>{name}</div>
+        <div className={styles.stale_container}>
+          <div className={styles.name_text}>{name}</div>
+        </div>
       )}
     </div>
   );
