@@ -83,15 +83,6 @@ export default function FileMenu({
   const handleDownload = useCallback(async () => {
     closeMenu();
     await queryClient.fetchQuery(storageQuery.session.read(fileKey));
-    //const downloadedFile = await queryClient.fetchQuery(
-    //  storageQuery.file.download({ fileKey }),
-    //);
-    //
-    //const downloadUrl = URL.createObjectURL(downloadedFile);
-    //const a = document.createElement("a");
-    //a.href = downloadUrl;
-    //a.download = fileName;
-    //a.click();
 
     const downloadUrl = `${url.storage.file.readWithName(fileKey, fileName)}`;
     const a = document.createElement("a");
