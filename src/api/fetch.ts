@@ -15,6 +15,8 @@ export const url = {
     create: {
       container: (parentKey: string, fileName: string) =>
         `/file/container/${parentKey}?file_name=${fileName}`,
+      link: (parentKey: string, fileName: string, targetKey: string) =>
+        `/file/link/${parentKey}?file_name=${fileName}&target_key=${targetKey}`,
     },
     delete: {
       permanent: (fileKey: string) => `/file/permanent/${fileKey}`,
@@ -52,7 +54,10 @@ export const url = {
       read: (fileKey: string, type: "original" = "original") =>
         new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
       readWithName: (fileKey: string, fileName: string) =>
-        new URL(`/read/with_name/${fileKey}?file_name=${fileName}`, storageApiBase),
+        new URL(
+          `/read/with_name/${fileKey}?file_name=${fileName}`,
+          storageApiBase,
+        ),
       write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
