@@ -156,6 +156,17 @@ const readFileFind = (fileKey: string, fileName: string) =>
     staleTime: normalStaleTime,
     enabled: !!fileKey && !!fileName,
   });
+const readFileLinkTarget = (fileKey: string) =>
+  queryOptions({
+    queryKey: ["file", fileKey, "target"],
+    queryFn: async () => {
+      const response = await fileApi.read.linkTarget(fileKey);
+      return response.body;
+    },
+    retry: normalRetryCount,
+    staleTime: normalStaleTime,
+    enabled: !!fileKey,
+  });
 // fileApi.update
 const updateFileName: UseMutationOptions<
   Awaited<ReturnType<typeof fileApi.update.name>>["body"],
@@ -235,6 +246,7 @@ export const fileQuery = {
     parent: readFileParent,
     children: readFileChildren,
     find: readFileFind,
+    linkTarget: readFileLinkTarget,
   },
   update: {
     name: updateFileName,

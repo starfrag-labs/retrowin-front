@@ -93,17 +93,15 @@ export default function FileContainer({
           windowKey={windowKey}
         />
       )}
-      {readContainerQuery.data.data
-        .sort(sortFiles)
-        .map((file) => (
-          <FileItem
-            key={file.fileKey}
-            name={file.fileName}
-            type={file.type}
-            fileKey={file.fileKey}
-            windowKey={windowKey}
-          />
-        ))}
+      {readContainerQuery.data.data.sort(sortFiles).map((file) => (
+        <FileItem
+          key={file.fileKey}
+          name={file.fileName}
+          type={file.type}
+          fileKey={file.fileKey}
+          windowKey={windowKey}
+        />
+      ))}
     </div>
   );
 }

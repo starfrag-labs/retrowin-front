@@ -31,6 +31,7 @@ export const url = {
       children: (fileKey: string) => `/file/children/${fileKey}`,
       find: (fileKey: string, fileName: string) =>
         `/file/find/${fileKey}?file_name=${fileName}`,
+      linkTarget: (fileKey: string) => `/file/link-target/${fileKey}`,
     },
     update: {
       name: (fileKey: string, fileName: string) =>
@@ -55,7 +56,7 @@ export const url = {
         new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
       readWithName: (fileKey: string, fileName: string) =>
         new URL(
-          `/read/with_name/${fileKey}?file_name=${fileName}`,
+          `/read/with-name/${fileKey}?file_name=${fileName}`,
           storageApiBase,
         ),
       write: (fileKey: string) => `/write/${fileKey}`,
@@ -242,6 +243,14 @@ export const fileApi = {
           type: ApiFileType;
         }>
       >(url.file.read.find(fileKey, fileName)),
+    linkTarget: (fileKey: string) =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.linkTarget(fileKey)),
   },
   update: {
     name: (fileKey: string, fileName: string) =>
