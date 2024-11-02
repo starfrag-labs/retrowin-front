@@ -5,15 +5,7 @@
 }
 
 .icon {
-  display: inline-block;
   font-size: 4rem;
+  display: inline-block;
   filter: drop-shadow(0 0 1px black);
-}
-
-.file_icon {
-  color: lightgray;
-}
-
-.folder_icon {
-  color: orange;
 }

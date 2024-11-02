@@ -15,6 +15,7 @@ export default memo(
       thirdWindowButtonAction,
       windowButtonColorPallete,
       onMouseDown,
+      onMouseEnter,
     }: {
       title: string;
       loading: boolean;
@@ -27,6 +28,7 @@ export default memo(
       onMouseDown?: (
         event: React.MouseEvent<HTMLDivElement, MouseEvent>,
       ) => void;
+      onMouseEnter?: () => void;
     },
     ref: React.Ref<HTMLDivElement>,
   ) {
@@ -37,6 +39,7 @@ export default memo(
       <div
         className={`flex-center ${styles.container}`}
         onMouseDown={onMouseDown}
+        onMouseEnter={onMouseEnter}
         ref={ref}
       >
         <div className={styles.header_left_container}>

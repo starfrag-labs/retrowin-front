@@ -2,6 +2,7 @@ import { queryOptions, UseMutationOptions } from "@tanstack/react-query";
 import { fileApi, memberApi, storageApi } from "./fetch";
 
 const normalRetryCount = 3;
+const shortStaleTime = 1000 * 60 * 1;
 const normalStaleTime = 1000 * 60 * 10;
 
 // member
@@ -102,6 +103,15 @@ const readFileRoot = queryOptions({
   retry: normalRetryCount,
   staleTime: normalStaleTime,
 });
+const readFileHome = queryOptions({
+  queryKey: ["file", "home"],
+  queryFn: async () => {
+    const response = await fileApi.read.home;
+    return response.body;
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
 const readFileInfo = (fileKey: string) =>
   queryOptions({
     queryKey: ["file", fileKey, "info"],
@@ -145,6 +155,17 @@ const readFileFind = (fileKey: string, fileName: string) =>
     retry: normalRetryCount,
     staleTime: normalStaleTime,
     enabled: !!fileKey && !!fileName,
+  });
+const readFileLinkTarget = (fileKey: string) =>
+  queryOptions({
+    queryKey: ["file", fileKey, "target"],
+    queryFn: async () => {
+      const response = await fileApi.read.linkTarget(fileKey);
+      return response.body;
+    },
+    retry: normalRetryCount,
+    staleTime: normalStaleTime,
+    enabled: !!fileKey,
   });
 // fileApi.update
 const updateFileName: UseMutationOptions<
@@ -220,10 +241,12 @@ export const fileQuery = {
   read: {
     storage: readFileStorage,
     root: readFileRoot,
+    home: readFileHome,
     info: readFileInfo,
     parent: readFileParent,
     children: readFileChildren,
     find: readFileFind,
+    linkTarget: readFileLinkTarget,
   },
   update: {
     name: updateFileName,
@@ -240,16 +263,22 @@ export const fileQuery = {
 
 // storage
 // storageApi.file
-const readStorageFile = (fileKey: string, fileName: string) =>
+const downloadStorageFile = ({
+  fileKey,
+  type = "original",
+}: {
+  fileKey: string;
+  type?: "original";
+}) =>
   queryOptions({
-    queryKey: ["storage", fileKey, fileName],
+    queryKey: ["storage", fileKey],
     queryFn: async () => {
-      const response = await storageApi.file.read(fileKey, fileName);
+      const response = await storageApi.file.download(fileKey, type);
       return response.body;
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
-    enabled: !!fileKey && !!fileName,
+    enabled: !!fileKey,
   });
 const writeStorageFile: UseMutationOptions<
   Awaited<ReturnType<typeof storageApi.file.write>>["body"],
@@ -263,23 +292,55 @@ const writeStorageFile: UseMutationOptions<
   },
 };
 // storageApi.session
-const issueSession = (token: string) =>
+const issueWriteSession: UseMutationOptions<
+  {
+    fileKey: string;
+    sessionResponse: Awaited<
+      ReturnType<typeof storageApi.session.issue>
+    >["body"];
+  },
+  Error,
+  {
+    targetContainerKey: string;
+    fileName: string;
+    size: number;
+  }
+> = {
+  retry: normalRetryCount,
+  mutationFn: async ({ targetContainerKey, fileName, size }) => {
+    const response = await fileApi.upload.writeToken(
+      targetContainerKey,
+      fileName,
+      size,
+    );
+    const token = response.body.data.token;
+    const fileKey = response.body.data.fileKey;
+    const sessionResposne = await storageApi.session.issue(token);
+    return { fileKey, sessionResponse: sessionResposne.body };
+  },
+};
+const issueReadSession = (fileKey: string) =>
   queryOptions({
-    queryKey: ["storage", "session", "issue"],
+    queryKey: ["storage", "session", "read", fileKey],
     queryFn: async () => {
+      let token = "";
+      token = await fileApi.stream
+        .readToken(fileKey)
+        .then((res) => res.body.data.token);
       const response = await storageApi.session.issue(token);
       return response.body;
     },
     retry: normalRetryCount,
-    staleTime: normalStaleTime,
-    enabled: !!token,
+    staleTime: shortStaleTime,
+    enabled: !!fileKey,
   });
 export const storageQuery = {
   file: {
-    read: readStorageFile,
+    download: downloadStorageFile,
     write: writeStorageFile,
   },
   session: {
-    issue: issueSession,
+    read: issueReadSession,
+    write: issueWriteSession,
   },
 };

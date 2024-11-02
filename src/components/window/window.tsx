@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
-import { AppWindow } from "@/interfaces/window";
+import { AppWindow, WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
 import { useEventStore } from "@/store/event.store";
 import { fileQuery } from "@/api/query";
@@ -55,12 +55,11 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
 
   // Set window title
   useEffect(() => {
-    if (targetWindow?.type === "uploader") {
+    if (targetWindow?.type === WindowType.Uploader) {
       setTitle(windowKey, "Uploader");
     } else if (fileInfo.isSuccess) {
       setTitle(windowKey, fileInfo.data.data.fileName);
     }
-    //}, [fileInfo.data, fileInfo.isSuccess, targetWindow?.type]);
   }, [
     fileInfo.data,
     fileInfo.isSuccess,
@@ -79,8 +78,8 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     });
   }, [setCurrentWindow, windowKey]);
 
-  // Leave window
-  const leaveWindow = useCallback(() => {
+  // Set current window to null when the mouse enters the window header
+  const enterWindowHeader = useCallback(() => {
     setCurrentWindow(null);
   }, [setCurrentWindow]);
 
@@ -95,7 +94,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Initialize window position and size
   useEffect(() => {
     if (windowRef.current && targetWindow) {
-      if (targetWindow.type === "uploader") {
+      if (targetWindow.type === WindowType.Uploader) {
         const x = document.body.clientWidth / 2 - windowSize1.width / 2;
         const y = document.body.clientHeight / 2 - windowSize1.height / 2;
         setWindowPosition({ x, y });
@@ -294,16 +293,17 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
             ? maximizedWindowButtonColorPallete
             : defaultWindowButtonColorPallete
         }
+        onMouseEnter={enterWindowHeader}
       />
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
+          fileName={fileInfo.data?.data.fileName || ""}
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}
           ref={windowContentRef}
           onMouseEnter={enterWindow}
-          onMouseLeave={leaveWindow}
         />
       )}
     </div>

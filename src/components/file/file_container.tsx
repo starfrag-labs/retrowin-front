@@ -2,7 +2,9 @@ import { useQuery } from "@tanstack/react-query";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
 import { fileQuery } from "@/api/query";
-import { useEffect } from "react";
+import { useCallback, useEffect } from "react";
+import { FileType, SpecialFileName } from "@/interfaces/file";
+import { ApiFileType } from "@/interfaces/api";
 
 /**
  * File container component
@@ -16,12 +18,52 @@ export default function FileContainer({
   windowKey,
   containerKey,
   setLoading,
+  uploadIcon = false,
 }: {
   windowKey: string;
   containerKey: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
+  uploadIcon?: boolean;
 }) {
   const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
+
+  const sortFiles = useCallback(
+    (
+      a: {
+        fileName: string;
+        type: ApiFileType;
+      },
+      b: {
+        fileName: string;
+        type: ApiFileType;
+      },
+    ) => {
+      // Home > Trash > Others
+      const specialFileOrder = [
+        SpecialFileName.Root,
+        SpecialFileName.Home,
+        SpecialFileName.Trash,
+        SpecialFileName.Upload,
+      ];
+      const aIndex = specialFileOrder.findIndex((name) => a.fileName === name);
+      const bIndex = specialFileOrder.findIndex((name) => b.fileName === name);
+      if (aIndex !== -1 && bIndex !== -1) {
+        return aIndex - bIndex;
+      }
+      if (aIndex !== -1) {
+        return -1;
+      }
+      if (bIndex !== -1) {
+        return 1;
+      }
+      // Container > Block > Link
+      const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
+      const aTypeIndex = typeOrder.findIndex((type) => a.type === type);
+      const bTypeIndex = typeOrder.findIndex((type) => b.type === type);
+      return aTypeIndex - bTypeIndex;
+    },
+    [],
+  );
 
   useEffect(() => {
     if (setLoading) {
@@ -43,7 +85,15 @@ export default function FileContainer({
 
   return (
     <div className={`${styles.container} full-size`}>
-      {readContainerQuery.data.data.map((file) => (
+      {uploadIcon && (
+        <FileItem
+          name={FileType.Upload}
+          type={FileType.Upload}
+          fileKey={containerKey}
+          windowKey={windowKey}
+        />
+      )}
+      {readContainerQuery.data.data.sort(sortFiles).map((file) => (
         <FileItem
           key={file.fileKey}
           name={file.fileName}

@@ -1,4 +1,5 @@
 import { AppWindow, WindowType } from "@/interfaces/window";
+import { createWindowKey } from "@/utils/random_key";
 import { create } from "zustand";
 
 type State = {
@@ -6,16 +7,35 @@ type State = {
   currentWindow: {
     key: string;
     windowRef: React.RefObject<HTMLElement>;
-    contentRef: React.RefObject<HTMLElement>;
-    headerRef: React.RefObject<HTMLElement>;
+    contentRef: React.RefObject<HTMLElement> | null;
+    headerRef: React.RefObject<HTMLElement> | null;
   } | null;
-  backgroundWindowRef: React.RefObject<HTMLElement> | null;
   mouseEnter: boolean;
 };
 
 type Action = {
-  newWindow: (targetKey: string, type: WindowType, title: string) => void;
-  updateWindow: (key: string, targetKey: string) => void;
+  newWindow: ({
+    targetKey,
+    type,
+    title,
+    key,
+  }: {
+    targetKey: string;
+    type: WindowType;
+    title: string;
+    key?: string;
+  }) => void;
+  updateWindow: ({
+    targetWindowKey,
+    type,
+    targetFileKey,
+    title,
+  }: {
+    targetWindowKey: string;
+    type?: WindowType;
+    targetFileKey: string;
+    title?: string;
+  }) => void;
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
   closeWindow: (key: string) => void;
@@ -23,19 +43,10 @@ type Action = {
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
   setTitle: (key: string, title: string) => void;
+  getBackgroundWindow: () => AppWindow | undefined;
 
   // current window
-  setCurrentWindow: (
-    window: {
-      key: string;
-      windowRef: React.RefObject<HTMLElement>;
-      contentRef: React.RefObject<HTMLElement>;
-      headerRef: React.RefObject<HTMLElement>;
-    } | null,
-  ) => void;
-
-  // window ref
-  setBackgroundWindowRef: (ref: React.RefObject<HTMLElement>) => void;
+  setCurrentWindow: (window: State["currentWindow"] | null) => void;
 
   // mouse enter
   setMouseEnter: (enter: boolean) => void;
@@ -44,19 +55,17 @@ type Action = {
 const initialState: State = {
   windows: [],
   currentWindow: null,
-  backgroundWindowRef: null,
   mouseEnter: false,
 };
 
 export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
-  backgroundWindowRef: initialState.backgroundWindowRef,
   mouseEnter: initialState.mouseEnter,
-  newWindow: (targetKey, type, title) => {
+  newWindow: ({ targetKey, type, title, key }) => {
     set((state) => {
       const existingWindow = state.windows.find(
-        (w) => w.targetKey === targetKey,
+        (w) => w.targetKey === targetKey && w.type === type,
       );
       if (existingWindow) {
         // highlight existing window
@@ -68,12 +77,12 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       } else {
         // create new window
         const newWindow: AppWindow = {
-          key: Math.random().toString(36).substring(7),
+          key: key || createWindowKey(),
           title: title || "New Window",
           targetKey: targetKey,
           type,
         };
-        if (type === "navigator") {
+        if (type === WindowType.Navigator) {
           newWindow.targetHistory = [targetKey];
           newWindow.historyIndex = 0;
         }
@@ -82,22 +91,28 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       }
     });
   },
-  updateWindow: (key, targetKey) => {
+  updateWindow: ({ targetWindowKey, type, targetFileKey, title }) => {
     set((state) => {
-      const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetKey === targetKey) {
+      const window = state.windows.find((w) => w.key === targetWindowKey);
+      if (
+        window &&
+        window.targetKey === targetFileKey &&
+        window.type === type
+      ) {
         return { windows: state.windows };
       } else if (window) {
-        window.targetKey = targetKey;
+        window.targetKey = targetFileKey;
+        if (type) {
+          window.type = type;
+        }
+        if (title) {
+          window.title = title;
+        }
       }
-      if (
-        window?.type === "navigator" &&
-        window.targetHistory &&
-        window.historyIndex !== undefined
-      ) {
+      if (window && window.targetHistory && window.historyIndex !== undefined) {
         window.targetHistory = [
           ...window.targetHistory.slice(0, window.historyIndex + 1),
-          targetKey,
+          targetFileKey,
         ];
         window.historyIndex = window.targetHistory.length - 1;
       }
@@ -171,15 +186,13 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       return { windows: state.windows };
     });
   },
+  getBackgroundWindow: () => {
+    return get().windows.find((w) => w.type === WindowType.Background);
+  },
 
   // current window
   setCurrentWindow: (window) => {
     set({ currentWindow: window });
-  },
-
-  // window ref
-  setBackgroundWindowRef: (ref) => {
-    set({ backgroundWindowRef: ref });
   },
 
   // mouse enter

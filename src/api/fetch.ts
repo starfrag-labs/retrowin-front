@@ -1,11 +1,8 @@
 import { ApiFileType } from "@/interfaces/api";
-import {
-  CustomResponse,
-  CustomStorageResponse,
-} from "@/interfaces/api";
+import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
-const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
-const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
+export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
+export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
 
 export const url = {
   member: {
@@ -18,6 +15,8 @@ export const url = {
     create: {
       container: (parentKey: string, fileName: string) =>
         `/file/container/${parentKey}?file_name=${fileName}`,
+      link: (parentKey: string, fileName: string, targetKey: string) =>
+        `/file/link/${parentKey}?file_name=${fileName}&target_key=${targetKey}`,
     },
     delete: {
       permanent: (fileKey: string) => `/file/permanent/${fileKey}`,
@@ -26,11 +25,13 @@ export const url = {
     read: {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
       root: "/file/root",
+      home: "/file/home",
       info: (fileKey: string) => `/file/info/${fileKey}`,
       parent: (fileKey: string) => `/file/parent/${fileKey}`,
       children: (fileKey: string) => `/file/children/${fileKey}`,
       find: (fileKey: string, fileName: string) =>
         `/file/find/${fileKey}?file_name=${fileName}`,
+      linkTarget: (fileKey: string) => `/file/link-target/${fileKey}`,
     },
     update: {
       name: (fileKey: string, fileName: string) =>
@@ -50,11 +51,15 @@ export const url = {
   },
   storage: {
     file: {
-      src: (fileKey: string, fileName: string) =>
-        new URL(`/file/${fileKey}?file_name=${fileName}`, storageApiBase),
-      read: (fileKey: string, fileName: string) =>
-        `/file/${fileKey}?file_name=${fileName}`,
-      write: (fileKey: string) => `/file/${fileKey}`,
+      // get source directly from storage
+      read: (fileKey: string, type: "original" = "original") =>
+        new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
+      readWithName: (fileKey: string, fileName: string) =>
+        new URL(
+          `/read/with-name/${fileKey}?file_name=${fileName}`,
+          storageApiBase,
+        ),
+      write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
       issue: (token: string) => `/session/issue/${token}`,
@@ -195,6 +200,13 @@ export const fileApi = {
         type: ApiFileType;
       }>
     >(url.file.read.root),
+    home: customFetch<
+      CustomResponse<{
+        fileKey: string;
+        fileName: string;
+        type: ApiFileType;
+      }>
+    >(url.file.read.home),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{
@@ -215,11 +227,13 @@ export const fileApi = {
       >(url.file.read.parent(fileKey)),
     children: (fileKey: string) =>
       customFetch<
-        CustomResponse<{
-          fileKey: string;
-          fileName: string;
-          type: ApiFileType;
-        }[]>
+        CustomResponse<
+          {
+            fileKey: string;
+            fileName: string;
+            type: ApiFileType;
+          }[]
+        >
       >(url.file.read.children(fileKey)),
     find: (fileKey: string, fileName: string) =>
       customFetch<
@@ -229,6 +243,14 @@ export const fileApi = {
           type: ApiFileType;
         }>
       >(url.file.read.find(fileKey, fileName)),
+    linkTarget: (fileKey: string) =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.linkTarget(fileKey)),
   },
   update: {
     name: (fileKey: string, fileName: string) =>
@@ -280,18 +302,10 @@ export const fileApi = {
 };
 export const storageApi = {
   file: {
-    read: (fileKey: string, fileName: string) =>
-      customFetch<
-        | Blob
-        | CustomStorageResponse<{
-            message: string;
-          }>
-      >(
-        url.storage.file.read(fileKey, fileName),
+    download: (fileKey: string, type: "original" = "original") =>
+      customFetch<Blob>(
+        url.storage.file.read(fileKey, type),
         {
-          //headers: {
-          //  responseType: "blob",
-          //},
           method: "GET",
         },
         "storage",

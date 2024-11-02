@@ -4,12 +4,20 @@ import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
 import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./drag_file_container.module.css";
+import { parseSerialKey } from "@/utils/serial_key";
+import { WindowType } from "@/interfaces/window";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { fileQuery } from "@/api/query";
+import { FileType } from "@/interfaces/file";
 
 export default function DragFileContainer({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Query client
+  const queryClient = useQueryClient();
+
   // States
   const [start, setStart] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -35,6 +43,9 @@ export default function DragFileContainer({
   const isFileKeySelected = useFileStore((state) => state.isFileKeySelected);
   const selectFile = useFileStore((state) => state.selectFile);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
+
+  // Queries
+  const moveFile = useMutation(fileQuery.update.parent);
 
   // Drag file start
   const dragFileStart = useCallback(
@@ -89,7 +100,7 @@ export default function DragFileContainer({
         let width = 0;
         selectedFileSerials.forEach((serialKey) => {
           const fileIconRef = fileIconRefs.get(serialKey);
-          if (fileIconRef?.current && count < 4 ) {
+          if (fileIconRef?.current && count < 4) {
             const fileRect = fileIconRef.current.getBoundingClientRect();
             const clone = fileIconRef.current.cloneNode(true) as HTMLElement;
             clone.style.position = "absolute";
@@ -137,75 +148,87 @@ export default function DragFileContainer({
   );
 
   // Drag file end
-  const dragFileEnd = useCallback(
-    (e: MouseEvent) => {
-      setIsDragging(false);
-      setIsDraggingReady(false);
-      setDisplayDraggingElements(false);
-      if (!isDragging) return;
-      if (!draggingFileRef.current) return;
-      document.body.style.cursor = "default";
-      draggingFileRef.current.innerHTML = "";
-      document.body.style.cursor = "default";
-      let targetFolderKey: string = "";
+  const dragFileEnd = useCallback(async () => {
+    setIsDragging(false);
+    setIsDraggingReady(false);
+    setDisplayDraggingElements(false);
+    if (!isDragging) return;
+    if (!draggingFileRef.current) return;
+    document.body.style.cursor = "default";
+    draggingFileRef.current.innerHTML = "";
+    document.body.style.cursor = "default";
+    let targetContainerKey: string | null = null;
 
-      // Search for the target folder from the background
-      if (currentWindow && currentWindow.windowRef.current) {
-        const window = findWindow(currentWindow.key);
-        if (window && window.type === "navigator") {
-          targetFolderKey = window.targetKey;
-        }
+    // Set target container key as the current window key
+    if (currentWindow && currentWindow.windowRef.current) {
+      const window = findWindow(currentWindow.key);
+      if (
+        window &&
+        (window.type === WindowType.Background ||
+          window.type === WindowType.Navigator)
+      ) {
+        targetContainerKey = window.targetKey;
       }
+    }
 
-      //if (
-      //  currentElement &&
-      //  getElementInfo(currentElement.key)?.type === "folder"
-      //) {
-      //  targetFolderKey = currentElement.key;
-      //}
+    // Set the target folder key as the highlighted file key
+    if (highlightedFile && highlightedFile.type === FileType.Container) {
+      targetContainerKey = highlightedFile.fileKey;
+    } else if (highlightedFile) {
+      targetContainerKey = null;
+    }
 
-      // Move the selected elements to the target folder
-      if (targetFolderKey && pointerMoved) {
-        selectedFileSerials.forEach((serialKey) => {
-          const fileKey = serialKey.split(":")[0];
-          //const info = getElementInfo(fileKey);
-          if (!isFileKeySelected(fileKey) || fileKey === targetFolderKey)
-            return;
-          //if (info.type === 'folder') {
-          //  moveFolder
-          //    .mutateAsync({ folderKey: serialKey, targetKey: targetFolderKey })
-          //    .then(() => {
-          //      queryClient.invalidateQueries({
-          //        queryKey: generateQueryKey('folder', targetFolderKey),
-          //      });
-          //      queryClient.invalidateQueries({
-          //        queryKey: generateQueryKey('folder', info.parentKey),
-          //      });
-          //    });
-          //} else if (info.type === 'file') {
-          //  moveFile
-          //    .mutateAsync({ fileKey: serialKey, targetKey: targetFolderKey })
-          //    .then(() => {
-          //      queryClient.invalidateQueries({
-          //        queryKey: generateQueryKey('folder', targetFolderKey),
-          //      });
-          //      queryClient.invalidateQueries({
-          //        queryKey: generateQueryKey('folder', info.parentKey),
-          //      });
-          //    });
-          //}
-        });
-      }
-    },
-    [
-      currentWindow,
-      findWindow,
-      isDragging,
-      isFileKeySelected,
-      pointerMoved,
-      selectedFileSerials,
-    ],
-  );
+    // Move the selected elements to the target folder
+    if (targetContainerKey && pointerMoved) {
+      // Get the file keys of the selected files
+      const fileKeys = selectedFileSerials.map(
+        (serialKey) => parseSerialKey(serialKey).fileKey,
+      );
+      // Get the parent file keys of the selected files
+      const parentFileKeys = await Promise.all(
+        fileKeys.map((fileKey) =>
+          queryClient
+            .fetchQuery(fileQuery.read.parent(fileKey))
+            .then((data) => data.data.fileKey),
+        ),
+      );
+      // Move the selected files to the target folder
+      Promise.all(
+        fileKeys.map((fileKey, index) => {
+          if (parentFileKeys[index] !== targetContainerKey) {
+            return moveFile
+              .mutateAsync({
+                fileKey,
+                parentKey: targetContainerKey,
+              })
+              .then(() => {
+                queryClient.invalidateQueries({
+                  queryKey: ["file", targetContainerKey],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ["file", fileKey],
+                });
+                queryClient.invalidateQueries({
+                  queryKey: ["file", parentFileKeys[index]],
+                });
+              });
+          }
+        }),
+      ).finally(() => {
+        unselectAllFiles();
+      });
+    }
+  }, [
+    currentWindow,
+    findWindow,
+    highlightedFile,
+    isDragging,
+    moveFile,
+    pointerMoved,
+    queryClient,
+    selectedFileSerials,
+    unselectAllFiles,
+  ]);
 
   // Event listeners
   useEffect(() => {
