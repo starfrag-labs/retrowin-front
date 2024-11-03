@@ -172,7 +172,13 @@ export default function DragFileContainer({
     }
 
     // Set the target folder key as the highlighted file key
-    if (highlightedFile && highlightedFile.type === FileType.Container) {
+    if (
+      highlightedFile &&
+      (highlightedFile.type === FileType.Container ||
+        highlightedFile.type === FileType.Root ||
+        highlightedFile.type === FileType.Home ||
+        highlightedFile.type === FileType.Trash)
+    ) {
       targetContainerKey = highlightedFile.fileKey;
     } else if (highlightedFile && highlightedFile.type === FileType.Link) {
       // Get the linked file

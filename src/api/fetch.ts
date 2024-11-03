@@ -25,6 +25,7 @@ export const url = {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
       root: "/file/root",
       home: "/file/home",
+      trash: "/file/trash",
       info: (fileKey: string) => `/file/info/${fileKey}`,
       parent: (fileKey: string) => `/file/parent/${fileKey}`,
       children: (fileKey: string) => `/file/children/${fileKey}`,
@@ -199,6 +200,13 @@ export const fileApi = {
         type: ApiFileType;
       }>
     >(url.file.read.home),
+    trash: customFetch<
+      CustomResponse<{
+        fileKey: string;
+        fileName: string;
+        type: ApiFileType;
+      }>
+    >(url.file.read.trash),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{

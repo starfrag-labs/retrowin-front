@@ -94,7 +94,9 @@ export default memo(function FileItem({
     if (windowKey !== targetWindow) return;
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
-      (type === FileType.Container || type === FileType.Block) &&
+      (type === FileType.Container ||
+        type === FileType.Block ||
+        type === FileType.Link) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
       fileRect.left < selectBox.right &&
@@ -131,16 +133,17 @@ export default memo(function FileItem({
       case FileType.Block:
         setIcon(FileIconType.Block);
         break;
-    }
-    switch (name) {
-      case FileIconType.Home:
+      case FileType.Home:
         setIcon(FileIconType.Home);
         break;
-      case FileIconType.Trash:
+      case FileType.Trash:
         setIcon(FileIconType.Trash);
         break;
+      case FileType.Link:
+        setIcon(FileIconType.Block);
+        break;
     }
-  }, [name, type]);
+  }, [type]);
 
   // Assign fileRef to store
   useEffect(() => {
@@ -230,6 +233,33 @@ export default memo(function FileItem({
     ],
   );
 
+  const clickTrash = useCallback(
+    ({ fileKey, name }: { fileKey: string; name: string }) => {
+      if (backgroundWindowKey === windowKey) {
+        newWindow({
+          targetKey: fileKey,
+          type: WindowType.Navigator,
+          title: name,
+        });
+      } else {
+        setHighlightedFile(null);
+        updateWindow({
+          targetWindowKey: windowKey,
+          targetFileKey: fileKey,
+          type: WindowType.Navigator,
+          title: name,
+        });
+      }
+    },
+    [
+      backgroundWindowKey,
+      newWindow,
+      updateWindow,
+      setHighlightedFile,
+      windowKey,
+    ],
+  );
+
   const iconClick = useCallback(() => {
     switch (type) {
       case FileType.Container: // If the file is a container, open the navigator window
@@ -266,10 +296,23 @@ export default memo(function FileItem({
           }
         }
         break;
+      case FileType.Home:
+        clickContaienr({
+          fileKey,
+          name,
+        });
+        break;
+      case FileType.Trash:
+        clickTrash({
+          fileKey,
+          name,
+        });
+        break;
     }
   }, [
     clickBlock,
     clickContaienr,
+    clickTrash,
     clickUpload,
     fileKey,
     linkTargetQuery.data,

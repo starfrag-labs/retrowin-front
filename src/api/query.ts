@@ -101,6 +101,15 @@ const readFileHome = queryOptions({
   retry: normalRetryCount,
   staleTime: normalStaleTime,
 });
+const readFileTrash = queryOptions({
+  queryKey: ["file", "trash"],
+  queryFn: async () => {
+    const response = await fileApi.read.trash;
+    return response.body;
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
 const readFileInfo = (fileKey: string) =>
   queryOptions({
     queryKey: ["file", fileKey, "info"],
@@ -241,6 +250,7 @@ export const fileQuery = {
     storage: readFileStorage,
     root: readFileRoot,
     home: readFileHome,
+    trash: readFileTrash,
     info: readFileInfo,
     parent: readFileParent,
     children: readFileChildren,

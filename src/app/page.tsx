@@ -81,7 +81,8 @@ export default function Home() {
                 <FileContainer
                   windowKey={backgroundWindowKey}
                   containerKey={homeKey}
-                  uploadIcon
+                  upload
+                  trash
                 />
               </div>
               {windows

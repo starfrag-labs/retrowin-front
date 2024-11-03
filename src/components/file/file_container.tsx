@@ -18,14 +18,17 @@ export default function FileContainer({
   windowKey,
   containerKey,
   setLoading,
-  uploadIcon = false,
+  upload = false,
+  trash = false,
 }: {
   windowKey: string;
   containerKey: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-  uploadIcon?: boolean;
+  upload?: boolean;
+  trash?: boolean;
 }) {
   const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
+  const readTrashQuery = useQuery(fileQuery.read.trash);
 
   const sortFiles = useCallback(
     (
@@ -85,11 +88,19 @@ export default function FileContainer({
 
   return (
     <div className={`${styles.container} full-size`}>
-      {uploadIcon && (
+      {upload && (
         <FileItem
-          name={FileType.Upload}
+          name={SpecialFileName.Upload}
           type={FileType.Upload}
           fileKey={containerKey}
+          windowKey={windowKey}
+        />
+      )}
+      {trash && readTrashQuery.isFetched && readTrashQuery.data && (
+        <FileItem
+          name={SpecialFileName.Trash}
+          type={FileType.Trash}
+          fileKey={readTrashQuery.data.data.fileKey || ""}
           windowKey={windowKey}
         />
       )}

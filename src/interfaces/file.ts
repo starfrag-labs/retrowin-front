@@ -9,6 +9,9 @@ export enum FileType {
   Block = "block",
   Link = "link",
   Upload = "upload",
+  Root = "root",
+  Trash = "trash",
+  Home = "home",
 }
 
 export enum FileIconType {
