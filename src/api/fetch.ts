@@ -20,7 +20,6 @@ export const url = {
     },
     delete: {
       permanent: (fileKey: string) => `/file/permanent/${fileKey}`,
-      trash: (fileKey: string) => `/file/trash/${fileKey}`,
     },
     read: {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
@@ -38,6 +37,7 @@ export const url = {
         `/file/name/${fileKey}?file_name=${fileName}`,
       parent: (fileKey: string, parentKey: string) =>
         `/file/parent/${fileKey}?parent_key=${parentKey}`,
+      trash: (fileKey: string) => `/file/trash/${fileKey}`,
     },
     upload: {
       writeToken: (parentKey: string, fileName: string, byteSize: number) =>
@@ -177,14 +177,6 @@ export const fileApi = {
       >(url.file.delete.permanent(fileKey), {
         method: "DELETE",
       }),
-    trash: (fileKey: string) =>
-      customFetch<
-        CustomResponse<{
-          success: boolean;
-        }>
-      >(url.file.delete.trash(fileKey), {
-        method: "DELETE",
-      }),
   },
   read: {
     storage: (fileKey: string) =>
@@ -269,6 +261,16 @@ export const fileApi = {
           success: boolean;
         }>
       >(url.file.update.parent(fileKey, parentKey), {
+        method: "PATCH",
+      }),
+    trash: (fileKey: string) =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.update.trash(fileKey), {
         method: "PATCH",
       }),
   },

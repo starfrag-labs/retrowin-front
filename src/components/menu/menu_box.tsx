@@ -25,7 +25,6 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   // Store actions
   const setMenuRef = useMenuStore((state) => state.setMenuRef);
-  const selectFile = useFileStore((state) => state.selectFile);
   const isFileKeySelected = useFileStore((state) => state.isFileKeySelected);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
   const findWindow = useWindowStore((state) => state.findWindow);

@@ -71,17 +71,6 @@ const deleteFilePermanent: UseMutationOptions<
     return response.body;
   },
 };
-const deleteFileToTrash: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.delete.trash>>["body"],
-  Error,
-  { fileKey: string }
-> = {
-  retry: normalRetryCount,
-  mutationFn: async ({ fileKey }) => {
-    const response = await fileApi.delete.trash(fileKey);
-    return response.body;
-  },
-};
 // fileApi.read
 const readFileStorage = (fileKey: string) =>
   queryOptions({
@@ -190,6 +179,17 @@ const updateFileParent: UseMutationOptions<
     return response.body;
   },
 };
+const moveFileToTrash: UseMutationOptions<
+  Awaited<ReturnType<typeof fileApi.update.trash>>["body"],
+  Error,
+  { fileKey: string }
+> = {
+  retry: normalRetryCount,
+  mutationFn: async ({ fileKey }) => {
+    const response = await fileApi.update.trash(fileKey);
+    return response.body;
+  },
+};
 // fileApi.upload
 const uploadFileWriteToken = (
   parentKey: string,
@@ -236,7 +236,6 @@ export const fileQuery = {
   },
   delete: {
     permanent: deleteFilePermanent,
-    trash: deleteFileToTrash,
   },
   read: {
     storage: readFileStorage,
@@ -251,6 +250,7 @@ export const fileQuery = {
   update: {
     name: updateFileName,
     parent: updateFileParent,
+    trash: moveFileToTrash,
   },
   upload: {
     writeToken: uploadFileWriteToken,

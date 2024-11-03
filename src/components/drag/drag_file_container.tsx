@@ -174,7 +174,24 @@ export default function DragFileContainer({
     // Set the target folder key as the highlighted file key
     if (highlightedFile && highlightedFile.type === FileType.Container) {
       targetContainerKey = highlightedFile.fileKey;
+    } else if (highlightedFile && highlightedFile.type === FileType.Link) {
+      // Get the linked file
+      const linkedFile = await queryClient.fetchQuery(
+        fileQuery.read.linkTarget(highlightedFile.fileKey),
+      );
+      // Set the target folder key as the linked file key
+      if (
+        linkedFile.status === 200 &&
+        linkedFile.data &&
+        linkedFile.data.type === FileType.Container
+      ) {
+        targetContainerKey = linkedFile.data.fileKey;
+      } else {
+        // If the linked file is not a container, set the target folder key as null
+        targetContainerKey = null;
+      }
     } else if (highlightedFile) {
+      // If the highlighted file is not a container or a link, set the target folder key as null
       targetContainerKey = null;
     }
 

@@ -27,7 +27,7 @@ export default function FileMenu({
   // Queries
 
   // Mutations
-  const moveToTrashMutation = useMutation(fileQuery.delete.trash);
+  const moveToTrashMutation = useMutation(fileQuery.update.trash);
   const permanentDeleteMutation = useMutation(fileQuery.delete.permanent);
 
   // Store actions
