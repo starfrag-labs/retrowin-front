@@ -21,7 +21,7 @@ export default function NavbarIcon({ windowType }: { windowType: WindowType }) {
           <FileIcon icon={FileIconType.Block} />
         )}
         {windowType === WindowType.Video && (
-          <FileIcon icon={FileIconType.Block} />
+          <FileIcon icon={FileIconType.Video} />
         )}
         {windowType === WindowType.Audio && (
           <FileIcon icon={FileIconType.Block} />

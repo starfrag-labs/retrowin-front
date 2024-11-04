@@ -364,16 +364,18 @@ export default memo(function FileItem({
               size:{fileInfoQuery.data.data.byteSize}bytes
             </div>
             <div className={styles.detail_text}>
-              created_at:
+              create:
               {fileInfoQuery.data.data.createDate
-                .toLocaleString()
+                .toLocaleDateString()
                 .replace(/\s+/g, "")}
+              {fileInfoQuery.data.data.createDate.toLocaleTimeString()}
             </div>
             <div className={styles.detail_text}>
-              updated_at:
+              update:
               {fileInfoQuery.data.data.updateDate
-                .toLocaleString()
+                .toLocaleDateString()
                 .replace(/\s+/g, "")}
+              {fileInfoQuery.data.data.updateDate.toLocaleTimeString()}
             </div>
           </div>
         )}

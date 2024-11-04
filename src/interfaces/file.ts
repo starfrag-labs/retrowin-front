@@ -20,4 +20,7 @@ export enum FileIconType {
   Home = SpecialFileName.Home,
   Trash = SpecialFileName.Trash,
   Upload = FileType.Upload,
+  Image = "image",
+  Video = "video",
+  Audio = "audio",
 }

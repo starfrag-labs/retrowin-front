@@ -6,6 +6,7 @@ import { FaUpload } from "react-icons/fa";
 import styles from "./file_icon.module.css";
 import { CSSProperties, forwardRef, memo } from "react";
 import { FileIconType } from "@/interfaces/file";
+import { MdOndemandVideo } from "react-icons/md";
 
 export default memo(
   forwardRef(function FileIcon(
@@ -64,6 +65,16 @@ export default memo(
             className={`${styles.icon}`}
             style={{
               color: "#9296f0",
+              padding: "0.25rem",
+              ...style,
+            }}
+          />
+        )}
+        {icon === FileIconType.Video && (
+          <MdOndemandVideo
+            className={`${styles.icon}`}
+            style={{
+              color: "#f44336",
               padding: "0.25rem",
               ...style,
             }}
