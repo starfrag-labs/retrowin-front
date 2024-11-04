@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { memo, useEffect, useState } from "react";
 import styles from "./file_name.module.css";
 import { useFileStore } from "@/store/file.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
 import { parseSerialKey } from "@/utils/serial_key";
-export default function FileName({
+export default memo(function FileName({
   name,
   fileKey,
   windowKey,
@@ -95,4 +95,4 @@ export default function FileName({
       )}
     </div>
   );
-}
+});

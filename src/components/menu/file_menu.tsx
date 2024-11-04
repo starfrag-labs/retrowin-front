@@ -14,12 +14,14 @@ export default function FileMenu({
   fileType,
   fileName,
   windowKey,
+  parentWindowType,
   closeMenu,
 }: {
   fileKey: string;
   fileType: FileType;
   fileName: string;
   windowKey: string;
+  parentWindowType: WindowType | null;
   closeMenu: () => void;
 }) {
   // Query client
@@ -166,56 +168,78 @@ export default function FileMenu({
     });
   }, [closeMenu, getSelectedFileKeys, permanentDeleteMutation, queryClient]);
 
-  const menuList = [
-    { name: "Open", action: handleOpen },
-    { name: "Download", action: handleDownload },
-    { name: "Rename", action: handleRename },
-    { name: "/", action: () => {} },
-    { name: "Move to Trash", action: handleMoveToTrash },
-    { name: "Permanent Delete", action: handlePermanentDelete },
-  ];
+  const handleEmptyTrash = useCallback(async () => {
+    closeMenu();
+    const files = await queryClient.fetchQuery(
+      fileQuery.read.children(fileKey),
+    );
+    Promise.all(
+      files.data.map((file) =>
+        permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey }),
+      ),
+    ).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["file", fileKey],
+      });
+    });
+  }, [closeMenu, fileKey, permanentDeleteMutation, queryClient]);
 
-  if (fileType === FileType.Container) {
-    return (
-      <MenuList
-        menuList={[
-          { name: "Open", action: handleOpen },
-          { name: "Rename", action: handleRename },
-          { name: "/", action: () => {} },
-          { name: "Move to Trash", action: handleMoveToTrash },
-        ]}
-      />
-    );
-  } else if (fileType === FileType.Block) {
-    return (
-      <MenuList
-        menuList={[
-          { name: "Open", action: handleOpen },
-          { name: "Download", action: handleDownload },
-          { name: "Rename", action: handleRename },
-          { name: "/", action: () => {} },
-          { name: "Move to Trash", action: handleMoveToTrash },
-        ]}
-      />
-    );
-  } else if (fileType === FileType.Link) {
-    return (
-      <MenuList
-        menuList={[
-          { name: "Open", action: handleOpen },
-          {
-            name: "Open Link Target Location",
-            action: handleOpenLinkTargetLocation,
-          },
-          { name: "Rename", action: handleRename },
-          { name: "/", action: () => {} },
-          { name: "Move to Trash", action: handleMoveToTrash },
-        ]}
-      />
-    );
-  } else if (fileType === FileType.Upload) {
-    return <MenuList menuList={[{ name: "Open", action: handleOpen }]} />;
+  // Delete file actions based on parent window type
+  const deleteMenu =
+    parentWindowType === WindowType.Trash
+      ? { name: "Permanent Delete", action: handlePermanentDelete }
+      : { name: "Move to Trash", action: handleMoveToTrash };
+
+  switch (fileType) {
+    case FileType.Container:
+    case FileType.Root:
+    case FileType.Home:
+      return (
+        <MenuList
+          menuList={[
+            { name: "Open", action: handleOpen },
+            { name: "Rename", action: handleRename },
+            { name: "/", action: () => {} },
+            deleteMenu,
+          ]}
+        />
+      );
+    case FileType.Block:
+      return (
+        <MenuList
+          menuList={[
+            { name: "Open", action: handleOpen },
+            { name: "Download", action: handleDownload },
+            { name: "Rename", action: handleRename },
+            { name: "/", action: () => {} },
+            deleteMenu,
+          ]}
+        />
+      );
+    case FileType.Link:
+      return (
+        <MenuList
+          menuList={[
+            { name: "Open", action: handleOpen },
+            {
+              name: "Open Link Target Location",
+              action: handleOpenLinkTargetLocation,
+            },
+            { name: "Rename", action: handleRename },
+            { name: "/", action: () => {} },
+            deleteMenu,
+          ]}
+        />
+      );
+    case FileType.Upload:
+      return <MenuList menuList={[{ name: "Open", action: handleOpen }]} />;
+    case FileType.Trash:
+      return (
+        <MenuList
+          menuList={[{ name: "Empty Trash", action: handleEmptyTrash }]}
+        />
+      );
+    default:
+      return null;
   }
-
-  return <MenuList menuList={menuList} />;
 }

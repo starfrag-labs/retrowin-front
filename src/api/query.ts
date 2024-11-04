@@ -115,7 +115,16 @@ const readFileInfo = (fileKey: string) =>
     queryKey: ["file", fileKey, "info"],
     queryFn: async () => {
       const response = await fileApi.read.info(fileKey);
-      return response.body;
+      const createDate = new Date(response.body.data.createDate);
+      const updateDate = new Date(response.body.data.updateDate);
+      return {
+        ...response.body,
+        data: {
+          ...response.body.data,
+          createDate,
+          updateDate,
+        },
+      };
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,

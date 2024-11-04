@@ -40,6 +40,13 @@ export default forwardRef(function WindowContent(
           setLoading={setLoading}
         />
       )}
+      {type === WindowType.Trash && setLoading && (
+        <Navigator
+          fileKey={fileKey}
+          windowKey={windowKey}
+          setLoading={setLoading}
+        />
+      )}
       {type === WindowType.Uploader && (
         <Uploader targetContainerKey={fileKey} />
       )}
@@ -47,7 +54,7 @@ export default forwardRef(function WindowContent(
         <ImageViewer fileKey={fileKey} fileName={fileName} />
       )}
       {type === WindowType.Video && fileName && (
-        <VideoViewer fileKey={fileKey} fileName={fileName} />
+        <VideoViewer fileKey={fileKey} />
       )}
     </div>
   );

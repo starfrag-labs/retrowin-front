@@ -15,6 +15,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   const [menuType, setMenuType] = useState<
     "file" | "window" | "background" | null
   >(null);
+  const [windowType, setWindowType] = useState<WindowType | null>(null);
 
   // Refs
   const menuRef = useRef<HTMLDivElement>(null);
@@ -50,12 +51,14 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
       if (currentWindow) {
         const window = findWindow(currentWindow.key);
         if (window) {
+          setWindowType(window.type);
           switch (window.type) {
             case WindowType.Background:
               setMenuType("background");
               setTargetFileKey(window.targetKey);
               break;
             case WindowType.Navigator:
+            case WindowType.Trash:
               setMenuType("window");
               setTargetFileKey(window.targetKey);
               break;
@@ -136,11 +139,16 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
             fileName={targetFile.fileName}
             fileType={targetFile.fileType}
             windowKey={currentWindow.key}
+            parentWindowType={windowType}
             closeMenu={closeMenu}
           />
         )}
         {menuType === "window" && targetFileKey && (
-          <WindowMenu targetFileKey={targetFileKey} closeMenu={closeMenu} />
+          <WindowMenu
+            targetFileKey={targetFileKey}
+            windowType={windowType}
+            closeMenu={closeMenu}
+          />
         )}
       </div>
       {children}

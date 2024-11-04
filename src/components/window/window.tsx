@@ -171,27 +171,25 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
             const windowRect = windowRef.current.getBoundingClientRect();
             const x = windowRect.left;
             const y = windowRect.top;
+            let newX = x;
+            let newY = y;
             // Check if the window is out of the screen
             // If x or y is less than 0, set it to 0
             if (x < 0) {
-              setWindowPosition({ x: 0, y });
+              newX = 0;
             }
             if (y < 0) {
-              setWindowPosition({ x, y: 0 });
+              newY = 0;
             }
             // If x or y is greater than the screen width or height, set it to the screen width or height
             if (x + windowSize.width > document.body.clientWidth) {
-              setWindowPosition({
-                x: document.body.clientWidth - windowSize.width,
-                y,
-              });
+              newX = document.body.clientWidth - windowSize.width;
             }
             if (y + windowSize.height > document.body.clientHeight) {
-              setWindowPosition({
-                x,
-                y: document.body.clientHeight - windowSize.height,
-              });
+              newY = document.body.clientHeight - windowSize.height;
             }
+            // Set window position
+            setWindowPosition({ x: newX, y: newY });
           }
           window.removeEventListener("mousemove", handleMouseMove);
           window.removeEventListener("mouseup", handleMouseUp);

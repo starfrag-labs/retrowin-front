@@ -212,8 +212,8 @@ export const fileApi = {
         CustomResponse<{
           fileName: string;
           type: ApiFileType;
-          createDate: Date;
-          updateDate: Date;
+          createDate: string;
+          updateDate: string;
           byteSize: number;
         }>
       >(url.file.read.info(fileKey)),

@@ -41,6 +41,7 @@ export default memo(function FileItem({
 
   // States
   const [icon, setIcon] = useState<FileIconType | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   // Store state
   const selectedFileSerials = useFileStore(
@@ -62,6 +63,7 @@ export default memo(function FileItem({
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
+  const showDetailTimeoutRef = useRef<number | null>(null);
 
   const linkTargetQuery = useQuery(
     fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
@@ -73,6 +75,9 @@ export default memo(function FileItem({
     return backgroundWindow?.key || "";
   }, [getBackgroundWindow]);
 
+  // Query
+  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
+
   const handleMouseEnter = useCallback(() => {
     setHighlightedFile({
       fileKey,
@@ -81,10 +86,17 @@ export default memo(function FileItem({
       type,
       ref: fileRef,
     });
+    showDetailTimeoutRef.current = window.setTimeout(() => {
+      setShowDetail(true);
+    }, 750);
   }, [setHighlightedFile, fileKey, windowKey, name, type]);
 
   const handleMouseLeave = useCallback(() => {
     setHighlightedFile(null);
+    setShowDetail(false);
+    if (showDetailTimeoutRef.current) {
+      clearTimeout(showDetailTimeoutRef.current);
+    }
   }, [setHighlightedFile]);
 
   // Check if the file is in the select box
@@ -238,7 +250,7 @@ export default memo(function FileItem({
       if (backgroundWindowKey === windowKey) {
         newWindow({
           targetKey: fileKey,
-          type: WindowType.Navigator,
+          type: WindowType.Trash,
           title: name,
         });
       } else {
@@ -246,7 +258,7 @@ export default memo(function FileItem({
         updateWindow({
           targetWindowKey: windowKey,
           targetFileKey: fileKey,
-          type: WindowType.Navigator,
+          type: WindowType.Trash,
           title: name,
         });
       }
@@ -337,6 +349,34 @@ export default memo(function FileItem({
           <FileName name={name} fileKey={fileKey} windowKey={windowKey} />
         </div>
       </div>
+      {showDetail &&
+        (type === FileType.Block || type === FileType.Container) &&
+        fileInfoQuery.isFetched &&
+        fileInfoQuery.data && (
+          <div className={styles.detail_container}>
+            <div className={styles.detail_text}>
+              name:{fileInfoQuery.data.data.fileName}
+            </div>
+            <div className={styles.detail_text}>
+              type:{fileInfoQuery.data.data.type}
+            </div>
+            <div className={styles.detail_text}>
+              size:{fileInfoQuery.data.data.byteSize}bytes
+            </div>
+            <div className={styles.detail_text}>
+              created_at:
+              {fileInfoQuery.data.data.createDate
+                .toLocaleString()
+                .replace(/\s+/g, "")}
+            </div>
+            <div className={styles.detail_text}>
+              updated_at:
+              {fileInfoQuery.data.data.updateDate
+                .toLocaleString()
+                .replace(/\s+/g, "")}
+            </div>
+          </div>
+        )}
     </div>
   );
 });
