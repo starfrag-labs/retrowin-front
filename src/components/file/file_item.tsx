@@ -64,6 +64,7 @@ export default memo(function FileItem({
   const fileRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
   const showDetailTimeoutRef = useRef<number | null>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   const linkTargetQuery = useQuery(
     fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
@@ -97,6 +98,7 @@ export default memo(function FileItem({
     if (showDetailTimeoutRef.current) {
       clearTimeout(showDetailTimeoutRef.current);
     }
+    detailRef.current?.style.setProperty("visibility", "hidden");
   }, [setHighlightedFile]);
 
   // Check if the file is in the select box
@@ -332,6 +334,38 @@ export default memo(function FileItem({
     type,
   ]);
 
+  // Detail position adjustment
+  useEffect(() => {
+    if (
+      showDetail &&
+      detailRef.current &&
+      fileRef.current &&
+      fileInfoQuery.isFetched &&
+      fileInfoQuery.data &&
+      fileInfoQuery.data.status === 200
+    ) {
+      const fileRect = fileRef.current.getBoundingClientRect();
+      const detailRect = detailRef.current.getBoundingClientRect();
+      const windowRect = document.body.getBoundingClientRect();
+      if (fileRect.right + detailRect.width > windowRect.right) {
+        detailRef.current.style.left = `-${
+          detailRect.width + fileRect.width / 2
+        }px`;
+      } else {
+
+        detailRef.current.style.left = `${fileRect.width}px`;
+      }
+      if (fileRect.bottom + detailRect.height > windowRect.bottom) {
+        detailRef.current.style.top = `-${
+          detailRect.height + fileRect.height / 2
+        }px`;
+      } else {
+        detailRef.current.style.top = `${fileRect.height}px`;
+      }
+      detailRef.current.style.visibility = "visible";
+    }
+  }, [fileInfoQuery.data, fileInfoQuery.isFetched, showDetail]);
+
   return (
     <div className={`full-size ${styles.container}`}>
       <div
@@ -353,29 +387,46 @@ export default memo(function FileItem({
         (type === FileType.Block || type === FileType.Container) &&
         fileInfoQuery.isFetched &&
         fileInfoQuery.data && (
-          <div className={styles.detail_container}>
-            <div className={styles.detail_text}>
-              name:{fileInfoQuery.data.data.fileName}
+          <div className={styles.detail_container} ref={detailRef}
+
+              >
+            <div className={styles.detail_item}>
+              <div className={styles.detail_item_name}>name</div>
+              <div className={styles.detail_item_text}>
+                {fileInfoQuery.data.data.fileName}
+              </div>
             </div>
-            <div className={styles.detail_text}>
-              type:{fileInfoQuery.data.data.type}
+            <div className={styles.detail_item}>
+              <div className={styles.detail_item_name}>type</div>
+              <div className={styles.detail_item_text}>
+                {fileInfoQuery.data.data.type}
+              </div>
             </div>
-            <div className={styles.detail_text}>
-              size:{fileInfoQuery.data.data.byteSize}bytes
+            <div className={styles.detail_item}>
+              <div className={styles.detail_item_name}>size</div>
+              {fileInfoQuery.data.data.byteSize / 1024 / 1024 > 1 ? (
+                <div className={styles.detail_item_text}>
+                  {Math.round(fileInfoQuery.data.data.byteSize / 1024 / 1024)}
+                  MB
+                </div>
+              ) : (
+                <div className={styles.detail_item_text}>
+                  {Math.round(fileInfoQuery.data.data.byteSize / 1024)}
+                  KB
+                </div>
+              )}
             </div>
-            <div className={styles.detail_text}>
-              create:
-              {fileInfoQuery.data.data.createDate
-                .toLocaleDateString()
-                .replace(/\s+/g, "")}
-              {fileInfoQuery.data.data.createDate.toLocaleTimeString()}
+            <div className={styles.detail_item}>
+              <div className={styles.detail_item_name}>create</div>
+              <div className={styles.detail_item_text}>
+                {fileInfoQuery.data.data.createDate.toLocaleString()}
+              </div>
             </div>
-            <div className={styles.detail_text}>
-              update:
-              {fileInfoQuery.data.data.updateDate
-                .toLocaleDateString()
-                .replace(/\s+/g, "")}
-              {fileInfoQuery.data.data.updateDate.toLocaleTimeString()}
+            <div className={styles.detail_item}>
+              <div className={styles.detail_item_name}>update</div>
+              <div className={styles.detail_item_text}>
+                {fileInfoQuery.data.data.updateDate.toLocaleString()}
+              </div>
             </div>
           </div>
         )}
