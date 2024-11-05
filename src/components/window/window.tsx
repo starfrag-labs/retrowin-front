@@ -237,18 +237,9 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         e.clientY > rect.bottom - 10
       ) {
         const handleMouseMove = (e: MouseEvent) => {
-          if (
-            !windowRef.current ||
-            !windowContentRef.current ||
-            !windowHeaderRef.current
-          )
-            return;
           const width = Math.max(e.clientX - rect.left, minWindowSize.width);
           const height = Math.max(e.clientY - rect.top, minWindowSize.height);
-          windowRef.current.style.width = `${width}px`;
-          windowRef.current.style.height = `${height}px`;
-          windowContentRef.current.style.width = `${width}px`;
-          windowContentRef.current.style.height = `${height - windowHeaderRef.current.clientHeight}px`;
+          setWindowSize({ width, height });
         };
         const handleMouseUp = () => {
           document.removeEventListener("mousemove", handleMouseMove);
