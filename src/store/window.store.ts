@@ -43,6 +43,8 @@ type Action = {
   highlightWindowsByType: (type: WindowType) => void;
   prevWindow: (key: string) => void;
   nextWindow: (key: string) => void;
+  hasPrevWindow: (key: string) => boolean;
+  hasNextWindow: (key: string) => boolean;
   setTitle: (key: string, title: string) => void;
   getBackgroundWindow: () => AppWindow | undefined;
 
@@ -155,11 +157,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   prevWindow: (key) => {
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
-      if (
-        window?.type === "navigator" &&
-        window.targetHistory &&
-        window.historyIndex !== undefined
-      ) {
+      if (window && window.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex > 0) {
           window.historyIndex -= 1;
           window.targetKey = window.targetHistory[window.historyIndex];
@@ -172,11 +170,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   nextWindow: (key) => {
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
-      if (
-        window?.type === "navigator" &&
-        window.targetHistory &&
-        window.historyIndex !== undefined
-      ) {
+      if (window && window.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex < window.targetHistory.length - 1) {
           window.historyIndex += 1;
           window.targetKey = window.targetHistory[window.historyIndex];
@@ -185,6 +179,23 @@ export const useWindowStore = create<State & Action>((set, get) => ({
       }
       return { windows: state.windows };
     });
+  },
+  hasPrevWindow: (key) => {
+    const window = get().windows.find((w) => w.key === key);
+    if (window && window.historyIndex !== undefined) {
+      return window.historyIndex > 0;
+    }
+    return false;
+  },
+  hasNextWindow: (key) => {
+    const window = get().windows.find((w) => w.key === key);
+    if (window && window.targetHistory && window.historyIndex !== undefined) {
+      return (
+        window.historyIndex < window.targetHistory.length - 1 &&
+        window.targetHistory.length > 1
+      );
+    }
+    return false;
   },
   setTitle: (key, title) => {
     set((state) => {

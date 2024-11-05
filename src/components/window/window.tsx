@@ -23,12 +23,12 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const [prevWindowPosition, setPrevWindowPosition] = useState({ x: 0, y: 0 });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [defaultWindowButtonColorPallete, setDefaultWindowButtonColorPallete] =
-    useState(["#C8E6C9", "#FFCDD2", "#FFE0B2"]);
+    useState([]);
   const [
     maximizedWindowButtonColorPallete,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     setMaximizedWindowButtonColorPallete,
-  ] = useState(["#FFE0B2", "#FFCDD2", "#FFE0B2"]);
+  ] = useState([]);
   const [contentLoading, setContentLoading] = useState(false);
 
   // Store state
@@ -44,6 +44,8 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
   const setMouseEnter = useWindowStore((state) => state.setMouseEnter);
   const setTitle = useWindowStore((state) => state.setTitle);
+  const hasPrevWindow = useWindowStore((state) => state.hasPrevWindow);
+  const hasNextWindow = useWindowStore((state) => state.hasNextWindow);
 
   // Refs
   const windowRef = useRef<HTMLDivElement>(null);
@@ -273,15 +275,30 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         onMouseDown={moveWindow}
         loading={contentLoading}
         title={targetWindow?.title || ""}
-        prevWindowButtonAction={() => prevWindow(windowKey)}
-        nextWindowButtonAction={() => nextWindow(windowKey)}
-        firstWindowButtonAction={maximized ? revertWindowSize : maximizeWindow}
-        secondWindowButtonAction={() => closeWindow(windowKey)}
-        windowButtonColorPallete={
-          maximized
-            ? maximizedWindowButtonColorPallete
-            : defaultWindowButtonColorPallete
-        }
+        prevWindowAction={() => prevWindow(windowKey)}
+        nextWindowAction={() => nextWindow(windowKey)}
+        hasPrevWindow={hasPrevWindow(windowKey)}
+        hasNextWindow={hasNextWindow(windowKey)}
+        buttonActions={[
+          {
+            action: maximized ? revertWindowSize : maximizeWindow,
+            icon: maximized ? "exit_fullscreen" : "fullscreen",
+            style: {
+              color: maximized
+                ? maximizedWindowButtonColorPallete[0]
+                : defaultWindowButtonColorPallete[0],
+            },
+          },
+          {
+            action: () => closeWindow(windowKey),
+            icon: "close",
+            style: {
+              color: maximized
+                ? maximizedWindowButtonColorPallete[1]
+                : defaultWindowButtonColorPallete[1],
+            },
+          },
+        ]}
         onMouseEnter={enterWindowHeader}
       />
       {targetWindow && (

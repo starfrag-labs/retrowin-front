@@ -4,14 +4,27 @@ import { useFileStore } from "@/store/file.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
 import { parseSerialKey } from "@/utils/serial_key";
+
+/**
+ * File name component
+ * @param name - name of the file
+ * @param fileKey - key of the file
+ * @param windowKey - key of the window
+ * @param backgroundFile - is background file
+ * @returns - File name component
+ * @example
+ * <FileName name="example.txt" fileKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" windowKey="421b0ad1f948" />
+ */
 export default memo(function FileName({
   name,
   fileKey,
   windowKey,
+  backgroundFile = false,
 }: {
   name: string;
   fileKey: string;
   windowKey: string;
+  backgroundFile?: boolean;
 }) {
   // Query Client
   const queryClient = useQueryClient();
@@ -90,7 +103,11 @@ export default memo(function FileName({
         </form>
       ) : (
         <div className={styles.stale_container}>
-          <div className={styles.name_text}>{name}</div>
+          <div
+            className={`${styles.name_text} ${backgroundFile && styles.background_file_name}`}
+          >
+            {name}
+          </div>
         </div>
       )}
     </div>

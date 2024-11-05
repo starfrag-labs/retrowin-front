@@ -9,6 +9,15 @@ import { FileIconType } from "@/interfaces/file";
 import { MdOndemandVideo } from "react-icons/md";
 import { FaImage } from "react-icons/fa";
 
+/**
+ * File icon component
+ * @param icon - type of the icon
+ * @param onClick - on click event
+ * @param style - style of the icon
+ * @returns - File icon component
+ * @example
+ * <FileIcon icon={FileIconType.Container} />
+ */
 export default memo(
   forwardRef(function FileIcon(
     {

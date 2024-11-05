@@ -83,6 +83,7 @@ export default function Home() {
                   containerKey={homeKey}
                   upload
                   trash
+                  backgroundFile
                 />
               </div>
               {windows

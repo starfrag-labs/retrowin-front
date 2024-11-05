@@ -13,6 +13,7 @@ import { FileType, FileIconType } from "@/interfaces/file";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
 import { useQuery } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
+import FileDetail from "./file_detail";
 
 /**
  * File item component
@@ -20,20 +21,23 @@ import { fileQuery } from "@/api/query";
  * @param type - type of the file
  * @param fileKey - key of the file
  * @param windowKey - key of the window
+ * @param backgroundFile - Is background file
  * @returns - File item component
  * @example
- * <FileItem name="name" type="container" fileKey="fileKey" windowKey="windowKey" />
+ * <FileItem name="file" type={FileType.Container} fileKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" windowKey="421b0ad1f948" />
  */
 export default memo(function FileItem({
   name,
   type,
   fileKey,
   windowKey,
+  backgroundFile = false,
 }: {
   name: string;
   type: FileType;
   fileKey: string;
   windowKey: string;
+  backgroundFile?: boolean;
 }) {
   // constants
   const serialKey = createSerialKey(fileKey, windowKey);
@@ -352,7 +356,6 @@ export default memo(function FileItem({
           detailRect.width + fileRect.width / 2
         }px`;
       } else {
-
         detailRef.current.style.left = `${fileRect.width}px`;
       }
       if (fileRect.bottom + detailRect.height > windowRect.bottom) {
@@ -380,55 +383,26 @@ export default memo(function FileItem({
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
           {icon && <FileIcon ref={iconRef} onClick={iconClick} icon={icon} />}
-          <FileName name={name} fileKey={fileKey} windowKey={windowKey} />
+          <FileName
+            name={name}
+            fileKey={fileKey}
+            windowKey={windowKey}
+            backgroundFile={backgroundFile}
+          />
         </div>
       </div>
       {showDetail &&
         (type === FileType.Block || type === FileType.Container) &&
         fileInfoQuery.isFetched &&
         fileInfoQuery.data && (
-          <div className={styles.detail_container} ref={detailRef}
-
-              >
-            <div className={styles.detail_item}>
-              <div className={styles.detail_item_name}>name</div>
-              <div className={styles.detail_item_text}>
-                {fileInfoQuery.data.data.fileName}
-              </div>
-            </div>
-            <div className={styles.detail_item}>
-              <div className={styles.detail_item_name}>type</div>
-              <div className={styles.detail_item_text}>
-                {fileInfoQuery.data.data.type}
-              </div>
-            </div>
-            <div className={styles.detail_item}>
-              <div className={styles.detail_item_name}>size</div>
-              {fileInfoQuery.data.data.byteSize / 1024 / 1024 > 1 ? (
-                <div className={styles.detail_item_text}>
-                  {Math.round(fileInfoQuery.data.data.byteSize / 1024 / 1024)}
-                  MB
-                </div>
-              ) : (
-                <div className={styles.detail_item_text}>
-                  {Math.round(fileInfoQuery.data.data.byteSize / 1024)}
-                  KB
-                </div>
-              )}
-            </div>
-            <div className={styles.detail_item}>
-              <div className={styles.detail_item_name}>create</div>
-              <div className={styles.detail_item_text}>
-                {fileInfoQuery.data.data.createDate.toLocaleString()}
-              </div>
-            </div>
-            <div className={styles.detail_item}>
-              <div className={styles.detail_item_name}>update</div>
-              <div className={styles.detail_item_text}>
-                {fileInfoQuery.data.data.updateDate.toLocaleString()}
-              </div>
-            </div>
-          </div>
+          <FileDetail
+            ref={detailRef}
+            fileName={name}
+            fileType={type}
+            bytes={fileInfoQuery.data.data.byteSize}
+            created={fileInfoQuery.data.data.createDate}
+            modified={fileInfoQuery.data.data.updateDate}
+          />
         )}
     </div>
   );
