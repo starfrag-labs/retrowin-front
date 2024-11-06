@@ -24,15 +24,25 @@ export default memo(
       icon,
       onClick,
       style,
+      size = "4rem",
     }: {
       icon: FileIconType;
       onClick?: () => void;
       style?: CSSProperties;
+      size?: string;
     },
     ref?: React.Ref<HTMLDivElement>,
   ) {
     return (
-      <div className={styles.icon_container} ref={ref} onDoubleClick={onClick}>
+      <div
+        className={styles.icon_container}
+        ref={ref}
+        onDoubleClick={onClick}
+        style={{
+          width: size,
+          height: size,
+        }}
+      >
         {icon === FileIconType.Container && (
           <FaFolder
             className={`${styles.icon}`}

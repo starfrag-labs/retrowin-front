@@ -9,7 +9,9 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
       { type: WindowType.Image, count: 0, fixed: false },
       { type: WindowType.Video, count: 0, fixed: false },
       { type: WindowType.Audio, count: 0, fixed: false },
-      { type: WindowType.Uploader, count: 0, fixed: false },
+      { type: WindowType.Uploader, count: 0, fixed: true },
+      { type: WindowType.Trash, count: 0, fixed: true },
+      { type: WindowType.Document, count: 0, fixed: false },
     ],
     [],
   );
@@ -30,17 +32,16 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
   }, [defaultIcons, windows]);
 
   return (
-    <nav className={styles.container}>
-      {icons.map((icon, index) => (
-        <div key={index} className={styles.icon_container}>
-          {(icon.fixed || icon.count > 0) && (
-            <div className="full-size">
-              <NavbarIcon windowType={icon.type} />
-              <div className={styles.count}>{icon.count}</div>
-            </div>
-          )}
-        </div>
-      ))}
-    </nav>
+    <div className={styles.container}>
+      <nav className={styles.navbar}>
+        {icons.map((icon, index) => (
+          <div key={index} className={styles.icon_container}>
+            {(icon.fixed || icon.count > 0) && (
+              <NavbarIcon windowType={icon.type} windowCount={icon.count} />
+            )}
+          </div>
+        ))}
+      </nav>
+    </div>
   );
 }
