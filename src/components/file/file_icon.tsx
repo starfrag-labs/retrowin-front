@@ -94,7 +94,7 @@ export default memo(
           <FaImage
             className={`${styles.icon}`}
             style={{
-              color: "#f44336",
+              color: "#0078a1",
               padding: "0.25rem",
               ...style,
             }}
