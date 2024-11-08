@@ -9,7 +9,7 @@ const nextConfig = {
     ],
   },
   output: "standalone",
-  basePath: "/ifcloud",
+  assetPrefix: process.env.ASSET_PREFIX || "",
 };
 
 export default nextConfig;
