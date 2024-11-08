@@ -3,13 +3,7 @@ const nextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "http",
-        hostname: "localhost",
-        port: "3001",
-        pathname: "/**",
-      },
-      {
-        hostname: "127.0.0.1",
+        hostname: "ifcloud-storage",
         port: "3001",
       }
     ],
