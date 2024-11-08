@@ -10,10 +10,11 @@ import SelectBoxContainer from "@/components/select/select_box_container";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import Window from "@/components/window/window";
 import { useQuery } from "@tanstack/react-query";
-import { fileQuery } from "@/api/query";
+import { loadMainPageData } from "@/api/query";
 import MenuBox from "@/components/menu/menu_box";
 import { createWindowKey } from "@/utils/random_key";
 import { WindowType } from "@/interfaces/window";
+import { redirect, RedirectType } from "next/navigation";
 
 export default function Home() {
   // Constants
@@ -32,7 +33,7 @@ export default function Home() {
   const backgroundWindowRef = useRef(null);
 
   // Queries
-  const homeKeyQuery = useQuery(fileQuery.read.home);
+  const homeKeyQuery = useQuery(loadMainPageData);
 
   useEffect(() => {
     if (homeKey) {
@@ -48,8 +49,10 @@ export default function Home() {
   useEffect(() => {
     if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
       setHomeKey(homeKeyQuery.data.data.fileKey);
+    } else if (homeKeyQuery.isError) {
+      redirect("/error", RedirectType.replace);
     }
-  }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
+  }, [homeKeyQuery.data, homeKeyQuery.isError, homeKeyQuery.isSuccess]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({

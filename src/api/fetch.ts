@@ -1,10 +1,16 @@
 import { ApiFileType } from "@/interfaces/api";
 import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
+export const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE;
 export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
 export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
 
 export const url = {
+  auth: {
+    session: {
+      check: "/session/check",
+    },
+  },
   member: {
     get: "/member",
     create: "/member",
@@ -78,7 +84,7 @@ export const url = {
 const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
-  base: "cloud" | "storage" = "cloud",
+  base: "cloud" | "storage" | "auth" = "cloud",
   bodyType: "json" | "blob" = "json",
 ) => {
   // create a new URL object with the input string
@@ -89,6 +95,9 @@ const customFetch = async <T = unknown>(
       break;
     case "storage":
       url = new URL(input as string, storageApiBase);
+      break;
+    case "auth":
+      url = new URL(input as string, authApiBase);
       break;
   }
   const response = await fetch(url, {
@@ -120,7 +129,7 @@ const customFetch = async <T = unknown>(
   return {
     ok: response.ok, // pass the ok along
     headers: response.headers, // pass the headers along
-    status: response.headers, // pass the status along
+    status: response.status, // pass the status along
     body, // pass the body along
   };
 };
@@ -129,6 +138,14 @@ const customFetch = async <T = unknown>(
  * Custom fetch function
  * @returns promise of json response
  */
+export const authApi = {
+  session: {
+    check: () =>
+      customFetch<
+        CustomResponse<string>
+      >(url.auth.session.check),
+  },
+};
 export const memberApi = {
   get: () =>
     customFetch<
