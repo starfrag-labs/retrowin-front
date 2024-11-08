@@ -15,6 +15,7 @@ const nextConfig = {
     ],
   },
   output: "standalone",
+  basePath: "/ifcloud",
 };
 
 export default nextConfig;
