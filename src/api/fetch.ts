@@ -1,9 +1,9 @@
 import { ApiFileType } from "@/interfaces/api";
 import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
-export const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE;
-export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
-export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
+export const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE ?? "";
+export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE ?? "";
+export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE ?? "";
 
 export const url = {
   auth: {
