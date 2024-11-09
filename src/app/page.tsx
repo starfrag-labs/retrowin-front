@@ -46,7 +46,7 @@ export default function Home() {
     queryKey: ["file", "home"],
     queryFn: async () => {
       const response = await fileApi.read.home();
-      if (response.status === 200) {
+      if (response.ok && response.body) {
         return response.body.data;
       } else {
         return Promise.reject(response.status);

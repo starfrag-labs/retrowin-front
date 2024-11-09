@@ -100,21 +100,23 @@ const customFetch = async <T = unknown>(
     credentials: "include",
   });
 
-  let body: T;
-  switch (bodyType) {
-    case "json":
-      body = (await response.json()) as T;
-      break;
-    case "blob":
-      if (response.status !== 200) {
+  let body: T | undefined;
+  if (response.ok) {
+    switch (bodyType) {
+      case "json":
         body = (await response.json()) as T;
-      } else {
-        body = (await response.blob()) as T;
-      }
-      break;
-    default:
-      body = (await response.json()) as T;
-      break;
+        break;
+      case "blob":
+        if (response.status !== 200) {
+          body = (await response.json()) as T;
+        } else {
+          body = (await response.blob()) as T;
+        }
+        break;
+      default:
+        body = (await response.json()) as T;
+        break;
+    }
   }
 
   return {
@@ -186,27 +188,30 @@ export const fileApi = {
           token: string;
         }>
       >(url.file.read.storage(fileKey)),
-    root: () => customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.root),
-    home: () => customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.home),
-    trash: () => customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.trash),
+    root: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.root),
+    home: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.home),
+    trash: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.trash),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{

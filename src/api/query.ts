@@ -10,7 +10,11 @@ const getMember = queryOptions({
   queryKey: ["member"],
   queryFn: async () => {
     const response = await memberApi.get();
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to get member"));
+    }
   },
   retry: normalRetryCount,
   staleTime: normalStaleTime,
@@ -23,7 +27,11 @@ const createMember: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async () => {
     const response = await memberApi.create();
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to create member"));
+    }
   },
 };
 const deleteMember: UseMutationOptions<
@@ -34,7 +42,11 @@ const deleteMember: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async () => {
     const response = await memberApi.delete();
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to delete member"));
+    }
   },
 };
 export const memberQuery = {
@@ -56,7 +68,11 @@ const createFile: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ parentKey, fileName }) => {
     const response = await fileApi.create.container(parentKey, fileName);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to create file"));
+    }
   },
 };
 // fileApi.delete
@@ -68,7 +84,11 @@ const deleteFilePermanent: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey }) => {
     const response = await fileApi.delete.permanent(fileKey);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to delete file"));
+    }
   },
 };
 // fileApi.read
@@ -77,7 +97,11 @@ const readFileStorage = (fileKey: string) =>
     queryKey: ["file", fileKey, "storage"],
     queryFn: async () => {
       const response = await fileApi.read.storage(fileKey);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -96,10 +120,10 @@ const readFileHome = queryOptions({
   queryKey: ["file", "home"],
   queryFn: async () => {
     const response = await fileApi.read.home();
-    if (response.status === 404) {
-      return Promise.reject(new Error("Home not found"));
-    } else {
+    if (response.ok && response.body) {
       return response.body;
+    } else {
+      return Promise.reject(new Error("File not found"));
     }
   },
   retry: normalRetryCount,
@@ -109,7 +133,11 @@ const readFileTrash = queryOptions({
   queryKey: ["file", "trash"],
   queryFn: async () => {
     const response = await fileApi.read.trash();
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("File not found"));
+    }
   },
   retry: normalRetryCount,
   staleTime: normalStaleTime,
@@ -119,16 +147,20 @@ const readFileInfo = (fileKey: string) =>
     queryKey: ["file", fileKey, "info"],
     queryFn: async () => {
       const response = await fileApi.read.info(fileKey);
-      const createDate = new Date(response.body.data.createDate);
-      const updateDate = new Date(response.body.data.updateDate);
-      return {
-        ...response.body,
-        data: {
-          ...response.body.data,
-          createDate,
-          updateDate,
-        },
-      };
+      if (response.ok && response.body) {
+        const createDate = new Date(response.body.data.createDate);
+        const updateDate = new Date(response.body.data.updateDate);
+        return {
+          ...response.body,
+          data: {
+            ...response.body.data,
+            createDate,
+            updateDate,
+          },
+        };
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -139,7 +171,11 @@ const readFileParent = (fileKey: string) =>
     queryKey: ["file", fileKey, "parent"],
     queryFn: async () => {
       const response = await fileApi.read.parent(fileKey);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -150,7 +186,11 @@ const readFileChildren = (fileKey: string) =>
     queryKey: ["file", fileKey, "children"],
     queryFn: async () => {
       const response = await fileApi.read.children(fileKey);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -161,7 +201,11 @@ const readFileFind = (fileKey: string, fileName: string) =>
     queryKey: ["file", fileKey, "find", fileName],
     queryFn: async () => {
       const response = await fileApi.read.find(fileKey, fileName);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -172,7 +216,11 @@ const readFileLinkTarget = (fileKey: string) =>
     queryKey: ["file", fileKey, "target"],
     queryFn: async () => {
       const response = await fileApi.read.linkTarget(fileKey);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("File not found"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -187,7 +235,11 @@ const updateFileName: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey, fileName }) => {
     const response = await fileApi.update.name(fileKey, fileName);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to update file name"));
+    }
   },
 };
 const updateFileParent: UseMutationOptions<
@@ -198,7 +250,11 @@ const updateFileParent: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey, parentKey }) => {
     const response = await fileApi.update.parent(fileKey, parentKey);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to update file parent"));
+    }
   },
 };
 const moveFileToTrash: UseMutationOptions<
@@ -209,7 +265,11 @@ const moveFileToTrash: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey }) => {
     const response = await fileApi.update.trash(fileKey);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to move file to trash"));
+    }
   },
 };
 // fileApi.upload
@@ -226,7 +286,11 @@ const uploadFileWriteToken = (
         fileName,
         byteSize,
       );
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("Failed to get write token"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -240,7 +304,11 @@ const uploadFileComplete: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey, totalChunks }) => {
     const response = await fileApi.upload.complete(fileKey, totalChunks);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to complete upload"));
+    }
   },
 };
 // fileApi.stream
@@ -297,7 +365,11 @@ const downloadStorageFile = ({
     queryKey: ["storage", fileKey],
     queryFn: async () => {
       const response = await storageApi.file.download(fileKey, type);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("Failed to download file"));
+      }
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -311,7 +383,11 @@ const writeStorageFile: UseMutationOptions<
   retry: normalRetryCount,
   mutationFn: async ({ fileKey, chunkCount, fileData }) => {
     const response = await storageApi.file.write(fileKey, chunkCount, fileData);
-    return response.body;
+    if (response.ok && response.body) {
+      return response.body;
+    } else {
+      return Promise.reject(new Error("Failed to write file"));
+    }
   },
 };
 // storageApi.session
@@ -336,10 +412,14 @@ const issueWriteSession: UseMutationOptions<
       fileName,
       size,
     );
-    const token = response.body.data.token;
-    const fileKey = response.body.data.fileKey;
-    const sessionResposne = await storageApi.session.issue(token);
-    return { fileKey, sessionResponse: sessionResposne.body };
+    if (response.ok && response.body) {
+      const token = response.body.data.token;
+      const fileKey = response.body.data.fileKey;
+      const sessionResposne = await storageApi.session.issue(token);
+      return { fileKey, sessionResponse: sessionResposne.body };
+    } else {
+      return Promise.reject(new Error("Failed to issue write session"));
+    }
   },
 };
 const issueReadSession = (fileKey: string) =>
@@ -347,11 +427,19 @@ const issueReadSession = (fileKey: string) =>
     queryKey: ["storage", "session", "read", fileKey],
     queryFn: async () => {
       let token = "";
-      token = await fileApi.stream
-        .readToken(fileKey)
-        .then((res) => res.body.data.token);
+      token = await fileApi.stream.readToken(fileKey).then((res) => {
+        if (res.ok && res.body) {
+          return res.body.data.token;
+        } else {
+          return Promise.reject(new Error("Failed to issue read session"));
+        }
+      });
       const response = await storageApi.session.issue(token);
-      return response.body;
+      if (response.ok && response.body) {
+        return response.body;
+      } else {
+        return Promise.reject(new Error("Failed to issue read session"));
+      }
     },
     retry: normalRetryCount,
     staleTime: shortStaleTime,
