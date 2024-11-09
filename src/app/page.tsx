@@ -20,7 +20,6 @@ import { ApiFileType } from "@/interfaces/api";
 
 export default function Home() {
   // Constants
-  const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
   const backgroundWindowKey = useMemo(() => createWindowKey(), []);
 
   // States
@@ -76,13 +75,14 @@ export default function Home() {
 
   useEffect(() => {
     if (homeKeyQuery.isError) {
+      const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
       if (homeKeyQuery.error === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
       } else {
         throw new Error("Failed to get home");
       }
     }
-  }, [homeKeyQuery.error, homeKeyQuery.isError, redirectUri]);
+  }, [homeKeyQuery.error, homeKeyQuery.isError]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
