@@ -9,11 +9,11 @@ import { useWindowStore } from "@/store/window.store";
 import SelectBoxContainer from "@/components/select/select_box_container";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import Window from "@/components/window/window";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuBox from "@/components/menu/menu_box";
 import { createWindowKey } from "@/utils/random_key";
 import { WindowType } from "@/interfaces/window";
-import { fileApi } from "@/api/fetch";
+import { fileApi, memberApi } from "@/api/fetch";
 import { redirect, RedirectType } from "next/navigation";
 import { normalRetryCount, normalStaleTime } from "@/api/query";
 import { ApiFileType } from "@/interfaces/api";
@@ -35,6 +35,7 @@ export default function Home() {
   const backgroundWindowRef = useRef(null);
 
   // Queries
+  const queryClient = useQueryClient();
   const homeKeyQuery = useQuery<
     {
       fileKey: string;
@@ -54,6 +55,31 @@ export default function Home() {
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
+  });
+  const getMemberQuery = useQuery({
+    queryKey: ["member"],
+    queryFn: async () => {
+      const response = await memberApi.get();
+      if (response.ok && response.body) {
+        return response.body.data;
+      } else {
+        return Promise.reject(response.status);
+      }
+    },
+    retry: normalRetryCount,
+    staleTime: normalStaleTime,
+  });
+  const createMemberMutation = useMutation({
+    mutationKey: ["member", "create"],
+    mutationFn: async () => {
+      const response = await memberApi.create();
+      if (response.ok && response.body) {
+        return response.body.data;
+      } else {
+        return Promise.reject(response.status);
+      }
+    },
+    retry: normalRetryCount,
   });
 
   useEffect(() => {
@@ -78,11 +104,29 @@ export default function Home() {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
       if (homeKeyQuery.error === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
+      } else if (homeKeyQuery.error === 403 && !getMemberQuery.isSuccess) {
+        // If the user is not a member of the service, create a member
+        createMemberMutation
+          .mutateAsync()
+          .then(() => {
+            queryClient.invalidateQueries();
+          })
+          .catch(() => {
+            throw new Error("Failed to create member");
+          });
+      } else if (homeKeyQuery.error === 403 && getMemberQuery.isSuccess) {
+        throw new Error("You are not a member of this service");
       } else {
         throw new Error("Failed to get home");
       }
     }
-  }, [homeKeyQuery.error, homeKeyQuery.isError]);
+  }, [
+    createMemberMutation,
+    getMemberQuery.isSuccess,
+    homeKeyQuery.error,
+    homeKeyQuery.isError,
+    queryClient,
+  ]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
