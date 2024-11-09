@@ -14,11 +14,13 @@ import MenuBox from "@/components/menu/menu_box";
 import { createWindowKey } from "@/utils/random_key";
 import { WindowType } from "@/interfaces/window";
 import { fileApi } from "@/api/fetch";
-import { redirect } from "next/navigation";
+import { redirect, RedirectType } from "next/navigation";
 import { normalRetryCount, normalStaleTime } from "@/api/query";
+import { ApiFileType } from "@/interfaces/api";
 
 export default function Home() {
   // Constants
+  const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
   const backgroundWindowKey = useMemo(() => createWindowKey(), []);
 
   // States
@@ -34,17 +36,22 @@ export default function Home() {
   const backgroundWindowRef = useRef(null);
 
   // Queries
-  const homeKeyQuery = useQuery({
+  const homeKeyQuery = useQuery<
+    {
+      fileKey: string;
+      fileName: string;
+      type: ApiFileType;
+    },
+    number
+  >({
     queryKey: ["file", "home"],
     queryFn: async () => {
-      const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
       const response = await fileApi.read.home();
-      if (response.status === 401 && redirectUri) {
-        redirect(redirectUri);
-      } else if (response.status === 200) {
+      Promise.reject(response.status);
+      if (response.status === 200) {
         return response.body.data;
       } else {
-        Promise.reject(response.status);
+        return Promise.reject(response.status);
       }
     },
     retry: normalRetryCount,
@@ -67,6 +74,16 @@ export default function Home() {
       setHomeKey(homeKeyQuery.data.fileKey);
     }
   }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
+
+  useEffect(() => {
+    if (homeKeyQuery.isError) {
+      if (homeKeyQuery.error === 401 && redirectUri) {
+        redirect(redirectUri, RedirectType.push);
+      } else {
+        throw new Error("Failed to get home");
+      }
+    }
+  }, [homeKeyQuery.error, homeKeyQuery.isError, redirectUri]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
