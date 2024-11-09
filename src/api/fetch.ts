@@ -88,16 +88,16 @@ const customFetch = async <T = unknown>(
   bodyType: "json" | "blob" = "json",
 ) => {
   // create a new URL object with the input string
-  let url: URL;
+  let url: string;
   switch (base) {
     case "cloud":
-      url = new URL(input as string, cloudApiBase);
+      url = `${cloudApiBase}${input}`;
       break;
     case "storage":
-      url = new URL(input as string, storageApiBase);
+      url = `${storageApiBase}${input}`;
       break;
     case "auth":
-      url = new URL(input as string, authApiBase);
+      url = `${authApiBase}${input}`;
       break;
   }
   const response = await fetch(url, {
