@@ -9,6 +9,9 @@ export enum FileType {
   Block = "block",
   Link = "link",
   Upload = "upload",
+  Root = "root",
+  Trash = "trash",
+  Home = "home",
 }
 
 export enum FileIconType {
@@ -17,4 +20,7 @@ export enum FileIconType {
   Home = SpecialFileName.Home,
   Trash = SpecialFileName.Trash,
   Upload = FileType.Upload,
+  Image = "image",
+  Video = "video",
+  Audio = "audio",
 }

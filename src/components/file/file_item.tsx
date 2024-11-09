@@ -13,6 +13,7 @@ import { FileType, FileIconType } from "@/interfaces/file";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
 import { useQuery } from "@tanstack/react-query";
 import { fileQuery } from "@/api/query";
+import FileDetail from "./file_detail";
 
 /**
  * File item component
@@ -20,20 +21,23 @@ import { fileQuery } from "@/api/query";
  * @param type - type of the file
  * @param fileKey - key of the file
  * @param windowKey - key of the window
+ * @param backgroundFile - Is background file
  * @returns - File item component
  * @example
- * <FileItem name="name" type="container" fileKey="fileKey" windowKey="windowKey" />
+ * <FileItem name="file" type={FileType.Container} fileKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" windowKey="421b0ad1f948" />
  */
 export default memo(function FileItem({
   name,
   type,
   fileKey,
   windowKey,
+  backgroundFile = false,
 }: {
   name: string;
   type: FileType;
   fileKey: string;
   windowKey: string;
+  backgroundFile?: boolean;
 }) {
   // constants
   const serialKey = createSerialKey(fileKey, windowKey);
@@ -41,6 +45,7 @@ export default memo(function FileItem({
 
   // States
   const [icon, setIcon] = useState<FileIconType | null>(null);
+  const [showDetail, setShowDetail] = useState(false);
 
   // Store state
   const selectedFileSerials = useFileStore(
@@ -62,6 +67,8 @@ export default memo(function FileItem({
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
+  const showDetailTimeoutRef = useRef<number | null>(null);
+  const detailRef = useRef<HTMLDivElement>(null);
 
   const linkTargetQuery = useQuery(
     fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
@@ -73,6 +80,9 @@ export default memo(function FileItem({
     return backgroundWindow?.key || "";
   }, [getBackgroundWindow]);
 
+  // Query
+  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
+
   const handleMouseEnter = useCallback(() => {
     setHighlightedFile({
       fileKey,
@@ -81,10 +91,18 @@ export default memo(function FileItem({
       type,
       ref: fileRef,
     });
+    showDetailTimeoutRef.current = window.setTimeout(() => {
+      setShowDetail(true);
+    }, 750);
   }, [setHighlightedFile, fileKey, windowKey, name, type]);
 
   const handleMouseLeave = useCallback(() => {
     setHighlightedFile(null);
+    setShowDetail(false);
+    if (showDetailTimeoutRef.current) {
+      clearTimeout(showDetailTimeoutRef.current);
+    }
+    detailRef.current?.style.setProperty("visibility", "hidden");
   }, [setHighlightedFile]);
 
   // Check if the file is in the select box
@@ -94,7 +112,9 @@ export default memo(function FileItem({
     if (windowKey !== targetWindow) return;
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
-      (type === FileType.Container || type === FileType.Block) &&
+      (type === FileType.Container ||
+        type === FileType.Block ||
+        type === FileType.Link) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
       fileRect.left < selectBox.right &&
@@ -131,16 +151,17 @@ export default memo(function FileItem({
       case FileType.Block:
         setIcon(FileIconType.Block);
         break;
-    }
-    switch (name) {
-      case FileIconType.Home:
+      case FileType.Home:
         setIcon(FileIconType.Home);
         break;
-      case FileIconType.Trash:
+      case FileType.Trash:
         setIcon(FileIconType.Trash);
         break;
+      case FileType.Link:
+        setIcon(FileIconType.Block);
+        break;
     }
-  }, [name, type]);
+  }, [type]);
 
   // Assign fileRef to store
   useEffect(() => {
@@ -230,6 +251,33 @@ export default memo(function FileItem({
     ],
   );
 
+  const clickTrash = useCallback(
+    ({ fileKey, name }: { fileKey: string; name: string }) => {
+      if (backgroundWindowKey === windowKey) {
+        newWindow({
+          targetKey: fileKey,
+          type: WindowType.Trash,
+          title: name,
+        });
+      } else {
+        setHighlightedFile(null);
+        updateWindow({
+          targetWindowKey: windowKey,
+          targetFileKey: fileKey,
+          type: WindowType.Trash,
+          title: name,
+        });
+      }
+    },
+    [
+      backgroundWindowKey,
+      newWindow,
+      updateWindow,
+      setHighlightedFile,
+      windowKey,
+    ],
+  );
+
   const iconClick = useCallback(() => {
     switch (type) {
       case FileType.Container: // If the file is a container, open the navigator window
@@ -266,16 +314,60 @@ export default memo(function FileItem({
           }
         }
         break;
+      case FileType.Home:
+        clickContaienr({
+          fileKey,
+          name,
+        });
+        break;
+      case FileType.Trash:
+        clickTrash({
+          fileKey,
+          name,
+        });
+        break;
     }
   }, [
     clickBlock,
     clickContaienr,
+    clickTrash,
     clickUpload,
     fileKey,
     linkTargetQuery.data,
     name,
     type,
   ]);
+
+  // Detail position adjustment
+  useEffect(() => {
+    if (
+      showDetail &&
+      detailRef.current &&
+      fileRef.current &&
+      fileInfoQuery.isFetched &&
+      fileInfoQuery.data &&
+      fileInfoQuery.data.status === 200
+    ) {
+      const fileRect = fileRef.current.getBoundingClientRect();
+      const detailRect = detailRef.current.getBoundingClientRect();
+      const windowRect = document.body.getBoundingClientRect();
+      if (fileRect.right + detailRect.width > windowRect.right) {
+        detailRef.current.style.left = `-${
+          detailRect.width + fileRect.width / 2
+        }px`;
+      } else {
+        detailRef.current.style.left = `${fileRect.width}px`;
+      }
+      if (fileRect.bottom + detailRect.height > windowRect.bottom) {
+        detailRef.current.style.top = `-${
+          detailRect.height + fileRect.height / 2
+        }px`;
+      } else {
+        detailRef.current.style.top = `${fileRect.height}px`;
+      }
+      detailRef.current.style.visibility = "visible";
+    }
+  }, [fileInfoQuery.data, fileInfoQuery.isFetched, showDetail]);
 
   return (
     <div className={`full-size ${styles.container}`}>
@@ -291,9 +383,27 @@ export default memo(function FileItem({
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
           {icon && <FileIcon ref={iconRef} onClick={iconClick} icon={icon} />}
-          <FileName name={name} fileKey={fileKey} windowKey={windowKey} />
+          <FileName
+            name={name}
+            fileKey={fileKey}
+            windowKey={windowKey}
+            backgroundFile={backgroundFile}
+          />
         </div>
       </div>
+      {showDetail &&
+        (type === FileType.Block || type === FileType.Container) &&
+        fileInfoQuery.isFetched &&
+        fileInfoQuery.data && (
+          <FileDetail
+            ref={detailRef}
+            fileName={name}
+            fileType={type}
+            bytes={fileInfoQuery.data.data.byteSize}
+            created={fileInfoQuery.data.data.createDate}
+            modified={fileInfoQuery.data.data.updateDate}
+          />
+        )}
     </div>
   );
 });

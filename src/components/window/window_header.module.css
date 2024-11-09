@@ -13,6 +13,7 @@
   align-items: center;
   width: 100%;
   height: 100%;
+  gap: 0.5rem;
 }
 
 .header_right_container {
@@ -38,16 +39,25 @@
   width: 2rem;
   height: 2rem;
   border: none;
+  color: #888;
+}
+
+.active {
+  color: #000;
   cursor: pointer;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }
 
 .header_title {
   display: block;
   width: auto;
   height: 100%;
-  font-size: 1rem;
   text-align: center;
-  line-height: 2rem;
+  align-content: center;
+  font-size: 1rem;
 }
 
 .window_button_container {
@@ -56,6 +66,7 @@
   justify-content: center;
   align-items: center;
   width: auto;
+  height: 100%;
 }
 
 .window_button {
@@ -64,4 +75,9 @@
   height: 2rem;
   border: none;
   cursor: pointer;
+  padding: 0.5rem;
+
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
 }

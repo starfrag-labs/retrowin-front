@@ -1,0 +1,24 @@
+.container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  height: 100%;
+}
+
+.icon_container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  margin: 3px 10px;
+}
+
+.icon_highlight {
+  display: block;
+  background-color: #fff;
+  width: 20px;
+  height: 2px;
+  border-radius: 50px;
+}

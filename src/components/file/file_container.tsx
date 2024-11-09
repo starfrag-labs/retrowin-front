@@ -10,6 +10,10 @@ import { ApiFileType } from "@/interfaces/api";
  * File container component
  * @param windowKey - key of the window
  * @param containerKey - key of the container
+ * @param setLoading - set loading state
+ * @param upload - show upload file
+ * @param trash - show trash file
+ * @param backgroundFile - is background file
  * @returns - File container component
  * @example
  * <FileContainer windowKey="421b0ad1f948" containerKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" />
@@ -18,14 +22,19 @@ export default function FileContainer({
   windowKey,
   containerKey,
   setLoading,
-  uploadIcon = false,
+  upload = false,
+  trash = false,
+  backgroundFile = false,
 }: {
   windowKey: string;
   containerKey: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
-  uploadIcon?: boolean;
+  upload?: boolean;
+  trash?: boolean;
+  backgroundFile?: boolean;
 }) {
   const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
+  const readTrashQuery = useQuery(fileQuery.read.trash);
 
   const sortFiles = useCallback(
     (
@@ -85,12 +94,22 @@ export default function FileContainer({
 
   return (
     <div className={`${styles.container} full-size`}>
-      {uploadIcon && (
+      {upload && (
         <FileItem
-          name={FileType.Upload}
+          name={SpecialFileName.Upload}
           type={FileType.Upload}
           fileKey={containerKey}
           windowKey={windowKey}
+          backgroundFile={backgroundFile}
+        />
+      )}
+      {trash && readTrashQuery.isFetched && readTrashQuery.data && (
+        <FileItem
+          name={SpecialFileName.Trash}
+          type={FileType.Trash}
+          fileKey={readTrashQuery.data.data.fileKey || ""}
+          windowKey={windowKey}
+          backgroundFile={backgroundFile}
         />
       )}
       {readContainerQuery.data.data.sort(sortFiles).map((file) => (
@@ -100,6 +119,7 @@ export default function FileContainer({
           type={file.type}
           fileKey={file.fileKey}
           windowKey={windowKey}
+          backgroundFile={backgroundFile}
         />
       ))}
     </div>

@@ -7,9 +7,11 @@ import { WindowType } from "@/interfaces/window";
 
 export default function WindowMenu({
   targetFileKey,
+  windowType,
   closeMenu,
 }: {
   targetFileKey: string;
+  windowType: WindowType | null;
   closeMenu: () => void;
 }) {
   // Query client
@@ -20,6 +22,7 @@ export default function WindowMenu({
 
   // Mutations
   const createContainerMutation = useMutation(fileQuery.create.container);
+  const deleteFilePermanentMutation = useMutation(fileQuery.delete.permanent);
 
   // Handle upload action
   const handleUpload = useCallback(() => {
@@ -31,11 +34,11 @@ export default function WindowMenu({
     closeMenu();
   }, [closeMenu, newWindow, targetFileKey]);
 
-  const handleCreateContainer = useCallback(() => {
+  const handleCreateContainer = useCallback(async () => {
     createContainerMutation
       .mutateAsync({
         parentKey: targetFileKey,
-        fileName: "New Folder",
+        fileName: "New_Folder",
       })
       .finally(() => {
         queryClient.invalidateQueries({
@@ -45,12 +48,50 @@ export default function WindowMenu({
       });
   }, [closeMenu, createContainerMutation, queryClient, targetFileKey]);
 
-  const menuList = [
-    { name: "Upload", action: handleUpload },
-    { name: "Create Folder", action: handleCreateContainer },
-    { name: "/", action: () => {} },
-    { name: "Refresh", action: () => queryClient.invalidateQueries() },
-  ];
+  const handleEmptyTrash = useCallback(async () => {
+    closeMenu();
+    const files = await queryClient.fetchQuery(
+      fileQuery.read.children(targetFileKey),
+    );
+    Promise.all(
+      files.data.map((file) =>
+        deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey }),
+      ),
+    ).then(() => {
+      queryClient.invalidateQueries({
+        queryKey: ["file", targetFileKey],
+      });
+    });
+  }, [closeMenu, deleteFilePermanentMutation, queryClient, targetFileKey]);
 
-  return <MenuList menuList={menuList} />;
+  const handleRefresh = useCallback(async () => {
+    queryClient.invalidateQueries();
+    closeMenu();
+  }, [closeMenu, queryClient]);
+
+  switch (windowType) {
+    case WindowType.Trash:
+      return (
+        <MenuList
+          menuList={[
+            { name: "Empty Trash", action: handleEmptyTrash },
+            { name: "/", action: () => {} },
+            { name: "Refresh", action: handleRefresh },
+          ]}
+        />
+      );
+    case WindowType.Navigator:
+      return (
+        <MenuList
+          menuList={[
+            { name: "Upload", action: handleUpload },
+            { name: "Create Folder", action: handleCreateContainer },
+            { name: "/", action: () => {} },
+            { name: "Refresh", action: handleRefresh },
+          ]}
+        />
+      );
+    default:
+      return null;
+  }
 }

@@ -1,10 +1,16 @@
 import { ApiFileType } from "@/interfaces/api";
 import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
+export const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE;
 export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
 export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
 
 export const url = {
+  auth: {
+    session: {
+      check: "/session/check",
+    },
+  },
   member: {
     get: "/member",
     create: "/member",
@@ -20,12 +26,12 @@ export const url = {
     },
     delete: {
       permanent: (fileKey: string) => `/file/permanent/${fileKey}`,
-      trash: (fileKey: string) => `/file/trash/${fileKey}`,
     },
     read: {
       storage: (fileKey: string) => `/file/storage/${fileKey}`,
       root: "/file/root",
       home: "/file/home",
+      trash: "/file/trash",
       info: (fileKey: string) => `/file/info/${fileKey}`,
       parent: (fileKey: string) => `/file/parent/${fileKey}`,
       children: (fileKey: string) => `/file/children/${fileKey}`,
@@ -38,6 +44,7 @@ export const url = {
         `/file/name/${fileKey}?file_name=${fileName}`,
       parent: (fileKey: string, parentKey: string) =>
         `/file/parent/${fileKey}?parent_key=${parentKey}`,
+      trash: (fileKey: string) => `/file/trash/${fileKey}`,
     },
     upload: {
       writeToken: (parentKey: string, fileName: string, byteSize: number) =>
@@ -77,7 +84,7 @@ export const url = {
 const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
-  base: "cloud" | "storage" = "cloud",
+  base: "cloud" | "storage" | "auth" = "cloud",
   bodyType: "json" | "blob" = "json",
 ) => {
   // create a new URL object with the input string
@@ -88,6 +95,9 @@ const customFetch = async <T = unknown>(
       break;
     case "storage":
       url = new URL(input as string, storageApiBase);
+      break;
+    case "auth":
+      url = new URL(input as string, authApiBase);
       break;
   }
   const response = await fetch(url, {
@@ -119,7 +129,7 @@ const customFetch = async <T = unknown>(
   return {
     ok: response.ok, // pass the ok along
     headers: response.headers, // pass the headers along
-    status: response.headers, // pass the status along
+    status: response.status, // pass the status along
     body, // pass the body along
   };
 };
@@ -128,6 +138,14 @@ const customFetch = async <T = unknown>(
  * Custom fetch function
  * @returns promise of json response
  */
+export const authApi = {
+  session: {
+    check: () =>
+      customFetch<
+        CustomResponse<string>
+      >(url.auth.session.check),
+  },
+};
 export const memberApi = {
   get: () =>
     customFetch<
@@ -177,14 +195,6 @@ export const fileApi = {
       >(url.file.delete.permanent(fileKey), {
         method: "DELETE",
       }),
-    trash: (fileKey: string) =>
-      customFetch<
-        CustomResponse<{
-          success: boolean;
-        }>
-      >(url.file.delete.trash(fileKey), {
-        method: "DELETE",
-      }),
   },
   read: {
     storage: (fileKey: string) =>
@@ -207,13 +217,20 @@ export const fileApi = {
         type: ApiFileType;
       }>
     >(url.file.read.home),
+    trash: customFetch<
+      CustomResponse<{
+        fileKey: string;
+        fileName: string;
+        type: ApiFileType;
+      }>
+    >(url.file.read.trash),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{
           fileName: string;
           type: ApiFileType;
-          createDate: Date;
-          updateDate: Date;
+          createDate: string;
+          updateDate: string;
           byteSize: number;
         }>
       >(url.file.read.info(fileKey)),
@@ -269,6 +286,16 @@ export const fileApi = {
           success: boolean;
         }>
       >(url.file.update.parent(fileKey, parentKey), {
+        method: "PATCH",
+      }),
+    trash: (fileKey: string) =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.update.trash(fileKey), {
         method: "PATCH",
       }),
   },

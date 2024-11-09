@@ -1,19 +1,19 @@
 .stale_container {
   display: block;
   width: 100%;
-  text-overflow: ellipsis;
-  overflow: hidden;
-  white-space: nowrap;
 }
 
 .name_text {
   display: block;
   width: 100%;
-  color: #FFFFFF;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
+}
+
+.background_file_name {
+  color: #ffffff;
   filter: drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black);
 }
 

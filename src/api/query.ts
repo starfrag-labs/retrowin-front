@@ -1,9 +1,40 @@
 import { queryOptions, UseMutationOptions } from "@tanstack/react-query";
-import { fileApi, memberApi, storageApi } from "./fetch";
+import { authApi, fileApi, memberApi, storageApi } from "./fetch";
 
 const normalRetryCount = 3;
 const shortStaleTime = 1000 * 60 * 1;
 const normalStaleTime = 1000 * 60 * 10;
+
+export const loadMainPageData = queryOptions({
+  queryKey: ["main"],
+  queryFn: async () => {
+    const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+    if (!redirectUri) {
+      return Promise.reject(new Error("Redirect URI not found"));
+    }
+    const sessionResponse = await authApi.session.check();
+    if (sessionResponse.status !== 200) {
+      window.location.href = redirectUri;
+    }
+    const memberResponse = await memberApi.get();
+    if (memberResponse.status !== 200) {
+      const createResponse = await memberApi.create();
+      if (createResponse.status !== 201) {
+        return Promise.reject(new Error("Member not found"));
+      }
+    }
+    const homeResponse = await fileApi.read.home;
+    if (homeResponse.status === 404) {
+      return Promise.reject(new Error("Home not found"));
+    } else if (homeResponse.status === 200) {
+      return homeResponse.body;
+    } else {
+      return Promise.reject(new Error("Home not found"));
+    }
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
 
 // member
 const getMember = queryOptions({
@@ -71,17 +102,6 @@ const deleteFilePermanent: UseMutationOptions<
     return response.body;
   },
 };
-const deleteFileToTrash: UseMutationOptions<
-  Awaited<ReturnType<typeof fileApi.delete.trash>>["body"],
-  Error,
-  { fileKey: string }
-> = {
-  retry: normalRetryCount,
-  mutationFn: async ({ fileKey }) => {
-    const response = await fileApi.delete.trash(fileKey);
-    return response.body;
-  },
-};
 // fileApi.read
 const readFileStorage = (fileKey: string) =>
   queryOptions({
@@ -107,6 +127,19 @@ const readFileHome = queryOptions({
   queryKey: ["file", "home"],
   queryFn: async () => {
     const response = await fileApi.read.home;
+    if (response.status === 404) {
+      return Promise.reject(new Error("Home not found"));
+    } else {
+      return response.body;
+    }
+  },
+  retry: normalRetryCount,
+  staleTime: normalStaleTime,
+});
+const readFileTrash = queryOptions({
+  queryKey: ["file", "trash"],
+  queryFn: async () => {
+    const response = await fileApi.read.trash;
     return response.body;
   },
   retry: normalRetryCount,
@@ -117,7 +150,16 @@ const readFileInfo = (fileKey: string) =>
     queryKey: ["file", fileKey, "info"],
     queryFn: async () => {
       const response = await fileApi.read.info(fileKey);
-      return response.body;
+      const createDate = new Date(response.body.data.createDate);
+      const updateDate = new Date(response.body.data.updateDate);
+      return {
+        ...response.body,
+        data: {
+          ...response.body.data,
+          createDate,
+          updateDate,
+        },
+      };
     },
     retry: normalRetryCount,
     staleTime: normalStaleTime,
@@ -190,6 +232,17 @@ const updateFileParent: UseMutationOptions<
     return response.body;
   },
 };
+const moveFileToTrash: UseMutationOptions<
+  Awaited<ReturnType<typeof fileApi.update.trash>>["body"],
+  Error,
+  { fileKey: string }
+> = {
+  retry: normalRetryCount,
+  mutationFn: async ({ fileKey }) => {
+    const response = await fileApi.update.trash(fileKey);
+    return response.body;
+  },
+};
 // fileApi.upload
 const uploadFileWriteToken = (
   parentKey: string,
@@ -236,12 +289,12 @@ export const fileQuery = {
   },
   delete: {
     permanent: deleteFilePermanent,
-    trash: deleteFileToTrash,
   },
   read: {
     storage: readFileStorage,
     root: readFileRoot,
     home: readFileHome,
+    trash: readFileTrash,
     info: readFileInfo,
     parent: readFileParent,
     children: readFileChildren,
@@ -251,6 +304,7 @@ export const fileQuery = {
   update: {
     name: updateFileName,
     parent: updateFileParent,
+    trash: moveFileToTrash,
   },
   upload: {
     writeToken: uploadFileWriteToken,

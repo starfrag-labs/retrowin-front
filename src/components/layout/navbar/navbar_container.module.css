@@ -1,10 +1,29 @@
 .container {
   display: flex;
+  position: fixed;
   bottom: 0;
   justify-content: center;
   align-items: center;
-  flex-direction: row;
   width: 100%;
   height: 50px;
-  background-color: #525252;
+  margin: 10px;
+}
+
+.navbar {
+  display: flex;
+  flex-direction: row;
+  background-color: #2e2e2ebb;
+  border: 1px solid #e2e2e233;
+  border-radius: 10px;
+  width: auto;
+  height: 100%;
+  padding: 0 10px;
+}
+
+.icon_container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  cursor: pointer;
 }

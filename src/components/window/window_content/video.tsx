@@ -1,6 +1,7 @@
 import { url } from "@/api/fetch";
 import { storageQuery } from "@/api/query";
 import { useQuery } from "@tanstack/react-query";
+import mediaStyles from "./media.module.css";
 
 export default function VideoViewer({ fileKey }: { fileKey: string }) {
   // Constants
@@ -10,7 +11,7 @@ export default function VideoViewer({ fileKey }: { fileKey: string }) {
   const sessionQuery = useQuery(storageQuery.session.read(fileKey));
 
   return (
-    <div className="full-size flex-center">
+    <div className={`full-size flex-center ${mediaStyles.container}`}>
       {sessionQuery.isFetched && sessionQuery.data && (
         <video
           controls
