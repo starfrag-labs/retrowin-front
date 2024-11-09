@@ -141,9 +141,13 @@ const customFetch = async <T = unknown>(
 export const authApi = {
   session: {
     check: () =>
-      customFetch<
-        CustomResponse<string>
-      >(url.auth.session.check),
+      customFetch<CustomResponse<string>>(
+        url.auth.session.check,
+        {
+          method: "GET",
+        },
+        "auth",
+      ),
   },
 };
 export const memberApi = {
