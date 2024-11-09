@@ -56,7 +56,12 @@ export default function Home() {
     retry: normalRetryCount,
     staleTime: normalStaleTime,
   });
-  const getMemberQuery = useQuery({
+  const getMemberQuery = useQuery<
+    {
+      uuidKey: string;
+    },
+    number
+  >({
     queryKey: ["member"],
     queryFn: async () => {
       const response = await memberApi.get();
@@ -104,7 +109,12 @@ export default function Home() {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
       if (homeKeyQuery.error === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
-      } else if (homeKeyQuery.error === 403 && !getMemberQuery.isSuccess) {
+      } else if (
+        homeKeyQuery.error === 403 &&
+        getMemberQuery.isError &&
+        getMemberQuery.error === 404 &&
+        !createMemberMutation.isPending
+      ) {
         // If the user is not a member of the service, create a member
         createMemberMutation
           .mutateAsync()
@@ -122,6 +132,8 @@ export default function Home() {
     }
   }, [
     createMemberMutation,
+    getMemberQuery.error,
+    getMemberQuery.isError,
     getMemberQuery.isSuccess,
     homeKeyQuery.error,
     homeKeyQuery.isError,
