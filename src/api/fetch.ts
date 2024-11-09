@@ -54,12 +54,9 @@ export const url = {
     file: {
       // get source directly from storage
       read: (fileKey: string, type: "original" = "original") =>
-        new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
+        `${storageApiBase}/read/bare/${fileKey}/${type}`,
       readWithName: (fileKey: string, fileName: string) =>
-        new URL(
-          `/read/with-name/${fileKey}?file_name=${fileName}`,
-          storageApiBase,
-        ),
+        `${storageApiBase}/read/with-name/${fileKey}?file_name=${fileName}`,
       write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
