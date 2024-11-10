@@ -4,6 +4,7 @@
   align-items: center;
   justify-content: center;
   position: absolute;
+  border: 1px solid #888888;
   overflow: hidden;
   z-index: 1;
 }
