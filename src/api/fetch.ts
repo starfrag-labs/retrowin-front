@@ -76,7 +76,7 @@ const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
   base: "cloud" | "storage" = "cloud",
-  bodyType: "json" | "blob" = "json",
+  bodyType: "json" | "blob" | undefined = "json",
 ) => {
   // create a new URL object with the input string
   let url: string;
@@ -98,7 +98,7 @@ const customFetch = async <T = unknown>(
   });
 
   let body: T | undefined;
-  if (response.ok) {
+  if (response.ok && bodyType) {
     switch (bodyType) {
       case "json":
         body = (await response.json()) as T;
@@ -117,9 +117,9 @@ const customFetch = async <T = unknown>(
   }
 
   return {
-    ok: response.ok, // pass the ok along
-    headers: response.headers, // pass the headers along
+    ok: response.ok, // pass the ok status along
     status: response.status, // pass the status along
+    headers: response.headers, // pass the headers along
     body, // pass the body along
   };
 };

@@ -2,7 +2,8 @@
 const nextConfig = {
   output: "standalone",
   images: {
-    path: `${process.env.ASSET_PREFIX}/_next/image`,
+    // path: `${process.env.ASSET_PREFIX}/_next/image`,
+    path: process.env.ASSET_PREFIX ? `${process.env.ASSET_PREFIX}/_next/image` : "/_next/image",
     remotePatterns: [
       {
         hostname: "ifcloud-storage",

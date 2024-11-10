@@ -42,6 +42,7 @@ export default memo(function FileItem({
   // constants
   const serialKey = createSerialKey(fileKey, windowKey);
   const selectedFileBackground = "#f0f0f033";
+  const selectedFile = "#55555533";
 
   // States
   const [icon, setIcon] = useState<FileIconType | null>(null);
@@ -70,18 +71,17 @@ export default memo(function FileItem({
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
+  // Queries
   const linkTargetQuery = useQuery(
     fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
   );
+  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
 
   // Get background window key
   const backgroundWindowKey = useMemo(() => {
     const backgroundWindow = getBackgroundWindow();
     return backgroundWindow?.key || "";
   }, [getBackgroundWindow]);
-
-  // Query
-  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
 
   const handleMouseEnter = useCallback(() => {
     setHighlightedFile({
@@ -344,9 +344,8 @@ export default memo(function FileItem({
       showDetail &&
       detailRef.current &&
       fileRef.current &&
-      fileInfoQuery.isFetched &&
-      fileInfoQuery.data &&
-      fileInfoQuery.data.status === 200
+      fileInfoQuery.isSuccess &&
+      fileInfoQuery.data
     ) {
       const fileRect = fileRef.current.getBoundingClientRect();
       const detailRect = detailRef.current.getBoundingClientRect();
@@ -367,7 +366,7 @@ export default memo(function FileItem({
       }
       detailRef.current.style.visibility = "visible";
     }
-  }, [fileInfoQuery.data, fileInfoQuery.isFetched, showDetail]);
+  }, [fileInfoQuery.data, fileInfoQuery.isSuccess, showDetail]);
 
   return (
     <div className={`full-size ${styles.container}`}>
@@ -376,9 +375,10 @@ export default memo(function FileItem({
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={{
-          backgroundColor: selectedFileSerials.includes(serialKey)
-            ? selectedFileBackground
-            : "",
+          backgroundColor:
+            (selectedFileSerials.includes(serialKey) &&
+              (backgroundFile ? selectedFileBackground : selectedFile)) ||
+            "transparent",
         }}
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
