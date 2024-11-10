@@ -13,10 +13,8 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuBox from "@/components/menu/menu_box";
 import { createWindowKey } from "@/utils/random_key";
 import { WindowType } from "@/interfaces/window";
-import { fileApi, memberApi } from "@/api/fetch";
 import { redirect, RedirectType } from "next/navigation";
-import { normalRetryCount, normalStaleTime } from "@/api/query";
-import { ApiFileType } from "@/interfaces/api";
+import { fileQuery, memberQuery } from "@/api/query";
 
 export default function Home() {
   // Constants
@@ -36,56 +34,9 @@ export default function Home() {
 
   // Queries
   const queryClient = useQueryClient();
-  const homeKeyQuery = useQuery<
-    {
-      fileKey: string;
-      fileName: string;
-      type: ApiFileType;
-    },
-    number
-  >({
-    queryKey: ["file", "home"],
-    queryFn: async () => {
-      const response = await fileApi.read.home();
-      if (response.ok && response.body) {
-        return response.body.data;
-      } else {
-        return Promise.reject(response.status);
-      }
-    },
-    retry: normalRetryCount,
-    staleTime: normalStaleTime,
-  });
-  const getMemberQuery = useQuery<
-    {
-      uuidKey: string;
-    },
-    number
-  >({
-    queryKey: ["member"],
-    queryFn: async () => {
-      const response = await memberApi.get();
-      if (response.ok && response.body) {
-        return response.body.data;
-      } else {
-        return Promise.reject(response.status);
-      }
-    },
-    retry: normalRetryCount,
-    staleTime: normalStaleTime,
-  });
-  const createMemberMutation = useMutation({
-    mutationKey: ["member", "create"],
-    mutationFn: async () => {
-      const response = await memberApi.create();
-      if (response.ok && response.body) {
-        return response.body.data;
-      } else {
-        return Promise.reject(response.status);
-      }
-    },
-    retry: normalRetryCount,
-  });
+  const homeKeyQuery = useQuery(fileQuery.read.home);
+  const getMemberQuery = useQuery(memberQuery.get);
+  const createMemberMutation = useMutation(memberQuery.create);
 
   useEffect(() => {
     if (homeKey) {
@@ -100,19 +51,19 @@ export default function Home() {
 
   useEffect(() => {
     if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
-      setHomeKey(homeKeyQuery.data.fileKey);
+      setHomeKey(homeKeyQuery.data.data.fileKey);
     }
   }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
 
   useEffect(() => {
     if (homeKeyQuery.isError) {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      if (homeKeyQuery.error === 401 && redirectUri) {
+      if (homeKeyQuery.error.status === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
       } else if (
-        homeKeyQuery.error === 403 &&
+        homeKeyQuery.error.status === 403 &&
         getMemberQuery.isError &&
-        getMemberQuery.error === 404 &&
+        getMemberQuery.error.status === 404 &&
         !createMemberMutation.isPending
       ) {
         // If the user is not a member of the service, create a member
@@ -124,7 +75,10 @@ export default function Home() {
           .catch(() => {
             throw new Error("Failed to create member");
           });
-      } else if (homeKeyQuery.error === 403 && getMemberQuery.isSuccess) {
+      } else if (
+        homeKeyQuery.error.status === 403 &&
+        getMemberQuery.isSuccess
+      ) {
         throw new Error("You are not a member of this service");
       } else {
         throw new Error("Failed to get home");
@@ -149,7 +103,7 @@ export default function Home() {
     });
   }, [backgroundWindowKey, backgroundWindowRef, setCurrentWindow]);
 
-  if (homeKeyQuery.isLoading || !homeKey) {
+  if (!homeKey) {
     return <div></div>;
   }
 

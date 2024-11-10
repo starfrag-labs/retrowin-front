@@ -49,7 +49,9 @@ export default function BackgroundMenu({
   }, [backgroundFileKey, closeMenu, createContainerMutation, queryClient]);
 
   const handleRefresh = useCallback(() => {
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({
+      queryKey: ["file"],
+    });
     closeMenu();
   }, [queryClient, closeMenu]);
 

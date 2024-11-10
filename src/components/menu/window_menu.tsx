@@ -65,7 +65,9 @@ export default function WindowMenu({
   }, [closeMenu, deleteFilePermanentMutation, queryClient, targetFileKey]);
 
   const handleRefresh = useCallback(async () => {
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({
+      queryKey: ["file"],
+    });
     closeMenu();
   }, [closeMenu, queryClient]);
 

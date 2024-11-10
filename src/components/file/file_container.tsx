@@ -84,7 +84,7 @@ export default function FileContainer({
     return null;
   }
 
-  if (readContainerQuery.data.status !== 200) {
+  if (readContainerQuery.isError) {
     return (
       <div className="flex-center full-size">
         {readContainerQuery.data.message}
