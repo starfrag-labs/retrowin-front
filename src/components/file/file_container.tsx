@@ -76,18 +76,15 @@ export default function FileContainer({
 
   useEffect(() => {
     if (setLoading) {
+      // Set loading state
       setLoading(readContainerQuery.isFetching);
     }
   }, [readContainerQuery.isFetching, setLoading]);
 
-  if (readContainerQuery.isFetching || !readContainerQuery.data) {
-    return null;
-  }
-
-  if (readContainerQuery.isError) {
+  if (readContainerQuery.isError && readContainerQuery.error) {
     return (
       <div className="flex-center full-size">
-        {readContainerQuery.data.message}
+        {readContainerQuery.error.message}
       </div>
     );
   }
@@ -103,25 +100,27 @@ export default function FileContainer({
           backgroundFile={backgroundFile}
         />
       )}
-      {trash && readTrashQuery.isFetched && readTrashQuery.data && (
+      {trash && readTrashQuery.isSuccess && readTrashQuery.data && (
         <FileItem
           name={SpecialFileName.Trash}
           type={FileType.Trash}
-          fileKey={readTrashQuery.data.data.fileKey || ""}
+          fileKey={readTrashQuery.data.data.fileKey}
           windowKey={windowKey}
           backgroundFile={backgroundFile}
         />
       )}
-      {readContainerQuery.data.data.sort(sortFiles).map((file) => (
-        <FileItem
-          key={file.fileKey}
-          name={file.fileName}
-          type={file.type}
-          fileKey={file.fileKey}
-          windowKey={windowKey}
-          backgroundFile={backgroundFile}
-        />
-      ))}
+      {readContainerQuery.data?.data
+        .sort(sortFiles)
+        .map((file) => (
+          <FileItem
+            key={file.fileKey}
+            name={file.fileName}
+            type={file.type}
+            fileKey={file.fileKey}
+            windowKey={windowKey}
+            backgroundFile={backgroundFile}
+          />
+        ))}
     </div>
   );
 }

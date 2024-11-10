@@ -34,8 +34,8 @@ export default function Home() {
 
   // Queries
   const queryClient = useQueryClient();
-  const homeKeyQuery = useQuery(fileQuery.read.home);
-  const getMemberQuery = useQuery(memberQuery.get);
+  const homeKeyQuery = useQuery({ ...fileQuery.read.home, retry: false });
+  const getMemberQuery = useQuery({ ...memberQuery.get, retry: false });
   const createMemberMutation = useMutation(memberQuery.create);
 
   useEffect(() => {
