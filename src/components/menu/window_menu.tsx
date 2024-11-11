@@ -53,19 +53,23 @@ export default function WindowMenu({
     const files = await queryClient.fetchQuery(
       fileQuery.read.children(targetFileKey),
     );
-    Promise.all(
-      files.data.map((file) =>
-        deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey }),
-      ),
-    ).then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["file", targetFileKey],
+    if (files) {
+      Promise.all(
+        files.data.map((file) =>
+          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey }),
+        ),
+      ).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["file", targetFileKey],
+        });
       });
-    });
+    }
   }, [closeMenu, deleteFilePermanentMutation, queryClient, targetFileKey]);
 
   const handleRefresh = useCallback(async () => {
-    queryClient.invalidateQueries();
+    queryClient.invalidateQueries({
+      queryKey: ["file"],
+    });
     closeMenu();
   }, [closeMenu, queryClient]);
 

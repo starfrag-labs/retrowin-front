@@ -187,7 +187,7 @@ export default function DragFileContainer({
       );
       // Set the target folder key as the linked file key
       if (
-        linkedFile.status === 200 &&
+        linkedFile &&
         linkedFile.data &&
         linkedFile.data.type === FileType.Container
       ) {
@@ -212,7 +212,7 @@ export default function DragFileContainer({
         fileKeys.map((fileKey) =>
           queryClient
             .fetchQuery(fileQuery.read.parent(fileKey))
-            .then((data) => data.data.fileKey),
+            .then((data) => data?.data.fileKey || ""),
         ),
       );
       // Move the selected files to the target folder

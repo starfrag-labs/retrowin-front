@@ -9,12 +9,12 @@ import { useWindowStore } from "@/store/window.store";
 import SelectBoxContainer from "@/components/select/select_box_container";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import Window from "@/components/window/window";
-import { useQuery } from "@tanstack/react-query";
-import { loadMainPageData } from "@/api/query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuBox from "@/components/menu/menu_box";
 import { createWindowKey } from "@/utils/random_key";
 import { WindowType } from "@/interfaces/window";
 import { redirect, RedirectType } from "next/navigation";
+import { fileQuery, memberQuery } from "@/api/query";
 
 export default function Home() {
   // Constants
@@ -33,7 +33,10 @@ export default function Home() {
   const backgroundWindowRef = useRef(null);
 
   // Queries
-  const homeKeyQuery = useQuery(loadMainPageData);
+  const queryClient = useQueryClient();
+  const homeKeyQuery = useQuery({ ...fileQuery.read.home, retry: false });
+  const getMemberQuery = useQuery({ ...memberQuery.get, retry: false });
+  const createMemberMutation = useMutation(memberQuery.create);
 
   useEffect(() => {
     if (homeKey) {
@@ -49,10 +52,47 @@ export default function Home() {
   useEffect(() => {
     if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
       setHomeKey(homeKeyQuery.data.data.fileKey);
-    } else if (homeKeyQuery.isError) {
-      redirect("/error", RedirectType.replace);
     }
-  }, [homeKeyQuery.data, homeKeyQuery.isError, homeKeyQuery.isSuccess]);
+  }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
+
+  useEffect(() => {
+    if (homeKeyQuery.isError) {
+      const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
+      if (homeKeyQuery.error.status === 401 && redirectUri) {
+        redirect(redirectUri, RedirectType.push);
+      } else if (
+        homeKeyQuery.error.status === 403 &&
+        getMemberQuery.isError &&
+        getMemberQuery.error.status === 404 &&
+        !createMemberMutation.isPending
+      ) {
+        // If the user is not a member of the service, create a member
+        createMemberMutation
+          .mutateAsync()
+          .then(() => {
+            queryClient.invalidateQueries();
+          })
+          .catch(() => {
+            throw new Error("Failed to create member");
+          });
+      } else if (
+        homeKeyQuery.error.status === 403 &&
+        getMemberQuery.isSuccess
+      ) {
+        throw new Error("You are not a member of this service");
+      } else {
+        throw new Error("Failed to get home");
+      }
+    }
+  }, [
+    createMemberMutation,
+    getMemberQuery.error,
+    getMemberQuery.isError,
+    getMemberQuery.isSuccess,
+    homeKeyQuery.error,
+    homeKeyQuery.isError,
+    queryClient,
+  ]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
@@ -63,7 +103,7 @@ export default function Home() {
     });
   }, [backgroundWindowKey, backgroundWindowRef, setCurrentWindow]);
 
-  if (homeKeyQuery.isLoading || !homeKey) {
+  if (!homeKey) {
     return <div></div>;
   }
 

@@ -45,7 +45,7 @@ export default memo(function FileName({
   const updateFileName = async () => {
     const parentFileKey = await queryClient
       .fetchQuery(fileQuery.read.parent(fileKey))
-      .then((data) => data.data.fileKey);
+      .then((data) => data?.data.fileKey);
     if (!parentFileKey) return;
     await renamingFileQuery
       .mutateAsync({

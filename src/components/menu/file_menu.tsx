@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuList from "./menu_list";
 import { useWindowStore } from "@/store/window.store";
 import { fileQuery, storageQuery } from "@/api/query";
@@ -25,8 +25,15 @@ export default function FileMenu({
   closeMenu: () => void;
 }) {
   // Query client
+  // This is used for actions
+  // By using queryClient, the query will be performed only needed, instead of performing all queries for possible actions
   const queryClient = useQueryClient();
+
   // Queries
+  const readLinkTargetQuery = useQuery({
+    ...fileQuery.read.linkTarget(fileKey),
+    enabled: fileType === FileType.Link,
+  });
 
   // Mutations
   const moveToTrashMutation = useMutation(fileQuery.update.trash);
@@ -89,29 +96,37 @@ export default function FileMenu({
   // Open file action
   const handleOpen = useCallback(async () => {
     closeMenu();
-    if (fileType === FileType.Link) {
-      const linkTarget = await queryClient.fetchQuery(
-        fileQuery.read.linkTarget(fileKey),
+    if (
+      fileType === FileType.Link &&
+      readLinkTargetQuery.isSuccess &&
+      readLinkTargetQuery.data
+    ) {
+      openFile(
+        readLinkTargetQuery.data.data.type,
+        fileName,
+        readLinkTargetQuery.data.data.fileKey,
       );
-      if (linkTarget.status === 200 && linkTarget.data) {
-        openFile(linkTarget.data.type, fileName, linkTarget.data.fileKey);
-      }
     } else {
       openFile(fileType, fileName, fileKey);
     }
-  }, [closeMenu, fileKey, fileName, fileType, openFile, queryClient]);
+  }, [
+    closeMenu,
+    fileKey,
+    fileName,
+    fileType,
+    openFile,
+    readLinkTargetQuery.data,
+    readLinkTargetQuery.isSuccess,
+  ]);
 
   // Open file location action
   const handleOpenLinkTargetLocation = useCallback(async () => {
     closeMenu();
-    const linkTarget = await queryClient.fetchQuery(
-      fileQuery.read.linkTarget(fileKey),
-    );
-    if (linkTarget.status === 200 && linkTarget.data) {
+    if (readLinkTargetQuery.isSuccess && readLinkTargetQuery.data) {
       const parent = await queryClient.fetchQuery(
-        fileQuery.read.parent(linkTarget.data.fileKey),
+        fileQuery.read.parent(readLinkTargetQuery.data.data.fileKey),
       );
-      if (parent.status === 200 && parent.data) {
+      if (parent && parent.data) {
         newWindow({
           targetKey: parent.data.fileKey,
           type: WindowType.Navigator,
@@ -119,7 +134,13 @@ export default function FileMenu({
         });
       }
     }
-  }, [closeMenu, fileKey, newWindow, queryClient]);
+  }, [
+    closeMenu,
+    newWindow,
+    queryClient,
+    readLinkTargetQuery.data,
+    readLinkTargetQuery.isSuccess,
+  ]);
 
   // Update file actions
   const handleRename = useCallback(() => {
@@ -173,15 +194,17 @@ export default function FileMenu({
     const files = await queryClient.fetchQuery(
       fileQuery.read.children(fileKey),
     );
-    Promise.all(
-      files.data.map((file) =>
-        permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey }),
-      ),
-    ).then(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["file", fileKey],
+    if (files) {
+      Promise.all(
+        files.data.map((file) =>
+          permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey }),
+        ),
+      ).then(() => {
+        queryClient.invalidateQueries({
+          queryKey: ["file", fileKey],
+        });
       });
-    });
+    }
   }, [closeMenu, fileKey, permanentDeleteMutation, queryClient]);
 
   // Delete file actions based on parent window type

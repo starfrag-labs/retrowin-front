@@ -1,16 +1,10 @@
 import { ApiFileType } from "@/interfaces/api";
 import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
 
-export const authApiBase = process.env.NEXT_PUBLIC_AUTH_API_BASE;
-export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE;
-export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE;
+export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE ?? "";
+export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE ?? "";
 
 export const url = {
-  auth: {
-    session: {
-      check: "/session/check",
-    },
-  },
   member: {
     get: "/member",
     create: "/member",
@@ -60,12 +54,9 @@ export const url = {
     file: {
       // get source directly from storage
       read: (fileKey: string, type: "original" = "original") =>
-        new URL(`/read/bare/${fileKey}/${type}`, storageApiBase),
+        `${storageApiBase}/read/bare/${fileKey}/${type}`,
       readWithName: (fileKey: string, fileName: string) =>
-        new URL(
-          `/read/with-name/${fileKey}?file_name=${fileName}`,
-          storageApiBase,
-        ),
+        `${storageApiBase}/read/with-name/${fileKey}?file_name=${fileName}`,
       write: (fileKey: string) => `/write/${fileKey}`,
     },
     session: {
@@ -84,20 +75,17 @@ export const url = {
 const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
-  base: "cloud" | "storage" | "auth" = "cloud",
-  bodyType: "json" | "blob" = "json",
+  base: "cloud" | "storage" = "cloud",
+  bodyType: "json" | "blob" | undefined = "json",
 ) => {
   // create a new URL object with the input string
-  let url: URL;
+  let url: string;
   switch (base) {
     case "cloud":
-      url = new URL(input as string, cloudApiBase);
+      url = `${cloudApiBase}${input}`;
       break;
     case "storage":
-      url = new URL(input as string, storageApiBase);
-      break;
-    case "auth":
-      url = new URL(input as string, authApiBase);
+      url = `${storageApiBase}${input}`;
       break;
   }
   const response = await fetch(url, {
@@ -109,27 +97,29 @@ const customFetch = async <T = unknown>(
     credentials: "include",
   });
 
-  let body: T;
-  switch (bodyType) {
-    case "json":
-      body = (await response.json()) as T;
-      break;
-    case "blob":
-      if (response.status !== 200) {
+  let body: T | undefined;
+  if (response.ok && bodyType) {
+    switch (bodyType) {
+      case "json":
         body = (await response.json()) as T;
-      } else {
-        body = (await response.blob()) as T;
-      }
-      break;
-    default:
-      body = (await response.json()) as T;
-      break;
+        break;
+      case "blob":
+        if (response.status !== 200) {
+          body = (await response.json()) as T;
+        } else {
+          body = (await response.blob()) as T;
+        }
+        break;
+      default:
+        body = (await response.json()) as T;
+        break;
+    }
   }
 
   return {
-    ok: response.ok, // pass the ok along
-    headers: response.headers, // pass the headers along
+    ok: response.ok, // pass the ok status along
     status: response.status, // pass the status along
+    headers: response.headers, // pass the headers along
     body, // pass the body along
   };
 };
@@ -138,14 +128,6 @@ const customFetch = async <T = unknown>(
  * Custom fetch function
  * @returns promise of json response
  */
-export const authApi = {
-  session: {
-    check: () =>
-      customFetch<
-        CustomResponse<string>
-      >(url.auth.session.check),
-  },
-};
 export const memberApi = {
   get: () =>
     customFetch<
@@ -203,27 +185,30 @@ export const fileApi = {
           token: string;
         }>
       >(url.file.read.storage(fileKey)),
-    root: customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.root),
-    home: customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.home),
-    trash: customFetch<
-      CustomResponse<{
-        fileKey: string;
-        fileName: string;
-        type: ApiFileType;
-      }>
-    >(url.file.read.trash),
+    root: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.root),
+    home: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.home),
+    trash: () =>
+      customFetch<
+        CustomResponse<{
+          fileKey: string;
+          fileName: string;
+          type: ApiFileType;
+        }>
+      >(url.file.read.trash),
     info: (fileKey: string) =>
       customFetch<
         CustomResponse<{
