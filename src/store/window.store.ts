@@ -1,14 +1,14 @@
-import { AppWindow, WindowType } from "@/interfaces/window";
-import { createWindowKey } from "@/utils/random_key";
 import { create } from "zustand";
+import { type AppWindow, WindowType } from "@/interfaces/window";
+import { createWindowKey } from "@/utils/random_key";
 
 type State = {
   windows: AppWindow[];
   currentWindow: {
     key: string;
-    windowRef: React.RefObject<HTMLElement>;
-    contentRef: React.RefObject<HTMLElement> | null;
-    headerRef: React.RefObject<HTMLElement> | null;
+    windowRef: React.RefObject<HTMLDivElement | null>;
+    contentRef: React.RefObject<HTMLElement | null> | null;
+    headerRef: React.RefObject<HTMLElement | null> | null;
   } | null;
   mouseEnter: boolean;
 };
@@ -68,12 +68,12 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   newWindow: ({ targetKey, type, title, key }) => {
     set((state) => {
       const existingWindow = state.windows.find(
-        (w) => w.targetKey === targetKey && w.type === type,
+        (w) => w.targetKey === targetKey && w.type === type
       );
       if (existingWindow) {
         // highlight existing window
         const filteredWindows = state.windows.filter(
-          (w) => w.targetKey !== targetKey,
+          (w) => w.targetKey !== targetKey
         );
         state.windows = [...filteredWindows, existingWindow];
         return { windows: state.windows };
@@ -112,7 +112,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
           window.title = title;
         }
       }
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
+      if (window?.targetHistory && window.historyIndex !== undefined) {
         window.targetHistory = [
           ...window.targetHistory.slice(0, window.historyIndex + 1),
           targetFileKey,
@@ -157,7 +157,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   prevWindow: (key) => {
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
+      if (window?.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex > 0) {
           window.historyIndex -= 1;
           window.targetKey = window.targetHistory[window.historyIndex];
@@ -170,7 +170,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   nextWindow: (key) => {
     set((state) => {
       const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
+      if (window?.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex < window.targetHistory.length - 1) {
           window.historyIndex += 1;
           window.targetKey = window.targetHistory[window.historyIndex];
@@ -189,7 +189,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   hasNextWindow: (key) => {
     const window = get().windows.find((w) => w.key === key);
-    if (window && window.targetHistory && window.historyIndex !== undefined) {
+    if (window?.targetHistory && window.historyIndex !== undefined) {
       return (
         window.historyIndex < window.targetHistory.length - 1 &&
         window.targetHistory.length > 1

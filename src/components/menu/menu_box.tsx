@@ -1,14 +1,14 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import type { FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
 import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
-import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./menu_box.module.css";
 import BackgroundMenu from "./background_menu";
 import FileMenu from "./file_menu";
+import styles from "./menu_box.module.css";
 import WindowMenu from "./window_menu";
-import { FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 
 export default function MenuBox({ children }: { children: React.ReactNode }) {
   // States
@@ -87,7 +87,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
       isFileKeySelected,
       pressedKeys,
       unselectAllFiles,
-    ],
+    ]
   );
 
   const closeMenu = useCallback(() => {
@@ -108,7 +108,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
         }
       }
     },
-    [closeMenu],
+    [closeMenu]
   );
 
   useEffect(() => {
@@ -125,7 +125,11 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   }, [setMenuRef]);
 
   return (
-    <div className="flex-center full-size" onMouseUp={handleContextMenu}>
+    <section
+      className="flex-center full-size"
+      onMouseUp={handleContextMenu}
+      aria-label="context menu area"
+    >
       <div className={styles.menu_box} ref={menuRef} hidden={menuType === null}>
         {menuType === "background" && targetFileKey && (
           <BackgroundMenu
@@ -152,6 +156,6 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
         )}
       </div>
       {children}
-    </div>
+    </section>
   );
 }

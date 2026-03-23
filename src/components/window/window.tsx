@@ -1,12 +1,12 @@
+import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fileQuery } from "@/api/query";
+import { type AppWindow, WindowType } from "@/interfaces/window";
+import { useEventStore } from "@/store/event.store";
+import { useWindowStore } from "@/store/window.store";
 import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
-import { AppWindow, WindowType } from "@/interfaces/window";
-import { useWindowStore } from "@/store/window.store";
-import { useEventStore } from "@/store/event.store";
-import { fileQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
 
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
@@ -22,17 +22,17 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 });
   const [prevWindowPosition, setPrevWindowPosition] = useState({ x: 0, y: 0 });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [defaultWindowButtonColorPallete, setDefaultWindowButtonColorPallete] =
+  const [defaultWindowButtonColorPallete, _setDefaultWindowButtonColorPallete] =
     useState([]);
   const [
     maximizedWindowButtonColorPallete,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setMaximizedWindowButtonColorPallete,
+    _setMaximizedWindowButtonColorPallete,
   ] = useState([]);
   const [contentLoading, setContentLoading] = useState(false);
 
   // Store state
-  const windows = useWindowStore((state) => state.windows);
+  const _windows = useWindowStore((state) => state.windows);
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
   const findWindow = useWindowStore((state) => state.findWindow);
@@ -91,7 +91,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     if (window) {
       setTargetWindow(window);
     }
-  }, [findWindow, windowKey, windows]);
+  }, [findWindow, windowKey]);
 
   // Initialize window position and size
   useEffect(() => {
@@ -201,7 +201,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         window.addEventListener("mouseup", handleMouseUp);
       }
     },
-    [resizingCursor, windowSize.height, windowSize.width],
+    [resizingCursor, windowSize.height, windowSize.width]
   );
 
   // change cursor on resize
@@ -217,7 +217,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         windowRef.current.style.cursor = "default";
       }
     },
-    [setResizingCursor],
+    [setResizingCursor]
   );
   useEffect(() => {
     const currentWindow = windowRef.current;
@@ -251,7 +251,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         document.addEventListener("mouseup", handleMouseUp);
       }
     },
-    [minWindowSize.width, minWindowSize.height, resizingCursor],
+    [minWindowSize.width, minWindowSize.height, resizingCursor]
   );
   useEffect(() => {
     const currentWindow = windowRef.current;
@@ -263,12 +263,12 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   }, [resizeWindow]);
 
   return (
-    <div
+    <article
       className={`flex-center ${styles.container}`}
       ref={windowRef}
       onMouseDown={() => highlightWindow(windowKey)}
-      onMouseEnter={() => setMouseEnter(true)} // Set mouse enter when the mouse enters the window
-      onMouseLeave={() => setMouseEnter(false)} // Set mouse enter when the mouse leaves the window
+      onMouseEnter={() => setMouseEnter(true)}
+      onMouseLeave={() => setMouseEnter(false)}
     >
       <WindowHeader
         ref={windowHeaderRef}
@@ -312,6 +312,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
           onMouseEnter={enterWindow}
         />
       )}
-    </div>
+    </article>
   );
 });

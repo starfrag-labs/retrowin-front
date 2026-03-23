@@ -1,20 +1,20 @@
 "use client";
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { RedirectType, redirect } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fileQuery, memberQuery } from "@/api/query";
+import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
-import styles from "./page.module.css";
 import Background from "@/components/layout/background";
 import Navbar from "@/components/layout/navbar/navbar_container";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWindowStore } from "@/store/window.store";
-import SelectBoxContainer from "@/components/select/select_box_container";
-import DragFileContainer from "@/components/drag/drag_file_container";
-import Window from "@/components/window/window";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuBox from "@/components/menu/menu_box";
-import { createWindowKey } from "@/utils/random_key";
+import SelectBoxContainer from "@/components/select/select_box_container";
+import Window from "@/components/window/window";
 import { WindowType } from "@/interfaces/window";
-import { redirect, RedirectType } from "next/navigation";
-import { fileQuery, memberQuery } from "@/api/query";
+import { useWindowStore } from "@/store/window.store";
+import { createWindowKey } from "@/utils/random_key";
+import styles from "./page.module.css";
 
 export default function Home() {
   // Constants
@@ -30,7 +30,7 @@ export default function Home() {
   const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
 
   // Refs
-  const backgroundWindowRef = useRef(null);
+  const backgroundWindowRef = useRef<HTMLDivElement>(null);
 
   // Queries
   const queryClient = useQueryClient();
@@ -47,7 +47,7 @@ export default function Home() {
         key: backgroundWindowKey,
       });
     }
-  }, [backgroundWindowKey, backgroundWindowRef, newBackgroundWindow, homeKey]);
+  }, [backgroundWindowKey, newBackgroundWindow, homeKey]);
 
   useEffect(() => {
     if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
@@ -101,7 +101,7 @@ export default function Home() {
       contentRef: null,
       headerRef: null,
     });
-  }, [backgroundWindowKey, backgroundWindowRef, setCurrentWindow]);
+  }, [backgroundWindowKey, setCurrentWindow]);
 
   if (!homeKey) {
     return <div></div>;
@@ -111,15 +111,17 @@ export default function Home() {
     <div
       className={`${styles.page} flex-center full-size`}
       onContextMenu={(e) => e.preventDefault()}
+      role="application"
     >
       <Background>
         <MenuBox>
           <SelectBoxContainer>
             <DragFileContainer>
-              <div
+              <section
                 ref={backgroundWindowRef}
                 className={`full-size flex-center ${styles.background_window}`}
                 onMouseEnter={onMouseEnter}
+                aria-label="background workspace"
               >
                 <FileContainer
                   windowKey={backgroundWindowKey}
@@ -128,7 +130,7 @@ export default function Home() {
                   trash
                   backgroundFile
                 />
-              </div>
+              </section>
               {windows
                 .filter((w) => w.type !== WindowType.Background)
                 .map((window) => (

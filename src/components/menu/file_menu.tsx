@@ -1,13 +1,13 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import MenuList from "./menu_list";
-import { useWindowStore } from "@/store/window.store";
-import { fileQuery, storageQuery } from "@/api/query";
 import { useCallback } from "react";
-import { WindowType } from "@/interfaces/window";
-import { FileType } from "@/interfaces/file";
-import { useFileStore } from "@/store/file.store";
-import { ContentTypes, getContentTypes } from "@/utils/content_types";
 import { url } from "@/api/fetch";
+import { fileQuery, storageQuery } from "@/api/query";
+import { FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
+import { useFileStore } from "@/store/file.store";
+import { useWindowStore } from "@/store/window.store";
+import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import MenuList from "./menu_list";
 
 export default function FileMenu({
   fileKey,
@@ -42,7 +42,7 @@ export default function FileMenu({
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
   const getSelectedFileKeys = useFileStore(
-    (state) => state.getSelectedFileKeys,
+    (state) => state.getSelectedFileKeys
   );
   const setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
@@ -50,7 +50,7 @@ export default function FileMenu({
     async (
       fileType: Omit<FileType, FileType.Link>,
       fileName: string,
-      fileKey: string,
+      fileKey: string
     ) => {
       let windowType: WindowType;
       switch (fileType) {
@@ -60,7 +60,7 @@ export default function FileMenu({
         case FileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case FileType.Block:
+        case FileType.Block: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
@@ -77,6 +77,7 @@ export default function FileMenu({
               break;
           }
           break;
+        }
         case FileType.Upload:
           windowType = WindowType.Uploader;
           break;
@@ -90,7 +91,7 @@ export default function FileMenu({
         title: fileName,
       });
     },
-    [newWindow],
+    [newWindow]
   );
 
   // Open file action
@@ -104,7 +105,7 @@ export default function FileMenu({
       openFile(
         readLinkTargetQuery.data.data.type,
         fileName,
-        readLinkTargetQuery.data.data.fileKey,
+        readLinkTargetQuery.data.data.fileKey
       );
     } else {
       openFile(fileType, fileName, fileKey);
@@ -124,9 +125,9 @@ export default function FileMenu({
     closeMenu();
     if (readLinkTargetQuery.isSuccess && readLinkTargetQuery.data) {
       const parent = await queryClient.fetchQuery(
-        fileQuery.read.parent(readLinkTargetQuery.data.data.fileKey),
+        fileQuery.read.parent(readLinkTargetQuery.data.data.fileKey)
       );
-      if (parent && parent.data) {
+      if (parent?.data) {
         newWindow({
           targetKey: parent.data.fileKey,
           type: WindowType.Navigator,
@@ -166,8 +167,8 @@ export default function FileMenu({
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
       selectedFileKeys.map((fileKey) =>
-        moveToTrashMutation.mutateAsync({ fileKey }),
-      ),
+        moveToTrashMutation.mutateAsync({ fileKey })
+      )
     ).finally(() => {
       queryClient.invalidateQueries({
         queryKey: ["file"],
@@ -180,8 +181,8 @@ export default function FileMenu({
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
       selectedFileKeys.map((fileKey) =>
-        permanentDeleteMutation.mutateAsync({ fileKey }),
-      ),
+        permanentDeleteMutation.mutateAsync({ fileKey })
+      )
     ).finally(() => {
       queryClient.invalidateQueries({
         queryKey: ["file"],
@@ -192,13 +193,13 @@ export default function FileMenu({
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
     const files = await queryClient.fetchQuery(
-      fileQuery.read.children(fileKey),
+      fileQuery.read.children(fileKey)
     );
     if (files) {
       Promise.all(
         files.data.map((file) =>
-          permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey }),
-        ),
+          permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey })
+        )
       ).then(() => {
         queryClient.invalidateQueries({
           queryKey: ["file", fileKey],

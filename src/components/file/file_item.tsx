@@ -1,19 +1,19 @@
 "use client";
 
-import FileIcon from "./file_icon";
-import FileName from "./file_name";
-import styles from "./file_item.module.css";
-import { useFileStore } from "@/store/file.store";
+import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { fileQuery } from "@/api/query";
+import { FileIconType, FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
+import { useFileStore } from "@/store/file.store";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
-import { WindowType } from "@/interfaces/window";
-import { createSerialKey } from "@/utils/serial_key";
-import { FileType, FileIconType } from "@/interfaces/file";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
-import { useQuery } from "@tanstack/react-query";
-import { fileQuery } from "@/api/query";
+import { createSerialKey } from "@/utils/serial_key";
 import FileDetail from "./file_detail";
+import FileIcon from "./file_icon";
+import styles from "./file_item.module.css";
+import FileName from "./file_name";
 
 /**
  * File item component
@@ -50,7 +50,7 @@ export default memo(function FileItem({
 
   // Store state
   const selectedFileSerials = useFileStore(
-    (state) => state.selectedFileSerials,
+    (state) => state.selectedFileSerials
   );
   const selectBox = useSelectBoxStore((state) => state.rect);
   const targetWindow = useSelectBoxStore((state) => state.currentWindowKey);
@@ -61,7 +61,7 @@ export default memo(function FileItem({
   const unselectFile = useFileStore((state) => state.unselectFile);
   const newWindow = useWindowStore((state) => state.newWindow);
   const getBackgroundWindow = useWindowStore(
-    (state) => state.getBackgroundWindow,
+    (state) => state.getBackgroundWindow
   );
   const updateWindow = useWindowStore((state) => state.updateWindow);
 
@@ -73,7 +73,7 @@ export default memo(function FileItem({
 
   // Queries
   const linkTargetQuery = useQuery(
-    fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
+    fileQuery.read.linkTarget(type === FileType.Link ? fileKey : "")
   );
   const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
 
@@ -191,7 +191,7 @@ export default memo(function FileItem({
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const clickBlock = useCallback(
@@ -221,7 +221,7 @@ export default memo(function FileItem({
           break;
       }
     },
-    [newWindow],
+    [newWindow]
   );
 
   const clickUpload = useCallback(
@@ -248,7 +248,7 @@ export default memo(function FileItem({
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const clickTrash = useCallback(
@@ -275,7 +275,7 @@ export default memo(function FileItem({
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const iconClick = useCallback(() => {
@@ -370,7 +370,7 @@ export default memo(function FileItem({
 
   return (
     <div className={`full-size ${styles.container}`}>
-      <div
+      <li
         className={`${styles.item_wrapper}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -390,7 +390,7 @@ export default memo(function FileItem({
             backgroundFile={backgroundFile}
           />
         </div>
-      </div>
+      </li>
       {showDetail &&
         (type === FileType.Block || type === FileType.Container) &&
         fileInfoQuery.isFetched &&

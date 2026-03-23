@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+import { fileQuery } from "@/api/query";
+import type { ApiFileType } from "@/interfaces/api";
+import { FileType, SpecialFileName } from "@/interfaces/file";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
-import { fileQuery } from "@/api/query";
-import { useCallback, useEffect } from "react";
-import { FileType, SpecialFileName } from "@/interfaces/file";
-import { ApiFileType } from "@/interfaces/api";
 
 /**
  * File container component
@@ -45,7 +45,7 @@ export default function FileContainer({
       b: {
         fileName: string;
         type: ApiFileType;
-      },
+      }
     ) => {
       // Home > Trash > Others
       const specialFileOrder = [
@@ -53,9 +53,9 @@ export default function FileContainer({
         SpecialFileName.Home,
         SpecialFileName.Trash,
         SpecialFileName.Upload,
-      ];
-      const aIndex = specialFileOrder.findIndex((name) => a.fileName === name);
-      const bIndex = specialFileOrder.findIndex((name) => b.fileName === name);
+      ] as string[];
+      const aIndex = specialFileOrder.indexOf(a.fileName);
+      const bIndex = specialFileOrder.indexOf(b.fileName);
       if (aIndex !== -1 && bIndex !== -1) {
         return aIndex - bIndex;
       }
@@ -67,11 +67,11 @@ export default function FileContainer({
       }
       // Container > Block > Link
       const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
-      const aTypeIndex = typeOrder.findIndex((type) => a.type === type);
-      const bTypeIndex = typeOrder.findIndex((type) => b.type === type);
+      const aTypeIndex = typeOrder.indexOf(a.type);
+      const bTypeIndex = typeOrder.indexOf(b.type);
       return aTypeIndex - bTypeIndex;
     },
-    [],
+    []
   );
 
   useEffect(() => {
@@ -109,18 +109,16 @@ export default function FileContainer({
           backgroundFile={backgroundFile}
         />
       )}
-      {readContainerQuery.data?.data
-        .sort(sortFiles)
-        .map((file) => (
-          <FileItem
-            key={file.fileKey}
-            name={file.fileName}
-            type={file.type}
-            fileKey={file.fileKey}
-            windowKey={windowKey}
-            backgroundFile={backgroundFile}
-          />
-        ))}
+      {readContainerQuery.data?.data.sort(sortFiles).map((file) => (
+        <FileItem
+          key={file.fileKey}
+          name={file.fileName}
+          type={file.type}
+          fileKey={file.fileKey}
+          windowKey={windowKey}
+          backgroundFile={backgroundFile}
+        />
+      ))}
     </div>
   );
 }

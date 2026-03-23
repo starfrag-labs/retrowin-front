@@ -6,7 +6,7 @@
   width: 1px;
   height: 1px;
   background-color: rgba(0, 0, 255, 0.2);
-  border: "1px solid blue";
-  transform-origin: "0 0";
+  border: 1px solid blue;
+  transform-origin: 0 0;
   z-index: 9999;
 }

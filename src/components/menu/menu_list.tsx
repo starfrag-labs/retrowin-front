@@ -1,4 +1,7 @@
 import styles from "./menu_list.module.css";
+
+let menuKeyCounter = 0;
+
 export default function MenuList({
   menuList,
 }: {
@@ -6,17 +9,26 @@ export default function MenuList({
 }) {
   return (
     <div className={`${styles.container}`}>
-      {menuList.map(({ name, action }, index) => (
-        <div className={`${styles.list_item_container}`} key={index}>
-          {name === "/" ? (
-            <div className={styles.list_split} />
-          ) : (
-            <div className={styles.list_item} onClick={() => action()}>
-              {name}
-            </div>
-          )}
-        </div>
-      ))}
+      {menuList.map(({ name, action }) => {
+        const key = name === "/" ? `divider-${menuKeyCounter++}` : name;
+        return (
+          <div className={`${styles.list_item_container}`} key={key}>
+            {name === "/" ? (
+              <div className={styles.list_split} />
+            ) : (
+              <div
+                className={styles.list_item}
+                onClick={() => action()}
+                onKeyDown={(e) => e.key === "Enter" && action()}
+                role="menuitem"
+                tabIndex={0}
+              >
+                {name}
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

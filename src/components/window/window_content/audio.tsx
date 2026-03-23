@@ -1,6 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { url } from "@/api/fetch";
 import { storageQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
 
 export default function Audio({ fileKey }: { fileKey: string }) {
   // Constants
@@ -14,6 +14,7 @@ export default function Audio({ fileKey }: { fileKey: string }) {
       {sessionQuery.isFetched && sessionQuery.data && (
         <audio controls>
           <source src={fileUrl.toString()} type="audio/mpeg" />
+          <track kind="captions" />
           Your browser does not support the audio element.
         </audio>
       )}

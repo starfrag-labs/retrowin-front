@@ -1,11 +1,11 @@
-import { WindowType } from "@/interfaces/window";
-import FileIcon from "../../file/file_icon";
-import { FileIconType } from "@/interfaces/file";
-import { useWindowStore } from "@/store/window.store";
-import styles from "./navbar_icon.module.css";
-import { useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useCallback } from "react";
 import { fileQuery } from "@/api/query";
+import { FileIconType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
+import { useWindowStore } from "@/store/window.store";
+import FileIcon from "../../file/file_icon";
+import styles from "./navbar_icon.module.css";
 
 export default function NavbarIcon({
   windowType,
@@ -20,7 +20,7 @@ export default function NavbarIcon({
 
   // Store actions
   const highlightWindowsByType = useWindowStore(
-    (state) => state.highlightWindowsByType,
+    (state) => state.highlightWindowsByType
   );
   const newWindow = useWindowStore((state) => state.newWindow);
 
@@ -68,7 +68,11 @@ export default function NavbarIcon({
 
   return (
     <div className={styles.container}>
-      <div className={styles.icon_container} onClick={handleClick}>
+      <button
+        type="button"
+        className={styles.icon_container}
+        onClick={handleClick}
+      >
         {windowCount > 0 && <div className={styles.icon_highlight} />}
         {windowType === WindowType.Navigator && (
           <FileIcon icon={FileIconType.Container} size={size} />
@@ -91,7 +95,7 @@ export default function NavbarIcon({
         {windowType === WindowType.Document && (
           <FileIcon icon={FileIconType.Block} size={size} />
         )}
-      </div>
+      </button>
     </div>
   );
 }

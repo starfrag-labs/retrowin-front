@@ -1,5 +1,8 @@
-import { ApiFileType } from "@/interfaces/api";
-import { CustomResponse, CustomStorageResponse } from "@/interfaces/api";
+import type {
+  ApiFileType,
+  CustomResponse,
+  CustomStorageResponse,
+} from "@/interfaces/api";
 
 export const cloudApiBase = process.env.NEXT_PUBLIC_CLOUD_API_BASE ?? "";
 export const storageApiBase = process.env.NEXT_PUBLIC_STORAGE_API_BASE ?? "";
@@ -76,7 +79,7 @@ const customFetch = async <T = unknown>(
   input: string | URL | globalThis.Request,
   init?: RequestInit,
   base: "cloud" | "storage" = "cloud",
-  bodyType: "json" | "blob" | undefined = "json",
+  bodyType: "json" | "blob" | undefined = "json"
 ) => {
   // create a new URL object with the input string
   let url: string;
@@ -321,7 +324,7 @@ export const storageApi = {
           method: "GET",
         },
         "storage",
-        "blob",
+        "blob"
       ),
     write: (fileKey: string, chunkCount: number, fileData: Blob) => {
       const formData = new FormData();
@@ -337,7 +340,7 @@ export const storageApi = {
           method: "POST",
           body: formData,
         },
-        "storage",
+        "storage"
       );
     },
   },
@@ -352,7 +355,7 @@ export const storageApi = {
         {
           method: "GET",
         },
-        "storage",
+        "storage"
       ),
   },
 };

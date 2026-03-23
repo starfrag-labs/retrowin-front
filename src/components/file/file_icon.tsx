@@ -1,13 +1,15 @@
-import { FaFileAlt } from "react-icons/fa";
-import { FaFolder } from "react-icons/fa";
-import { FaHome } from "react-icons/fa";
-import { FaTrash } from "react-icons/fa";
-import { FaUpload } from "react-icons/fa";
-import styles from "./file_icon.module.css";
-import { CSSProperties, forwardRef, memo } from "react";
-import { FileIconType } from "@/interfaces/file";
+import { type CSSProperties, forwardRef, memo } from "react";
+import {
+  FaFileAlt,
+  FaFolder,
+  FaHome,
+  FaImage,
+  FaTrash,
+  FaUpload,
+} from "react-icons/fa";
 import { MdOndemandVideo } from "react-icons/md";
-import { FaImage } from "react-icons/fa";
+import { FileIconType } from "@/interfaces/file";
+import styles from "./file_icon.module.css";
 
 /**
  * File icon component
@@ -31,13 +33,16 @@ export default memo(
       style?: CSSProperties;
       size?: string;
     },
-    ref?: React.Ref<HTMLDivElement>,
+    ref?: React.Ref<HTMLDivElement>
   ) {
     return (
       <div
         className={styles.icon_container}
         ref={ref}
         onDoubleClick={onClick}
+        onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+        role="button"
+        tabIndex={0}
         style={{
           width: size,
           height: size,
@@ -112,5 +117,5 @@ export default memo(
         )}
       </div>
     );
-  }),
+  })
 );

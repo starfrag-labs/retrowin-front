@@ -1,9 +1,9 @@
-import { memo, useEffect, useState } from "react";
-import styles from "./file_name.module.css";
-import { useFileStore } from "@/store/file.store";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { memo, useEffect, useState } from "react";
 import { fileQuery } from "@/api/query";
+import { useFileStore } from "@/store/file.store";
 import { parseSerialKey } from "@/utils/serial_key";
+import styles from "./file_name.module.css";
 
 /**
  * File name component
@@ -98,7 +98,6 @@ export default memo(function FileName({
               setIsRenaming(false);
               setRenamingFile(null);
             }}
-            autoFocus
           />
         </form>
       ) : (

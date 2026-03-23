@@ -1,7 +1,6 @@
-import { FaRegSquareFull } from "react-icons/fa6";
-import { IoMdClose } from "react-icons/io";
+import { FaMinus, FaRegSquareFull } from "react-icons/fa6";
 import { FiMinimize } from "react-icons/fi";
-import { FaMinus } from "react-icons/fa6";
+import { IoMdClose } from "react-icons/io";
 
 export default function WindowHeaderIcon({
   icon,

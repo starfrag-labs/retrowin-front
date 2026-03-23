@@ -1,6 +1,6 @@
-import { FileType } from "@/interfaces/file";
-import { createSerialKey, parseSerialKey } from "@/utils/serial_key";
 import { create } from "zustand";
+import type { FileType } from "@/interfaces/file";
+import { createSerialKey, parseSerialKey } from "@/utils/serial_key";
 
 export type State = {
   selectedFileSerials: string[];
@@ -10,10 +10,10 @@ export type State = {
     windowKey: string;
     fileName: string;
     type: FileType;
-    ref: React.RefObject<HTMLElement>;
+    ref: React.RefObject<HTMLElement | null>;
   } | null;
-  fileRefs: Map<string, React.RefObject<HTMLElement>>;
-  fileIconRefs: Map<string, React.RefObject<HTMLElement>>;
+  fileRefs: Map<string, React.RefObject<HTMLElement | null>>;
+  fileIconRefs: Map<string, React.RefObject<HTMLElement | null>>;
 };
 
 export type Action = {
@@ -22,14 +22,14 @@ export type Action = {
   unselectAllFiles: () => void;
   isFileKeySelected: (fileKey: string) => boolean;
   setRenamingFile: (
-    file: { fileKey: string; windowKey: string } | null,
+    file: { fileKey: string; windowKey: string } | null
   ) => void;
   getRenamingFile: () => { fileKey: string; windowKey: string } | null;
   setHighlightedFile: (highlightedFile: State["highlightedFile"]) => void;
   setFileIconRef: (
     fileKey: string,
     windowKey: string,
-    ref: React.RefObject<HTMLElement>,
+    ref: React.RefObject<HTMLElement | null>
   ) => void;
   getSelectedFileKeys: () => string[];
 };
@@ -61,7 +61,7 @@ export const useFileStore = create<State & Action>((set, get) => ({
     const serialKey = createSerialKey(fileKey, windowKey);
     set((state) => {
       state.selectedFileSerials = state.selectedFileSerials.filter(
-        (k) => k !== serialKey,
+        (k) => k !== serialKey
       );
       return { selectedFileSerials: state.selectedFileSerials };
     });
@@ -72,9 +72,7 @@ export const useFileStore = create<State & Action>((set, get) => ({
   isFileKeySelected: (fileKey) => {
     return get().selectedFileSerials.some((key) => key.startsWith(fileKey));
   },
-  setRenamingFile: (
-    file: { fileKey: string; windowKey: string } | null,
-  ) => {
+  setRenamingFile: (file: { fileKey: string; windowKey: string } | null) => {
     if (file) {
       const serialKey = createSerialKey(file.fileKey, file.windowKey);
       set({ renamingFileSerial: serialKey });

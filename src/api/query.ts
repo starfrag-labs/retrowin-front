@@ -1,6 +1,6 @@
-import { queryOptions, UseMutationOptions } from "@tanstack/react-query";
+import { queryOptions, type UseMutationOptions } from "@tanstack/react-query";
+import type { ApiFileType, QueryError } from "@/interfaces/api";
 import { fileApi, memberApi, storageApi } from "./fetch";
-import { ApiFileType, QueryError } from "@/interfaces/api";
 
 export const normalRetryCount = 3;
 export const shortStaleTime = 1000 * 60 * 1;
@@ -371,7 +371,7 @@ const moveFileToTrash: UseMutationOptions<
 const uploadFileWriteToken = (
   parentKey: string,
   fileName: string,
-  byteSize: number,
+  byteSize: number
 ) =>
   queryOptions<
     Awaited<ReturnType<typeof fileApi.upload.writeToken>>["body"],
@@ -382,7 +382,7 @@ const uploadFileWriteToken = (
       const response = await fileApi.upload.writeToken(
         parentKey,
         fileName,
-        byteSize,
+        byteSize
       );
       if (response.ok && response.body) {
         return response.body;
@@ -536,7 +536,7 @@ const issueWriteSession: UseMutationOptions<
     const response = await fileApi.upload.writeToken(
       targetContainerKey,
       fileName,
-      size,
+      size
     );
     if (response.ok && response.body) {
       const token = response.body.data.token;

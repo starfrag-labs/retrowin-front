@@ -1,6 +1,6 @@
+import { useQuery } from "@tanstack/react-query";
 import { url } from "@/api/fetch";
 import { storageQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
 import mediaStyles from "./media.module.css";
 
 export default function VideoViewer({ fileKey }: { fileKey: string }) {
@@ -19,6 +19,7 @@ export default function VideoViewer({ fileKey }: { fileKey: string }) {
           style={{ objectFit: "contain" }}
         >
           <source src={fileUrl.toString()} type="video/mp4" />
+          <track kind="captions" />
         </video>
       )}
     </div>

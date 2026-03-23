@@ -1,6 +1,6 @@
-import { AppWindow, WindowType } from "@/interfaces/window";
-import styles from "./navbar_container.module.css";
 import { useEffect, useMemo, useState } from "react";
+import { type AppWindow, WindowType } from "@/interfaces/window";
+import styles from "./navbar_container.module.css";
 import NavbarIcon from "./navbar_icon";
 export default function Navbar({ windows }: { windows: AppWindow[] }) {
   const defaultIcons = useMemo(
@@ -13,18 +13,18 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
       { type: WindowType.Trash, count: 0, fixed: true },
       { type: WindowType.Document, count: 0, fixed: false },
     ],
-    [],
+    []
   );
 
   const [icons, setIcons] =
     useState<{ type: WindowType; count: number; fixed: boolean }[]>(
-      defaultIcons,
+      defaultIcons
     );
 
   useEffect(() => {
     const newIcons = defaultIcons.map((icon) => {
       const count = windows.filter(
-        (window) => window.type === icon.type,
+        (window) => window.type === icon.type
       ).length;
       return { ...icon, count };
     });
@@ -34,8 +34,8 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
   return (
     <div className={styles.container}>
       <nav className={styles.navbar}>
-        {icons.map((icon, index) => (
-          <div key={index} className={styles.icon_container}>
+        {icons.map((icon) => (
+          <div key={icon.type} className={styles.icon_container}>
             {(icon.fixed || icon.count > 0) && (
               <NavbarIcon windowType={icon.type} windowCount={icon.count} />
             )}

@@ -1,7 +1,7 @@
-import styles from "./uploader.module.css";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { fileQuery, storageQuery } from "@/api/query";
 import { useState } from "react";
+import { fileQuery, storageQuery } from "@/api/query";
+import styles from "./uploader.module.css";
 
 export default function Uploader({
   targetContainerKey,
@@ -31,13 +31,13 @@ export default function Uploader({
   const updateUpload = (fileKey: string, uploadedSize: number) => {
     setUploadState((state) =>
       state.map((upload) =>
-        upload.fileKey === fileKey ? { ...upload, uploadedSize } : upload,
-      ),
+        upload.fileKey === fileKey ? { ...upload, uploadedSize } : upload
+      )
     );
   };
   const removeUpload = (fileKey: string) => {
     setUploadState((state) =>
-      state.filter((upload) => upload.fileKey !== fileKey),
+      state.filter((upload) => upload.fileKey !== fileKey)
     );
   };
 
@@ -104,7 +104,7 @@ export default function Uploader({
           .then(() => {
             // Update upload state
             updateUpload(fileKey, end);
-          })
+          });
       }
 
       // Complete upload

@@ -1,6 +1,7 @@
+import { useQuery } from "@tanstack/react-query";
+import Image from "next/image";
 import { url } from "@/api/fetch";
 import { storageQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
 import mediaStyles from "./media.module.css";
 
 export default function ImageViewer({
@@ -19,12 +20,12 @@ export default function ImageViewer({
   return (
     <div className={`full-size flex-center ${mediaStyles.container}`}>
       {sessionQuery.isFetched && sessionQuery.data && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={fileUrl.toString()}
           alt={fileName}
-          className="full-size flex-center"
+          fill
           style={{ objectFit: "contain" }}
+          unoptimized
         />
       )}
     </div>

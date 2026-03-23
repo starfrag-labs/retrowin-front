@@ -3,4 +3,4 @@ export const createSerialKey = (fileKey: string, windowKey: string) =>
 export const parseSerialKey = (serialKey: string) => {
   const [fileKey, windowKey] = serialKey.split(":");
   return { fileKey, windowKey };
-}
+};

@@ -1,14 +1,14 @@
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { fileQuery } from "@/api/query";
+import { FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
 import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
-import { useCallback, useEffect, useRef, useState } from "react";
-import styles from "./drag_file_container.module.css";
 import { parseSerialKey } from "@/utils/serial_key";
-import { WindowType } from "@/interfaces/window";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { fileQuery } from "@/api/query";
-import { FileType } from "@/interfaces/file";
+import styles from "./drag_file_container.module.css";
 
 export default function DragFileContainer({
   children,
@@ -33,7 +33,7 @@ export default function DragFileContainer({
   const menuRef = useMenuStore((state) => state.menuRef);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const selectedFileSerials = useFileStore(
-    (state) => state.selectedFileSerials,
+    (state) => state.selectedFileSerials
   );
   const fileIconRefs = useFileStore((state) => state.fileIconRefs);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
@@ -76,7 +76,7 @@ export default function DragFileContainer({
       pressedKeys,
       selectFile,
       unselectAllFiles,
-    ],
+    ]
   );
 
   // Create dragging file clone
@@ -104,8 +104,8 @@ export default function DragFileContainer({
             const fileRect = fileIconRef.current.getBoundingClientRect();
             const clone = fileIconRef.current.cloneNode(true) as HTMLElement;
             clone.style.position = "absolute";
-            clone.style.left = -fileRect.width / 2 + "px";
-            clone.style.top = -fileRect.height - count * 5 + "px";
+            clone.style.left = `${-fileRect.width / 2}px`;
+            clone.style.top = `${-fileRect.height - count * 5}px`;
             clone.style.zIndex = `${-count}`;
             draggingFileRef.current?.appendChild(clone);
 
@@ -132,7 +132,7 @@ export default function DragFileContainer({
       selectedFileSerials,
       start.x,
       start.y,
-    ],
+    ]
   );
 
   // Drag file
@@ -141,10 +141,10 @@ export default function DragFileContainer({
       if (!isDragging) return;
       if (!draggingFileRef.current) return;
       e.preventDefault();
-      draggingFileRef.current.style.left = e.clientX + "px";
-      draggingFileRef.current.style.top = e.clientY + "px";
+      draggingFileRef.current.style.left = `${e.clientX}px`;
+      draggingFileRef.current.style.top = `${e.clientY}px`;
     },
-    [isDragging],
+    [isDragging]
   );
 
   // Drag file end
@@ -160,7 +160,7 @@ export default function DragFileContainer({
     let targetContainerKey: string | null = null;
 
     // Set target container key as the current window key
-    if (currentWindow && currentWindow.windowRef.current) {
+    if (currentWindow?.windowRef.current) {
       const window = findWindow(currentWindow.key);
       if (
         window &&
@@ -183,14 +183,10 @@ export default function DragFileContainer({
     } else if (highlightedFile && highlightedFile.type === FileType.Link) {
       // Get the linked file
       const linkedFile = await queryClient.fetchQuery(
-        fileQuery.read.linkTarget(highlightedFile.fileKey),
+        fileQuery.read.linkTarget(highlightedFile.fileKey)
       );
       // Set the target folder key as the linked file key
-      if (
-        linkedFile &&
-        linkedFile.data &&
-        linkedFile.data.type === FileType.Container
-      ) {
+      if (linkedFile?.data && linkedFile.data.type === FileType.Container) {
         targetContainerKey = linkedFile.data.fileKey;
       } else {
         // If the linked file is not a container, set the target folder key as null
@@ -205,15 +201,15 @@ export default function DragFileContainer({
     if (targetContainerKey && pointerMoved) {
       // Get the file keys of the selected files
       const fileKeys = selectedFileSerials.map(
-        (serialKey) => parseSerialKey(serialKey).fileKey,
+        (serialKey) => parseSerialKey(serialKey).fileKey
       );
       // Get the parent file keys of the selected files
       const parentFileKeys = await Promise.all(
         fileKeys.map((fileKey) =>
           queryClient
             .fetchQuery(fileQuery.read.parent(fileKey))
-            .then((data) => data?.data.fileKey || ""),
-        ),
+            .then((data) => data?.data.fileKey || "")
+        )
       );
       // Move the selected files to the target folder
       Promise.all(
@@ -236,7 +232,8 @@ export default function DragFileContainer({
                 });
               });
           }
-        }),
+          return Promise.resolve();
+        })
       ).finally(() => {
         unselectAllFiles();
       });

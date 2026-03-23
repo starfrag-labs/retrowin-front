@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import MenuList from "./menu_list";
-import { fileQuery } from "@/api/query";
-import { useWindowStore } from "@/store/window.store";
 import { useCallback } from "react";
+import { fileQuery } from "@/api/query";
 import { WindowType } from "@/interfaces/window";
+import { useWindowStore } from "@/store/window.store";
+import MenuList from "./menu_list";
 
 export default function WindowMenu({
   targetFileKey,
@@ -51,13 +51,13 @@ export default function WindowMenu({
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
     const files = await queryClient.fetchQuery(
-      fileQuery.read.children(targetFileKey),
+      fileQuery.read.children(targetFileKey)
     );
     if (files) {
       Promise.all(
         files.data.map((file) =>
-          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey }),
-        ),
+          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey })
+        )
       ).then(() => {
         queryClient.invalidateQueries({
           queryKey: ["file", targetFileKey],
