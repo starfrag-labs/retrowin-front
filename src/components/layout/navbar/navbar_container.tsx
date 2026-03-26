@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { type AppWindow, WindowType } from "@/interfaces/window";
 import styles from "./navbar_container.module.css";
 import NavbarIcon from "./navbar_icon";
+import PowerButton from "@/components/power/power_button";
 export default function Navbar({ windows }: { windows: AppWindow[] }) {
   const defaultIcons = useMemo(
     () => [
@@ -34,6 +35,7 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
   return (
     <div className={styles.container}>
       <nav className={styles.navbar}>
+        <PowerButton />
         {icons.map((icon) => (
           <div key={icon.type} className={styles.icon_container}>
             {(icon.fixed || icon.count > 0) && (

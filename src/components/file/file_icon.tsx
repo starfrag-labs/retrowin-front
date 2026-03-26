@@ -1,20 +1,13 @@
 import { type CSSProperties, forwardRef, memo } from "react";
-import {
-  FaFileAlt,
-  FaFolder,
-  FaHome,
-  FaImage,
-  FaTrash,
-  FaUpload,
-} from "react-icons/fa";
-import { MdOndemandVideo } from "react-icons/md";
 import { FileIconType } from "@/interfaces/file";
+import { XPImageIcons } from "@/components/icons/xp_image_icons";
 import styles from "./file_icon.module.css";
 
 /**
  * File icon component
  * @param icon - type of the icon
  * @param onClick - on click event
+ * @param hasContent - has content (for trash/container type)
  * @param style - style of the icon
  * @returns - File icon component
  * @example
@@ -25,11 +18,13 @@ export default memo(
     {
       icon,
       onClick,
+      hasContent = false,
       style,
       size = "4rem",
     }: {
       icon: FileIconType;
       onClick?: () => void;
+      hasContent?: boolean;
       style?: CSSProperties;
       size?: string;
     },
@@ -41,6 +36,8 @@ export default memo(
         ref={ref}
         onDoubleClick={onClick}
         onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+        onDragStart={(e) => e.preventDefault()}
+        draggable={false}
         role="button"
         tabIndex={0}
         style={{
@@ -48,73 +45,19 @@ export default memo(
           height: size,
         }}
       >
-        {icon === FileIconType.Container && (
-          <FaFolder
-            className={`${styles.icon}`}
-            style={{
-              color: "#ffa400",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Block && (
-          <FaFileAlt
-            className={`${styles.icon}`}
-            style={{
-              color: "#999999",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Home && (
-          <FaHome
-            className={`${styles.icon}`}
-            style={{
-              color: "#90b75e",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Trash && (
-          <FaTrash
-            className={`${styles.icon}`}
-            style={{
-              color: "#677381",
-              padding: "0.25rem",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Upload && (
-          <FaUpload
-            className={`${styles.icon}`}
-            style={{
-              color: "#9296f0",
-              padding: "0.25rem",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Image && (
-          <FaImage
-            className={`${styles.icon}`}
-            style={{
-              color: "#0078a1",
-              padding: "0.25rem",
-              ...style,
-            }}
-          />
-        )}
-        {icon === FileIconType.Video && (
-          <MdOndemandVideo
-            className={`${styles.icon}`}
-            style={{
-              color: "#f44336",
-              padding: "0.25rem",
-              ...style,
-            }}
-          />
-        )}
+        <div className={styles.image_icon}>
+          {icon === FileIconType.Container && (
+            hasContent ? <XPImageIcons.Home /> : <XPImageIcons.Folder />
+          )}
+          {icon === FileIconType.Block && <XPImageIcons.File />}
+          {icon === FileIconType.Home && <XPImageIcons.Home />}
+          {icon === FileIconType.Trash && (
+            hasContent ? <XPImageIcons.TrashFull /> : <XPImageIcons.Trash />
+          )}
+          {icon === FileIconType.Upload && <XPImageIcons.Upload />}
+          {icon === FileIconType.Image && <XPImageIcons.File />}
+          {icon === FileIconType.Video && <XPImageIcons.File />}
+        </div>
       </div>
     );
   })

@@ -10,24 +10,55 @@
   overflow: hidden;
   white-space: nowrap;
   text-align: center;
+  color: #000;
 }
 
 .background_file_name {
   color: #ffffff;
-  filter: drop-shadow(0 0 0.5px black) drop-shadow(0 0 0.5px black);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
 }
 
 .rename_form {
   display: block;
   width: 100%;
   text-align: center;
+  background: transparent;
 }
 
 .rename_input {
   display: block;
   width: 100%;
-  padding: 0.5rem;
-  border: 1px solid #000000;
-  border-radius: 0.5rem;
+  height: auto;
+  min-height: 1.2em;
+  max-height: 3em;
+  padding: 0;
+  border: none;
+  border-bottom: 1px dotted currentColor;
+  border-radius: 0;
   box-sizing: border-box;
+  background: transparent;
+  font-family: inherit;
+  font-size: 1em;
+  color: #000;
+  outline: none;
+  text-align: center;
+  line-height: 1.2;
+  resize: none;
+  overflow: hidden;
+}
+
+.rename_input:focus {
+  background: transparent;
+}
+
+/* Background file rename - white text */
+.rename_input_background {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+/* Window file rename - black text */
+.rename_input:not(.rename_input_background) {
+  color: #000000;
+  border-bottom-color: #000000;
 }

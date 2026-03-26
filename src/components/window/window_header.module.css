@@ -2,8 +2,9 @@
   display: grid;
   grid-template-columns: 3fr 1fr;
   width: 100%;
-  height: 2rem;
-  background-color: lightgray;
+  height: 30px;
+  background: linear-gradient(180deg, #0058EE 0%, #3A93FF 8%, #0058EE 25%, #0046C0 100%);
+  border-radius: 5px 5px 0 0;
 }
 
 .header_left_container {
@@ -14,6 +15,7 @@
   width: 100%;
   height: 100%;
   gap: 0.5rem;
+  padding-left: 8px;
 }
 
 .header_right_container {
@@ -39,15 +41,16 @@
   width: 2rem;
   height: 2rem;
   border: none;
-  color: #888;
+  color: #fff;
+  text-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
 }
 
 .active {
-  color: #000;
+  color: #fff;
   cursor: pointer;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.2);
   }
 }
 
@@ -57,7 +60,10 @@
   height: 100%;
   text-align: center;
   align-content: center;
-  font-size: 1rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #fff;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .window_button_container {
@@ -71,13 +77,25 @@
 
 .window_button {
   display: block;
-  width: 2rem;
-  height: 2rem;
+  width: 28px;
+  height: 22px;
   border: none;
   cursor: pointer;
-  padding: 0.5rem;
+  padding: 0;
+  margin-right: 2px;
+  border-radius: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.1);
+    background-color: rgba(255, 255, 255, 0.3);
+  }
+
+  svg {
+    width: 14px;
+    height: 14px;
+    fill: #fff;
+    filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
   }
 }
