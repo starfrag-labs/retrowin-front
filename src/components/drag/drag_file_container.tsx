@@ -205,26 +205,39 @@ export default function DragFileContainer({
           return "";
         })
       );
+
+      // Get unique source folder keys
+      const sourceFolderKeys = [...new Set(parentFileKeys.filter((key) => key && key !== targetContainerKey))];
+
       // Move the selected files to the target folder
-      Promise.all(
+      await Promise.all(
         fileKeys.map((fileKey, index) => {
           if (parentFileKeys[index] !== targetContainerKey) {
-            return moveFile
-              .mutateAsync({
-                fileKey,
-                data: { targetKey: targetContainerKey },
-              })
-              .then(() => {
-                queryClient.invalidateQueries({
-                  predicate: (query) => query.queryKey[0] === "file",
-                });
-              });
+            return moveFile.mutateAsync({
+              fileKey,
+              data: { targetKey: targetContainerKey },
+            });
           }
           return Promise.resolve();
         })
-      ).finally(() => {
-        unselectAllFiles();
-      });
+      );
+
+      // Invalidate source and target folder queries
+      const keysToInvalidate = [...sourceFolderKeys, targetContainerKey];
+      for (const key of keysToInvalidate) {
+        queryClient.invalidateQueries({
+          queryKey: [`/file/children/${key}`],
+        });
+      }
+
+      // Invalidate file info queries for moved files
+      for (const fileKey of fileKeys) {
+        queryClient.invalidateQueries({
+          queryKey: [`/file/info/${fileKey}`],
+        });
+      }
+
+      unselectAllFiles();
     }
   }, [
     currentWindow,
