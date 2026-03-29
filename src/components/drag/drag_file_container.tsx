@@ -222,20 +222,21 @@ export default function DragFileContainer({
         })
       );
 
-      // Refetch source and target folder queries
-      const keysToRefetch = [...sourceFolderKeys, targetContainerKey];
-      for (const key of keysToRefetch) {
-        await queryClient.refetchQueries({
-          queryKey: [`/file/children/${key}`],
-        });
-      }
+      // Refetch all file children queries (will update all open folders)
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0] as string;
+          return typeof queryKey === 'string' && queryKey.startsWith('/file/children/');
+        },
+      });
 
-      // Also refetch file info for moved files
-      for (const fileKey of fileKeys) {
-        queryClient.refetchQueries({
-          queryKey: [`/file/info/${fileKey}`],
-        });
-      }
+      // Also refetch file info queries
+      await queryClient.refetchQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0] as string;
+          return typeof queryKey === 'string' && queryKey.startsWith('/file/info/');
+        },
+      });
 
       unselectAllFiles();
     }
