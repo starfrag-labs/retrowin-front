@@ -19,10 +19,7 @@ export default function WindowHeaderIcon({
         <FaRegSquareFull
           className={className}
           onClick={onClick}
-          style={{
-            ...style,
-            padding: "0.675rem",
-          }}
+          style={style}
         />
       );
     case "exit_fullscreen":
