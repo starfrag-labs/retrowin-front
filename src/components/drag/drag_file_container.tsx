@@ -222,17 +222,17 @@ export default function DragFileContainer({
         })
       );
 
-      // Invalidate source and target folder queries
-      const keysToInvalidate = [...sourceFolderKeys, targetContainerKey];
-      for (const key of keysToInvalidate) {
-        queryClient.invalidateQueries({
+      // Refetch source and target folder queries
+      const keysToRefetch = [...sourceFolderKeys, targetContainerKey];
+      for (const key of keysToRefetch) {
+        await queryClient.refetchQueries({
           queryKey: [`/file/children/${key}`],
         });
       }
 
-      // Invalidate file info queries for moved files
+      // Also refetch file info for moved files
       for (const fileKey of fileKeys) {
-        queryClient.invalidateQueries({
+        queryClient.refetchQueries({
           queryKey: [`/file/info/${fileKey}`],
         });
       }
