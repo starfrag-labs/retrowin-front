@@ -1,9 +1,9 @@
 "use client";
 
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { RedirectType, redirect } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fileQuery, memberQuery } from "@/api/query";
+import { useGetHomeContainer, useGetUser, useCreateUser } from "@/api/generated";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
 import Background from "@/components/layout/background";
@@ -32,11 +32,17 @@ export default function Home() {
   // Refs
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
 
-  // Queries
+  // Queries - use Orval's generated hooks directly
   const queryClient = useQueryClient();
-  const homeKeyQuery = useQuery({ ...fileQuery.read.home, retry: false });
-  const getMemberQuery = useQuery({ ...memberQuery.get, retry: false });
-  const createMemberMutation = useMutation(memberQuery.create);
+  const homeKeyQuery = useGetHomeContainer({
+    query: { retry: false, select: (data) => ("file" in data.data ? data.data.file : null) },
+    fetch: { credentials: "include" },
+  });
+  const getMemberQuery = useGetUser({
+    query: { retry: false, select: (data) => ("user" in data.data ? data.data.user : null) },
+    fetch: { credentials: "include" },
+  });
+  const createMemberMutation = useCreateUser();
 
   useEffect(() => {
     if (homeKey) {
@@ -51,24 +57,25 @@ export default function Home() {
 
   useEffect(() => {
     if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
-      setHomeKey(homeKeyQuery.data.data.fileKey);
+      setHomeKey(homeKeyQuery.data.fileKey);
     }
   }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
 
   useEffect(() => {
     if (homeKeyQuery.isError) {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      if (homeKeyQuery.error.status === 401 && redirectUri) {
+      const errorStatus = (homeKeyQuery.error as any)?.status;
+      if (errorStatus === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
       } else if (
-        homeKeyQuery.error.status === 403 &&
+        errorStatus === 403 &&
         getMemberQuery.isError &&
-        getMemberQuery.error.status === 404 &&
+        (getMemberQuery.error as any)?.status === 404 &&
         !createMemberMutation.isPending
       ) {
         // If the user is not a member of the service, create a member
         createMemberMutation
-          .mutateAsync()
+          .mutateAsync({ data: { provider: "keycloak", providerId: "auto" } })
           .then(() => {
             queryClient.invalidateQueries();
           })
@@ -76,7 +83,7 @@ export default function Home() {
             throw new Error("Failed to create member");
           });
       } else if (
-        homeKeyQuery.error.status === 403 &&
+        errorStatus === 403 &&
         getMemberQuery.isSuccess
       ) {
         throw new Error("You are not a member of this service");

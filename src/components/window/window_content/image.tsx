@@ -1,7 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
+import { useGetStreamToken } from "@/api/generated";
 import Image from "next/image";
-import { url } from "@/api/fetch";
-import { storageQuery } from "@/api/query";
 import mediaStyles from "./media.module.css";
 
 export default function ImageViewer({
@@ -11,17 +9,19 @@ export default function ImageViewer({
   fileKey: string;
   fileName: string;
 }) {
-  // Constants
-  const fileUrl = url.storage.file.read(fileKey);
-
-  // Queries
-  const sessionQuery = useQuery(storageQuery.session.read(fileKey));
+  // Use Orval's generated hook directly
+  const streamQuery = useGetStreamToken(fileKey, {
+    query: {
+      select: (data) => ("streamToken" in data.data ? data.data.streamToken : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   return (
     <div className={`full-size flex-center ${mediaStyles.container}`}>
-      {sessionQuery.isFetched && sessionQuery.data && (
+      {streamQuery.data && (
         <Image
-          src={fileUrl.toString()}
+          src={streamQuery.data.downloadUrl}
           alt={fileName}
           fill
           style={{ objectFit: "contain" }}

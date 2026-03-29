@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { fileQuery } from "@/api/query";
+import { useMoveFile } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
@@ -45,7 +45,7 @@ export default function DragFileContainer({
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
 
   // Queries
-  const moveFile = useMutation(fileQuery.update.parent);
+  const moveFile = useMoveFile();
 
   // Drag file start
   const dragFileStart = useCallback(
@@ -181,17 +181,8 @@ export default function DragFileContainer({
     ) {
       targetContainerKey = highlightedFile.fileKey;
     } else if (highlightedFile && highlightedFile.type === FileType.Link) {
-      // Get the linked file
-      const linkedFile = await queryClient.fetchQuery(
-        fileQuery.read.linkTarget(highlightedFile.fileKey)
-      );
-      // Set the target folder key as the linked file key
-      if (linkedFile?.data && linkedFile.data.type === FileType.Container) {
-        targetContainerKey = linkedFile.data.fileKey;
-      } else {
-        // If the linked file is not a container, set the target folder key as null
-        targetContainerKey = null;
-      }
+      // Link files are not supported in new API
+      targetContainerKey = null;
     } else if (highlightedFile) {
       // If the highlighted file is not a container or a link, set the target folder key as null
       targetContainerKey = null;
@@ -204,12 +195,15 @@ export default function DragFileContainer({
         (serialKey) => parseSerialKey(serialKey).fileKey
       );
       // Get the parent file keys of the selected files
+      const { getFileInfo } = await import("@/api/generated");
       const parentFileKeys = await Promise.all(
-        fileKeys.map((fileKey) =>
-          queryClient
-            .fetchQuery(fileQuery.read.parent(fileKey))
-            .then((data) => data?.data.fileKey || "")
-        )
+        fileKeys.map(async (fileKey) => {
+          const fileInfo = await getFileInfo(fileKey, { credentials: "include" });
+          if (fileInfo.data && "file" in fileInfo.data && fileInfo.data.file.parentId) {
+            return fileInfo.data.file.parentId.toString();
+          }
+          return "";
+        })
       );
       // Move the selected files to the target folder
       Promise.all(
@@ -218,17 +212,11 @@ export default function DragFileContainer({
             return moveFile
               .mutateAsync({
                 fileKey,
-                parentKey: targetContainerKey,
+                data: { targetKey: targetContainerKey },
               })
               .then(() => {
                 queryClient.invalidateQueries({
-                  queryKey: ["file", targetContainerKey],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ["file", fileKey],
-                });
-                queryClient.invalidateQueries({
-                  queryKey: ["file", parentFileKeys[index]],
+                  predicate: (query) => query.queryKey[0] === "file",
                 });
               });
           }

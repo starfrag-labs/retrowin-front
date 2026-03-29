@@ -1,19 +1,19 @@
-import { useQuery } from "@tanstack/react-query";
-import { url } from "@/api/fetch";
-import { storageQuery } from "@/api/query";
+import { useGetStreamToken } from "@/api/generated";
 
 export default function Audio({ fileKey }: { fileKey: string }) {
-  // Constants
-  const fileUrl = url.storage.file.read(fileKey);
-
-  // Queries
-  const sessionQuery = useQuery(storageQuery.session.read(fileKey));
+  // Use Orval's generated hook directly
+  const streamQuery = useGetStreamToken(fileKey, {
+    query: {
+      select: (data) => ("streamToken" in data.data ? data.data.streamToken : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   return (
     <div className={"full-size flex-center"}>
-      {sessionQuery.isFetched && sessionQuery.data && (
+      {streamQuery.data && (
         <audio controls>
-          <source src={fileUrl.toString()} type="audio/mpeg" />
+          <source src={streamQuery.data.downloadUrl} type="audio/mpeg" />
           <track kind="captions" />
           Your browser does not support the audio element.
         </audio>

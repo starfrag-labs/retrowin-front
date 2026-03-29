@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { memo, useEffect, useState } from "react";
-import { fileQuery } from "@/api/query";
+import { useUpdateFile, useGetFileInfo } from "@/api/generated";
+import { getFileInfo } from "@/api/generated";
 import { useFileStore } from "@/store/file.store";
 import { parseSerialKey } from "@/utils/serial_key";
 import styles from "./file_name.module.css";
@@ -30,7 +31,7 @@ export default memo(function FileName({
   const queryClient = useQueryClient();
 
   // Query renaming file
-  const renamingFileQuery = useMutation(fileQuery.update.name);
+  const renamingFileQuery = useUpdateFile();
 
   // States
   const [isRenaming, setIsRenaming] = useState(false);
@@ -43,23 +44,21 @@ export default memo(function FileName({
 
   // Update file name
   const updateFileName = async () => {
-    const parentFileKey = await queryClient
-      .fetchQuery(fileQuery.read.parent(fileKey))
-      .then((data) => data?.data.fileKey);
-    if (!parentFileKey) return;
-    await renamingFileQuery
-      .mutateAsync({
-        fileKey,
-        fileName: newName,
-      })
-      .then(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["file", fileKey],
+    // Get parent file info to find parent key
+    const fileInfo = await getFileInfo(fileKey, { credentials: "include" });
+    if (fileInfo.data && "file" in fileInfo.data && fileInfo.data.file.parentId) {
+      const parentFileKey = fileInfo.data.file.parentId.toString();
+      await renamingFileQuery
+        .mutateAsync({
+          fileKey,
+          data: { fileName: newName },
+        })
+        .then(() => {
+          queryClient.invalidateQueries({
+            predicate: (query) => query.queryKey[0] === "file",
+          });
         });
-        queryClient.invalidateQueries({
-          queryKey: ["file", parentFileKey],
-        });
-      });
+    }
   };
 
   // Set isRenaming state when the file is the renaming file

@@ -1,6 +1,5 @@
-import { useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { fileQuery } from "@/api/query";
+import { useGetHomeContainer, useGetTrashContainer } from "@/api/generated";
 import { FileIconType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
@@ -24,16 +23,26 @@ export default function NavbarIcon({
   );
   const newWindow = useWindowStore((state) => state.newWindow);
 
-  // Queries
-  const homeKeyQuery = useQuery(fileQuery.read.home);
-  const trashKeyQuery = useQuery(fileQuery.read.trash);
+  // Queries - use Orval's generated hooks directly
+  const homeKeyQuery = useGetHomeContainer({
+    query: {
+      select: (data) => ("file" in data.data ? data.data.file : null),
+    },
+    fetch: { credentials: "include" },
+  });
+  const trashKeyQuery = useGetTrashContainer({
+    query: {
+      select: (data) => ("file" in data.data ? data.data.file : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   const handleClick = useCallback(() => {
     switch (windowType) {
       case WindowType.Uploader:
         if (windowCount === 0 && homeKeyQuery.isSuccess && homeKeyQuery.data) {
           newWindow({
-            targetKey: homeKeyQuery.data.data.fileKey,
+            targetKey: homeKeyQuery.data.fileKey,
             type: WindowType.Uploader,
             title: "Uploader",
           });
@@ -46,7 +55,7 @@ export default function NavbarIcon({
           trashKeyQuery.data
         ) {
           newWindow({
-            targetKey: trashKeyQuery.data.data.fileKey,
+            targetKey: trashKeyQuery.data.fileKey,
             type: WindowType.Trash,
             title: "Trash",
           });

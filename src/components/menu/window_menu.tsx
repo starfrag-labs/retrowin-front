@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { fileQuery } from "@/api/query";
+import { useCreateFile, useDeleteFile, useGetFileChildren } from "@/api/generated";
+import { getFileChildren } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
 import MenuList from "./menu_list";
@@ -21,8 +22,8 @@ export default function WindowMenu({
   const newWindow = useWindowStore((state) => state.newWindow);
 
   // Mutations
-  const createContainerMutation = useMutation(fileQuery.create.container);
-  const deleteFilePermanentMutation = useMutation(fileQuery.delete.permanent);
+  const createContainerMutation = useCreateFile();
+  const deleteFilePermanentMutation = useDeleteFile();
 
   // Handle upload action
   const handleUpload = useCallback(() => {
@@ -35,40 +36,36 @@ export default function WindowMenu({
   }, [closeMenu, newWindow, targetFileKey]);
 
   const handleCreateContainer = useCallback(async () => {
-    createContainerMutation
-      .mutateAsync({
-        parentKey: targetFileKey,
-        fileName: "New_Folder",
-      })
-      .finally(() => {
-        queryClient.invalidateQueries({
-          queryKey: ["file", targetFileKey],
-        });
-        closeMenu();
+    const result = await createContainerMutation.mutateAsync({
+      data: { type: "container", fileName: "New Folder", parentKey: targetFileKey },
+    });
+    if (result.data) {
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === "file",
       });
+      closeMenu();
+    }
   }, [closeMenu, createContainerMutation, queryClient, targetFileKey]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
-    const files = await queryClient.fetchQuery(
-      fileQuery.read.children(targetFileKey)
-    );
-    if (files) {
+    const files = await getFileChildren(targetFileKey, { credentials: "include" });
+    if (files.data && "files" in files.data) {
       Promise.all(
-        files.data.map((file) =>
-          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey })
+        files.data.files.map((file) =>
+          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey, params: { permanent: true } })
         )
       ).then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["file", targetFileKey],
+          predicate: (query) => query.queryKey[0] === "file",
         });
       });
     }
   }, [closeMenu, deleteFilePermanentMutation, queryClient, targetFileKey]);
 
-  const handleRefresh = useCallback(async () => {
+  const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({
-      queryKey: ["file"],
+      predicate: (query) => query.queryKey[0] === "file",
     });
     closeMenu();
   }, [closeMenu, queryClient]);

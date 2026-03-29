@@ -1,10 +1,14 @@
-import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect } from "react";
-import { fileQuery } from "@/api/query";
+import { useGetFileChildren, useGetTrashContainer } from "@/api/generated";
 import type { ApiFileType } from "@/interfaces/api";
 import { FileType, SpecialFileName } from "@/interfaces/file";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
+
+// Convert new API FileType to legacy ApiFileType
+const convertFileType = (type: "container" | "file"): ApiFileType => {
+  return type === "container" ? FileType.Container : FileType.Block;
+};
 
 /**
  * File container component
@@ -33,19 +37,24 @@ export default function FileContainer({
   trash?: boolean;
   backgroundFile?: boolean;
 }) {
-  const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
-  const readTrashQuery = useQuery(fileQuery.read.trash);
+  // Use Orval's generated hooks directly
+  const readContainerQuery = useGetFileChildren(containerKey, {
+    query: {
+      select: (data) => ("files" in data.data ? data.data.files : []),
+    },
+    fetch: { credentials: "include" },
+  });
+  const readTrashQuery = useGetTrashContainer({
+    query: {
+      select: (data) => ("file" in data.data ? data.data.file : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   const sortFiles = useCallback(
     (
-      a: {
-        fileName: string;
-        type: ApiFileType;
-      },
-      b: {
-        fileName: string;
-        type: ApiFileType;
-      }
+      a: { fileName: string; type: "container" | "file" },
+      b: { fileName: string; type: "container" | "file" }
     ) => {
       // Home > Trash > Others
       const specialFileOrder = [
@@ -67,8 +76,8 @@ export default function FileContainer({
       }
       // Container > Block > Link
       const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
-      const aTypeIndex = typeOrder.indexOf(a.type);
-      const bTypeIndex = typeOrder.indexOf(b.type);
+      const aTypeIndex = typeOrder.indexOf(convertFileType(a.type));
+      const bTypeIndex = typeOrder.indexOf(convertFileType(b.type));
       return aTypeIndex - bTypeIndex;
     },
     []
@@ -84,7 +93,7 @@ export default function FileContainer({
   if (readContainerQuery.isError && readContainerQuery.error) {
     return (
       <div className="flex-center full-size">
-        {readContainerQuery.error.message}
+        {(readContainerQuery.error as any)?.message || "Error loading files"}
       </div>
     );
   }
@@ -104,16 +113,16 @@ export default function FileContainer({
         <FileItem
           name={SpecialFileName.Trash}
           type={FileType.Trash}
-          fileKey={readTrashQuery.data.data.fileKey}
+          fileKey={readTrashQuery.data.fileKey}
           windowKey={windowKey}
           backgroundFile={backgroundFile}
         />
       )}
-      {readContainerQuery.data?.data.sort(sortFiles).map((file) => (
+      {readContainerQuery.data?.sort(sortFiles).map((file) => (
         <FileItem
           key={file.fileKey}
           name={file.fileName}
-          type={file.type}
+          type={convertFileType(file.type)}
           fileKey={file.fileKey}
           windowKey={windowKey}
           backgroundFile={backgroundFile}

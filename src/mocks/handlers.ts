@@ -14,372 +14,305 @@ import {
 } from "./data";
 
 export const handlers = [
-  // Member endpoints
-  http.get("/member", () => {
+  // User endpoints
+  http.get("/user", () => {
     return HttpResponse.json({
-      message: "Success",
-      data: { uuidKey: "mock-user-uuid" },
-    });
-  }),
-
-  http.post("/member", () => {
-    return HttpResponse.json({
-      message: "Success",
-      data: { uuidKey: "mock-user-uuid" },
-    });
-  }),
-
-  http.delete("/member", () => {
-    return HttpResponse.json({
-      message: "Success",
-      data: { uuidKey: "mock-user-uuid" },
-    });
-  }),
-
-  http.get("/member/status", () => {
-    return HttpResponse.json({
-      message: "Success",
-      data: { status: "active" },
-    });
-  }),
-
-  // File endpoints - Create
-  http.post("/file/container/:parentKey", ({ params, request }) => {
-    const parentKey = params.parentKey as string;
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get("file_name") ?? "New Folder";
-
-    const parent = getFile(parentKey);
-    if (!parent) {
-      return HttpResponse.json(
-        { message: "Parent not found", data: null },
-        { status: 404 }
-      );
-    }
-
-    const newFile = createFile(parentKey, fileName, "container" as FileType);
-    return HttpResponse.json({
-      message: "Success",
-      data: {
-        fileKey: newFile.fileKey,
-        fileName: newFile.fileName,
-        type: newFile.type,
+      user: {
+        id: 1,
+        provider: "keycloak" as const,
+        providerId: "mock-provider-id",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     });
   }),
 
-  http.post("/file/link/:parentKey", ({ params, request }) => {
-    const parentKey = params.parentKey as string;
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get("file_name") ?? "New Link";
-
-    const parent = getFile(parentKey);
-    if (!parent) {
-      return HttpResponse.json(
-        { message: "Parent not found", data: null },
-        { status: 404 }
-      );
-    }
-
-    const newFile = createFile(parentKey, fileName, "link" as FileType);
+  http.post("/user", async ({ request }) => {
+    const body = await request.json();
     return HttpResponse.json({
-      message: "Success",
-      data: {
-        fileKey: newFile.fileKey,
-        fileName: newFile.fileName,
-        type: newFile.type,
+      user: {
+        id: 1,
+        provider: (body as { provider?: string }).provider || "keycloak",
+        providerId: "mock-provider-id",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     });
   }),
 
-  // File endpoints - Delete
-  http.delete("/file/permanent/:fileKey", ({ params }) => {
-    const file = deleteFile(params.fileKey as string);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: {
-        fileKey: file.fileKey,
-        fileName: file.fileName,
-        type: file.type,
-      },
-    });
+  http.delete("/user", () => {
+    return new HttpResponse(null, { status: 204 });
   }),
 
-  // File endpoints - Read
-  http.get("/file/storage/:fileKey", ({ params }) => {
-    const file = getFile(params.fileKey as string);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: { token: `mock-token-${params.fileKey}` },
-    });
-  }),
-
+  // File endpoints - Get special containers
   http.get("/file/root", () => {
     const root = getFile(ROOT_KEY);
+    if (!root) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "Root not found" } },
+        { status: 404 }
+      );
+    }
     return HttpResponse.json({
-      message: "Success",
-      data: root,
+      file: toApiFile(root),
     });
   }),
 
   http.get("/file/home", () => {
     const home = getFile(HOME_KEY);
+    if (!home) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "Home not found" } },
+        { status: 404 }
+      );
+    }
     return HttpResponse.json({
-      message: "Success",
-      data: home,
+      file: toApiFile(home),
     });
   }),
 
   http.get("/file/trash", () => {
     const trash = getFile(TRASH_KEY);
+    if (!trash) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "Trash not found" } },
+        { status: 404 }
+      );
+    }
     return HttpResponse.json({
-      message: "Success",
-      data: trash,
+      file: toApiFile(trash),
     });
   }),
 
+  // File endpoints - Get file info
   http.get("/file/info/:fileKey", ({ params }) => {
     const file = getFile(params.fileKey as string);
     if (!file) {
       return HttpResponse.json(
-        { message: "File not found", data: null },
+        { error: { type: "not_found", message: "File not found" } },
         { status: 404 }
       );
     }
     return HttpResponse.json({
-      message: "Success",
-      data: {
-        fileName: file.fileName,
-        type: file.type,
-        createDate: file.createDate,
-        updateDate: file.updateDate,
-        byteSize: file.byteSize,
-      },
+      file: toApiFile(file),
     });
   }),
 
-  http.get("/file/parent/:fileKey", ({ params }) => {
-    const file = getFile(params.fileKey as string);
-    if (!file || !file.parentKey) {
-      return HttpResponse.json(
-        { message: "Parent not found", data: null },
-        { status: 404 }
-      );
-    }
-    const parent = getFile(file.parentKey);
-    return HttpResponse.json({
-      message: "Success",
-      data: parent,
-    });
-  }),
-
+  // File endpoints - Get children
   http.get("/file/children/:fileKey", ({ params }) => {
     const children = getChildren(params.fileKey as string);
     return HttpResponse.json({
-      message: "Success",
-      data: children.map((f) => ({
-        fileKey: f.fileKey,
-        fileName: f.fileName,
-        type: f.type,
-      })),
+      files: children.map(toApiFile),
     });
   }),
 
-  http.get("/file/find/:fileKey", ({ params, request }) => {
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get("file_name");
-    const children = getChildren(params.fileKey as string);
-    const file = children.find((f) => f.fileName === fileName);
+  // File endpoints - Create file/container
+  http.post("/file", async ({ request }) => {
+    const body = (await request.json()) as {
+      type?: "container" | "file";
+      fileName?: string;
+      parentKey?: string | null;
+    };
+    const { type = "container", fileName = "New File", parentKey } = body;
 
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: file,
-    });
-  }),
-
-  http.get("/file/link-target/:fileKey", ({ params }) => {
-    const file = getFile(params.fileKey as string);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: file,
-    });
-  }),
-
-  // File endpoints - Update
-  http.patch("/file/name/:fileKey", ({ params, request }) => {
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get("file_name");
-    if (!fileName) {
-      return HttpResponse.json(
-        { message: "File name required", data: null },
-        { status: 400 }
-      );
-    }
-    const file = updateFileName(params.fileKey as string, fileName);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: file,
-    });
-  }),
-
-  http.patch("/file/parent/:fileKey", ({ params, request }) => {
-    const url = new URL(request.url);
-    const parentKey = url.searchParams.get("parent_key");
     if (!parentKey) {
       return HttpResponse.json(
-        { message: "Parent key required", data: null },
+        { error: { type: "bad_request", message: "parentKey is required" } },
         { status: 400 }
       );
     }
-    const file = updateFileParent(params.fileKey as string, parentKey);
-    if (!file) {
+
+    const parent = getFile(parentKey);
+    if (!parent) {
       return HttpResponse.json(
-        { message: "File not found", data: null },
+        { error: { type: "not_found", message: "Parent not found" } },
         { status: 404 }
       );
     }
-    return HttpResponse.json({
-      message: "Success",
-      data: { success: true },
-    });
-  }),
-
-  http.patch("/file/trash/:fileKey", ({ params }) => {
-    const file = moveToTrash(params.fileKey as string);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return HttpResponse.json({
-      message: "Success",
-      data: file,
-    });
-  }),
-
-  // Upload endpoints
-  http.get("/file/upload/write-token/:parentKey", ({ params, request }) => {
-    const url = new URL(request.url);
-    const fileName = url.searchParams.get("file_name") ?? "file";
-    const byteSize = Number.parseInt(
-      url.searchParams.get("byte_size") ?? "0",
-      10
-    );
 
     const newFile = createFile(
-      params.parentKey as string,
+      parentKey,
       fileName,
-      "block" as FileType
+      type === "file" ? ("block" as FileType) : ("container" as FileType)
     );
-    newFile.byteSize = byteSize;
-
-    return HttpResponse.json({
-      message: "Success",
-      data: {
-        token: `mock-upload-token-${newFile.fileKey}`,
-        fileKey: newFile.fileKey,
+    return HttpResponse.json(
+      {
+        file: toApiFile(newFile),
       },
+      { status: 201 }
+    );
+  }),
+
+  // File endpoints - Update file
+  http.patch("/file/:fileKey", async ({ params, request }) => {
+    const body = (await request.json()) as { fileName?: string };
+    const file = updateFileName(params.fileKey as string, body.fileName ?? "");
+    if (!file) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "File not found" } },
+        { status: 404 }
+      );
+    }
+    return HttpResponse.json({
+      file: toApiFile(file),
     });
   }),
 
-  http.patch("/file/upload/complete/:fileKey", ({ params }) => {
-    const file = getFile(params.fileKey as string);
+  // File endpoints - Delete file (move to trash)
+  http.delete("/file/:fileKey", ({ params, request }) => {
+    const url = new URL(request.url);
+    const permanent = url.searchParams.get("permanent");
 
+    if (permanent === "true") {
+      const file = deleteFile(params.fileKey as string);
+      if (!file) {
+        return HttpResponse.json(
+          { error: { type: "not_found", message: "File not found" } },
+          { status: 404 }
+        );
+      }
+      return new HttpResponse(null, { status: 204 });
+    } else {
+      const file = moveToTrash(params.fileKey as string);
+      if (!file) {
+        return HttpResponse.json(
+          { error: { type: "not_found", message: "File not found" } },
+          { status: 404 }
+        );
+      }
+      return HttpResponse.json({
+        file: toApiFile(file),
+      });
+    }
+  }),
+
+  // File endpoints - Move file
+  http.post("/file/:fileKey/move", async ({ params, request }) => {
+    const body = (await request.json()) as { targetKey?: string };
+    const { targetKey } = body;
+
+    if (!targetKey) {
+      return HttpResponse.json(
+        { error: { type: "bad_request", message: "targetKey is required" } },
+        { status: 400 }
+      );
+    }
+
+    const file = updateFileParent(params.fileKey as string, targetKey);
     if (!file) {
       return HttpResponse.json(
-        { message: "File not found", data: null },
+        { error: { type: "not_found", message: "File not found" } },
+        { status: 404 }
+      );
+    }
+    return HttpResponse.json({
+      file: toApiFile(file),
+    });
+  }),
+
+  // File endpoints - Copy file (not fully implemented for mock)
+  http.post("/file/:fileKey/copy", async ({ params, request }) => {
+    const body = (await request.json()) as { targetKey?: string };
+    const { targetKey } = body;
+
+    if (!targetKey) {
+      return HttpResponse.json(
+        { error: { type: "bad_request", message: "targetKey is required" } },
+        { status: 400 }
+      );
+    }
+
+    // For simplicity, just return a copy of the file with a new key
+    const originalFile = getFile(params.fileKey as string);
+    if (!originalFile) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "File not found" } },
         { status: 404 }
       );
     }
 
+    const newFile = createFile(
+      targetKey,
+      `${originalFile.fileName} (copy)`,
+      originalFile.type
+    );
+    return HttpResponse.json(
+      {
+        file: toApiFile(newFile),
+      },
+      { status: 201 }
+    );
+  }),
+
+  // Upload endpoints - Get write token
+  http.get("/file/upload/write-token/:fileKey", ({ params }) => {
+    const file = getFile(params.fileKey as string);
+    if (!file) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "File not found" } },
+        { status: 404 }
+      );
+    }
     return HttpResponse.json({
-      message: "Success",
-      data: {
-        fileKey: file.fileKey,
-        fileName: file.fileName,
-        type: file.type,
+      uploadToken: {
+        token: `mock-upload-token-${params.fileKey}`,
+        uploadUrl: "https://mock-storage.example.com/upload",
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
       },
     });
   }),
 
-  // Stream endpoints
+  // Upload endpoints - Complete upload
+  http.patch("/file/upload/complete/:fileKey", ({ params }) => {
+    const file = getFile(params.fileKey as string);
+    if (!file) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "File not found" } },
+        { status: 404 }
+      );
+    }
+    return HttpResponse.json({
+      file: toApiFile(file),
+    });
+  }),
+
+  // Stream endpoints - Get read token
   http.get("/file/stream/read-token/:fileKey", ({ params }) => {
     const file = getFile(params.fileKey as string);
     if (!file) {
       return HttpResponse.json(
-        { message: "File not found", data: null },
+        { error: { type: "not_found", message: "File not found" } },
         { status: 404 }
       );
     }
     return HttpResponse.json({
-      message: "Success",
-      data: { token: `mock-read-token-${params.fileKey}` },
-    });
-  }),
-
-  // Storage endpoints
-  http.get("/read/bare/:fileKey/:type", () => {
-    return new HttpResponse(new ArrayBuffer(0), {
-      headers: { "Content-Type": "application/octet-stream" },
-    });
-  }),
-
-  http.get("/read/with-name/:fileKey", ({ params }) => {
-    const file = getFile(params.fileKey as string);
-    if (!file) {
-      return HttpResponse.json(
-        { message: "File not found", data: null },
-        { status: 404 }
-      );
-    }
-    return new HttpResponse(new ArrayBuffer(0), {
-      headers: { "Content-Type": "application/octet-stream" },
-    });
-  }),
-
-  http.post("/write/:fileKey", () => {
-    return HttpResponse.json({
-      message: "Success",
-      data: { message: "Upload complete" },
-    });
-  }),
-
-  // Session endpoints
-  http.get("/session/issue/:token", () => {
-    return HttpResponse.json({
-      message: "Success",
-      data: { message: "Session issued" },
+      streamToken: {
+        token: `mock-read-token-${params.fileKey}`,
+        downloadUrl: "https://mock-storage.example.com/download",
+        expiresAt: new Date(Date.now() + 3600000).toISOString(),
+      },
     });
   }),
 ];
+
+// Helper function to convert MockFile to API File format
+function toApiFile(mockFile: {
+  fileKey: string;
+  fileName: string;
+  type: FileType;
+  createDate: string;
+  updateDate: string;
+  byteSize: number;
+  parentKey: string | null;
+}) {
+  return {
+    id: parseInt(mockFile.fileKey.split("-")[1] || "1", 10),
+    fileKey: mockFile.fileKey,
+    fileName: mockFile.fileName,
+    type: mockFile.type === "block" ? "file" : "container",
+    byteSize: mockFile.byteSize,
+    createdAt: mockFile.createDate,
+    updatedAt: mockFile.updateDate,
+    parentId: mockFile.parentKey ? parseInt(mockFile.parentKey.split("-")[1] || "1", 10) : null,
+  };
+}

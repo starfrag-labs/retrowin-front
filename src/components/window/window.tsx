@@ -1,12 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fileQuery } from "@/api/query";
+import { useGetFileInfo } from "@/api/generated";
 import { type AppWindow, WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useWindowStore } from "@/store/window.store";
-import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
+import styles from "./window.module.css";
 
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
@@ -32,7 +31,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const [contentLoading, setContentLoading] = useState(false);
 
   // Store state
-  const _windows = useWindowStore((state) => state.windows);
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
   const findWindow = useWindowStore((state) => state.findWindow);
@@ -52,15 +50,21 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
 
-  // Queries
-  const fileInfo = useQuery(fileQuery.read.info(targetWindow?.targetKey || ""));
+  // Queries - use Orval's generated hook directly
+  const fileInfo = useGetFileInfo(targetWindow?.targetKey || "", {
+    query: {
+      enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background,
+      select: (data) => ("file" in data.data ? data.data.file : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   // Set window title
   useEffect(() => {
     if (targetWindow?.type === WindowType.Uploader) {
       setTitle(windowKey, "Uploader");
-    } else if (fileInfo.isSuccess) {
-      setTitle(windowKey, fileInfo.data.data.fileName);
+    } else if (fileInfo.isSuccess && fileInfo.data) {
+      setTitle(windowKey, fileInfo.data.fileName);
     }
   }, [
     fileInfo.data,
@@ -304,7 +308,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
-          fileName={fileInfo.data?.data.fileName || ""}
+          fileName={fileInfo.data?.fileName || ""}
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}

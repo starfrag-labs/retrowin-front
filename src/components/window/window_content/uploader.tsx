@@ -1,6 +1,6 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import { fileQuery, storageQuery } from "@/api/query";
+import { useQueryClient } from "@tanstack/react-query";
+import { useCallback, useState } from "react";
+import { useCompleteUpload, useCreateFile, getUploadToken } from "@/api/generated";
 import styles from "./uploader.module.css";
 
 export default function Uploader({
@@ -8,7 +8,12 @@ export default function Uploader({
 }: {
   targetContainerKey: string;
 }) {
-  const chunkSize = 1024 * 1024; // 1MB
+  // Query Client
+  const queryClient = useQueryClient();
+
+  // Mutations
+  const createFileMutation = useCreateFile();
+  const completeUploadMutation = useCompleteUpload();
 
   // State
   const [uploadState, setUploadState] = useState<
@@ -19,115 +24,124 @@ export default function Uploader({
       uploadedSize: number;
     }[]
   >([]);
+
   // Upload state actions
-  const addUpload = (upload: {
+  const addUpload = useCallback((upload: {
     fileKey: string;
     fileName: string;
     totalSize: number;
     uploadedSize: number;
   }) => {
     setUploadState((state) => [...state, upload]);
-  };
-  const updateUpload = (fileKey: string, uploadedSize: number) => {
+  }, []);
+
+  const updateUpload = useCallback((fileKey: string, uploadedSize: number) => {
     setUploadState((state) =>
       state.map((upload) =>
         upload.fileKey === fileKey ? { ...upload, uploadedSize } : upload
       )
     );
-  };
-  const removeUpload = (fileKey: string) => {
+  }, []);
+
+  const removeUpload = useCallback((fileKey: string) => {
     setUploadState((state) =>
       state.filter((upload) => upload.fileKey !== fileKey)
     );
-  };
+  }, []);
 
-  // Query Client
-  const queryClient = useQueryClient();
+  const uploadFile = async (file: File) => {
+    let fileKey: string | null = null;
 
-  // Mutations
-  const issueWriteSessionMutation = useMutation(storageQuery.session.write);
-  const writeFileMutation = useMutation(storageQuery.file.write);
-  const completeUploadMutation = useMutation(fileQuery.upload.complete);
-
-  const uploadFiles = async (files: FileList) => {
-    // Sort files by size
-    const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
-    // Upload files
-    for (const file of sortedFiles) {
-      await uploadByChunk(file).then(() => {
-        // Invalidate file query
-        queryClient.invalidateQueries({
-          queryKey: ["file", targetContainerKey],
-        });
-      });
-    }
-  };
-
-  const uploadByChunk = async (file: File) => {
-    // Calculate total chunks
-    const totalChunks = Math.ceil(file.size / chunkSize);
-
-    // Issue write session
-    const fileKey = await issueWriteSessionMutation
-      .mutateAsync({
-        targetContainerKey,
-        fileName: file.name,
-        size: file.size,
-      })
-      .then((response) => {
-        const fileKey = response.fileKey;
-        if (fileKey) {
-          addUpload({
-            fileKey: fileKey,
-            fileName: file.name,
-            totalSize: file.size,
-            uploadedSize: 0,
-          });
-        }
-        return fileKey;
+    try {
+      // Step 1: Create file entry with type "file"
+      const createResult = await createFileMutation.mutateAsync({
+        data: {
+          type: "file",
+          fileName: file.name,
+          parentKey: targetContainerKey,
+        },
       });
 
-    if (fileKey) {
-      // Upload chunks
-      for (let i = 0; i < totalChunks; i++) {
-        // Calculate chunk start and end
-        const start = i * chunkSize;
-        const end = Math.min(file.size, start + chunkSize);
-        const chunk = file.slice(start, end);
-        // Write chunk to storage
-        await writeFileMutation
-          .mutateAsync({
-            fileKey,
-            chunkCount: i,
-            fileData: chunk,
-          })
-          .then(() => {
-            // Update upload state
-            updateUpload(fileKey, end);
-          });
+      if (createResult.data && "file" in createResult.data) {
+        fileKey = createResult.data.file.fileKey;
       }
 
-      // Complete upload
-      await completeUploadMutation
-        .mutateAsync({
-          fileKey,
-          totalChunks,
-        })
-        .finally(() => {
-          // Remove upload state
-          removeUpload(fileKey);
-        });
+      if (!fileKey) {
+        throw new Error("Failed to create file entry");
+      }
+
+      // Add to upload state
+      addUpload({
+        fileKey,
+        fileName: file.name,
+        totalSize: file.size,
+        uploadedSize: 0,
+      });
+
+      // Step 2: Get upload token (presigned URL)
+      const tokenResponse = await getUploadToken(fileKey, {
+        credentials: "include",
+      });
+
+      let uploadUrl: string | null = null;
+      if (tokenResponse.data && "uploadToken" in tokenResponse.data) {
+        uploadUrl = tokenResponse.data.uploadToken.uploadUrl;
+      }
+
+      if (!uploadUrl) {
+        throw new Error("Failed to get upload token");
+      }
+
+      // Step 3: Upload file directly to S3 using presigned URL
+      await fetch(uploadUrl, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      // Update upload state to 100%
+      updateUpload(fileKey, file.size);
+
+      // Step 4: Complete upload
+      await completeUploadMutation.mutateAsync({
+        fileKey,
+        data: {
+          byteSize: file.size,
+        },
+      });
+
+      // Invalidate file query
+      queryClient.invalidateQueries({
+        predicate: (query) => query.queryKey[0] === "file",
+      });
+    } finally {
+      // Remove from upload state
+      if (fileKey) {
+        removeUpload(fileKey);
+      }
     }
   };
 
-  const handleUpload = (e: React.FormEvent<HTMLFormElement>) => {
+  const uploadFiles = async (files: FileList) => {
+    // Sort files by size (small to large)
+    const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
+
+    // Upload files sequentially
+    for (const file of sortedFiles) {
+      await uploadFile(file);
+    }
+  };
+
+  const handleUpload = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const files = (e.target as HTMLFormElement).querySelector("input")?.files;
 
-    if (files) {
+    if (files && files.length > 0) {
       uploadFiles(files);
     }
-  };
+  }, []);
 
   return (
     <div className={`${styles.container} full-size`}>

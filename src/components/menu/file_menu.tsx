@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { url } from "@/api/fetch";
-import { fileQuery, storageQuery } from "@/api/query";
+import { useDeleteFile } from "@/api/generated";
+import { getStreamToken, getFileChildren } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -25,19 +25,10 @@ export default function FileMenu({
   closeMenu: () => void;
 }) {
   // Query client
-  // This is used for actions
-  // By using queryClient, the query will be performed only needed, instead of performing all queries for possible actions
   const queryClient = useQueryClient();
 
-  // Queries
-  const readLinkTargetQuery = useQuery({
-    ...fileQuery.read.linkTarget(fileKey),
-    enabled: fileType === FileType.Link,
-  });
-
   // Mutations
-  const moveToTrashMutation = useMutation(fileQuery.update.trash);
-  const permanentDeleteMutation = useMutation(fileQuery.delete.permanent);
+  const deleteFileMutation = useDeleteFile();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
@@ -97,50 +88,13 @@ export default function FileMenu({
   // Open file action
   const handleOpen = useCallback(async () => {
     closeMenu();
-    if (
-      fileType === FileType.Link &&
-      readLinkTargetQuery.isSuccess &&
-      readLinkTargetQuery.data
-    ) {
-      openFile(
-        readLinkTargetQuery.data.data.type,
-        fileName,
-        readLinkTargetQuery.data.data.fileKey
-      );
-    } else {
-      openFile(fileType, fileName, fileKey);
-    }
+    openFile(fileType, fileName, fileKey);
   }, [
     closeMenu,
     fileKey,
     fileName,
     fileType,
     openFile,
-    readLinkTargetQuery.data,
-    readLinkTargetQuery.isSuccess,
-  ]);
-
-  // Open file location action
-  const handleOpenLinkTargetLocation = useCallback(async () => {
-    closeMenu();
-    if (readLinkTargetQuery.isSuccess && readLinkTargetQuery.data) {
-      const parent = await queryClient.fetchQuery(
-        fileQuery.read.parent(readLinkTargetQuery.data.data.fileKey)
-      );
-      if (parent?.data) {
-        newWindow({
-          targetKey: parent.data.fileKey,
-          type: WindowType.Navigator,
-          title: parent.data.fileName,
-        });
-      }
-    }
-  }, [
-    closeMenu,
-    newWindow,
-    queryClient,
-    readLinkTargetQuery.data,
-    readLinkTargetQuery.isSuccess,
   ]);
 
   // Update file actions
@@ -152,14 +106,15 @@ export default function FileMenu({
   // Download file actions
   const handleDownload = useCallback(async () => {
     closeMenu();
-    await queryClient.fetchQuery(storageQuery.session.read(fileKey));
-
-    const downloadUrl = `${url.storage.file.readWithName(fileKey, fileName)}`;
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = fileName;
-    a.click();
-  }, [closeMenu, fileKey, fileName, queryClient]);
+    // Get stream token for download
+    const tokenResponse = await getStreamToken(fileKey, { credentials: "include" });
+    if (tokenResponse.data && "streamToken" in tokenResponse.data) {
+      const a = document.createElement("a");
+      a.href = tokenResponse.data.streamToken.downloadUrl;
+      a.download = fileName;
+      a.click();
+    }
+  }, [closeMenu, fileKey, fileName]);
 
   // Delete file actions
   const handleMoveToTrash = useCallback(() => {
@@ -167,46 +122,44 @@ export default function FileMenu({
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
       selectedFileKeys.map((fileKey) =>
-        moveToTrashMutation.mutateAsync({ fileKey })
+        deleteFileMutation.mutateAsync({ fileKey, params: { permanent: false } })
       )
     ).finally(() => {
       queryClient.invalidateQueries({
-        queryKey: ["file"],
+        predicate: (query) => query.queryKey[0] === "file",
       });
     });
-  }, [closeMenu, getSelectedFileKeys, moveToTrashMutation, queryClient]);
+  }, [closeMenu, getSelectedFileKeys, deleteFileMutation, queryClient]);
 
   const handlePermanentDelete = useCallback(() => {
     closeMenu();
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
       selectedFileKeys.map((fileKey) =>
-        permanentDeleteMutation.mutateAsync({ fileKey })
+        deleteFileMutation.mutateAsync({ fileKey, params: { permanent: true } })
       )
     ).finally(() => {
       queryClient.invalidateQueries({
-        queryKey: ["file"],
+        predicate: (query) => query.queryKey[0] === "file",
       });
     });
-  }, [closeMenu, getSelectedFileKeys, permanentDeleteMutation, queryClient]);
+  }, [closeMenu, getSelectedFileKeys, deleteFileMutation, queryClient]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
-    const files = await queryClient.fetchQuery(
-      fileQuery.read.children(fileKey)
-    );
-    if (files) {
+    const files = await getFileChildren(fileKey, { credentials: "include" });
+    if (files.data && "files" in files.data) {
       Promise.all(
-        files.data.map((file) =>
-          permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey })
+        files.data.files.map((file) =>
+          deleteFileMutation.mutateAsync({ fileKey: file.fileKey, params: { permanent: true } })
         )
       ).then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["file", fileKey],
+          predicate: (query) => query.queryKey[0] === "file",
         });
       });
     }
-  }, [closeMenu, fileKey, permanentDeleteMutation, queryClient]);
+  }, [closeMenu, fileKey, deleteFileMutation, queryClient]);
 
   // Delete file actions based on parent window type
   const deleteMenu =
@@ -245,10 +198,6 @@ export default function FileMenu({
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
-            {
-              name: "Open Link Target Location",
-              action: handleOpenLinkTargetLocation,
-            },
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,

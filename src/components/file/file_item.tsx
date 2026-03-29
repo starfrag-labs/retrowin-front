@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { fileQuery } from "@/api/query";
+import { useGetFileInfo } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -71,11 +71,13 @@ export default memo(function FileItem({
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // Queries
-  const linkTargetQuery = useQuery(
-    fileQuery.read.linkTarget(type === FileType.Link ? fileKey : "")
-  );
-  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
+  // Queries - link files are not supported in the new API, so we skip that query
+  const fileInfoQuery = useGetFileInfo(fileKey, {
+    query: {
+      select: (data) => ("file" in data.data ? data.data.file : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   // Get background window key
   const backgroundWindowKey = useMemo(() => {
@@ -298,21 +300,8 @@ export default memo(function FileItem({
           name,
         });
         break;
-      case FileType.Link:
-        if (linkTargetQuery.data) {
-          const linkTarget = linkTargetQuery.data.data;
-          if (linkTarget && linkTarget.type === FileType.Container) {
-            clickContaienr({
-              fileKey: linkTarget.fileKey,
-              name: linkTarget.fileName,
-            });
-          } else if (linkTarget && linkTarget.type === FileType.Block) {
-            clickBlock({
-              fileKey: linkTarget.fileKey,
-              name: linkTarget.fileName,
-            });
-          }
-        }
+      case FileType.Link: // Link files are not supported in new API
+        // Do nothing for link files
         break;
       case FileType.Home:
         clickContaienr({
@@ -333,7 +322,6 @@ export default memo(function FileItem({
     clickTrash,
     clickUpload,
     fileKey,
-    linkTargetQuery.data,
     name,
     type,
   ]);
@@ -399,9 +387,9 @@ export default memo(function FileItem({
             ref={detailRef}
             fileName={name}
             fileType={type}
-            bytes={fileInfoQuery.data.data.byteSize}
-            created={fileInfoQuery.data.data.createDate}
-            modified={fileInfoQuery.data.data.updateDate}
+            bytes={fileInfoQuery.data.byteSize || 0}
+            created={new Date(fileInfoQuery.data.createdAt || "")}
+            modified={new Date(fileInfoQuery.data.updatedAt || "")}
           />
         )}
     </div>

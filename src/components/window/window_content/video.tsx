@@ -1,24 +1,24 @@
-import { useQuery } from "@tanstack/react-query";
-import { url } from "@/api/fetch";
-import { storageQuery } from "@/api/query";
+import { useGetStreamToken } from "@/api/generated";
 import mediaStyles from "./media.module.css";
 
 export default function VideoViewer({ fileKey }: { fileKey: string }) {
-  // Constants
-  const fileUrl = url.storage.file.read(fileKey);
-
-  // Queries
-  const sessionQuery = useQuery(storageQuery.session.read(fileKey));
+  // Use Orval's generated hook directly
+  const streamQuery = useGetStreamToken(fileKey, {
+    query: {
+      select: (data) => ("streamToken" in data.data ? data.data.streamToken : null),
+    },
+    fetch: { credentials: "include" },
+  });
 
   return (
     <div className={`full-size flex-center ${mediaStyles.container}`}>
-      {sessionQuery.isFetched && sessionQuery.data && (
+      {streamQuery.data && (
         <video
           controls
           className="full-size flex-center"
           style={{ objectFit: "contain" }}
         >
-          <source src={fileUrl.toString()} type="video/mp4" />
+          <source src={streamQuery.data.downloadUrl} type="video/mp4" />
           <track kind="captions" />
         </video>
       )}
