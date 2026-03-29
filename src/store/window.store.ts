@@ -39,6 +39,8 @@ type Action = {
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
   closeWindow: (key: string) => void;
+  minimizeWindow: (key: string) => void;
+  restoreWindow: (key: string) => void;
   highlightWindow: (key: string) => void;
   highlightWindowsByType: (type: WindowType) => void;
   prevWindow: (key: string) => void;
@@ -132,6 +134,26 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   closeWindow: (key) => {
     set((state) => {
       state.windows = state.windows.filter((w) => w.key !== key);
+      return { windows: state.windows };
+    });
+  },
+  minimizeWindow: (key) => {
+    set((state) => {
+      const window = state.windows.find((w) => w.key === key);
+      if (window) {
+        window.minimized = true;
+        state.windows = [...state.windows];
+      }
+      return { windows: state.windows };
+    });
+  },
+  restoreWindow: (key) => {
+    set((state) => {
+      const window = state.windows.find((w) => w.key === key);
+      if (window) {
+        window.minimized = false;
+        state.windows = [...state.windows];
+      }
       return { windows: state.windows };
     });
   },

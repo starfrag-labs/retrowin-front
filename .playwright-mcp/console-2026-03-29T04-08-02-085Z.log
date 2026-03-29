@@ -1,8 +1,0 @@
-[    1389ms] [WARNING] MaxListenersExceededWarning: Possible EventEmitter memory leak detected. 11 response:mocked listeners added. Use emitter.setMaxListeners() to increase limit
-    at _Emitter.addListener (http://localhost:3000/_next/static/chunks/node_modules_0uf~dzs._.js:17073:39)
-    at _Emitter.once (http://localhost:3000/_next/static/chunks/node_modules_0uf~dzs._.js:17082:21)
-    at Object.onMockedResponse (http://localhost:3000/_next/static/chunks/node_modules_0uf~dzs._.js:19236:41)
-    at handleRequest (http://localhost:3000/_next/static/chunks/node_modules_0uf~dzs._.js:16941:45)
-    at async WorkerChannel.<anonymous> (http://localhost:3000/_next/static/chunks/node_modules_0uf~dzs._.js:19209:13) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
-[    1555ms] [WARNING] Image with src "/icons/sprites/Up.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
-Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431

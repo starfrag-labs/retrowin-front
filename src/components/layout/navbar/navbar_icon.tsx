@@ -21,6 +21,8 @@ export default function NavbarIcon({
   const highlightWindowsByType = useWindowStore(
     (state) => state.highlightWindowsByType
   );
+  const restoreWindow = useWindowStore((state) => state.restoreWindow);
+  const windows = useWindowStore((state) => state.windows);
   const newWindow = useWindowStore((state) => state.newWindow);
 
   // Queries - use Orval's generated hooks directly
@@ -38,6 +40,11 @@ export default function NavbarIcon({
   });
 
   const handleClick = useCallback(() => {
+    // Restore minimized windows of this type
+    windows
+      .filter((w) => w.type === windowType && w.minimized)
+      .forEach((w) => restoreWindow(w.key));
+
     switch (windowType) {
       case WindowType.Uploader:
         if (windowCount === 0 && homeKeyQuery.isSuccess && homeKeyQuery.data) {
@@ -69,8 +76,10 @@ export default function NavbarIcon({
     homeKeyQuery.data,
     homeKeyQuery.isSuccess,
     newWindow,
+    restoreWindow,
     trashKeyQuery.data,
     trashKeyQuery.isSuccess,
+    windows,
     windowCount,
     windowType,
   ]);

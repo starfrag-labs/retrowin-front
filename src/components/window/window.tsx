@@ -35,6 +35,8 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Store actions
   const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
+  const minimizeWindow = useWindowStore((state) => state.minimizeWindow);
+  const restoreWindow = useWindowStore((state) => state.restoreWindow);
   const setResizingCursor = useEventStore((state) => state.setResizingCursor);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
@@ -266,6 +268,11 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     };
   }, [resizeWindow]);
 
+  // Don't render minimized windows
+  if (targetWindow?.minimized) {
+    return null;
+  }
+
   return (
     <article
       className={`flex-center ${styles.container}`}
@@ -284,6 +291,10 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         hasPrevWindow={hasPrevWindow(windowKey)}
         hasNextWindow={hasNextWindow(windowKey)}
         buttonActions={[
+          {
+            action: () => minimizeWindow(windowKey),
+            icon: "minimize",
+          },
           {
             action: maximized ? revertWindowSize : maximizeWindow,
             icon: maximized ? "exit_fullscreen" : "fullscreen",

@@ -16,4 +16,5 @@ export interface AppWindow {
   type: WindowType;
   targetHistory?: string[];
   historyIndex?: number;
+  minimized?: boolean;
 }

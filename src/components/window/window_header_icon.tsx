@@ -13,24 +13,29 @@ export default function WindowHeaderIcon({
   className?: string;
   style?: React.CSSProperties;
 }) {
+  const baseStyle = {
+    strokeWidth: 2.5,
+    ...style,
+  };
+
   switch (icon) {
     case "fullscreen":
       return (
         <FaRegSquareFull
           className={className}
           onClick={onClick}
-          style={style}
+          style={baseStyle}
         />
       );
     case "exit_fullscreen":
       return (
-        <FiMinimize className={className} onClick={onClick} style={style} />
+        <FiMinimize className={className} onClick={onClick} style={baseStyle} />
       );
     case "minimize":
-      return <FaMinus className={className} onClick={onClick} style={style} />;
+      return <FaMinus className={className} onClick={onClick} style={baseStyle} />;
     case "close":
       return (
-        <IoMdClose className={className} onClick={onClick} style={style} />
+        <IoMdClose className={className} onClick={onClick} style={baseStyle} />
       );
     default:
       return null;
