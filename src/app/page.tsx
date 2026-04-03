@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { RedirectType, redirect } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetHomeContainer, useGetUser, useCreateUser } from "@/api/generated";
+import { useGetUser, useListSystems, useGetRootDirectory } from "@/api/generated";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
 import Background from "@/components/layout/background";
@@ -22,6 +22,8 @@ export default function Home() {
 
   // States
   const [homeKey, setHomeKey] = useState<string | null>(null);
+  const [currentSystemId, setCurrentSystemId] = useState<string | null>(null);
+  const [currentPath, setCurrentPath] = useState<string>("/home");
 
   // Store states
   const windows = useWindowStore((state) => state.windows);
@@ -34,72 +36,75 @@ export default function Home() {
 
   // Queries - use Orval's generated hooks directly
   const queryClient = useQueryClient();
-  const homeKeyQuery = useGetHomeContainer({
-    query: { retry: false, select: (data) => ("file" in data.data ? data.data.file : null) },
+
+  // Get current user
+  const getUserQuery = useGetUser({
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.user : null),
+    },
     fetch: { credentials: "include" },
   });
-  const getMemberQuery = useGetUser({
-    query: { retry: false, select: (data) => ("user" in data.data ? data.data.user : null) },
+
+  // Get systems list
+  const listSystemsQuery = useListSystems({
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.systems : []),
+      enabled: !!getUserQuery.data,
+    },
     fetch: { credentials: "include" },
   });
-  const createMemberMutation = useCreateUser();
+
+  // Get root directory for first system
+  const rootDirectoryQuery = useGetRootDirectory(
+    currentSystemId ?? "",
+    {
+      query: {
+        retry: false,
+        select: (data) => (data.status === 200 ? data.data.inode : null),
+        enabled: !!currentSystemId,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
+
+  // Set current system ID when systems are loaded
+  useEffect(() => {
+    if (listSystemsQuery.isSuccess && listSystemsQuery.data.length > 0 && !currentSystemId) {
+      setCurrentSystemId(listSystemsQuery.data[0].id);
+    }
+  }, [listSystemsQuery.data, listSystemsQuery.isSuccess, currentSystemId]);
 
   useEffect(() => {
-    if (homeKey) {
+    if (homeKey && currentSystemId) {
       newBackgroundWindow({
-        targetKey: homeKey,
+        targetKey: currentPath, // Use path instead of fileKey for Background window
         type: WindowType.Background,
         title: "background",
         key: backgroundWindowKey,
+        systemId: currentSystemId,
       });
     }
-  }, [backgroundWindowKey, newBackgroundWindow, homeKey]);
+  }, [backgroundWindowKey, newBackgroundWindow, homeKey, currentSystemId, currentPath]);
 
   useEffect(() => {
-    if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
-      setHomeKey(homeKeyQuery.data.fileKey);
+    if (rootDirectoryQuery.isSuccess && rootDirectoryQuery.data) {
+      setHomeKey(rootDirectoryQuery.data.id);
     }
-  }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
+  }, [rootDirectoryQuery.data, rootDirectoryQuery.isSuccess]);
 
   useEffect(() => {
-    if (homeKeyQuery.isError) {
+    if (getUserQuery.isError) {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      const errorStatus = (homeKeyQuery.error as any)?.status;
+      const errorStatus = (getUserQuery.error as any)?.status;
       if (errorStatus === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
-      } else if (
-        errorStatus === 403 &&
-        getMemberQuery.isError &&
-        (getMemberQuery.error as any)?.status === 404 &&
-        !createMemberMutation.isPending
-      ) {
-        // If the user is not a member of the service, create a member
-        createMemberMutation
-          .mutateAsync({ data: { provider: "keycloak", providerId: "auto" } })
-          .then(() => {
-            queryClient.invalidateQueries();
-          })
-          .catch(() => {
-            throw new Error("Failed to create member");
-          });
-      } else if (
-        errorStatus === 403 &&
-        getMemberQuery.isSuccess
-      ) {
-        throw new Error("You are not a member of this service");
       } else {
-        throw new Error("Failed to get home");
+        throw new Error("Failed to get user");
       }
     }
-  }, [
-    createMemberMutation,
-    getMemberQuery.error,
-    getMemberQuery.isError,
-    getMemberQuery.isSuccess,
-    homeKeyQuery.error,
-    homeKeyQuery.isError,
-    queryClient,
-  ]);
+  }, [getUserQuery.error, getUserQuery.isError]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
@@ -110,7 +115,7 @@ export default function Home() {
     });
   }, [backgroundWindowKey, setCurrentWindow]);
 
-  if (!homeKey) {
+  if (!homeKey || !currentSystemId) {
     return <div></div>;
   }
 
@@ -132,7 +137,8 @@ export default function Home() {
               >
                 <FileContainer
                   windowKey={backgroundWindowKey}
-                  containerKey={homeKey}
+                  systemId={currentSystemId ?? ""}
+                  path={currentPath}
                   upload
                   trash
                   backgroundFile

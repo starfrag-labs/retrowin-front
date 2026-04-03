@@ -1,71 +1,101 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useCreateFile, useDeleteFile, useGetFileChildren } from "@/api/generated";
-import { getFileChildren } from "@/api/generated";
+import { useMkdir, useUnlink } from "@/api/generated";
+import { ls } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
 import MenuList from "./menu_list";
 
 export default function WindowMenu({
-  targetFileKey,
+  path,
   windowType,
   closeMenu,
 }: {
-  targetFileKey: string;
+  path: string;
   windowType: WindowType | null;
   closeMenu: () => void;
 }) {
   // Query client
   const queryClient = useQueryClient();
 
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.targetKey === path);
+  const systemId = currentWindow?.systemId || "";
+
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
 
   // Mutations
-  const createContainerMutation = useCreateFile();
-  const deleteFilePermanentMutation = useDeleteFile();
+  const mkdirMutation = useMkdir();
+  const unlinkMutation = useUnlink();
 
   // Handle upload action
   const handleUpload = useCallback(() => {
     newWindow({
-      targetKey: targetFileKey,
+      targetKey: path,
       type: WindowType.Uploader,
       title: "Uploader",
+      systemId,
     });
     closeMenu();
-  }, [closeMenu, newWindow, targetFileKey]);
+  }, [closeMenu, newWindow, path, systemId]);
 
   const handleCreateContainer = useCallback(async () => {
-    const result = await createContainerMutation.mutateAsync({
-      data: { type: "container", fileName: "New Folder", parentKey: targetFileKey },
-    });
-    if (result.data) {
+    if (!path || !systemId) return;
+
+    await mkdirMutation.mutateAsync({
+      systemId,
+      data: {
+        path: `${path === "/" ? "" : path}/New Folder`,
+        mode: 0o755,
+      },
+    }).then(() => {
       queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "file",
+        predicate: (query) => {
+          const queryKey = query.queryKey[0] as string;
+          return (
+            queryKey.startsWith("/fs/") &&
+            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+          );
+        },
       });
       closeMenu();
-    }
-  }, [closeMenu, createContainerMutation, queryClient, targetFileKey]);
+    });
+  }, [path, systemId, closeMenu, mkdirMutation, queryClient]);
 
   const handleEmptyTrash = useCallback(async () => {
+    if (!path || !systemId) return;
     closeMenu();
-    const files = await getFileChildren(targetFileKey, { credentials: "include" });
-    if (files.data && "files" in files.data) {
+
+    // Get all files in trash directory
+    const readDirResult = await ls(systemId, { path }, { credentials: "include" });
+
+    if (readDirResult.data && "entries" in readDirResult.data) {
       Promise.all(
-        files.data.files.map((file) =>
-          deleteFilePermanentMutation.mutateAsync({ fileKey: file.fileKey, params: { permanent: true } })
+        readDirResult.data.entries.map((entry: any) =>
+          unlinkMutation.mutateAsync({
+            systemId,
+            params: { path: `${path === "/" ? "" : path}/${entry.name}` },
+          })
         )
       ).then(() => {
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "file",
+          predicate: (query) => {
+            const key = query.queryKey[0] as string;
+            return key === "readDir" || key === "statPath";
+          },
         });
       });
     }
-  }, [closeMenu, deleteFilePermanentMutation, queryClient, targetFileKey]);
+  }, [path, systemId, closeMenu, unlinkMutation, queryClient]);
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "file",
+      predicate: (query) => {
+        const key = query.queryKey[0] as string;
+        return key === "readDir" || key === "statPath";
+      },
     });
     closeMenu();
   }, [closeMenu, queryClient]);

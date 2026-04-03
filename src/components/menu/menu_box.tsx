@@ -127,19 +127,19 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   return (
     <section
       className="flex-center full-size"
-      onMouseUp={handleContextMenu}
+      onContextMenu={handleContextMenu}
       aria-label="context menu area"
     >
       <div className={styles.menu_box} ref={menuRef} hidden={menuType === null}>
         {menuType === "background" && targetFileKey && (
           <BackgroundMenu
-            backgroundFileKey={targetFileKey}
+            path={targetFileKey}
             closeMenu={closeMenu}
           />
         )}
         {menuType === "file" && targetFile && currentWindow && (
           <FileMenu
-            fileKey={targetFile.fileKey}
+            path={targetFile.fileKey}
             fileName={targetFile.fileName}
             fileType={targetFile.fileType}
             windowKey={currentWindow.key}
@@ -149,7 +149,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
         )}
         {menuType === "window" && targetFileKey && (
           <WindowMenu
-            targetFileKey={targetFileKey}
+            path={targetFileKey}
             windowType={windowType}
             closeMenu={closeMenu}
           />

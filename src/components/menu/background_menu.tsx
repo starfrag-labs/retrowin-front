@@ -1,53 +1,89 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useCreateFile } from "@/api/generated";
+import { useMkdir } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
 import MenuList from "./menu_list";
 
 export default function BackgroundMenu({
-  backgroundFileKey,
+  path,
   closeMenu,
 }: {
-  backgroundFileKey: string;
+  path: string;
   closeMenu: () => void;
 }) {
   // Query client
   const queryClient = useQueryClient();
 
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const backgroundWindow = windows.find((w) => w.type === WindowType.Background);
+  const systemId = backgroundWindow?.systemId || "";
+
   // Mutations
-  const createContainerMutation = useCreateFile();
+  const mkdirMutation = useMkdir();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
 
   const handleUpload = useCallback(() => {
-    if (backgroundFileKey) {
+    if (path) {
       newWindow({
-        targetKey: backgroundFileKey,
+        targetKey: path,
         type: WindowType.Uploader,
         title: "Uploader",
+        systemId,
       });
       closeMenu();
     }
-  }, [backgroundFileKey, newWindow, closeMenu]);
+  }, [path, systemId, newWindow, closeMenu]);
 
   const handleCreateFolder = useCallback(async () => {
-    if (!backgroundFileKey) return;
-    closeMenu();
-    const result = await createContainerMutation.mutateAsync({
-      data: { type: "container", fileName: "New Folder", parentKey: backgroundFileKey },
-    });
-    if (result.data && "file" in result.data) {
-      queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "file",
-      });
+    if (!path || !systemId) {
+      console.error("[BackgroundMenu] Cannot create folder: missing path or systemId", { path, systemId });
+      return;
     }
-  }, [backgroundFileKey, closeMenu, createContainerMutation, queryClient]);
+    closeMenu();
+
+    // Find a unique folder name
+    let folderName = "New Folder";
+    let counter = 1;
+    // Note: In production, you'd want to check existing folders first
+
+    const folderPath = `${path === "/" ? "" : path}/${folderName}`;
+    console.log("[BackgroundMenu] Creating folder:", { systemId, path: folderPath });
+
+    try {
+      await mkdirMutation.mutateAsync({
+        systemId,
+        data: {
+          path: folderPath,
+          mode: 0o755,
+        },
+      });
+      queryClient.invalidateQueries({
+        predicate: (query) => {
+          const queryKey = query.queryKey[0] as string;
+          return (
+            queryKey.startsWith("/fs/") &&
+            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+          );
+        },
+      });
+    } catch (error) {
+      console.error("[BackgroundMenu] Failed to create folder:", error);
+    }
+  }, [path, systemId, closeMenu, mkdirMutation, queryClient]);
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => query.queryKey[0] === "file",
+      predicate: (query) => {
+        const queryKey = query.queryKey[0] as string;
+        return (
+          queryKey.startsWith("/fs/") &&
+          (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+        );
+      },
     });
     closeMenu();
   }, [queryClient, closeMenu]);

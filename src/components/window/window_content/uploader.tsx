@@ -1,24 +1,32 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { useCompleteUpload, useCreateFile, getUploadToken } from "@/api/generated";
+import { useInitiateUpload, useCompleteUpload } from "@/api/generated";
+import { useWindowStore } from "@/store/window.store";
 import styles from "./uploader.module.css";
 
 export default function Uploader({
-  targetContainerKey,
+  targetPath,
 }: {
-  targetContainerKey: string;
+  targetPath: string;
 }) {
   // Query Client
   const queryClient = useQueryClient();
 
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.targetKey === targetPath);
+
+  // Get system ID from window state or use default
+  const systemId = currentWindow?.systemId || "";
+
   // Mutations
-  const createFileMutation = useCreateFile();
+  const initiateUploadMutation = useInitiateUpload();
   const completeUploadMutation = useCompleteUpload();
 
   // State
   const [uploadState, setUploadState] = useState<
     {
-      fileKey: string;
+      objectId: string;
       fileName: string;
       totalSize: number;
       uploadedSize: number;
@@ -27,7 +35,7 @@ export default function Uploader({
 
   // Upload state actions
   const addUpload = useCallback((upload: {
-    fileKey: string;
+    objectId: string;
     fileName: string;
     totalSize: number;
     uploadedSize: number;
@@ -35,61 +43,58 @@ export default function Uploader({
     setUploadState((state) => [...state, upload]);
   }, []);
 
-  const updateUpload = useCallback((fileKey: string, uploadedSize: number) => {
+  const updateUpload = useCallback((objectId: string, uploadedSize: number) => {
     setUploadState((state) =>
       state.map((upload) =>
-        upload.fileKey === fileKey ? { ...upload, uploadedSize } : upload
+        upload.objectId === objectId ? { ...upload, uploadedSize } : upload
       )
     );
   }, []);
 
-  const removeUpload = useCallback((fileKey: string) => {
+  const removeUpload = useCallback((objectId: string) => {
     setUploadState((state) =>
-      state.filter((upload) => upload.fileKey !== fileKey)
+      state.filter((upload) => upload.objectId !== objectId)
     );
   }, []);
 
   const uploadFile = async (file: File) => {
-    let fileKey: string | null = null;
+    let objectId: string | null = null;
 
     try {
-      // Step 1: Create file entry with type "file"
-      const createResult = await createFileMutation.mutateAsync({
+      // Step 1: Initiate upload to get presigned URL
+      const initiateResult = await initiateUploadMutation.mutateAsync({
+        systemId,
         data: {
-          type: "file",
-          fileName: file.name,
-          parentKey: targetContainerKey,
+          path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
+          contentType: file.type,
+          size: file.size,
         },
       });
 
-      if (createResult.data && "file" in createResult.data) {
-        fileKey = createResult.data.file.fileKey;
+      if (initiateResult.data && "uploadSession" in initiateResult.data) {
+        objectId = initiateResult.data.uploadSession.objectId;
       }
 
-      if (!fileKey) {
-        throw new Error("Failed to create file entry");
+      if (!objectId) {
+        throw new Error("Failed to initiate upload");
       }
 
       // Add to upload state
       addUpload({
-        fileKey,
+        objectId,
         fileName: file.name,
         totalSize: file.size,
         uploadedSize: 0,
       });
 
-      // Step 2: Get upload token (presigned URL)
-      const tokenResponse = await getUploadToken(fileKey, {
-        credentials: "include",
-      });
-
+      // Step 2: Get presigned URL from response
       let uploadUrl: string | null = null;
-      if (tokenResponse.data && "uploadToken" in tokenResponse.data) {
-        uploadUrl = tokenResponse.data.uploadToken.uploadUrl;
+      if (initiateResult.data && "uploadSession" in initiateResult.data) {
+        uploadUrl = initiateResult.data.uploadSession.uploadUrl;
       }
 
       if (!uploadUrl) {
-        throw new Error("Failed to get upload token");
+        throw new Error("Failed to get upload URL");
       }
 
       // Step 3: Upload file directly to S3 using presigned URL
@@ -102,24 +107,31 @@ export default function Uploader({
       });
 
       // Update upload state to 100%
-      updateUpload(fileKey, file.size);
+      updateUpload(objectId, file.size);
 
-      // Step 4: Complete upload
+      // Step 4: Complete upload to create inode
       await completeUploadMutation.mutateAsync({
-        fileKey,
+        systemId,
         data: {
-          byteSize: file.size,
+          objectId,
+          path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
         },
       });
 
-      // Invalidate file query
+      // Invalidate queries to refresh file list
       queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "file",
+        predicate: (query) => {
+          const queryKey = query.queryKey[0] as string;
+          return (
+            queryKey.startsWith("/fs/") &&
+            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+          );
+        },
       });
     } finally {
       // Remove from upload state
-      if (fileKey) {
-        removeUpload(fileKey);
+      if (objectId) {
+        removeUpload(objectId);
       }
     }
   };
@@ -141,14 +153,14 @@ export default function Uploader({
     if (files && files.length > 0) {
       uploadFiles(files);
     }
-  }, []);
+  }, [uploadFiles]);
 
   return (
     <div className={`${styles.container} full-size`}>
       <div className={`full-size`}>
         <div className={`${styles.upload_state} full-size`}>
           {uploadState.map((upload) => (
-            <div key={upload.fileKey} className={styles.progress_container}>
+            <div key={upload.objectId} className={styles.progress_container}>
               <span>{upload.fileName}</span>
               <progress
                 value={upload.uploadedSize}

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetFileInfo } from "@/api/generated";
+import { useStatPath } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -31,12 +31,14 @@ export default memo(function FileItem({
   type,
   fileKey,
   windowKey,
+  systemId,
   backgroundFile = false,
 }: {
   name: string;
   type: FileType;
   fileKey: string;
   windowKey: string;
+  systemId?: string;
   backgroundFile?: boolean;
 }) {
   // constants
@@ -71,13 +73,18 @@ export default memo(function FileItem({
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // Queries - link files are not supported in the new API, so we skip that query
-  const fileInfoQuery = useGetFileInfo(fileKey, {
-    query: {
-      select: (data) => ("file" in data.data ? data.data.file : null),
-    },
-    fetch: { credentials: "include" },
-  });
+  // Queries - use statPath to get file info
+  const fileInfoQuery = useStatPath(
+    systemId || "",
+    { path: fileKey },
+    {
+      query: {
+        select: (data: any) => (data.status === 200 ? data.data.inode : null),
+        enabled: !!systemId && (type === FileType.Block || type === FileType.Container),
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   // Get background window key
   const backgroundWindowKey = useMemo(() => {
@@ -177,6 +184,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Navigator,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -190,6 +198,7 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
@@ -205,6 +214,7 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Image,
             title: name,
+            systemId,
           });
           break;
         case ContentTypes.Video:
@@ -212,6 +222,7 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Video,
             title: name,
+            systemId,
           });
           break;
         case ContentTypes.Audio:
@@ -219,11 +230,12 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Audio,
             title: name,
+            systemId,
           });
           break;
       }
     },
-    [newWindow]
+    [newWindow, systemId]
   );
 
   const clickUpload = useCallback(
@@ -233,6 +245,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Uploader,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -247,6 +260,7 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
@@ -260,6 +274,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Trash,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -274,6 +289,7 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
@@ -387,9 +403,9 @@ export default memo(function FileItem({
             ref={detailRef}
             fileName={name}
             fileType={type}
-            bytes={fileInfoQuery.data.byteSize || 0}
+            bytes={fileInfoQuery.data.size || 0}
             created={new Date(fileInfoQuery.data.createdAt || "")}
-            modified={new Date(fileInfoQuery.data.updatedAt || "")}
+            modified={new Date(fileInfoQuery.data.mtime || "")}
           />
         )}
     </div>

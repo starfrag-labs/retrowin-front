@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetFileInfo } from "@/api/generated";
-import { type AppWindow, WindowType } from "@/interfaces/window";
+import { useStatPath } from "@/api/generated";
+import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useWindowStore } from "@/store/window.store";
 import WindowContent from "./window_content";
@@ -15,7 +15,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
 
   // States
   const [maximized, setMaximized] = useState(false);
-  const [targetWindow, setTargetWindow] = useState<AppWindow | null>(null);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [prevWindowSize, setPrevWindowSize] = useState({ width: 0, height: 0 });
   const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 });
@@ -30,10 +29,12 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   ] = useState([]);
   const [contentLoading, setContentLoading] = useState(false);
 
-  // Store state
+  // Store state - select the specific window to react to changes
+  const targetWindow = useWindowStore((state) =>
+    state.windows.find((w) => w.key === windowKey)
+  );
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
-  const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const minimizeWindow = useWindowStore((state) => state.minimizeWindow);
   const restoreWindow = useWindowStore((state) => state.restoreWindow);
@@ -53,25 +54,31 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowContentRef = useRef<HTMLDivElement>(null);
 
   // Queries - use Orval's generated hook directly
-  const fileInfo = useGetFileInfo(targetWindow?.targetKey || "", {
-    query: {
-      enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background,
-      select: (data) => ("file" in data.data ? data.data.file : null),
-    },
-    fetch: { credentials: "include" },
-  });
+  const fileInfo = useStatPath(
+    targetWindow?.systemId || "",
+    { path: targetWindow?.targetKey || "" },
+    {
+      query: {
+        enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background && !!targetWindow?.systemId,
+        select: (data: any) => (data.status === 200 ? data.data.inode : null),
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   // Set window title
   useEffect(() => {
     if (targetWindow?.type === WindowType.Uploader) {
       setTitle(windowKey, "Uploader");
-    } else if (fileInfo.isSuccess && fileInfo.data) {
-      setTitle(windowKey, fileInfo.data.fileName);
+    } else if (targetWindow?.targetKey) {
+      // Extract filename from path
+      const path = targetWindow.targetKey;
+      const fileName = path.split("/").filter(Boolean).pop() || path;
+      setTitle(windowKey, fileName);
     }
   }, [
-    fileInfo.data,
-    fileInfo.isSuccess,
     setTitle,
+    targetWindow?.targetKey,
     targetWindow?.type,
     windowKey,
   ]);
@@ -90,14 +97,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const enterWindowHeader = useCallback(() => {
     setCurrentWindow(null);
   }, [setCurrentWindow]);
-
-  // Update window state
-  useEffect(() => {
-    const window = findWindow(windowKey);
-    if (window) {
-      setTargetWindow(window);
-    }
-  }, [findWindow, windowKey]);
 
   // Initialize window position and size
   useEffect(() => {

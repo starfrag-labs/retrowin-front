@@ -3,17 +3,18 @@
  * Do not edit manually.
  * Retrowin API
  * Retrowin File Management System API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { Provider } from './provider';
 import type { Timestamp } from './timestamp';
 
 export interface User {
   /** User ID */
-  id: number;
+  id: string;
   provider: Provider;
   /** User ID from the authentication provider */
   providerId: string;
+  joinDate?: Timestamp;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }

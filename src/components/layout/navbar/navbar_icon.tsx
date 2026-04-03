@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useGetHomeContainer, useGetTrashContainer } from "@/api/generated";
 import { FileIconType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
@@ -25,20 +24,6 @@ export default function NavbarIcon({
   const windows = useWindowStore((state) => state.windows);
   const newWindow = useWindowStore((state) => state.newWindow);
 
-  // Queries - use Orval's generated hooks directly
-  const homeKeyQuery = useGetHomeContainer({
-    query: {
-      select: (data) => ("file" in data.data ? data.data.file : null),
-    },
-    fetch: { credentials: "include" },
-  });
-  const trashKeyQuery = useGetTrashContainer({
-    query: {
-      select: (data) => ("file" in data.data ? data.data.file : null),
-    },
-    fetch: { credentials: "include" },
-  });
-
   const handleClick = useCallback(() => {
     // Restore minimized windows of this type
     windows
@@ -47,22 +32,20 @@ export default function NavbarIcon({
 
     switch (windowType) {
       case WindowType.Uploader:
-        if (windowCount === 0 && homeKeyQuery.isSuccess && homeKeyQuery.data) {
+        if (windowCount === 0) {
+          // Open uploader with root path
           newWindow({
-            targetKey: homeKeyQuery.data.fileKey,
+            targetKey: "/",
             type: WindowType.Uploader,
             title: "Uploader",
           });
         }
         break;
       case WindowType.Trash:
-        if (
-          windowCount === 0 &&
-          trashKeyQuery.isSuccess &&
-          trashKeyQuery.data
-        ) {
+        if (windowCount === 0) {
+          // Open trash with trash path
           newWindow({
-            targetKey: trashKeyQuery.data.fileKey,
+            targetKey: "/.trash",
             type: WindowType.Trash,
             title: "Trash",
           });
@@ -73,12 +56,8 @@ export default function NavbarIcon({
     highlightWindowsByType(windowType);
   }, [
     highlightWindowsByType,
-    homeKeyQuery.data,
-    homeKeyQuery.isSuccess,
     newWindow,
     restoreWindow,
-    trashKeyQuery.data,
-    trashKeyQuery.isSuccess,
     windows,
     windowCount,
     windowType,

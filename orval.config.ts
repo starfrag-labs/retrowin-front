@@ -9,7 +9,7 @@ export default defineConfig({
       client: "react-query",
     },
     input: {
-      target: "https://retrowin-api.starfrag.co/v1/openapi.json",
+      target: "https://retrowin-api.starfrag.co/openapi.json",
     },
   },
 });

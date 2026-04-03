@@ -3,13 +3,14 @@
  * Do not edit manually.
  * Retrowin API
  * Retrowin File Management System API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 
 export interface CompleteUploadRequest {
-  /**
-     * Final file size in bytes
-     * @minimum 0
-     */
-  byteSize?: number;
+  /** Object ID from upload initiation */
+  objectId: string;
+  /** Final file path */
+  path: string;
+  /** Optional file permissions */
+  mode?: number;
 }

@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Retrowin API
  * Retrowin File Management System API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import type { HealthStatusStatus } from './healthStatusStatus';
 

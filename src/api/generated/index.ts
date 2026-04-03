@@ -3,7 +3,7 @@
  * Do not edit manually.
  * Retrowin API
  * Retrowin File Management System API
- * OpenAPI spec version: 0.1.0
+ * OpenAPI spec version: 0.2.0
  */
 import {
   useMutation,
@@ -25,20 +25,35 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  CallbackRequest,
+  CallbackResponse,
+  ChmodRequest,
   CompleteUploadRequest,
-  CopyFileRequest,
-  CreateFileRequest,
-  CreateUserRequest,
-  DeleteFileParams,
+  CreateSystemGroupRequest,
+  CreateSystemRequest,
+  CreateSystemUserRequest,
+  DirContentResponse,
+  DownloadURLResponse,
   Error,
-  FileListResponse,
-  FileResponse,
+  GetDownloadUrlParams,
   HealthStatus,
-  MoveFileRequest,
-  ServiceStatusResponse,
-  StreamTokenResponse,
-  UpdateFileRequest,
-  UploadTokenResponse,
+  InitiateUploadRequest,
+  InodeResponse,
+  LoginResponse,
+  LsParams,
+  MkdirRequest,
+  MvBody,
+  RenameBody,
+  StatPathParams,
+  SymlinkRequest,
+  SystemGroupListResponse,
+  SystemGroupResponse,
+  SystemListResponse,
+  SystemResponse,
+  SystemUserListResponse,
+  SystemUserResponse,
+  UnlinkParams,
+  UploadSessionResponse,
   UserResponse
 } from './model';
 
@@ -53,6 +68,327 @@ export type HTTPStatusCode4xx = 400 | 401 | 402 | 403 | 404 | 405 | 406 | 407 | 
 export type HTTPStatusCode5xx = 500 | 501 | 502 | 503 | 504 | 505 | 507 | 511;
 export type HTTPStatusCodes = HTTPStatusCode1xx | HTTPStatusCode2xx | HTTPStatusCode3xx | HTTPStatusCode4xx | HTTPStatusCode5xx;
 
+
+/**
+ * Start OIDC login flow and return authorization URL
+ * @summary Initiate login
+ */
+export type initiateLoginResponse200 = {
+  data: LoginResponse
+  status: 200
+}
+
+export type initiateLoginResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200>
+}
+
+export type initiateLoginResponseSuccess = (initiateLoginResponse200) & {
+  headers: Headers;
+};
+export type initiateLoginResponseError = (initiateLoginResponseDefault) & {
+  headers: Headers;
+};
+
+export type initiateLoginResponse = (initiateLoginResponseSuccess | initiateLoginResponseError)
+
+export const getInitiateLoginUrl = () => {
+
+
+
+
+  return `/auth/login`
+}
+
+export const initiateLogin = async ( options?: RequestInit): Promise<initiateLoginResponse> => {
+
+  const res = await fetch(getInitiateLoginUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: initiateLoginResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as initiateLoginResponse
+}
+
+
+
+
+
+export const getInitiateLoginQueryKey = () => {
+    return [
+    `/auth/login`
+    ] as const;
+    }
+
+
+export const getInitiateLoginQueryOptions = <TData = Awaited<ReturnType<typeof initiateLogin>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getInitiateLoginQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof initiateLogin>>> = ({ signal }) => initiateLogin({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type InitiateLoginQueryResult = NonNullable<Awaited<ReturnType<typeof initiateLogin>>>
+export type InitiateLoginQueryError = Error
+
+
+export function useInitiateLogin<TData = Awaited<ReturnType<typeof initiateLogin>>, TError = Error>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof initiateLogin>>,
+          TError,
+          Awaited<ReturnType<typeof initiateLogin>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useInitiateLogin<TData = Awaited<ReturnType<typeof initiateLogin>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof initiateLogin>>,
+          TError,
+          Awaited<ReturnType<typeof initiateLogin>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useInitiateLogin<TData = Awaited<ReturnType<typeof initiateLogin>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Initiate login
+ */
+
+export function useInitiateLogin<TData = Awaited<ReturnType<typeof initiateLogin>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof initiateLogin>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getInitiateLoginQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Handle OAuth callback from Keycloak
+ * @summary Handle OAuth callback
+ */
+export type handleCallbackResponse200 = {
+  data: CallbackResponse
+  status: 200
+}
+
+export type handleCallbackResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type handleCallbackResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type handleCallbackResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 400 | 401>
+}
+
+export type handleCallbackResponseSuccess = (handleCallbackResponse200) & {
+  headers: Headers;
+};
+export type handleCallbackResponseError = (handleCallbackResponse400 | handleCallbackResponse401 | handleCallbackResponseDefault) & {
+  headers: Headers;
+};
+
+export type handleCallbackResponse = (handleCallbackResponseSuccess | handleCallbackResponseError)
+
+export const getHandleCallbackUrl = () => {
+
+
+
+
+  return `/auth/callback`
+}
+
+export const handleCallback = async (callbackRequest: CallbackRequest, options?: RequestInit): Promise<handleCallbackResponse> => {
+
+  const res = await fetch(getHandleCallbackUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      callbackRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: handleCallbackResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as handleCallbackResponse
+}
+
+
+
+
+export const getHandleCallbackMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext> => {
+
+const mutationKey = ['handleCallback'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof handleCallback>>, {data: CallbackRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  handleCallback(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type HandleCallbackMutationResult = NonNullable<Awaited<ReturnType<typeof handleCallback>>>
+    export type HandleCallbackMutationBody = CallbackRequest
+    export type HandleCallbackMutationError = Error
+
+    /**
+ * @summary Handle OAuth callback
+ */
+export const useHandleCallback = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof handleCallback>>,
+        TError,
+        {data: CallbackRequest},
+        TContext
+      > => {
+      return useMutation(getHandleCallbackMutationOptions(options), queryClient);
+    }
+
+/**
+ * Logout and delete session (idempotent - always returns 204)
+ * @summary Logout
+ */
+export type logoutResponse204 = {
+  data: void
+  status: 204
+}
+
+export type logoutResponseSuccess = (logoutResponse204) & {
+  headers: Headers;
+};
+;
+
+export type logoutResponse = (logoutResponseSuccess)
+
+export const getLogoutUrl = () => {
+
+
+
+
+  return `/auth/logout`
+}
+
+export const logout = async ( options?: RequestInit): Promise<logoutResponse> => {
+
+  const res = await fetch(getLogoutUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: logoutResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as logoutResponse
+}
+
+
+
+
+export const getLogoutMutationOptions = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext> => {
+
+const mutationKey = ['logout'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logout>>, void> = () => {
+
+
+          return  logout(fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LogoutMutationResult = NonNullable<Awaited<ReturnType<typeof logout>>>
+
+    export type LogoutMutationError = unknown
+
+    /**
+ * @summary Logout
+ */
+export const useLogout = <TError = unknown,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logout>>, TError,void, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof logout>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getLogoutMutationOptions(options), queryClient);
+    }
 
 /**
  * Check if the service is healthy
@@ -315,113 +651,6 @@ export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError =
 
 
 /**
- * Create a new user
- * @summary Create a new user
- */
-export type createUserResponse201 = {
-  data: UserResponse
-  status: 201
-}
-
-export type createUserResponse400 = {
-  data: Error
-  status: 400
-}
-
-export type createUserResponse409 = {
-  data: Error
-  status: 409
-}
-
-export type createUserResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 201 | 400 | 409>
-}
-
-export type createUserResponseSuccess = (createUserResponse201) & {
-  headers: Headers;
-};
-export type createUserResponseError = (createUserResponse400 | createUserResponse409 | createUserResponseDefault) & {
-  headers: Headers;
-};
-
-export type createUserResponse = (createUserResponseSuccess | createUserResponseError)
-
-export const getCreateUserUrl = () => {
-
-
-
-
-  return `/user`
-}
-
-export const createUser = async (createUserRequest: CreateUserRequest, options?: RequestInit): Promise<createUserResponse> => {
-
-  const res = await fetch(getCreateUserUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      createUserRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createUserResponse
-}
-
-
-
-
-export const getCreateUserMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserRequest}, TContext> => {
-
-const mutationKey = ['createUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createUser>>, {data: CreateUserRequest}> = (props) => {
-          const {data} = props ?? {};
-
-          return  createUser(data,fetchOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CreateUserMutationResult = NonNullable<Awaited<ReturnType<typeof createUser>>>
-    export type CreateUserMutationBody = CreateUserRequest
-    export type CreateUserMutationError = Error
-
-    /**
- * @summary Create a new user
- */
-export const useCreateUser = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createUser>>, TError,{data: CreateUserRequest}, TContext>, fetch?: RequestInit}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createUser>>,
-        TError,
-        {data: CreateUserRequest},
-        TContext
-      > => {
-      return useMutation(getCreateUserMutationOptions(options), queryClient);
-    }
-
-/**
  * Delete the current user
  * @summary Delete user
  */
@@ -528,902 +757,72 @@ export const useDeleteUser = <TError = Error,
     }
 
 /**
- * Get the service status for the current user
- * @summary Get service status
+ * Create a new system with root user and directories
+ * @summary Create a new system
  */
-export type getServiceStatusResponse200 = {
-  data: ServiceStatusResponse
-  status: 200
-}
-
-export type getServiceStatusResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getServiceStatusResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getServiceStatusResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
-}
-
-export type getServiceStatusResponseSuccess = (getServiceStatusResponse200) & {
-  headers: Headers;
-};
-export type getServiceStatusResponseError = (getServiceStatusResponse401 | getServiceStatusResponse404 | getServiceStatusResponseDefault) & {
-  headers: Headers;
-};
-
-export type getServiceStatusResponse = (getServiceStatusResponseSuccess | getServiceStatusResponseError)
-
-export const getGetServiceStatusUrl = () => {
-
-
-
-
-  return `/user/status`
-}
-
-export const getServiceStatus = async ( options?: RequestInit): Promise<getServiceStatusResponse> => {
-
-  const res = await fetch(getGetServiceStatusUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getServiceStatusResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getServiceStatusResponse
-}
-
-
-
-
-
-export const getGetServiceStatusQueryKey = () => {
-    return [
-    `/user/status`
-    ] as const;
-    }
-
-
-export const getGetServiceStatusQueryOptions = <TData = Awaited<ReturnType<typeof getServiceStatus>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetServiceStatusQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getServiceStatus>>> = ({ signal }) => getServiceStatus({ signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetServiceStatusQueryResult = NonNullable<Awaited<ReturnType<typeof getServiceStatus>>>
-export type GetServiceStatusQueryError = Error
-
-
-export function useGetServiceStatus<TData = Awaited<ReturnType<typeof getServiceStatus>>, TError = Error>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getServiceStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getServiceStatus>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetServiceStatus<TData = Awaited<ReturnType<typeof getServiceStatus>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getServiceStatus>>,
-          TError,
-          Awaited<ReturnType<typeof getServiceStatus>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetServiceStatus<TData = Awaited<ReturnType<typeof getServiceStatus>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get service status
- */
-
-export function useGetServiceStatus<TData = Awaited<ReturnType<typeof getServiceStatus>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getServiceStatus>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetServiceStatusQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Get the root container for the current user
- * @summary Get root container
- */
-export type getRootContainerResponse200 = {
-  data: FileResponse
-  status: 200
-}
-
-export type getRootContainerResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getRootContainerResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getRootContainerResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
-}
-
-export type getRootContainerResponseSuccess = (getRootContainerResponse200) & {
-  headers: Headers;
-};
-export type getRootContainerResponseError = (getRootContainerResponse401 | getRootContainerResponse404 | getRootContainerResponseDefault) & {
-  headers: Headers;
-};
-
-export type getRootContainerResponse = (getRootContainerResponseSuccess | getRootContainerResponseError)
-
-export const getGetRootContainerUrl = () => {
-
-
-
-
-  return `/file/root`
-}
-
-export const getRootContainer = async ( options?: RequestInit): Promise<getRootContainerResponse> => {
-
-  const res = await fetch(getGetRootContainerUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getRootContainerResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getRootContainerResponse
-}
-
-
-
-
-
-export const getGetRootContainerQueryKey = () => {
-    return [
-    `/file/root`
-    ] as const;
-    }
-
-
-export const getGetRootContainerQueryOptions = <TData = Awaited<ReturnType<typeof getRootContainer>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetRootContainerQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRootContainer>>> = ({ signal }) => getRootContainer({ signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetRootContainerQueryResult = NonNullable<Awaited<ReturnType<typeof getRootContainer>>>
-export type GetRootContainerQueryError = Error
-
-
-export function useGetRootContainer<TData = Awaited<ReturnType<typeof getRootContainer>>, TError = Error>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRootContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getRootContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetRootContainer<TData = Awaited<ReturnType<typeof getRootContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getRootContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getRootContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetRootContainer<TData = Awaited<ReturnType<typeof getRootContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get root container
- */
-
-export function useGetRootContainer<TData = Awaited<ReturnType<typeof getRootContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetRootContainerQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Get the home container for the current user
- * @summary Get home container
- */
-export type getHomeContainerResponse200 = {
-  data: FileResponse
-  status: 200
-}
-
-export type getHomeContainerResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getHomeContainerResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getHomeContainerResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
-}
-
-export type getHomeContainerResponseSuccess = (getHomeContainerResponse200) & {
-  headers: Headers;
-};
-export type getHomeContainerResponseError = (getHomeContainerResponse401 | getHomeContainerResponse404 | getHomeContainerResponseDefault) & {
-  headers: Headers;
-};
-
-export type getHomeContainerResponse = (getHomeContainerResponseSuccess | getHomeContainerResponseError)
-
-export const getGetHomeContainerUrl = () => {
-
-
-
-
-  return `/file/home`
-}
-
-export const getHomeContainer = async ( options?: RequestInit): Promise<getHomeContainerResponse> => {
-
-  const res = await fetch(getGetHomeContainerUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getHomeContainerResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getHomeContainerResponse
-}
-
-
-
-
-
-export const getGetHomeContainerQueryKey = () => {
-    return [
-    `/file/home`
-    ] as const;
-    }
-
-
-export const getGetHomeContainerQueryOptions = <TData = Awaited<ReturnType<typeof getHomeContainer>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetHomeContainerQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getHomeContainer>>> = ({ signal }) => getHomeContainer({ signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetHomeContainerQueryResult = NonNullable<Awaited<ReturnType<typeof getHomeContainer>>>
-export type GetHomeContainerQueryError = Error
-
-
-export function useGetHomeContainer<TData = Awaited<ReturnType<typeof getHomeContainer>>, TError = Error>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHomeContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getHomeContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHomeContainer<TData = Awaited<ReturnType<typeof getHomeContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getHomeContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getHomeContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetHomeContainer<TData = Awaited<ReturnType<typeof getHomeContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get home container
- */
-
-export function useGetHomeContainer<TData = Awaited<ReturnType<typeof getHomeContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getHomeContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetHomeContainerQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Get the trash container for the current user
- * @summary Get trash container
- */
-export type getTrashContainerResponse200 = {
-  data: FileResponse
-  status: 200
-}
-
-export type getTrashContainerResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getTrashContainerResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getTrashContainerResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
-}
-
-export type getTrashContainerResponseSuccess = (getTrashContainerResponse200) & {
-  headers: Headers;
-};
-export type getTrashContainerResponseError = (getTrashContainerResponse401 | getTrashContainerResponse404 | getTrashContainerResponseDefault) & {
-  headers: Headers;
-};
-
-export type getTrashContainerResponse = (getTrashContainerResponseSuccess | getTrashContainerResponseError)
-
-export const getGetTrashContainerUrl = () => {
-
-
-
-
-  return `/file/trash`
-}
-
-export const getTrashContainer = async ( options?: RequestInit): Promise<getTrashContainerResponse> => {
-
-  const res = await fetch(getGetTrashContainerUrl(),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getTrashContainerResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getTrashContainerResponse
-}
-
-
-
-
-
-export const getGetTrashContainerQueryKey = () => {
-    return [
-    `/file/trash`
-    ] as const;
-    }
-
-
-export const getGetTrashContainerQueryOptions = <TData = Awaited<ReturnType<typeof getTrashContainer>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetTrashContainerQueryKey();
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getTrashContainer>>> = ({ signal }) => getTrashContainer({ signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetTrashContainerQueryResult = NonNullable<Awaited<ReturnType<typeof getTrashContainer>>>
-export type GetTrashContainerQueryError = Error
-
-
-export function useGetTrashContainer<TData = Awaited<ReturnType<typeof getTrashContainer>>, TError = Error>(
-  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTrashContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getTrashContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTrashContainer<TData = Awaited<ReturnType<typeof getTrashContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getTrashContainer>>,
-          TError,
-          Awaited<ReturnType<typeof getTrashContainer>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetTrashContainer<TData = Awaited<ReturnType<typeof getTrashContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get trash container
- */
-
-export function useGetTrashContainer<TData = Awaited<ReturnType<typeof getTrashContainer>>, TError = Error>(
-  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getTrashContainer>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetTrashContainerQueryOptions(options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Get detailed information about a file
- * @summary Get file information
- */
-export type getFileInfoResponse200 = {
-  data: FileResponse
-  status: 200
-}
-
-export type getFileInfoResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getFileInfoResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type getFileInfoResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getFileInfoResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
-}
-
-export type getFileInfoResponseSuccess = (getFileInfoResponse200) & {
-  headers: Headers;
-};
-export type getFileInfoResponseError = (getFileInfoResponse401 | getFileInfoResponse403 | getFileInfoResponse404 | getFileInfoResponseDefault) & {
-  headers: Headers;
-};
-
-export type getFileInfoResponse = (getFileInfoResponseSuccess | getFileInfoResponseError)
-
-export const getGetFileInfoUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/info/${fileKey}`
-}
-
-export const getFileInfo = async (fileKey: string, options?: RequestInit): Promise<getFileInfoResponse> => {
-
-  const res = await fetch(getGetFileInfoUrl(fileKey),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getFileInfoResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getFileInfoResponse
-}
-
-
-
-
-
-export const getGetFileInfoQueryKey = (fileKey: string,) => {
-    return [
-    `/file/info/${fileKey}`
-    ] as const;
-    }
-
-
-export const getGetFileInfoQueryOptions = <TData = Awaited<ReturnType<typeof getFileInfo>>, TError = Error>(fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetFileInfoQueryKey(fileKey);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFileInfo>>> = ({ signal }) => getFileInfo(fileKey, { signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(fileKey), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetFileInfoQueryResult = NonNullable<Awaited<ReturnType<typeof getFileInfo>>>
-export type GetFileInfoQueryError = Error
-
-
-export function useGetFileInfo<TData = Awaited<ReturnType<typeof getFileInfo>>, TError = Error>(
- fileKey: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFileInfo>>,
-          TError,
-          Awaited<ReturnType<typeof getFileInfo>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetFileInfo<TData = Awaited<ReturnType<typeof getFileInfo>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFileInfo>>,
-          TError,
-          Awaited<ReturnType<typeof getFileInfo>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetFileInfo<TData = Awaited<ReturnType<typeof getFileInfo>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get file information
- */
-
-export function useGetFileInfo<TData = Awaited<ReturnType<typeof getFileInfo>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileInfo>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetFileInfoQueryOptions(fileKey,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Get all children of a container
- * @summary Get file children
- */
-export type getFileChildrenResponse200 = {
-  data: FileListResponse
-  status: 200
-}
-
-export type getFileChildrenResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getFileChildrenResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type getFileChildrenResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getFileChildrenResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
-}
-
-export type getFileChildrenResponseSuccess = (getFileChildrenResponse200) & {
-  headers: Headers;
-};
-export type getFileChildrenResponseError = (getFileChildrenResponse401 | getFileChildrenResponse403 | getFileChildrenResponse404 | getFileChildrenResponseDefault) & {
-  headers: Headers;
-};
-
-export type getFileChildrenResponse = (getFileChildrenResponseSuccess | getFileChildrenResponseError)
-
-export const getGetFileChildrenUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/children/${fileKey}`
-}
-
-export const getFileChildren = async (fileKey: string, options?: RequestInit): Promise<getFileChildrenResponse> => {
-
-  const res = await fetch(getGetFileChildrenUrl(fileKey),
-  {
-    ...options,
-    method: 'GET'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getFileChildrenResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getFileChildrenResponse
-}
-
-
-
-
-
-export const getGetFileChildrenQueryKey = (fileKey: string,) => {
-    return [
-    `/file/children/${fileKey}`
-    ] as const;
-    }
-
-
-export const getGetFileChildrenQueryOptions = <TData = Awaited<ReturnType<typeof getFileChildren>>, TError = Error>(fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData>>, fetch?: RequestInit}
-) => {
-
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
-
-  const queryKey =  queryOptions?.queryKey ?? getGetFileChildrenQueryKey(fileKey);
-
-
-
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getFileChildren>>> = ({ signal }) => getFileChildren(fileKey, { signal, ...fetchOptions });
-
-
-
-
-
-   return  { queryKey, queryFn, enabled: !!(fileKey), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
-}
-
-export type GetFileChildrenQueryResult = NonNullable<Awaited<ReturnType<typeof getFileChildren>>>
-export type GetFileChildrenQueryError = Error
-
-
-export function useGetFileChildren<TData = Awaited<ReturnType<typeof getFileChildren>>, TError = Error>(
- fileKey: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData>> & Pick<
-        DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFileChildren>>,
-          TError,
-          Awaited<ReturnType<typeof getFileChildren>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetFileChildren<TData = Awaited<ReturnType<typeof getFileChildren>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData>> & Pick<
-        UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getFileChildren>>,
-          TError,
-          Awaited<ReturnType<typeof getFileChildren>>
-        > , 'initialData'
-      >, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetFileChildren<TData = Awaited<ReturnType<typeof getFileChildren>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
-  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-/**
- * @summary Get file children
- */
-
-export function useGetFileChildren<TData = Awaited<ReturnType<typeof getFileChildren>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getFileChildren>>, TError, TData>>, fetch?: RequestInit}
- , queryClient?: QueryClient
- ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
-
-  const queryOptions = getGetFileChildrenQueryOptions(fileKey,options)
-
-  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
-
-  return { ...query, queryKey: queryOptions.queryKey };
-}
-
-
-
-
-
-/**
- * Create a new file or container in a parent container
- * @summary Create a new file or container
- */
-export type createFileResponse201 = {
-  data: FileResponse
+export type createSystemResponse201 = {
+  data: SystemResponse
   status: 201
 }
 
-export type createFileResponse400 = {
+export type createSystemResponse400 = {
   data: Error
   status: 400
 }
 
-export type createFileResponse401 = {
+export type createSystemResponse401 = {
   data: Error
   status: 401
 }
 
-export type createFileResponse403 = {
+export type createSystemResponseDefault = {
   data: Error
-  status: 403
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401>
 }
 
-export type createFileResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type createFileResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 403 | 404>
-}
-
-export type createFileResponseSuccess = (createFileResponse201) & {
+export type createSystemResponseSuccess = (createSystemResponse201) & {
   headers: Headers;
 };
-export type createFileResponseError = (createFileResponse400 | createFileResponse401 | createFileResponse403 | createFileResponse404 | createFileResponseDefault) & {
+export type createSystemResponseError = (createSystemResponse400 | createSystemResponse401 | createSystemResponseDefault) & {
   headers: Headers;
 };
 
-export type createFileResponse = (createFileResponseSuccess | createFileResponseError)
+export type createSystemResponse = (createSystemResponseSuccess | createSystemResponseError)
 
-export const getCreateFileUrl = () => {
-
-
+export const getCreateSystemUrl = () => {
 
 
-  return `/file`
+
+
+  return `/systems`
 }
 
-export const createFile = async (createFileRequest: CreateFileRequest, options?: RequestInit): Promise<createFileResponse> => {
+export const createSystem = async (createSystemRequest: CreateSystemRequest, options?: RequestInit): Promise<createSystemResponse> => {
 
-  const res = await fetch(getCreateFileUrl(),
+  const res = await fetch(getCreateSystemUrl(),
   {
     ...options,
     method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      createFileRequest,)
+      createSystemRequest,)
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: createFileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createFileResponse
+  const data: createSystemResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as createSystemResponse
 }
 
 
 
 
-export const getCreateFileMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFile>>, TError,{data: CreateFileRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof createFile>>, TError,{data: CreateFileRequest}, TContext> => {
+export const getCreateSystemMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystem>>, TError,{data: CreateSystemRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createSystem>>, TError,{data: CreateSystemRequest}, TContext> => {
 
-const mutationKey = ['createFile'];
+const mutationKey = ['createSystem'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1433,10 +832,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createFile>>, {data: CreateFileRequest}> = (props) => {
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSystem>>, {data: CreateSystemRequest}> = (props) => {
           const {data} = props ?? {};
 
-          return  createFile(data,fetchOptions)
+          return  createSystem(data,fetchOptions)
         }
 
 
@@ -1446,102 +845,376 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type CreateFileMutationResult = NonNullable<Awaited<ReturnType<typeof createFile>>>
-    export type CreateFileMutationBody = CreateFileRequest
-    export type CreateFileMutationError = Error
+    export type CreateSystemMutationResult = NonNullable<Awaited<ReturnType<typeof createSystem>>>
+    export type CreateSystemMutationBody = CreateSystemRequest
+    export type CreateSystemMutationError = Error
 
     /**
- * @summary Create a new file or container
+ * @summary Create a new system
  */
-export const useCreateFile = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createFile>>, TError,{data: CreateFileRequest}, TContext>, fetch?: RequestInit}
+export const useCreateSystem = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystem>>, TError,{data: CreateSystemRequest}, TContext>, fetch?: RequestInit}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof createFile>>,
+        Awaited<ReturnType<typeof createSystem>>,
         TError,
-        {data: CreateFileRequest},
+        {data: CreateSystemRequest},
         TContext
       > => {
-      return useMutation(getCreateFileMutationOptions(options), queryClient);
+      return useMutation(getCreateSystemMutationOptions(options), queryClient);
     }
 
 /**
- * Update file name or other metadata
- * @summary Update file metadata
+ * Get a list of all systems
+ * @summary List all systems
  */
-export type updateFileResponse200 = {
-  data: FileResponse
+export type listSystemsResponse200 = {
+  data: SystemListResponse
   status: 200
 }
 
-export type updateFileResponse400 = {
+export type listSystemsResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type listSystemsResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401>
+}
+
+export type listSystemsResponseSuccess = (listSystemsResponse200) & {
+  headers: Headers;
+};
+export type listSystemsResponseError = (listSystemsResponse401 | listSystemsResponseDefault) & {
+  headers: Headers;
+};
+
+export type listSystemsResponse = (listSystemsResponseSuccess | listSystemsResponseError)
+
+export const getListSystemsUrl = () => {
+
+
+
+
+  return `/systems`
+}
+
+export const listSystems = async ( options?: RequestInit): Promise<listSystemsResponse> => {
+
+  const res = await fetch(getListSystemsUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listSystemsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listSystemsResponse
+}
+
+
+
+
+
+export const getListSystemsQueryKey = () => {
+    return [
+    `/systems`
+    ] as const;
+    }
+
+
+export const getListSystemsQueryOptions = <TData = Awaited<ReturnType<typeof listSystems>>, TError = Error>( options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSystemsQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSystems>>> = ({ signal }) => listSystems({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSystemsQueryResult = NonNullable<Awaited<ReturnType<typeof listSystems>>>
+export type ListSystemsQueryError = Error
+
+
+export function useListSystems<TData = Awaited<ReturnType<typeof listSystems>>, TError = Error>(
+  options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystems>>,
+          TError,
+          Awaited<ReturnType<typeof listSystems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystems<TData = Awaited<ReturnType<typeof listSystems>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystems>>,
+          TError,
+          Awaited<ReturnType<typeof listSystems>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystems<TData = Awaited<ReturnType<typeof listSystems>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List all systems
+ */
+
+export function useListSystems<TData = Awaited<ReturnType<typeof listSystems>>, TError = Error>(
+  options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystems>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSystemsQueryOptions(options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Get detailed information about a system
+ * @summary Get system by ID
+ */
+export type getSystemResponse200 = {
+  data: SystemResponse
+  status: 200
+}
+
+export type getSystemResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getSystemResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getSystemResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
+}
+
+export type getSystemResponseSuccess = (getSystemResponse200) & {
+  headers: Headers;
+};
+export type getSystemResponseError = (getSystemResponse401 | getSystemResponse404 | getSystemResponseDefault) & {
+  headers: Headers;
+};
+
+export type getSystemResponse = (getSystemResponseSuccess | getSystemResponseError)
+
+export const getGetSystemUrl = (systemId: string,) => {
+
+
+
+
+  return `/systems/${systemId}`
+}
+
+export const getSystem = async (systemId: string, options?: RequestInit): Promise<getSystemResponse> => {
+
+  const res = await fetch(getGetSystemUrl(systemId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getSystemResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getSystemResponse
+}
+
+
+
+
+
+export const getGetSystemQueryKey = (systemId: string,) => {
+    return [
+    `/systems/${systemId}`
+    ] as const;
+    }
+
+
+export const getGetSystemQueryOptions = <TData = Awaited<ReturnType<typeof getSystem>>, TError = Error>(systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemQueryKey(systemId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystem>>> = ({ signal }) => getSystem(systemId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemQueryResult = NonNullable<Awaited<ReturnType<typeof getSystem>>>
+export type GetSystemQueryError = Error
+
+
+export function useGetSystem<TData = Awaited<ReturnType<typeof getSystem>>, TError = Error>(
+ systemId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystem>>,
+          TError,
+          Awaited<ReturnType<typeof getSystem>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystem<TData = Awaited<ReturnType<typeof getSystem>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystem>>,
+          TError,
+          Awaited<ReturnType<typeof getSystem>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystem<TData = Awaited<ReturnType<typeof getSystem>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get system by ID
+ */
+
+export function useGetSystem<TData = Awaited<ReturnType<typeof getSystem>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystem>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemQueryOptions(systemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Add a user to a system.
+
+UID assignment:
+- If uid is -1 or not provided: Auto-assigned starting from 1000
+- If uid is 0: Creates root user (superuser) - typically only for system initialization
+- If uid is 1-999: Reserved for system users (e.g., daemon accounts)
+- If uid is 1000+: Regular user with explicit UID
+
+A private group with the same GID as UID is automatically created.
+
+ * @summary Add user to system
+ */
+export type createSystemUserResponse201 = {
+  data: SystemUserResponse
+  status: 201
+}
+
+export type createSystemUserResponse400 = {
   data: Error
   status: 400
 }
 
-export type updateFileResponse401 = {
+export type createSystemUserResponse401 = {
   data: Error
   status: 401
 }
 
-export type updateFileResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type updateFileResponse404 = {
+export type createSystemUserResponse404 = {
   data: Error
   status: 404
 }
 
-export type updateFileResponseDefault = {
+export type createSystemUserResponse409 = {
   data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404>
+  status: 409
 }
 
-export type updateFileResponseSuccess = (updateFileResponse200) & {
-  headers: Headers;
-};
-export type updateFileResponseError = (updateFileResponse400 | updateFileResponse401 | updateFileResponse403 | updateFileResponse404 | updateFileResponseDefault) & {
-  headers: Headers;
-};
-
-export type updateFileResponse = (updateFileResponseSuccess | updateFileResponseError)
-
-export const getUpdateFileUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/${fileKey}`
+export type createSystemUserResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 404 | 409>
 }
 
-export const updateFile = async (fileKey: string,
-    updateFileRequest: UpdateFileRequest, options?: RequestInit): Promise<updateFileResponse> => {
+export type createSystemUserResponseSuccess = (createSystemUserResponse201) & {
+  headers: Headers;
+};
+export type createSystemUserResponseError = (createSystemUserResponse400 | createSystemUserResponse401 | createSystemUserResponse404 | createSystemUserResponse409 | createSystemUserResponseDefault) & {
+  headers: Headers;
+};
 
-  const res = await fetch(getUpdateFileUrl(fileKey),
+export type createSystemUserResponse = (createSystemUserResponseSuccess | createSystemUserResponseError)
+
+export const getCreateSystemUserUrl = (systemId: string,) => {
+
+
+
+
+  return `/systems/${systemId}/users`
+}
+
+export const createSystemUser = async (systemId: string,
+    createSystemUserRequest: CreateSystemUserRequest, options?: RequestInit): Promise<createSystemUserResponse> => {
+
+  const res = await fetch(getCreateSystemUserUrl(systemId),
   {
     ...options,
-    method: 'PATCH',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
-      updateFileRequest,)
+      createSystemUserRequest,)
   }
 )
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: updateFileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as updateFileResponse
+  const data: createSystemUserResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as createSystemUserResponse
 }
 
 
 
 
-export const getUpdateFileMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFile>>, TError,{fileKey: string;data: UpdateFileRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof updateFile>>, TError,{fileKey: string;data: UpdateFileRequest}, TContext> => {
+export const getCreateSystemUserMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystemUser>>, TError,{systemId: string;data: CreateSystemUserRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createSystemUser>>, TError,{systemId: string;data: CreateSystemUserRequest}, TContext> => {
 
-const mutationKey = ['updateFile'];
+const mutationKey = ['createSystemUser'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
@@ -1551,10 +1224,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateFile>>, {fileKey: string;data: UpdateFileRequest}> = (props) => {
-          const {fileKey,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSystemUser>>, {systemId: string;data: CreateSystemUserRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
 
-          return  updateFile(fileKey,data,fetchOptions)
+          return  createSystemUser(systemId,data,fetchOptions)
         }
 
 
@@ -1564,64 +1237,1309 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
   return  { mutationFn, ...mutationOptions }}
 
-    export type UpdateFileMutationResult = NonNullable<Awaited<ReturnType<typeof updateFile>>>
-    export type UpdateFileMutationBody = UpdateFileRequest
-    export type UpdateFileMutationError = Error
+    export type CreateSystemUserMutationResult = NonNullable<Awaited<ReturnType<typeof createSystemUser>>>
+    export type CreateSystemUserMutationBody = CreateSystemUserRequest
+    export type CreateSystemUserMutationError = Error
 
     /**
- * @summary Update file metadata
+ * @summary Add user to system
  */
-export const useUpdateFile = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateFile>>, TError,{fileKey: string;data: UpdateFileRequest}, TContext>, fetch?: RequestInit}
+export const useCreateSystemUser = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystemUser>>, TError,{systemId: string;data: CreateSystemUserRequest}, TContext>, fetch?: RequestInit}
  , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof updateFile>>,
+        Awaited<ReturnType<typeof createSystemUser>>,
         TError,
-        {fileKey: string;data: UpdateFileRequest},
+        {systemId: string;data: CreateSystemUserRequest},
         TContext
       > => {
-      return useMutation(getUpdateFileMutationOptions(options), queryClient);
+      return useMutation(getCreateSystemUserMutationOptions(options), queryClient);
     }
 
 /**
- * Move file to trash or permanently delete
- * @summary Delete file
+ * Get all users in a system
+ * @summary List users in system
  */
-export type deleteFileResponse204 = {
-  data: void
-  status: 204
+export type listSystemUsersResponse200 = {
+  data: SystemUserListResponse
+  status: 200
 }
 
-export type deleteFileResponse401 = {
+export type listSystemUsersResponse401 = {
   data: Error
   status: 401
 }
 
-export type deleteFileResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type deleteFileResponse404 = {
+export type listSystemUsersResponse404 = {
   data: Error
   status: 404
 }
 
-export type deleteFileResponseDefault = {
+export type listSystemUsersResponseDefault = {
   data: Error
-  status: Exclude<HTTPStatusCodes, 204 | 401 | 403 | 404>
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
 }
 
-export type deleteFileResponseSuccess = (deleteFileResponse204) & {
+export type listSystemUsersResponseSuccess = (listSystemUsersResponse200) & {
   headers: Headers;
 };
-export type deleteFileResponseError = (deleteFileResponse401 | deleteFileResponse403 | deleteFileResponse404 | deleteFileResponseDefault) & {
+export type listSystemUsersResponseError = (listSystemUsersResponse401 | listSystemUsersResponse404 | listSystemUsersResponseDefault) & {
   headers: Headers;
 };
 
-export type deleteFileResponse = (deleteFileResponseSuccess | deleteFileResponseError)
+export type listSystemUsersResponse = (listSystemUsersResponseSuccess | listSystemUsersResponseError)
 
-export const getDeleteFileUrl = (fileKey: string,
-    params?: DeleteFileParams,) => {
+export const getListSystemUsersUrl = (systemId: string,) => {
+
+
+
+
+  return `/systems/${systemId}/users`
+}
+
+export const listSystemUsers = async (systemId: string, options?: RequestInit): Promise<listSystemUsersResponse> => {
+
+  const res = await fetch(getListSystemUsersUrl(systemId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listSystemUsersResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listSystemUsersResponse
+}
+
+
+
+
+
+export const getListSystemUsersQueryKey = (systemId: string,) => {
+    return [
+    `/systems/${systemId}/users`
+    ] as const;
+    }
+
+
+export const getListSystemUsersQueryOptions = <TData = Awaited<ReturnType<typeof listSystemUsers>>, TError = Error>(systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSystemUsersQueryKey(systemId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSystemUsers>>> = ({ signal }) => listSystemUsers(systemId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSystemUsersQueryResult = NonNullable<Awaited<ReturnType<typeof listSystemUsers>>>
+export type ListSystemUsersQueryError = Error
+
+
+export function useListSystemUsers<TData = Awaited<ReturnType<typeof listSystemUsers>>, TError = Error>(
+ systemId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystemUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listSystemUsers>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystemUsers<TData = Awaited<ReturnType<typeof listSystemUsers>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystemUsers>>,
+          TError,
+          Awaited<ReturnType<typeof listSystemUsers>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystemUsers<TData = Awaited<ReturnType<typeof listSystemUsers>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List users in system
+ */
+
+export function useListSystemUsers<TData = Awaited<ReturnType<typeof listSystemUsers>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemUsers>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSystemUsersQueryOptions(systemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Get detailed information about a system user
+ * @summary Get system user by UID
+ */
+export type getSystemUserResponse200 = {
+  data: SystemUserResponse
+  status: 200
+}
+
+export type getSystemUserResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getSystemUserResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getSystemUserResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
+}
+
+export type getSystemUserResponseSuccess = (getSystemUserResponse200) & {
+  headers: Headers;
+};
+export type getSystemUserResponseError = (getSystemUserResponse401 | getSystemUserResponse404 | getSystemUserResponseDefault) & {
+  headers: Headers;
+};
+
+export type getSystemUserResponse = (getSystemUserResponseSuccess | getSystemUserResponseError)
+
+export const getGetSystemUserUrl = (systemId: string,
+    uid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/users/${uid}`
+}
+
+export const getSystemUser = async (systemId: string,
+    uid: number, options?: RequestInit): Promise<getSystemUserResponse> => {
+
+  const res = await fetch(getGetSystemUserUrl(systemId,uid),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getSystemUserResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getSystemUserResponse
+}
+
+
+
+
+
+export const getGetSystemUserQueryKey = (systemId: string,
+    uid: number,) => {
+    return [
+    `/systems/${systemId}/users/${uid}`
+    ] as const;
+    }
+
+
+export const getGetSystemUserQueryOptions = <TData = Awaited<ReturnType<typeof getSystemUser>>, TError = Error>(systemId: string,
+    uid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemUserQueryKey(systemId,uid);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemUser>>> = ({ signal }) => getSystemUser(systemId,uid, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId && uid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemUserQueryResult = NonNullable<Awaited<ReturnType<typeof getSystemUser>>>
+export type GetSystemUserQueryError = Error
+
+
+export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser>>, TError = Error>(
+ systemId: string,
+    uid: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemUser>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser>>, TError = Error>(
+ systemId: string,
+    uid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemUser>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemUser>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser>>, TError = Error>(
+ systemId: string,
+    uid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get system user by UID
+ */
+
+export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser>>, TError = Error>(
+ systemId: string,
+    uid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemUser>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemUserQueryOptions(systemId,uid,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Remove a user from a system
+ * @summary Remove user from system
+ */
+export type deleteSystemUserResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteSystemUserResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type deleteSystemUserResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type deleteSystemUserResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 204 | 401 | 404>
+}
+
+export type deleteSystemUserResponseSuccess = (deleteSystemUserResponse204) & {
+  headers: Headers;
+};
+export type deleteSystemUserResponseError = (deleteSystemUserResponse401 | deleteSystemUserResponse404 | deleteSystemUserResponseDefault) & {
+  headers: Headers;
+};
+
+export type deleteSystemUserResponse = (deleteSystemUserResponseSuccess | deleteSystemUserResponseError)
+
+export const getDeleteSystemUserUrl = (systemId: string,
+    uid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/users/${uid}`
+}
+
+export const deleteSystemUser = async (systemId: string,
+    uid: number, options?: RequestInit): Promise<deleteSystemUserResponse> => {
+
+  const res = await fetch(getDeleteSystemUserUrl(systemId,uid),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteSystemUserResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as deleteSystemUserResponse
+}
+
+
+
+
+export const getDeleteSystemUserMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSystemUser>>, TError,{systemId: string;uid: number}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSystemUser>>, TError,{systemId: string;uid: number}, TContext> => {
+
+const mutationKey = ['deleteSystemUser'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSystemUser>>, {systemId: string;uid: number}> = (props) => {
+          const {systemId,uid} = props ?? {};
+
+          return  deleteSystemUser(systemId,uid,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSystemUserMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSystemUser>>>
+
+    export type DeleteSystemUserMutationError = Error
+
+    /**
+ * @summary Remove user from system
+ */
+export const useDeleteSystemUser = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSystemUser>>, TError,{systemId: string;uid: number}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSystemUser>>,
+        TError,
+        {systemId: string;uid: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSystemUserMutationOptions(options), queryClient);
+    }
+
+/**
+ * Create a new group in a system
+ * @summary Create a group
+ */
+export type createSystemGroupResponse201 = {
+  data: SystemGroupResponse
+  status: 201
+}
+
+export type createSystemGroupResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type createSystemGroupResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type createSystemGroupResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type createSystemGroupResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type createSystemGroupResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 404 | 409>
+}
+
+export type createSystemGroupResponseSuccess = (createSystemGroupResponse201) & {
+  headers: Headers;
+};
+export type createSystemGroupResponseError = (createSystemGroupResponse400 | createSystemGroupResponse401 | createSystemGroupResponse404 | createSystemGroupResponse409 | createSystemGroupResponseDefault) & {
+  headers: Headers;
+};
+
+export type createSystemGroupResponse = (createSystemGroupResponseSuccess | createSystemGroupResponseError)
+
+export const getCreateSystemGroupUrl = (systemId: string,) => {
+
+
+
+
+  return `/systems/${systemId}/groups`
+}
+
+export const createSystemGroup = async (systemId: string,
+    createSystemGroupRequest: CreateSystemGroupRequest, options?: RequestInit): Promise<createSystemGroupResponse> => {
+
+  const res = await fetch(getCreateSystemGroupUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      createSystemGroupRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: createSystemGroupResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as createSystemGroupResponse
+}
+
+
+
+
+export const getCreateSystemGroupMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystemGroup>>, TError,{systemId: string;data: CreateSystemGroupRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof createSystemGroup>>, TError,{systemId: string;data: CreateSystemGroupRequest}, TContext> => {
+
+const mutationKey = ['createSystemGroup'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof createSystemGroup>>, {systemId: string;data: CreateSystemGroupRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  createSystemGroup(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type CreateSystemGroupMutationResult = NonNullable<Awaited<ReturnType<typeof createSystemGroup>>>
+    export type CreateSystemGroupMutationBody = CreateSystemGroupRequest
+    export type CreateSystemGroupMutationError = Error
+
+    /**
+ * @summary Create a group
+ */
+export const useCreateSystemGroup = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createSystemGroup>>, TError,{systemId: string;data: CreateSystemGroupRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof createSystemGroup>>,
+        TError,
+        {systemId: string;data: CreateSystemGroupRequest},
+        TContext
+      > => {
+      return useMutation(getCreateSystemGroupMutationOptions(options), queryClient);
+    }
+
+/**
+ * Get all groups in a system
+ * @summary List groups in system
+ */
+export type listSystemGroupsResponse200 = {
+  data: SystemGroupListResponse
+  status: 200
+}
+
+export type listSystemGroupsResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type listSystemGroupsResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type listSystemGroupsResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
+}
+
+export type listSystemGroupsResponseSuccess = (listSystemGroupsResponse200) & {
+  headers: Headers;
+};
+export type listSystemGroupsResponseError = (listSystemGroupsResponse401 | listSystemGroupsResponse404 | listSystemGroupsResponseDefault) & {
+  headers: Headers;
+};
+
+export type listSystemGroupsResponse = (listSystemGroupsResponseSuccess | listSystemGroupsResponseError)
+
+export const getListSystemGroupsUrl = (systemId: string,) => {
+
+
+
+
+  return `/systems/${systemId}/groups`
+}
+
+export const listSystemGroups = async (systemId: string, options?: RequestInit): Promise<listSystemGroupsResponse> => {
+
+  const res = await fetch(getListSystemGroupsUrl(systemId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: listSystemGroupsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as listSystemGroupsResponse
+}
+
+
+
+
+
+export const getListSystemGroupsQueryKey = (systemId: string,) => {
+    return [
+    `/systems/${systemId}/groups`
+    ] as const;
+    }
+
+
+export const getListSystemGroupsQueryOptions = <TData = Awaited<ReturnType<typeof listSystemGroups>>, TError = Error>(systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getListSystemGroupsQueryKey(systemId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listSystemGroups>>> = ({ signal }) => listSystemGroups(systemId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type ListSystemGroupsQueryResult = NonNullable<Awaited<ReturnType<typeof listSystemGroups>>>
+export type ListSystemGroupsQueryError = Error
+
+
+export function useListSystemGroups<TData = Awaited<ReturnType<typeof listSystemGroups>>, TError = Error>(
+ systemId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystemGroups>>,
+          TError,
+          Awaited<ReturnType<typeof listSystemGroups>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystemGroups<TData = Awaited<ReturnType<typeof listSystemGroups>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof listSystemGroups>>,
+          TError,
+          Awaited<ReturnType<typeof listSystemGroups>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useListSystemGroups<TData = Awaited<ReturnType<typeof listSystemGroups>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List groups in system
+ */
+
+export function useListSystemGroups<TData = Awaited<ReturnType<typeof listSystemGroups>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof listSystemGroups>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getListSystemGroupsQueryOptions(systemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Get detailed information about a system group
+ * @summary Get system group by GID
+ */
+export type getSystemGroupResponse200 = {
+  data: SystemGroupResponse
+  status: 200
+}
+
+export type getSystemGroupResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getSystemGroupResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getSystemGroupResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
+}
+
+export type getSystemGroupResponseSuccess = (getSystemGroupResponse200) & {
+  headers: Headers;
+};
+export type getSystemGroupResponseError = (getSystemGroupResponse401 | getSystemGroupResponse404 | getSystemGroupResponseDefault) & {
+  headers: Headers;
+};
+
+export type getSystemGroupResponse = (getSystemGroupResponseSuccess | getSystemGroupResponseError)
+
+export const getGetSystemGroupUrl = (systemId: string,
+    gid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/groups/${gid}`
+}
+
+export const getSystemGroup = async (systemId: string,
+    gid: number, options?: RequestInit): Promise<getSystemGroupResponse> => {
+
+  const res = await fetch(getGetSystemGroupUrl(systemId,gid),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getSystemGroupResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getSystemGroupResponse
+}
+
+
+
+
+
+export const getGetSystemGroupQueryKey = (systemId: string,
+    gid: number,) => {
+    return [
+    `/systems/${systemId}/groups/${gid}`
+    ] as const;
+    }
+
+
+export const getGetSystemGroupQueryOptions = <TData = Awaited<ReturnType<typeof getSystemGroup>>, TError = Error>(systemId: string,
+    gid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetSystemGroupQueryKey(systemId,gid);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getSystemGroup>>> = ({ signal }) => getSystemGroup(systemId,gid, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId && gid), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetSystemGroupQueryResult = NonNullable<Awaited<ReturnType<typeof getSystemGroup>>>
+export type GetSystemGroupQueryError = Error
+
+
+export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGroup>>, TError = Error>(
+ systemId: string,
+    gid: number, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemGroup>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemGroup>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGroup>>, TError = Error>(
+ systemId: string,
+    gid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getSystemGroup>>,
+          TError,
+          Awaited<ReturnType<typeof getSystemGroup>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGroup>>, TError = Error>(
+ systemId: string,
+    gid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get system group by GID
+ */
+
+export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGroup>>, TError = Error>(
+ systemId: string,
+    gid: number, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getSystemGroup>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetSystemGroupQueryOptions(systemId,gid,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Delete a group from a system
+ * @summary Delete a group
+ */
+export type deleteSystemGroupResponse204 = {
+  data: void
+  status: 204
+}
+
+export type deleteSystemGroupResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type deleteSystemGroupResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type deleteSystemGroupResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 204 | 401 | 404>
+}
+
+export type deleteSystemGroupResponseSuccess = (deleteSystemGroupResponse204) & {
+  headers: Headers;
+};
+export type deleteSystemGroupResponseError = (deleteSystemGroupResponse401 | deleteSystemGroupResponse404 | deleteSystemGroupResponseDefault) & {
+  headers: Headers;
+};
+
+export type deleteSystemGroupResponse = (deleteSystemGroupResponseSuccess | deleteSystemGroupResponseError)
+
+export const getDeleteSystemGroupUrl = (systemId: string,
+    gid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/groups/${gid}`
+}
+
+export const deleteSystemGroup = async (systemId: string,
+    gid: number, options?: RequestInit): Promise<deleteSystemGroupResponse> => {
+
+  const res = await fetch(getDeleteSystemGroupUrl(systemId,gid),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: deleteSystemGroupResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as deleteSystemGroupResponse
+}
+
+
+
+
+export const getDeleteSystemGroupMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSystemGroup>>, TError,{systemId: string;gid: number}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof deleteSystemGroup>>, TError,{systemId: string;gid: number}, TContext> => {
+
+const mutationKey = ['deleteSystemGroup'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteSystemGroup>>, {systemId: string;gid: number}> = (props) => {
+          const {systemId,gid} = props ?? {};
+
+          return  deleteSystemGroup(systemId,gid,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type DeleteSystemGroupMutationResult = NonNullable<Awaited<ReturnType<typeof deleteSystemGroup>>>
+
+    export type DeleteSystemGroupMutationError = Error
+
+    /**
+ * @summary Delete a group
+ */
+export const useDeleteSystemGroup = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteSystemGroup>>, TError,{systemId: string;gid: number}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof deleteSystemGroup>>,
+        TError,
+        {systemId: string;gid: number},
+        TContext
+      > => {
+      return useMutation(getDeleteSystemGroupMutationOptions(options), queryClient);
+    }
+
+/**
+ * Add a user to a group
+ * @summary Add user to group
+ */
+export type addGroupMemberResponse204 = {
+  data: void
+  status: 204
+}
+
+export type addGroupMemberResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type addGroupMemberResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type addGroupMemberResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 204 | 401 | 404>
+}
+
+export type addGroupMemberResponseSuccess = (addGroupMemberResponse204) & {
+  headers: Headers;
+};
+export type addGroupMemberResponseError = (addGroupMemberResponse401 | addGroupMemberResponse404 | addGroupMemberResponseDefault) & {
+  headers: Headers;
+};
+
+export type addGroupMemberResponse = (addGroupMemberResponseSuccess | addGroupMemberResponseError)
+
+export const getAddGroupMemberUrl = (systemId: string,
+    gid: number,
+    uid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/groups/${gid}/members/${uid}`
+}
+
+export const addGroupMember = async (systemId: string,
+    gid: number,
+    uid: number, options?: RequestInit): Promise<addGroupMemberResponse> => {
+
+  const res = await fetch(getAddGroupMemberUrl(systemId,gid,uid),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: addGroupMemberResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as addGroupMemberResponse
+}
+
+
+
+
+export const getAddGroupMemberMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof addGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext> => {
+
+const mutationKey = ['addGroupMember'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof addGroupMember>>, {systemId: string;gid: number;uid: number}> = (props) => {
+          const {systemId,gid,uid} = props ?? {};
+
+          return  addGroupMember(systemId,gid,uid,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type AddGroupMemberMutationResult = NonNullable<Awaited<ReturnType<typeof addGroupMember>>>
+
+    export type AddGroupMemberMutationError = Error
+
+    /**
+ * @summary Add user to group
+ */
+export const useAddGroupMember = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof addGroupMember>>,
+        TError,
+        {systemId: string;gid: number;uid: number},
+        TContext
+      > => {
+      return useMutation(getAddGroupMemberMutationOptions(options), queryClient);
+    }
+
+/**
+ * Remove a user from a group
+ * @summary Remove user from group
+ */
+export type removeGroupMemberResponse204 = {
+  data: void
+  status: 204
+}
+
+export type removeGroupMemberResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type removeGroupMemberResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type removeGroupMemberResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 204 | 401 | 404>
+}
+
+export type removeGroupMemberResponseSuccess = (removeGroupMemberResponse204) & {
+  headers: Headers;
+};
+export type removeGroupMemberResponseError = (removeGroupMemberResponse401 | removeGroupMemberResponse404 | removeGroupMemberResponseDefault) & {
+  headers: Headers;
+};
+
+export type removeGroupMemberResponse = (removeGroupMemberResponseSuccess | removeGroupMemberResponseError)
+
+export const getRemoveGroupMemberUrl = (systemId: string,
+    gid: number,
+    uid: number,) => {
+
+
+
+
+  return `/systems/${systemId}/groups/${gid}/members/${uid}`
+}
+
+export const removeGroupMember = async (systemId: string,
+    gid: number,
+    uid: number, options?: RequestInit): Promise<removeGroupMemberResponse> => {
+
+  const res = await fetch(getRemoveGroupMemberUrl(systemId,gid,uid),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: removeGroupMemberResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as removeGroupMemberResponse
+}
+
+
+
+
+export const getRemoveGroupMemberMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof removeGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext> => {
+
+const mutationKey = ['removeGroupMember'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeGroupMember>>, {systemId: string;gid: number;uid: number}> = (props) => {
+          const {systemId,gid,uid} = props ?? {};
+
+          return  removeGroupMember(systemId,gid,uid,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RemoveGroupMemberMutationResult = NonNullable<Awaited<ReturnType<typeof removeGroupMember>>>
+
+    export type RemoveGroupMemberMutationError = Error
+
+    /**
+ * @summary Remove user from group
+ */
+export const useRemoveGroupMember = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeGroupMember>>, TError,{systemId: string;gid: number;uid: number}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof removeGroupMember>>,
+        TError,
+        {systemId: string;gid: number;uid: number},
+        TContext
+      > => {
+      return useMutation(getRemoveGroupMemberMutationOptions(options), queryClient);
+    }
+
+/**
+ * Get the root directory inode for a system
+ * @summary Get root directory
+ */
+export type getRootDirectoryResponse200 = {
+  data: InodeResponse
+  status: 200
+}
+
+export type getRootDirectoryResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type getRootDirectoryResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type getRootDirectoryResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 404>
+}
+
+export type getRootDirectoryResponseSuccess = (getRootDirectoryResponse200) & {
+  headers: Headers;
+};
+export type getRootDirectoryResponseError = (getRootDirectoryResponse401 | getRootDirectoryResponse404 | getRootDirectoryResponseDefault) & {
+  headers: Headers;
+};
+
+export type getRootDirectoryResponse = (getRootDirectoryResponseSuccess | getRootDirectoryResponseError)
+
+export const getGetRootDirectoryUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/root`
+}
+
+export const getRootDirectory = async (systemId: string, options?: RequestInit): Promise<getRootDirectoryResponse> => {
+
+  const res = await fetch(getGetRootDirectoryUrl(systemId),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getRootDirectoryResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getRootDirectoryResponse
+}
+
+
+
+
+
+export const getGetRootDirectoryQueryKey = (systemId: string,) => {
+    return [
+    `/fs/${systemId}/root`
+    ] as const;
+    }
+
+
+export const getGetRootDirectoryQueryOptions = <TData = Awaited<ReturnType<typeof getRootDirectory>>, TError = Error>(systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetRootDirectoryQueryKey(systemId);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getRootDirectory>>> = ({ signal }) => getRootDirectory(systemId, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type GetRootDirectoryQueryResult = NonNullable<Awaited<ReturnType<typeof getRootDirectory>>>
+export type GetRootDirectoryQueryError = Error
+
+
+export function useGetRootDirectory<TData = Awaited<ReturnType<typeof getRootDirectory>>, TError = Error>(
+ systemId: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRootDirectory>>,
+          TError,
+          Awaited<ReturnType<typeof getRootDirectory>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRootDirectory<TData = Awaited<ReturnType<typeof getRootDirectory>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof getRootDirectory>>,
+          TError,
+          Awaited<ReturnType<typeof getRootDirectory>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useGetRootDirectory<TData = Awaited<ReturnType<typeof getRootDirectory>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary Get root directory
+ */
+
+export function useGetRootDirectory<TData = Awaited<ReturnType<typeof getRootDirectory>>, TError = Error>(
+ systemId: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getRootDirectory>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getGetRootDirectoryQueryOptions(systemId,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Get inode metadata for a given path
+ * @summary Get inode by path
+ */
+export type statPathResponse200 = {
+  data: InodeResponse
+  status: 200
+}
+
+export type statPathResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type statPathResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type statPathResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type statPathResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
+}
+
+export type statPathResponseSuccess = (statPathResponse200) & {
+  headers: Headers;
+};
+export type statPathResponseError = (statPathResponse401 | statPathResponse403 | statPathResponse404 | statPathResponseDefault) & {
+  headers: Headers;
+};
+
+export type statPathResponse = (statPathResponseSuccess | statPathResponseError)
+
+export const getStatPathUrl = (systemId: string,
+    params: StatPathParams,) => {
   const normalizedParams = new URLSearchParams();
 
   Object.entries(params || {}).forEach(([key, value]) => {
@@ -1633,360 +2551,13 @@ export const getDeleteFileUrl = (fileKey: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/file/${fileKey}?${stringifiedParams}` : `/file/${fileKey}`
+  return stringifiedParams.length > 0 ? `/fs/${systemId}/stat?${stringifiedParams}` : `/fs/${systemId}/stat`
 }
 
-export const deleteFile = async (fileKey: string,
-    params?: DeleteFileParams, options?: RequestInit): Promise<deleteFileResponse> => {
+export const statPath = async (systemId: string,
+    params: StatPathParams, options?: RequestInit): Promise<statPathResponse> => {
 
-  const res = await fetch(getDeleteFileUrl(fileKey,params),
-  {
-    ...options,
-    method: 'DELETE'
-
-
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteFileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as deleteFileResponse
-}
-
-
-
-
-export const getDeleteFileMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{fileKey: string;params?: DeleteFileParams}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{fileKey: string;params?: DeleteFileParams}, TContext> => {
-
-const mutationKey = ['deleteFile'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteFile>>, {fileKey: string;params?: DeleteFileParams}> = (props) => {
-          const {fileKey,params} = props ?? {};
-
-          return  deleteFile(fileKey,params,fetchOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteFileMutationResult = NonNullable<Awaited<ReturnType<typeof deleteFile>>>
-
-    export type DeleteFileMutationError = Error
-
-    /**
- * @summary Delete file
- */
-export const useDeleteFile = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteFile>>, TError,{fileKey: string;params?: DeleteFileParams}, TContext>, fetch?: RequestInit}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof deleteFile>>,
-        TError,
-        {fileKey: string;params?: DeleteFileParams},
-        TContext
-      > => {
-      return useMutation(getDeleteFileMutationOptions(options), queryClient);
-    }
-
-/**
- * Move a file to a different container
- * @summary Move file to another container
- */
-export type moveFileResponse200 = {
-  data: FileResponse
-  status: 200
-}
-
-export type moveFileResponse400 = {
-  data: Error
-  status: 400
-}
-
-export type moveFileResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type moveFileResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type moveFileResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type moveFileResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404>
-}
-
-export type moveFileResponseSuccess = (moveFileResponse200) & {
-  headers: Headers;
-};
-export type moveFileResponseError = (moveFileResponse400 | moveFileResponse401 | moveFileResponse403 | moveFileResponse404 | moveFileResponseDefault) & {
-  headers: Headers;
-};
-
-export type moveFileResponse = (moveFileResponseSuccess | moveFileResponseError)
-
-export const getMoveFileUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/${fileKey}/move`
-}
-
-export const moveFile = async (fileKey: string,
-    moveFileRequest: MoveFileRequest, options?: RequestInit): Promise<moveFileResponse> => {
-
-  const res = await fetch(getMoveFileUrl(fileKey),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      moveFileRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: moveFileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as moveFileResponse
-}
-
-
-
-
-export const getMoveFileMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveFile>>, TError,{fileKey: string;data: MoveFileRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof moveFile>>, TError,{fileKey: string;data: MoveFileRequest}, TContext> => {
-
-const mutationKey = ['moveFile'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof moveFile>>, {fileKey: string;data: MoveFileRequest}> = (props) => {
-          const {fileKey,data} = props ?? {};
-
-          return  moveFile(fileKey,data,fetchOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type MoveFileMutationResult = NonNullable<Awaited<ReturnType<typeof moveFile>>>
-    export type MoveFileMutationBody = MoveFileRequest
-    export type MoveFileMutationError = Error
-
-    /**
- * @summary Move file to another container
- */
-export const useMoveFile = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof moveFile>>, TError,{fileKey: string;data: MoveFileRequest}, TContext>, fetch?: RequestInit}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof moveFile>>,
-        TError,
-        {fileKey: string;data: MoveFileRequest},
-        TContext
-      > => {
-      return useMutation(getMoveFileMutationOptions(options), queryClient);
-    }
-
-/**
- * Copy a file to a different container
- * @summary Copy file to another container
- */
-export type copyFileResponse201 = {
-  data: FileResponse
-  status: 201
-}
-
-export type copyFileResponse400 = {
-  data: Error
-  status: 400
-}
-
-export type copyFileResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type copyFileResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type copyFileResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type copyFileResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 403 | 404>
-}
-
-export type copyFileResponseSuccess = (copyFileResponse201) & {
-  headers: Headers;
-};
-export type copyFileResponseError = (copyFileResponse400 | copyFileResponse401 | copyFileResponse403 | copyFileResponse404 | copyFileResponseDefault) & {
-  headers: Headers;
-};
-
-export type copyFileResponse = (copyFileResponseSuccess | copyFileResponseError)
-
-export const getCopyFileUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/${fileKey}/copy`
-}
-
-export const copyFile = async (fileKey: string,
-    copyFileRequest: CopyFileRequest, options?: RequestInit): Promise<copyFileResponse> => {
-
-  const res = await fetch(getCopyFileUrl(fileKey),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      copyFileRequest,)
-  }
-)
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: copyFileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as copyFileResponse
-}
-
-
-
-
-export const getCopyFileMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof copyFile>>, TError,{fileKey: string;data: CopyFileRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof copyFile>>, TError,{fileKey: string;data: CopyFileRequest}, TContext> => {
-
-const mutationKey = ['copyFile'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof copyFile>>, {fileKey: string;data: CopyFileRequest}> = (props) => {
-          const {fileKey,data} = props ?? {};
-
-          return  copyFile(fileKey,data,fetchOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type CopyFileMutationResult = NonNullable<Awaited<ReturnType<typeof copyFile>>>
-    export type CopyFileMutationBody = CopyFileRequest
-    export type CopyFileMutationError = Error
-
-    /**
- * @summary Copy file to another container
- */
-export const useCopyFile = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof copyFile>>, TError,{fileKey: string;data: CopyFileRequest}, TContext>, fetch?: RequestInit}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof copyFile>>,
-        TError,
-        {fileKey: string;data: CopyFileRequest},
-        TContext
-      > => {
-      return useMutation(getCopyFileMutationOptions(options), queryClient);
-    }
-
-/**
- * Get a presigned URL and token for uploading file content
- * @summary Get upload write token
- */
-export type getUploadTokenResponse200 = {
-  data: UploadTokenResponse
-  status: 200
-}
-
-export type getUploadTokenResponse401 = {
-  data: Error
-  status: 401
-}
-
-export type getUploadTokenResponse403 = {
-  data: Error
-  status: 403
-}
-
-export type getUploadTokenResponse404 = {
-  data: Error
-  status: 404
-}
-
-export type getUploadTokenResponseDefault = {
-  data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
-}
-
-export type getUploadTokenResponseSuccess = (getUploadTokenResponse200) & {
-  headers: Headers;
-};
-export type getUploadTokenResponseError = (getUploadTokenResponse401 | getUploadTokenResponse403 | getUploadTokenResponse404 | getUploadTokenResponseDefault) & {
-  headers: Headers;
-};
-
-export type getUploadTokenResponse = (getUploadTokenResponseSuccess | getUploadTokenResponseError)
-
-export const getGetUploadTokenUrl = (fileKey: string,) => {
-
-
-
-
-  return `/file/upload/write-token/${fileKey}`
-}
-
-export const getUploadToken = async (fileKey: string, options?: RequestInit): Promise<getUploadTokenResponse> => {
-
-  const res = await fetch(getGetUploadTokenUrl(fileKey),
+  const res = await fetch(getStatPathUrl(systemId,params),
   {
     ...options,
     method: 'GET'
@@ -1997,77 +2568,83 @@ export const getUploadToken = async (fileKey: string, options?: RequestInit): Pr
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: getUploadTokenResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUploadTokenResponse
+  const data: statPathResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as statPathResponse
 }
 
 
 
 
 
-export const getGetUploadTokenQueryKey = (fileKey: string,) => {
+export const getStatPathQueryKey = (systemId: string,
+    params?: StatPathParams,) => {
     return [
-    `/file/upload/write-token/${fileKey}`
+    `/fs/${systemId}/stat`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetUploadTokenQueryOptions = <TData = Awaited<ReturnType<typeof getUploadToken>>, TError = Error>(fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData>>, fetch?: RequestInit}
+export const getStatPathQueryOptions = <TData = Awaited<ReturnType<typeof statPath>>, TError = Error>(systemId: string,
+    params: StatPathParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetUploadTokenQueryKey(fileKey);
+  const queryKey =  queryOptions?.queryKey ?? getStatPathQueryKey(systemId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUploadToken>>> = ({ signal }) => getUploadToken(fileKey, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof statPath>>> = ({ signal }) => statPath(systemId,params, { signal, ...fetchOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(fileKey), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetUploadTokenQueryResult = NonNullable<Awaited<ReturnType<typeof getUploadToken>>>
-export type GetUploadTokenQueryError = Error
+export type StatPathQueryResult = NonNullable<Awaited<ReturnType<typeof statPath>>>
+export type StatPathQueryError = Error
 
 
-export function useGetUploadToken<TData = Awaited<ReturnType<typeof getUploadToken>>, TError = Error>(
- fileKey: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData>> & Pick<
+export function useStatPath<TData = Awaited<ReturnType<typeof statPath>>, TError = Error>(
+ systemId: string,
+    params: StatPathParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUploadToken>>,
+          Awaited<ReturnType<typeof statPath>>,
           TError,
-          Awaited<ReturnType<typeof getUploadToken>>
+          Awaited<ReturnType<typeof statPath>>
         > , 'initialData'
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUploadToken<TData = Awaited<ReturnType<typeof getUploadToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData>> & Pick<
+export function useStatPath<TData = Awaited<ReturnType<typeof statPath>>, TError = Error>(
+ systemId: string,
+    params: StatPathParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getUploadToken>>,
+          Awaited<ReturnType<typeof statPath>>,
           TError,
-          Awaited<ReturnType<typeof getUploadToken>>
+          Awaited<ReturnType<typeof statPath>>
         > , 'initialData'
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetUploadToken<TData = Awaited<ReturnType<typeof getUploadToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData>>, fetch?: RequestInit}
+export function useStatPath<TData = Awaited<ReturnType<typeof statPath>>, TError = Error>(
+ systemId: string,
+    params: StatPathParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Get upload write token
+ * @summary Get inode by path
  */
 
-export function useGetUploadToken<TData = Awaited<ReturnType<typeof getUploadToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getUploadToken>>, TError, TData>>, fetch?: RequestInit}
+export function useStatPath<TData = Awaited<ReturnType<typeof statPath>>, TError = Error>(
+ systemId: string,
+    params: StatPathParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof statPath>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetUploadTokenQueryOptions(fileKey,options)
+  const queryOptions = getStatPathQueryOptions(systemId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 
@@ -2079,12 +2656,1000 @@ export function useGetUploadToken<TData = Awaited<ReturnType<typeof getUploadTok
 
 
 /**
- * Mark file upload as complete and update metadata
+ * List contents of a directory (like Unix ls command)
+ * @summary List directory contents
+ */
+export type lsResponse200 = {
+  data: DirContentResponse
+  status: 200
+}
+
+export type lsResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type lsResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type lsResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type lsResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
+}
+
+export type lsResponseSuccess = (lsResponse200) & {
+  headers: Headers;
+};
+export type lsResponseError = (lsResponse401 | lsResponse403 | lsResponse404 | lsResponseDefault) & {
+  headers: Headers;
+};
+
+export type lsResponse = (lsResponseSuccess | lsResponseError)
+
+export const getLsUrl = (systemId: string,
+    params: LsParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/fs/${systemId}/ls?${stringifiedParams}` : `/fs/${systemId}/ls`
+}
+
+export const ls = async (systemId: string,
+    params: LsParams, options?: RequestInit): Promise<lsResponse> => {
+
+  const res = await fetch(getLsUrl(systemId,params),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: lsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as lsResponse
+}
+
+
+
+
+
+export const getLsQueryKey = (systemId: string,
+    params?: LsParams,) => {
+    return [
+    `/fs/${systemId}/ls`, ...(params ? [params] : [])
+    ] as const;
+    }
+
+
+export const getLsQueryOptions = <TData = Awaited<ReturnType<typeof ls>>, TError = Error>(systemId: string,
+    params: LsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getLsQueryKey(systemId,params);
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof ls>>> = ({ signal }) => ls(systemId,params, { signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
+
+export type LsQueryResult = NonNullable<Awaited<ReturnType<typeof ls>>>
+export type LsQueryError = Error
+
+
+export function useLs<TData = Awaited<ReturnType<typeof ls>>, TError = Error>(
+ systemId: string,
+    params: LsParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ls>>,
+          TError,
+          Awaited<ReturnType<typeof ls>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLs<TData = Awaited<ReturnType<typeof ls>>, TError = Error>(
+ systemId: string,
+    params: LsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof ls>>,
+          TError,
+          Awaited<ReturnType<typeof ls>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useLs<TData = Awaited<ReturnType<typeof ls>>, TError = Error>(
+ systemId: string,
+    params: LsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
+ * @summary List directory contents
+ */
+
+export function useLs<TData = Awaited<ReturnType<typeof ls>>, TError = Error>(
+ systemId: string,
+    params: LsParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof ls>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getLsQueryOptions(systemId,params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+/**
+ * Create a new directory at the specified path
+ * @summary Create directory
+ */
+export type mkdirResponse201 = {
+  data: InodeResponse
+  status: 201
+}
+
+export type mkdirResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type mkdirResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type mkdirResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type mkdirResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type mkdirResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 403 | 409>
+}
+
+export type mkdirResponseSuccess = (mkdirResponse201) & {
+  headers: Headers;
+};
+export type mkdirResponseError = (mkdirResponse400 | mkdirResponse401 | mkdirResponse403 | mkdirResponse409 | mkdirResponseDefault) & {
+  headers: Headers;
+};
+
+export type mkdirResponse = (mkdirResponseSuccess | mkdirResponseError)
+
+export const getMkdirUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/mkdir`
+}
+
+export const mkdir = async (systemId: string,
+    mkdirRequest: MkdirRequest, options?: RequestInit): Promise<mkdirResponse> => {
+
+  const res = await fetch(getMkdirUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mkdirRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: mkdirResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as mkdirResponse
+}
+
+
+
+
+export const getMkdirMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mkdir>>, TError,{systemId: string;data: MkdirRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof mkdir>>, TError,{systemId: string;data: MkdirRequest}, TContext> => {
+
+const mutationKey = ['mkdir'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mkdir>>, {systemId: string;data: MkdirRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  mkdir(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MkdirMutationResult = NonNullable<Awaited<ReturnType<typeof mkdir>>>
+    export type MkdirMutationBody = MkdirRequest
+    export type MkdirMutationError = Error
+
+    /**
+ * @summary Create directory
+ */
+export const useMkdir = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mkdir>>, TError,{systemId: string;data: MkdirRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mkdir>>,
+        TError,
+        {systemId: string;data: MkdirRequest},
+        TContext
+      > => {
+      return useMutation(getMkdirMutationOptions(options), queryClient);
+    }
+
+/**
+ * Create a symbolic link (like Unix ln -s command)
+ * @summary Create link
+ */
+export type lnResponse201 = {
+  data: InodeResponse
+  status: 201
+}
+
+export type lnResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type lnResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type lnResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type lnResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type lnResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 403 | 404>
+}
+
+export type lnResponseSuccess = (lnResponse201) & {
+  headers: Headers;
+};
+export type lnResponseError = (lnResponse400 | lnResponse401 | lnResponse403 | lnResponse404 | lnResponseDefault) & {
+  headers: Headers;
+};
+
+export type lnResponse = (lnResponseSuccess | lnResponseError)
+
+export const getLnUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/ln`
+}
+
+export const ln = async (systemId: string,
+    symlinkRequest: SymlinkRequest, options?: RequestInit): Promise<lnResponse> => {
+
+  const res = await fetch(getLnUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      symlinkRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: lnResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as lnResponse
+}
+
+
+
+
+export const getLnMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ln>>, TError,{systemId: string;data: SymlinkRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof ln>>, TError,{systemId: string;data: SymlinkRequest}, TContext> => {
+
+const mutationKey = ['ln'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof ln>>, {systemId: string;data: SymlinkRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  ln(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type LnMutationResult = NonNullable<Awaited<ReturnType<typeof ln>>>
+    export type LnMutationBody = SymlinkRequest
+    export type LnMutationError = Error
+
+    /**
+ * @summary Create link
+ */
+export const useLn = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof ln>>, TError,{systemId: string;data: SymlinkRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof ln>>,
+        TError,
+        {systemId: string;data: SymlinkRequest},
+        TContext
+      > => {
+      return useMutation(getLnMutationOptions(options), queryClient);
+    }
+
+/**
+ * Change permissions of a file or directory
+ * @summary Change file permissions
+ */
+export type chmodResponse200 = {
+  data: InodeResponse
+  status: 200
+}
+
+export type chmodResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type chmodResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type chmodResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type chmodResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type chmodResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404>
+}
+
+export type chmodResponseSuccess = (chmodResponse200) & {
+  headers: Headers;
+};
+export type chmodResponseError = (chmodResponse400 | chmodResponse401 | chmodResponse403 | chmodResponse404 | chmodResponseDefault) & {
+  headers: Headers;
+};
+
+export type chmodResponse = (chmodResponseSuccess | chmodResponseError)
+
+export const getChmodUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/chmod`
+}
+
+export const chmod = async (systemId: string,
+    chmodRequest: ChmodRequest, options?: RequestInit): Promise<chmodResponse> => {
+
+  const res = await fetch(getChmodUrl(systemId),
+  {
+    ...options,
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      chmodRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: chmodResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as chmodResponse
+}
+
+
+
+
+export const getChmodMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof chmod>>, TError,{systemId: string;data: ChmodRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof chmod>>, TError,{systemId: string;data: ChmodRequest}, TContext> => {
+
+const mutationKey = ['chmod'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof chmod>>, {systemId: string;data: ChmodRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  chmod(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ChmodMutationResult = NonNullable<Awaited<ReturnType<typeof chmod>>>
+    export type ChmodMutationBody = ChmodRequest
+    export type ChmodMutationError = Error
+
+    /**
+ * @summary Change file permissions
+ */
+export const useChmod = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof chmod>>, TError,{systemId: string;data: ChmodRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof chmod>>,
+        TError,
+        {systemId: string;data: ChmodRequest},
+        TContext
+      > => {
+      return useMutation(getChmodMutationOptions(options), queryClient);
+    }
+
+/**
+ * Rename a file or directory within the same parent directory
+ * @summary Rename file or directory
+ */
+export type renameResponse200 = {
+  data: InodeResponse
+  status: 200
+}
+
+export type renameResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type renameResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type renameResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type renameResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type renameResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type renameResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404 | 409>
+}
+
+export type renameResponseSuccess = (renameResponse200) & {
+  headers: Headers;
+};
+export type renameResponseError = (renameResponse400 | renameResponse401 | renameResponse403 | renameResponse404 | renameResponse409 | renameResponseDefault) & {
+  headers: Headers;
+};
+
+export type renameResponse = (renameResponseSuccess | renameResponseError)
+
+export const getRenameUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/rename`
+}
+
+export const rename = async (systemId: string,
+    renameBody: RenameBody, options?: RequestInit): Promise<renameResponse> => {
+
+  const res = await fetch(getRenameUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      renameBody,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: renameResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as renameResponse
+}
+
+
+
+
+export const getRenameMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rename>>, TError,{systemId: string;data: RenameBody}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof rename>>, TError,{systemId: string;data: RenameBody}, TContext> => {
+
+const mutationKey = ['rename'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof rename>>, {systemId: string;data: RenameBody}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  rename(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type RenameMutationResult = NonNullable<Awaited<ReturnType<typeof rename>>>
+    export type RenameMutationBody = RenameBody
+    export type RenameMutationError = Error
+
+    /**
+ * @summary Rename file or directory
+ */
+export const useRename = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof rename>>, TError,{systemId: string;data: RenameBody}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof rename>>,
+        TError,
+        {systemId: string;data: RenameBody},
+        TContext
+      > => {
+      return useMutation(getRenameMutationOptions(options), queryClient);
+    }
+
+/**
+ * Move a file or directory to a different location (like Unix mv command)
+ * @summary Move file or directory
+ */
+export type mvResponse200 = {
+  data: InodeResponse
+  status: 200
+}
+
+export type mvResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type mvResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type mvResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type mvResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type mvResponse409 = {
+  data: Error
+  status: 409
+}
+
+export type mvResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404 | 409>
+}
+
+export type mvResponseSuccess = (mvResponse200) & {
+  headers: Headers;
+};
+export type mvResponseError = (mvResponse400 | mvResponse401 | mvResponse403 | mvResponse404 | mvResponse409 | mvResponseDefault) & {
+  headers: Headers;
+};
+
+export type mvResponse = (mvResponseSuccess | mvResponseError)
+
+export const getMvUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/mv`
+}
+
+export const mv = async (systemId: string,
+    mvBody: MvBody, options?: RequestInit): Promise<mvResponse> => {
+
+  const res = await fetch(getMvUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      mvBody,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: mvResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as mvResponse
+}
+
+
+
+
+export const getMvMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mv>>, TError,{systemId: string;data: MvBody}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof mv>>, TError,{systemId: string;data: MvBody}, TContext> => {
+
+const mutationKey = ['mv'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof mv>>, {systemId: string;data: MvBody}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  mv(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type MvMutationResult = NonNullable<Awaited<ReturnType<typeof mv>>>
+    export type MvMutationBody = MvBody
+    export type MvMutationError = Error
+
+    /**
+ * @summary Move file or directory
+ */
+export const useMv = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof mv>>, TError,{systemId: string;data: MvBody}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof mv>>,
+        TError,
+        {systemId: string;data: MvBody},
+        TContext
+      > => {
+      return useMutation(getMvMutationOptions(options), queryClient);
+    }
+
+/**
+ * Delete a file or directory at the specified path
+ * @summary Delete file or directory
+ */
+export type unlinkResponse204 = {
+  data: void
+  status: 204
+}
+
+export type unlinkResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type unlinkResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type unlinkResponse404 = {
+  data: Error
+  status: 404
+}
+
+export type unlinkResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 204 | 401 | 403 | 404>
+}
+
+export type unlinkResponseSuccess = (unlinkResponse204) & {
+  headers: Headers;
+};
+export type unlinkResponseError = (unlinkResponse401 | unlinkResponse403 | unlinkResponse404 | unlinkResponseDefault) & {
+  headers: Headers;
+};
+
+export type unlinkResponse = (unlinkResponseSuccess | unlinkResponseError)
+
+export const getUnlinkUrl = (systemId: string,
+    params: UnlinkParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/fs/${systemId}/unlink?${stringifiedParams}` : `/fs/${systemId}/unlink`
+}
+
+export const unlink = async (systemId: string,
+    params: UnlinkParams, options?: RequestInit): Promise<unlinkResponse> => {
+
+  const res = await fetch(getUnlinkUrl(systemId,params),
+  {
+    ...options,
+    method: 'DELETE'
+
+
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: unlinkResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as unlinkResponse
+}
+
+
+
+
+export const getUnlinkMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlink>>, TError,{systemId: string;params: UnlinkParams}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof unlink>>, TError,{systemId: string;params: UnlinkParams}, TContext> => {
+
+const mutationKey = ['unlink'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof unlink>>, {systemId: string;params: UnlinkParams}> = (props) => {
+          const {systemId,params} = props ?? {};
+
+          return  unlink(systemId,params,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type UnlinkMutationResult = NonNullable<Awaited<ReturnType<typeof unlink>>>
+
+    export type UnlinkMutationError = Error
+
+    /**
+ * @summary Delete file or directory
+ */
+export const useUnlink = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof unlink>>, TError,{systemId: string;params: UnlinkParams}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof unlink>>,
+        TError,
+        {systemId: string;params: UnlinkParams},
+        TContext
+      > => {
+      return useMutation(getUnlinkMutationOptions(options), queryClient);
+    }
+
+/**
+ * Start an upload session and get presigned URL
+ * @summary Initiate file upload
+ */
+export type initiateUploadResponse201 = {
+  data: UploadSessionResponse
+  status: 201
+}
+
+export type initiateUploadResponse400 = {
+  data: Error
+  status: 400
+}
+
+export type initiateUploadResponse401 = {
+  data: Error
+  status: 401
+}
+
+export type initiateUploadResponse403 = {
+  data: Error
+  status: 403
+}
+
+export type initiateUploadResponseDefault = {
+  data: Error
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 403>
+}
+
+export type initiateUploadResponseSuccess = (initiateUploadResponse201) & {
+  headers: Headers;
+};
+export type initiateUploadResponseError = (initiateUploadResponse400 | initiateUploadResponse401 | initiateUploadResponse403 | initiateUploadResponseDefault) & {
+  headers: Headers;
+};
+
+export type initiateUploadResponse = (initiateUploadResponseSuccess | initiateUploadResponseError)
+
+export const getInitiateUploadUrl = (systemId: string,) => {
+
+
+
+
+  return `/fs/${systemId}/upload/initiate`
+}
+
+export const initiateUpload = async (systemId: string,
+    initiateUploadRequest: InitiateUploadRequest, options?: RequestInit): Promise<initiateUploadResponse> => {
+
+  const res = await fetch(getInitiateUploadUrl(systemId),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      initiateUploadRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: initiateUploadResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as initiateUploadResponse
+}
+
+
+
+
+export const getInitiateUploadMutationOptions = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initiateUpload>>, TError,{systemId: string;data: InitiateUploadRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof initiateUpload>>, TError,{systemId: string;data: InitiateUploadRequest}, TContext> => {
+
+const mutationKey = ['initiateUpload'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof initiateUpload>>, {systemId: string;data: InitiateUploadRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
+
+          return  initiateUpload(systemId,data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type InitiateUploadMutationResult = NonNullable<Awaited<ReturnType<typeof initiateUpload>>>
+    export type InitiateUploadMutationBody = InitiateUploadRequest
+    export type InitiateUploadMutationError = Error
+
+    /**
+ * @summary Initiate file upload
+ */
+export const useInitiateUpload = <TError = Error,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof initiateUpload>>, TError,{systemId: string;data: InitiateUploadRequest}, TContext>, fetch?: RequestInit}
+ , queryClient?: QueryClient): UseMutationResult<
+        Awaited<ReturnType<typeof initiateUpload>>,
+        TError,
+        {systemId: string;data: InitiateUploadRequest},
+        TContext
+      > => {
+      return useMutation(getInitiateUploadMutationOptions(options), queryClient);
+    }
+
+/**
+ * Mark upload as complete and create inode
  * @summary Complete file upload
  */
-export type completeUploadResponse200 = {
-  data: FileResponse
-  status: 200
+export type completeUploadResponse201 = {
+  data: InodeResponse
+  status: 201
 }
 
 export type completeUploadResponse400 = {
@@ -2097,11 +3662,6 @@ export type completeUploadResponse401 = {
   status: 401
 }
 
-export type completeUploadResponse403 = {
-  data: Error
-  status: 403
-}
-
 export type completeUploadResponse404 = {
   data: Error
   status: 404
@@ -2109,33 +3669,33 @@ export type completeUploadResponse404 = {
 
 export type completeUploadResponseDefault = {
   data: Error
-  status: Exclude<HTTPStatusCodes, 200 | 400 | 401 | 403 | 404>
+  status: Exclude<HTTPStatusCodes, 201 | 400 | 401 | 404>
 }
 
-export type completeUploadResponseSuccess = (completeUploadResponse200) & {
+export type completeUploadResponseSuccess = (completeUploadResponse201) & {
   headers: Headers;
 };
-export type completeUploadResponseError = (completeUploadResponse400 | completeUploadResponse401 | completeUploadResponse403 | completeUploadResponse404 | completeUploadResponseDefault) & {
+export type completeUploadResponseError = (completeUploadResponse400 | completeUploadResponse401 | completeUploadResponse404 | completeUploadResponseDefault) & {
   headers: Headers;
 };
 
 export type completeUploadResponse = (completeUploadResponseSuccess | completeUploadResponseError)
 
-export const getCompleteUploadUrl = (fileKey: string,) => {
+export const getCompleteUploadUrl = (systemId: string,) => {
 
 
 
 
-  return `/file/upload/complete/${fileKey}`
+  return `/fs/${systemId}/upload/complete`
 }
 
-export const completeUpload = async (fileKey: string,
-    completeUploadRequest?: CompleteUploadRequest, options?: RequestInit): Promise<completeUploadResponse> => {
+export const completeUpload = async (systemId: string,
+    completeUploadRequest: CompleteUploadRequest, options?: RequestInit): Promise<completeUploadResponse> => {
 
-  const res = await fetch(getCompleteUploadUrl(fileKey),
+  const res = await fetch(getCompleteUploadUrl(systemId),
   {
     ...options,
-    method: 'PATCH',
+    method: 'POST',
     headers: { 'Content-Type': 'application/json', ...options?.headers },
     body: JSON.stringify(
       completeUploadRequest,)
@@ -2152,8 +3712,8 @@ export const completeUpload = async (fileKey: string,
 
 
 export const getCompleteUploadMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{fileKey: string;data: CompleteUploadRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{fileKey: string;data: CompleteUploadRequest}, TContext> => {
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{systemId: string;data: CompleteUploadRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{systemId: string;data: CompleteUploadRequest}, TContext> => {
 
 const mutationKey = ['completeUpload'];
 const {mutation: mutationOptions, fetch: fetchOptions} = options ?
@@ -2165,10 +3725,10 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeUpload>>, {fileKey: string;data: CompleteUploadRequest}> = (props) => {
-          const {fileKey,data} = props ?? {};
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof completeUpload>>, {systemId: string;data: CompleteUploadRequest}> = (props) => {
+          const {systemId,data} = props ?? {};
 
-          return  completeUpload(fileKey,data,fetchOptions)
+          return  completeUpload(systemId,data,fetchOptions)
         }
 
 
@@ -2186,65 +3746,74 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
  * @summary Complete file upload
  */
 export const useCompleteUpload = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{fileKey: string;data: CompleteUploadRequest}, TContext>, fetch?: RequestInit}
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof completeUpload>>, TError,{systemId: string;data: CompleteUploadRequest}, TContext>, fetch?: RequestInit}
  , queryClient?: QueryClient): UseMutationResult<
         Awaited<ReturnType<typeof completeUpload>>,
         TError,
-        {fileKey: string;data: CompleteUploadRequest},
+        {systemId: string;data: CompleteUploadRequest},
         TContext
       > => {
       return useMutation(getCompleteUploadMutationOptions(options), queryClient);
     }
 
 /**
- * Get a presigned URL for downloading/streaming file content
- * @summary Get stream read token
+ * Get presigned download URL for a file
+ * @summary Get download URL
  */
-export type getStreamTokenResponse200 = {
-  data: StreamTokenResponse
+export type getDownloadUrlResponse200 = {
+  data: DownloadURLResponse
   status: 200
 }
 
-export type getStreamTokenResponse401 = {
+export type getDownloadUrlResponse401 = {
   data: Error
   status: 401
 }
 
-export type getStreamTokenResponse403 = {
+export type getDownloadUrlResponse403 = {
   data: Error
   status: 403
 }
 
-export type getStreamTokenResponse404 = {
+export type getDownloadUrlResponse404 = {
   data: Error
   status: 404
 }
 
-export type getStreamTokenResponseDefault = {
+export type getDownloadUrlResponseDefault = {
   data: Error
   status: Exclude<HTTPStatusCodes, 200 | 401 | 403 | 404>
 }
 
-export type getStreamTokenResponseSuccess = (getStreamTokenResponse200) & {
+export type getDownloadUrlResponseSuccess = (getDownloadUrlResponse200) & {
   headers: Headers;
 };
-export type getStreamTokenResponseError = (getStreamTokenResponse401 | getStreamTokenResponse403 | getStreamTokenResponse404 | getStreamTokenResponseDefault) & {
+export type getDownloadUrlResponseError = (getDownloadUrlResponse401 | getDownloadUrlResponse403 | getDownloadUrlResponse404 | getDownloadUrlResponseDefault) & {
   headers: Headers;
 };
 
-export type getStreamTokenResponse = (getStreamTokenResponseSuccess | getStreamTokenResponseError)
+export type getDownloadUrlResponse = (getDownloadUrlResponseSuccess | getDownloadUrlResponseError)
 
-export const getGetStreamTokenUrl = (fileKey: string,) => {
+export const getGetDownloadUrlUrl = (systemId: string,
+    params: GetDownloadUrlParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/file/stream/read-token/${fileKey}`
+  return stringifiedParams.length > 0 ? `/fs/${systemId}/download?${stringifiedParams}` : `/fs/${systemId}/download`
 }
 
-export const getStreamToken = async (fileKey: string, options?: RequestInit): Promise<getStreamTokenResponse> => {
+export const getDownloadUrl = async (systemId: string,
+    params: GetDownloadUrlParams, options?: RequestInit): Promise<getDownloadUrlResponse> => {
 
-  const res = await fetch(getGetStreamTokenUrl(fileKey),
+  const res = await fetch(getGetDownloadUrlUrl(systemId,params),
   {
     ...options,
     method: 'GET'
@@ -2255,77 +3824,83 @@ export const getStreamToken = async (fileKey: string, options?: RequestInit): Pr
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
-  const data: getStreamTokenResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getStreamTokenResponse
+  const data: getDownloadUrlResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getDownloadUrlResponse
 }
 
 
 
 
 
-export const getGetStreamTokenQueryKey = (fileKey: string,) => {
+export const getGetDownloadUrlQueryKey = (systemId: string,
+    params?: GetDownloadUrlParams,) => {
     return [
-    `/file/stream/read-token/${fileKey}`
+    `/fs/${systemId}/download`, ...(params ? [params] : [])
     ] as const;
     }
 
 
-export const getGetStreamTokenQueryOptions = <TData = Awaited<ReturnType<typeof getStreamToken>>, TError = Error>(fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData>>, fetch?: RequestInit}
+export const getGetDownloadUrlQueryOptions = <TData = Awaited<ReturnType<typeof getDownloadUrl>>, TError = Error>(systemId: string,
+    params: GetDownloadUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData>>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getGetStreamTokenQueryKey(fileKey);
+  const queryKey =  queryOptions?.queryKey ?? getGetDownloadUrlQueryKey(systemId,params);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getStreamToken>>> = ({ signal }) => getStreamToken(fileKey, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getDownloadUrl>>> = ({ signal }) => getDownloadUrl(systemId,params, { signal, ...fetchOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: !!(fileKey), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+   return  { queryKey, queryFn, enabled: !!(systemId), ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
 }
 
-export type GetStreamTokenQueryResult = NonNullable<Awaited<ReturnType<typeof getStreamToken>>>
-export type GetStreamTokenQueryError = Error
+export type GetDownloadUrlQueryResult = NonNullable<Awaited<ReturnType<typeof getDownloadUrl>>>
+export type GetDownloadUrlQueryError = Error
 
 
-export function useGetStreamToken<TData = Awaited<ReturnType<typeof getStreamToken>>, TError = Error>(
- fileKey: string, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData>> & Pick<
+export function useGetDownloadUrl<TData = Awaited<ReturnType<typeof getDownloadUrl>>, TError = Error>(
+ systemId: string,
+    params: GetDownloadUrlParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData>> & Pick<
         DefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreamToken>>,
+          Awaited<ReturnType<typeof getDownloadUrl>>,
           TError,
-          Awaited<ReturnType<typeof getStreamToken>>
+          Awaited<ReturnType<typeof getDownloadUrl>>
         > , 'initialData'
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStreamToken<TData = Awaited<ReturnType<typeof getStreamToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData>> & Pick<
+export function useGetDownloadUrl<TData = Awaited<ReturnType<typeof getDownloadUrl>>, TError = Error>(
+ systemId: string,
+    params: GetDownloadUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData>> & Pick<
         UndefinedInitialDataOptions<
-          Awaited<ReturnType<typeof getStreamToken>>,
+          Awaited<ReturnType<typeof getDownloadUrl>>,
           TError,
-          Awaited<ReturnType<typeof getStreamToken>>
+          Awaited<ReturnType<typeof getDownloadUrl>>
         > , 'initialData'
       >, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
-export function useGetStreamToken<TData = Awaited<ReturnType<typeof getStreamToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData>>, fetch?: RequestInit}
+export function useGetDownloadUrl<TData = Awaited<ReturnType<typeof getDownloadUrl>>, TError = Error>(
+ systemId: string,
+    params: GetDownloadUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
   ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
 /**
- * @summary Get stream read token
+ * @summary Get download URL
  */
 
-export function useGetStreamToken<TData = Awaited<ReturnType<typeof getStreamToken>>, TError = Error>(
- fileKey: string, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getStreamToken>>, TError, TData>>, fetch?: RequestInit}
+export function useGetDownloadUrl<TData = Awaited<ReturnType<typeof getDownloadUrl>>, TError = Error>(
+ systemId: string,
+    params: GetDownloadUrlParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof getDownloadUrl>>, TError, TData>>, fetch?: RequestInit}
  , queryClient?: QueryClient
  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
 
-  const queryOptions = getGetStreamTokenQueryOptions(fileKey,options)
+  const queryOptions = getGetDownloadUrlQueryOptions(systemId,params,options)
 
   const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
 

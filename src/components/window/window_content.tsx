@@ -37,20 +37,20 @@ export default memo(
       >
         {type === WindowType.Navigator && setLoading && (
           <Navigator
-            fileKey={fileKey}
+            path={fileKey}
             windowKey={windowKey}
             setLoading={setLoading}
           />
         )}
         {type === WindowType.Trash && setLoading && (
           <Navigator
-            fileKey={fileKey}
+            path={fileKey}
             windowKey={windowKey}
             setLoading={setLoading}
           />
         )}
         {type === WindowType.Uploader && (
-          <Uploader targetContainerKey={fileKey} />
+          <Uploader targetPath={fileKey} />
         )}
         {type === WindowType.Image && fileName && (
           <ImageViewer fileKey={fileKey} fileName={fileName} />

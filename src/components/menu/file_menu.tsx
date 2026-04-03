@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useDeleteFile } from "@/api/generated";
-import { getStreamToken, getFileChildren } from "@/api/generated";
+import { useUnlink } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -10,14 +9,14 @@ import { ContentTypes, getContentTypes } from "@/utils/content_types";
 import MenuList from "./menu_list";
 
 export default function FileMenu({
-  fileKey,
+  path,
   fileType,
   fileName,
   windowKey,
   parentWindowType,
   closeMenu,
 }: {
-  fileKey: string;
+  path: string;
   fileType: FileType;
   fileName: string;
   windowKey: string;
@@ -27,8 +26,13 @@ export default function FileMenu({
   // Query client
   const queryClient = useQueryClient();
 
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.key === windowKey);
+  const systemId = currentWindow?.systemId || "";
+
   // Mutations
-  const deleteFileMutation = useDeleteFile();
+  const unlinkMutation = useUnlink();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
@@ -41,7 +45,7 @@ export default function FileMenu({
     async (
       fileType: Omit<FileType, FileType.Link>,
       fileName: string,
-      fileKey: string
+      path: string
     ) => {
       let windowType: WindowType;
       switch (fileType) {
@@ -77,89 +81,97 @@ export default function FileMenu({
           break;
       }
       newWindow({
-        targetKey: fileKey,
+        targetKey: path,
         type: windowType,
         title: fileName,
+        systemId,
       });
     },
-    [newWindow]
+    [newWindow, systemId]
   );
 
   // Open file action
   const handleOpen = useCallback(async () => {
     closeMenu();
-    openFile(fileType, fileName, fileKey);
+    openFile(fileType, fileName, path);
   }, [
     closeMenu,
-    fileKey,
+    path,
     fileName,
     fileType,
     openFile,
   ]);
 
-  // Update file actions
+  // Update file actions (TODO: Not implemented in new API yet)
   const handleRename = useCallback(() => {
     closeMenu();
-    setRenamingFile({ fileKey, windowKey });
-  }, [closeMenu, fileKey, setRenamingFile, windowKey]);
+    // TODO: Implement rename functionality
+    // setRenamingFile({ path, windowKey });
+    console.warn("Rename not implemented in new API");
+  }, [closeMenu]);
 
   // Download file actions
   const handleDownload = useCallback(async () => {
     closeMenu();
-    // Get stream token for download
-    const tokenResponse = await getStreamToken(fileKey, { credentials: "include" });
-    if (tokenResponse.data && "streamToken" in tokenResponse.data) {
-      const a = document.createElement("a");
-      a.href = tokenResponse.data.streamToken.downloadUrl;
-      a.download = fileName;
-      a.click();
-    }
-  }, [closeMenu, fileKey, fileName]);
+    // TODO: Implement download with proper API call
+    console.warn("Download not fully implemented in new API");
+    // Need to call getDownloadUrl API function directly
+  }, [closeMenu]);
 
-  // Delete file actions
+  // Delete file actions (TODO: Implement with proper systemId)
   const handleMoveToTrash = useCallback(() => {
     closeMenu();
+    // TODO: Implement move to trash
+    console.warn("Move to trash not implemented in new API");
+    /*
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
-      selectedFileKeys.map((fileKey) =>
-        deleteFileMutation.mutateAsync({ fileKey, params: { permanent: false } })
+      selectedFileKeys.map((filePath) =>
+        unlinkMutation.mutateAsync({
+          systemId,
+          data: { path: filePath },
+        })
       )
     ).finally(() => {
       queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "file",
+        predicate: (query) => query.queryKey[0] === "readDir",
       });
     });
-  }, [closeMenu, getSelectedFileKeys, deleteFileMutation, queryClient]);
+    */
+  }, [closeMenu, systemId]);
 
   const handlePermanentDelete = useCallback(() => {
     closeMenu();
-    const selectedFileKeys = getSelectedFileKeys();
-    Promise.all(
-      selectedFileKeys.map((fileKey) =>
-        deleteFileMutation.mutateAsync({ fileKey, params: { permanent: true } })
-      )
-    ).finally(() => {
-      queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "file",
-      });
-    });
-  }, [closeMenu, getSelectedFileKeys, deleteFileMutation, queryClient]);
+    // TODO: Implement permanent delete
+    console.warn("Permanent delete not implemented in new API");
+  }, [closeMenu]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
-    const files = await getFileChildren(fileKey, { credentials: "include" });
-    if (files.data && "files" in files.data) {
+    // TODO: Implement empty trash
+    console.warn("Empty trash not implemented in new API");
+    /*
+    const files = await useReadDir()(
+      systemId,
+      { path },
+      { fetch: { credentials: "include" } }
+    );
+    if (files.data && "entries" in files.data) {
       Promise.all(
-        files.data.files.map((file) =>
-          deleteFileMutation.mutateAsync({ fileKey: file.fileKey, params: { permanent: true } })
+        files.data.entries.map((entry) =>
+          unlinkMutation.mutateAsync({
+            systemId,
+            data: { path: `${path}/${entry.name}` },
+          })
         )
       ).then(() => {
         queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "file",
+          predicate: (query) => query.queryKey[0] === "readDir",
         });
       });
     }
-  }, [closeMenu, fileKey, deleteFileMutation, queryClient]);
+    */
+  }, [closeMenu, path, systemId]);
 
   // Delete file actions based on parent window type
   const deleteMenu =

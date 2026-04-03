@@ -1,27 +1,37 @@
-import { useGetStreamToken } from "@/api/generated";
+import { useGetDownloadUrl } from "@/api/generated";
+import { useWindowStore } from "@/store/window.store";
 import Image from "next/image";
 import mediaStyles from "./media.module.css";
 
 export default function ImageViewer({
-  fileKey,
+  fileKey: path,
   fileName,
 }: {
   fileKey: string;
   fileName: string;
 }) {
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.targetKey === path);
+  const systemId = currentWindow?.systemId || "";
+
   // Use Orval's generated hook directly
-  const streamQuery = useGetStreamToken(fileKey, {
-    query: {
-      select: (data) => ("streamToken" in data.data ? data.data.streamToken : null),
-    },
-    fetch: { credentials: "include" },
-  });
+  const downloadQuery = useGetDownloadUrl(
+    systemId,
+    { path },
+    {
+      query: {
+        select: (data: any) => (data.status === 200 ? data.data.downloadUrl : null),
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   return (
     <div className={`full-size flex-center ${mediaStyles.container}`}>
-      {streamQuery.data && (
+      {downloadQuery.data && (
         <Image
-          src={streamQuery.data.downloadUrl}
+          src={downloadQuery.data.downloadUrl}
           alt={fileName}
           fill
           style={{ objectFit: "contain" }}

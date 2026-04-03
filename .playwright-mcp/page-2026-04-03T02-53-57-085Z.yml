@@ -1,0 +1,83 @@
+- generic [ref=e1]:
+  - button "Open Next.js Dev Tools" [ref=e7] [cursor=pointer]:
+    - img [ref=e8]
+  - alert [ref=e11]
+  - application [ref=e13]:
+    - generic [ref=e14]:
+      - img "background" [ref=e15]
+      - region "context menu area" [ref=e16]:
+        - generic [ref=e18]:
+          - region "background workspace" [ref=e19]:
+            - generic [ref=e20]:
+              - listitem [ref=e22] [cursor=pointer]:
+                - generic [ref=e23]:
+                  - button "Upload" [ref=e24]:
+                    - img "Upload" [ref=e26]
+                  - generic [ref=e29]: upload
+              - generic [ref=e30]:
+                - listitem [ref=e31] [cursor=pointer]:
+                  - generic [ref=e32]:
+                    - button "Folder" [active] [ref=e33]:
+                      - img "Folder" [ref=e35]
+                    - generic [ref=e38]: Documents
+                - generic [ref=e39]:
+                  - generic [ref=e40]:
+                    - generic [ref=e41]: "name:"
+                    - generic [ref=e42]: Documents
+                  - generic [ref=e43]:
+                    - generic [ref=e44]: "type:"
+                    - generic [ref=e45]: container
+                  - generic [ref=e46]:
+                    - generic [ref=e47]: "size:"
+                    - generic [ref=e48]: 0 B
+                  - generic [ref=e49]:
+                    - generic [ref=e50]: "created:"
+                    - generic [ref=e51]: 4/3/2026, 11:53:08 AM
+                  - generic [ref=e52]:
+                    - generic [ref=e53]: "modified:"
+                    - generic [ref=e54]: 4/3/2026, 11:53:08 AM
+              - listitem [ref=e56] [cursor=pointer]:
+                - generic [ref=e57]:
+                  - button "Folder" [ref=e58]:
+                    - img "Folder" [ref=e60]
+                  - generic [ref=e63]: Pictures
+              - listitem [ref=e65] [cursor=pointer]:
+                - generic [ref=e66]:
+                  - button "Folder" [ref=e67]:
+                    - img "Folder" [ref=e69]
+                  - generic [ref=e72]: Music
+              - listitem [ref=e74] [cursor=pointer]:
+                - generic [ref=e75]:
+                  - button "File" [ref=e76]:
+                    - img "File" [ref=e78]
+                  - generic [ref=e81]: README.md
+              - listitem [ref=e83] [cursor=pointer]:
+                - generic [ref=e84]:
+                  - button "File" [ref=e85]:
+                    - img "File" [ref=e87]
+                  - generic [ref=e90]: sample-video.mp4
+          - article [ref=e109]:
+            - toolbar "window header" [ref=e110]:
+              - generic [ref=e111]:
+                - generic [ref=e112]:
+                  - img [ref=e113]
+                  - img [ref=e116]
+                - generic [ref=e119]: Documents
+              - generic [ref=e121]:
+                - img [ref=e122] [cursor=pointer]
+                - img [ref=e124] [cursor=pointer]
+                - img [ref=e126] [cursor=pointer]
+            - region "window content" [ref=e128]
+    - navigation [ref=e92]:
+      - button "start" [ref=e93] [cursor=pointer]:
+        - img [ref=e94]
+        - generic [ref=e96]: start
+      - button "Folder" [ref=e134] [cursor=pointer]:
+        - button "Folder" [ref=e136]:
+          - img "Folder" [ref=e138]
+      - button "Upload" [ref=e99] [cursor=pointer]:
+        - button "Upload" [ref=e100]:
+          - img "Upload" [ref=e102]
+      - button "Trash" [ref=e105] [cursor=pointer]:
+        - button "Trash" [ref=e106]:
+          - img "Trash" [ref=e108]
