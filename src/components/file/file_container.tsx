@@ -135,7 +135,9 @@ export default function FileContainer({
   if (readDirQuery.isError && readDirQuery.error) {
     return (
       <div className="flex-center full-size">
-        {"message" in readDirQuery.error ? readDirQuery.error.message : "Error loading files"}
+        {"message" in readDirQuery.error && typeof readDirQuery.error.message === "string"
+          ? readDirQuery.error.message
+          : "Error loading files"}
       </div>
     );
   }
