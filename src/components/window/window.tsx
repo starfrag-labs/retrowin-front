@@ -52,6 +52,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowRef = useRef<HTMLDivElement>(null);
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
+  const positionInitializedRef = useRef(false);
 
   // Queries - use Orval's generated hook directly
   const fileInfo = useStatPath(
@@ -98,9 +99,9 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     setCurrentWindow(null);
   }, [setCurrentWindow]);
 
-  // Initialize window position and size
+  // Initialize window position and size (only once when window is created)
   useEffect(() => {
-    if (windowRef.current && targetWindow) {
+    if (windowRef.current && targetWindow && !positionInitializedRef.current) {
       if (targetWindow.type === WindowType.Uploader) {
         const x = document.body.clientWidth / 2 - windowSize1.width / 2;
         const y = document.body.clientHeight / 2 - windowSize1.height / 2;
@@ -112,6 +113,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         setWindowPosition({ x, y });
         setWindowSize(windowSize2);
       }
+      positionInitializedRef.current = true;
     }
   }, [targetWindow, windowSize1, windowSize2]);
 
