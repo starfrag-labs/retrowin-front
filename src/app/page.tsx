@@ -1,20 +1,20 @@
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { RedirectType, redirect } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useGetUser, useListSystems, useGetRootDirectory } from "@/api/generated";
+import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
-import styles from "./page.module.css";
 import Background from "@/components/layout/background";
 import Navbar from "@/components/layout/navbar/navbar_container";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useWindowStore } from "@/store/window.store";
-import SelectBoxContainer from "@/components/select/select_box_container";
-import DragFileContainer from "@/components/drag/drag_file_container";
-import Window from "@/components/window/window";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import MenuBox from "@/components/menu/menu_box";
-import { createWindowKey } from "@/utils/random_key";
+import SelectBoxContainer from "@/components/select/select_box_container";
+import Window from "@/components/window/window";
 import { WindowType } from "@/interfaces/window";
-import { redirect, RedirectType } from "next/navigation";
-import { fileQuery, memberQuery } from "@/api/query";
+import { useWindowStore } from "@/store/window.store";
+import { createWindowKey } from "@/utils/random_key";
+import styles from "./page.module.css";
 
 export default function Home() {
   // Constants
@@ -22,6 +22,8 @@ export default function Home() {
 
   // States
   const [homeKey, setHomeKey] = useState<string | null>(null);
+  const [currentSystemId, setCurrentSystemId] = useState<string | null>(null);
+  const [currentPath, _setCurrentPath] = useState<string>("/home");
 
   // Store states
   const windows = useWindowStore((state) => state.windows);
@@ -30,69 +32,79 @@ export default function Home() {
   const setCurrentWindow = useWindowStore((state) => state.setCurrentWindow);
 
   // Refs
-  const backgroundWindowRef = useRef(null);
+  const backgroundWindowRef = useRef<HTMLDivElement>(null);
 
-  // Queries
-  const queryClient = useQueryClient();
-  const homeKeyQuery = useQuery({ ...fileQuery.read.home, retry: false });
-  const getMemberQuery = useQuery({ ...memberQuery.get, retry: false });
-  const createMemberMutation = useMutation(memberQuery.create);
+  // Queries - use Orval's generated hooks directly
+  const _queryClient = useQueryClient();
+
+  // Get current user
+  const getUserQuery = useGetUser({
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.user : null),
+    },
+    fetch: { credentials: "include" },
+  });
+
+  // Get systems list
+  const listSystemsQuery = useListSystems({
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.systems : []),
+      enabled: !!getUserQuery.data,
+    },
+    fetch: { credentials: "include" },
+  });
+
+  // Get root directory for first system
+  const rootDirectoryQuery = useGetRootDirectory(
+    currentSystemId ?? "",
+    {
+      query: {
+        retry: false,
+        select: (data) => (data.status === 200 ? data.data.inode : null),
+        enabled: !!currentSystemId,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
+
+  // Set current system ID when systems are loaded
+  useEffect(() => {
+    if (listSystemsQuery.isSuccess && listSystemsQuery.data.length > 0 && !currentSystemId) {
+      setCurrentSystemId(listSystemsQuery.data[0].id);
+    }
+  }, [listSystemsQuery.data, listSystemsQuery.isSuccess, currentSystemId]);
 
   useEffect(() => {
-    if (homeKey) {
+    if (homeKey && currentSystemId) {
       newBackgroundWindow({
-        targetKey: homeKey,
+        targetKey: currentPath, // Use path instead of fileKey for Background window
         type: WindowType.Background,
         title: "background",
         key: backgroundWindowKey,
+        systemId: currentSystemId,
       });
     }
-  }, [backgroundWindowKey, backgroundWindowRef, newBackgroundWindow, homeKey]);
+  }, [backgroundWindowKey, newBackgroundWindow, homeKey, currentSystemId, currentPath]);
 
   useEffect(() => {
-    if (homeKeyQuery.isSuccess && homeKeyQuery.data) {
-      setHomeKey(homeKeyQuery.data.data.fileKey);
+    if (rootDirectoryQuery.isSuccess && rootDirectoryQuery.data) {
+      setHomeKey(rootDirectoryQuery.data.id);
     }
-  }, [homeKeyQuery.data, homeKeyQuery.isSuccess]);
+  }, [rootDirectoryQuery.data, rootDirectoryQuery.isSuccess]);
 
   useEffect(() => {
-    if (homeKeyQuery.isError) {
+    if (getUserQuery.isError) {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      if (homeKeyQuery.error.status === 401 && redirectUri) {
+      const errorStatus = (getUserQuery.error as { status?: number })?.status;
+      if (errorStatus === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
-      } else if (
-        homeKeyQuery.error.status === 403 &&
-        getMemberQuery.isError &&
-        getMemberQuery.error.status === 404 &&
-        !createMemberMutation.isPending
-      ) {
-        // If the user is not a member of the service, create a member
-        createMemberMutation
-          .mutateAsync()
-          .then(() => {
-            queryClient.invalidateQueries();
-          })
-          .catch(() => {
-            throw new Error("Failed to create member");
-          });
-      } else if (
-        homeKeyQuery.error.status === 403 &&
-        getMemberQuery.isSuccess
-      ) {
-        throw new Error("You are not a member of this service");
       } else {
-        throw new Error("Failed to get home");
+        throw new Error("Failed to get user");
       }
     }
-  }, [
-    createMemberMutation,
-    getMemberQuery.error,
-    getMemberQuery.isError,
-    getMemberQuery.isSuccess,
-    homeKeyQuery.error,
-    homeKeyQuery.isError,
-    queryClient,
-  ]);
+  }, [getUserQuery.error, getUserQuery.isError]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
@@ -101,9 +113,9 @@ export default function Home() {
       contentRef: null,
       headerRef: null,
     });
-  }, [backgroundWindowKey, backgroundWindowRef, setCurrentWindow]);
+  }, [backgroundWindowKey, setCurrentWindow]);
 
-  if (!homeKey) {
+  if (!homeKey || !currentSystemId) {
     return <div></div>;
   }
 
@@ -111,24 +123,27 @@ export default function Home() {
     <div
       className={`${styles.page} flex-center full-size`}
       onContextMenu={(e) => e.preventDefault()}
+      role="application"
     >
       <Background>
         <MenuBox>
           <SelectBoxContainer>
             <DragFileContainer>
-              <div
+              <section
                 ref={backgroundWindowRef}
                 className={`full-size flex-center ${styles.background_window}`}
                 onMouseEnter={onMouseEnter}
+                aria-label="background workspace"
               >
                 <FileContainer
                   windowKey={backgroundWindowKey}
-                  containerKey={homeKey}
+                  systemId={currentSystemId ?? ""}
+                  path={currentPath}
                   upload
                   trash
                   backgroundFile
                 />
-              </div>
+              </section>
               {windows
                 .filter((w) => w.type !== WindowType.Background)
                 .map((window) => (

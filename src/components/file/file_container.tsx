@@ -1,61 +1,112 @@
-import { useQuery } from "@tanstack/react-query";
+import { useCallback, useEffect } from "react";
+import { useLs, useStatPath } from "@/api/generated";
+import type { DirEntry } from "@/api/generated/model";
+import { FileType, SpecialFileName } from "@/interfaces/file";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
-import { fileQuery } from "@/api/query";
-import { useCallback, useEffect } from "react";
-import { FileType, SpecialFileName } from "@/interfaces/file";
-import { ApiFileType } from "@/interfaces/api";
+
+/**
+ * Convert file type from mode to FileType
+ */
+const getFileType = (fileType: number): FileType => {
+  // Check if directory (S_IFDIR = 0o040000)
+  if ((fileType & 0o040000) === 0o040000) {
+    return FileType.Container;
+  }
+  // Check if symlink (S_IFLNK = 0o0120000)
+  if ((fileType & 0o0120000) === 0o0120000) {
+    return FileType.Link;
+  }
+  return FileType.Block;
+};
+
+/**
+ * Check if path is trash directory
+ */
+const _isTrashPath = (path: string): boolean => {
+  return path === "/.trash" || path.endsWith("/.trash");
+};
+
+/**
+ * Check if path is upload directory
+ */
+const _isUploadPath = (path: string): boolean => {
+  return path === "/.upload" || path.endsWith("/.upload");
+};
 
 /**
  * File container component
  * @param windowKey - key of the window
- * @param containerKey - key of the container
+ * @param systemId - system ID
+ * @param path - current directory path
  * @param setLoading - set loading state
  * @param upload - show upload file
  * @param trash - show trash file
  * @param backgroundFile - is background file
  * @returns - File container component
  * @example
- * <FileContainer windowKey="421b0ad1f948" containerKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" />
+ * <FileContainer windowKey="421b0ad1f948" systemId="sys-123" path="/home/user" />
  */
 export default function FileContainer({
   windowKey,
-  containerKey,
+  systemId,
+  path,
   setLoading,
   upload = false,
   trash = false,
   backgroundFile = false,
 }: {
   windowKey: string;
-  containerKey: string;
+  systemId: string;
+  path: string;
   setLoading?: React.Dispatch<React.SetStateAction<boolean>>;
   upload?: boolean;
   trash?: boolean;
   backgroundFile?: boolean;
 }) {
-  const readContainerQuery = useQuery(fileQuery.read.children(containerKey));
-  const readTrashQuery = useQuery(fileQuery.read.trash);
+  // Use Orval's generated hooks directly
+  const readDirQuery = useLs(
+    systemId,
+    { path },
+    {
+      query: {
+        select: (data) => (data.status === 200 ? data.data.entries : []),
+        enabled: !!systemId && !!path,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
+
+  // Get trash inode if trash should be shown
+  const trashPath = path === "/" ? "/.trash" : `${path}/.trash`;
+  const trashStatQuery = useStatPath(
+    systemId,
+    { path: trashPath },
+    {
+      query: {
+        select: (data) => (data.status === 200 ? data.data.inode : null),
+        enabled: trash && !!systemId,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   const sortFiles = useCallback(
-    (
-      a: {
-        fileName: string;
-        type: ApiFileType;
-      },
-      b: {
-        fileName: string;
-        type: ApiFileType;
-      },
-    ) => {
-      // Home > Trash > Others
+    (a: DirEntry, b: DirEntry): number => {
+      // Home > Trash > Upload > Others
       const specialFileOrder = [
         SpecialFileName.Root,
         SpecialFileName.Home,
         SpecialFileName.Trash,
         SpecialFileName.Upload,
-      ];
-      const aIndex = specialFileOrder.findIndex((name) => a.fileName === name);
-      const bIndex = specialFileOrder.findIndex((name) => b.fileName === name);
+      ] as string[];
+
+      // Skip hidden files starting with dot
+      if (a.name.startsWith(".")) return 1;
+      if (b.name.startsWith(".")) return -1;
+
+      const aIndex = specialFileOrder.indexOf(a.name);
+      const bIndex = specialFileOrder.indexOf(b.name);
       if (aIndex !== -1 && bIndex !== -1) {
         return aIndex - bIndex;
       }
@@ -67,24 +118,26 @@ export default function FileContainer({
       }
       // Container > Block > Link
       const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
-      const aTypeIndex = typeOrder.findIndex((type) => a.type === type);
-      const bTypeIndex = typeOrder.findIndex((type) => b.type === type);
+      const aTypeIndex = typeOrder.indexOf(getFileType(a.fileType));
+      const bTypeIndex = typeOrder.indexOf(getFileType(b.fileType));
       return aTypeIndex - bTypeIndex;
     },
-    [],
+    []
   );
 
   useEffect(() => {
     if (setLoading) {
       // Set loading state
-      setLoading(readContainerQuery.isFetching);
+      setLoading(readDirQuery.isFetching);
     }
-  }, [readContainerQuery.isFetching, setLoading]);
+  }, [readDirQuery.isFetching, setLoading]);
 
-  if (readContainerQuery.isError && readContainerQuery.error) {
+  if (readDirQuery.isError && readDirQuery.error) {
     return (
       <div className="flex-center full-size">
-        {readContainerQuery.error.message}
+        {"message" in readDirQuery.error && typeof readDirQuery.error.message === "string"
+          ? readDirQuery.error.message
+          : "Error loading files"}
       </div>
     );
   }
@@ -95,29 +148,33 @@ export default function FileContainer({
         <FileItem
           name={SpecialFileName.Upload}
           type={FileType.Upload}
-          fileKey={containerKey}
+          fileKey={path}
           windowKey={windowKey}
+          systemId={systemId}
           backgroundFile={backgroundFile}
         />
       )}
-      {trash && readTrashQuery.isSuccess && readTrashQuery.data && (
+      {trash && trashStatQuery.isSuccess && trashStatQuery.data && (
         <FileItem
           name={SpecialFileName.Trash}
           type={FileType.Trash}
-          fileKey={readTrashQuery.data.data.fileKey}
+          fileKey={trashPath}
           windowKey={windowKey}
+          systemId={systemId}
           backgroundFile={backgroundFile}
         />
       )}
-      {readContainerQuery.data?.data
+      {readDirQuery.data
+        ?.filter((entry: DirEntry) => !entry.name.startsWith("."))
         .sort(sortFiles)
-        .map((file) => (
+        .map((file: DirEntry) => (
           <FileItem
-            key={file.fileKey}
-            name={file.fileName}
-            type={file.type}
-            fileKey={file.fileKey}
+            key={file.inodeId}
+            name={file.name}
+            type={getFileType(file.fileType)}
+            fileKey={`${path === "/" ? "" : path}/${file.name}`}
             windowKey={windowKey}
+            systemId={systemId}
             backgroundFile={backgroundFile}
           />
         ))}

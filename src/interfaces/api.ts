@@ -1,4 +1,4 @@
-import { FileType } from "./file";
+import type { FileType } from "./file";
 
 export interface CustomFetchResponse<T = unknown> {
   headers: Headers;

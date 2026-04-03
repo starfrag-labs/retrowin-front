@@ -1,30 +1,41 @@
-import { url } from "@/api/fetch";
-import { storageQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
+import { useGetDownloadUrl } from "@/api/generated";
+import { useWindowStore } from "@/store/window.store";
+import Image from "next/image";
 import mediaStyles from "./media.module.css";
 
 export default function ImageViewer({
-  fileKey,
+  fileKey: path,
   fileName,
 }: {
   fileKey: string;
   fileName: string;
 }) {
-  // Constants
-  const fileUrl = url.storage.file.read(fileKey);
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.targetKey === path);
+  const systemId = currentWindow?.systemId || "";
 
-  // Queries
-  const sessionQuery = useQuery(storageQuery.session.read(fileKey));
+  // Use Orval's generated hook directly
+  const downloadQuery = useGetDownloadUrl(
+    systemId,
+    { path },
+    {
+      query: {
+        select: (data) => (data.status === 200 ? data.data.downloadUrl : null),
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   return (
     <div className={`full-size flex-center ${mediaStyles.container}`}>
-      {sessionQuery.isFetched && sessionQuery.data && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={fileUrl.toString()}
+      {downloadQuery.data && (
+        <Image
+          src={downloadQuery.data.downloadUrl}
           alt={fileName}
-          className="full-size flex-center"
+          fill
           style={{ objectFit: "contain" }}
+          unoptimized
         />
       )}
     </div>

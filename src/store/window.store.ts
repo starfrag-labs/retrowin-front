@@ -1,14 +1,14 @@
-import { AppWindow, WindowType } from "@/interfaces/window";
-import { createWindowKey } from "@/utils/random_key";
 import { create } from "zustand";
+import { type AppWindow, WindowType } from "@/interfaces/window";
+import { createWindowKey } from "@/utils/random_key";
 
 type State = {
   windows: AppWindow[];
   currentWindow: {
     key: string;
-    windowRef: React.RefObject<HTMLElement>;
-    contentRef: React.RefObject<HTMLElement> | null;
-    headerRef: React.RefObject<HTMLElement> | null;
+    windowRef: React.RefObject<HTMLDivElement | null>;
+    contentRef: React.RefObject<HTMLElement | null> | null;
+    headerRef: React.RefObject<HTMLElement | null> | null;
   } | null;
   mouseEnter: boolean;
 };
@@ -19,11 +19,13 @@ type Action = {
     type,
     title,
     key,
+    systemId,
   }: {
     targetKey: string;
     type: WindowType;
     title: string;
     key?: string;
+    systemId?: string;
   }) => void;
   updateWindow: ({
     targetWindowKey,
@@ -39,6 +41,8 @@ type Action = {
   findWindow: (key: string) => AppWindow | undefined;
   findWindowByTarget: (targetKey: string) => AppWindow | undefined;
   closeWindow: (key: string) => void;
+  minimizeWindow: (key: string) => void;
+  restoreWindow: (key: string) => void;
   highlightWindow: (key: string) => void;
   highlightWindowsByType: (type: WindowType) => void;
   prevWindow: (key: string) => void;
@@ -65,15 +69,15 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   windows: initialState.windows,
   currentWindow: initialState.currentWindow,
   mouseEnter: initialState.mouseEnter,
-  newWindow: ({ targetKey, type, title, key }) => {
+  newWindow: ({ targetKey, type, title, key, systemId }) => {
     set((state) => {
       const existingWindow = state.windows.find(
-        (w) => w.targetKey === targetKey && w.type === type,
+        (w) => w.targetKey === targetKey && w.type === type
       );
       if (existingWindow) {
         // highlight existing window
         const filteredWindows = state.windows.filter(
-          (w) => w.targetKey !== targetKey,
+          (w) => w.targetKey !== targetKey
         );
         state.windows = [...filteredWindows, existingWindow];
         return { windows: state.windows };
@@ -84,6 +88,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
           title: title || "New Window",
           targetKey: targetKey,
           type,
+          systemId,
         };
         if (type === WindowType.Navigator) {
           newWindow.targetHistory = [targetKey];
@@ -96,31 +101,38 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   updateWindow: ({ targetWindowKey, type, targetFileKey, title }) => {
     set((state) => {
-      const window = state.windows.find((w) => w.key === targetWindowKey);
+      const windowIndex = state.windows.findIndex((w) => w.key === targetWindowKey);
+      if (windowIndex === -1) return state;
+
+      const window = state.windows[windowIndex];
       if (
-        window &&
         window.targetKey === targetFileKey &&
         window.type === type
       ) {
-        return { windows: state.windows };
-      } else if (window) {
-        window.targetKey = targetFileKey;
-        if (type) {
-          window.type = type;
-        }
-        if (title) {
-          window.title = title;
-        }
+        return state;
       }
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
-        window.targetHistory = [
+
+      const newWindow: typeof window = {
+        ...window,
+        targetKey: targetFileKey,
+      };
+      if (type) {
+        newWindow.type = type;
+      }
+      if (title) {
+        newWindow.title = title;
+      }
+      if (window.targetHistory && window.historyIndex !== undefined) {
+        newWindow.targetHistory = [
           ...window.targetHistory.slice(0, window.historyIndex + 1),
           targetFileKey,
         ];
-        window.historyIndex = window.targetHistory.length - 1;
+        newWindow.historyIndex = newWindow.targetHistory.length - 1;
       }
-      state.windows = [...state.windows];
-      return { windows: state.windows };
+
+      const newWindows = [...state.windows];
+      newWindows[windowIndex] = newWindow;
+      return { windows: newWindows };
     });
   },
   findWindow(key) {
@@ -132,6 +144,26 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   closeWindow: (key) => {
     set((state) => {
       state.windows = state.windows.filter((w) => w.key !== key);
+      return { windows: state.windows };
+    });
+  },
+  minimizeWindow: (key) => {
+    set((state) => {
+      const window = state.windows.find((w) => w.key === key);
+      if (window) {
+        window.minimized = true;
+        state.windows = [...state.windows];
+      }
+      return { windows: state.windows };
+    });
+  },
+  restoreWindow: (key) => {
+    set((state) => {
+      const window = state.windows.find((w) => w.key === key);
+      if (window) {
+        window.minimized = false;
+        state.windows = [...state.windows];
+      }
       return { windows: state.windows };
     });
   },
@@ -156,28 +188,46 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   prevWindow: (key) => {
     set((state) => {
-      const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
+      const windowIndex = state.windows.findIndex((w) => w.key === key);
+      if (windowIndex === -1) return state;
+
+      const window = state.windows[windowIndex];
+      if (window?.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex > 0) {
-          window.historyIndex -= 1;
-          window.targetKey = window.targetHistory[window.historyIndex];
-          state.windows = [...state.windows];
+          const newHistoryIndex = window.historyIndex - 1;
+          const newWindow = {
+            ...window,
+            historyIndex: newHistoryIndex,
+            targetKey: window.targetHistory[newHistoryIndex],
+          };
+          const newWindows = [...state.windows];
+          newWindows[windowIndex] = newWindow;
+          return { windows: newWindows };
         }
       }
-      return { windows: state.windows };
+      return state;
     });
   },
   nextWindow: (key) => {
     set((state) => {
-      const window = state.windows.find((w) => w.key === key);
-      if (window && window.targetHistory && window.historyIndex !== undefined) {
+      const windowIndex = state.windows.findIndex((w) => w.key === key);
+      if (windowIndex === -1) return state;
+
+      const window = state.windows[windowIndex];
+      if (window?.targetHistory && window.historyIndex !== undefined) {
         if (window.historyIndex < window.targetHistory.length - 1) {
-          window.historyIndex += 1;
-          window.targetKey = window.targetHistory[window.historyIndex];
-          state.windows = [...state.windows];
+          const newHistoryIndex = window.historyIndex + 1;
+          const newWindow = {
+            ...window,
+            historyIndex: newHistoryIndex,
+            targetKey: window.targetHistory[newHistoryIndex],
+          };
+          const newWindows = [...state.windows];
+          newWindows[windowIndex] = newWindow;
+          return { windows: newWindows };
         }
       }
-      return { windows: state.windows };
+      return state;
     });
   },
   hasPrevWindow: (key) => {
@@ -189,7 +239,7 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   hasNextWindow: (key) => {
     const window = get().windows.find((w) => w.key === key);
-    if (window && window.targetHistory && window.historyIndex !== undefined) {
+    if (window?.targetHistory && window.historyIndex !== undefined) {
       return (
         window.historyIndex < window.targetHistory.length - 1 &&
         window.targetHistory.length > 1

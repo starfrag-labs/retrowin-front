@@ -1,6 +1,6 @@
 import { forwardRef, memo } from "react";
+import type { ApiFileType } from "@/interfaces/api";
 import styles from "./file_detail.module.css";
-import { ApiFileType } from "@/interfaces/api";
 
 /**
  * File detail component
@@ -28,7 +28,7 @@ export default memo(
       created: Date;
       modified: Date;
     },
-    ref: React.Ref<HTMLDivElement>,
+    ref: React.Ref<HTMLDivElement>
   ) {
     return (
       <div className={styles.detail_container} ref={ref}>
@@ -75,5 +75,5 @@ export default memo(
         </div>
       </div>
     );
-  }),
+  })
 );

@@ -1,11 +1,9 @@
-import { WindowType } from "@/interfaces/window";
-import FileIcon from "../../file/file_icon";
-import { FileIconType } from "@/interfaces/file";
-import { useWindowStore } from "@/store/window.store";
-import styles from "./navbar_icon.module.css";
 import { useCallback } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { fileQuery } from "@/api/query";
+import { FileIconType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
+import { useWindowStore } from "@/store/window.store";
+import FileIcon from "../../file/file_icon";
+import styles from "./navbar_icon.module.css";
 
 export default function NavbarIcon({
   windowType,
@@ -20,33 +18,34 @@ export default function NavbarIcon({
 
   // Store actions
   const highlightWindowsByType = useWindowStore(
-    (state) => state.highlightWindowsByType,
+    (state) => state.highlightWindowsByType
   );
+  const restoreWindow = useWindowStore((state) => state.restoreWindow);
+  const windows = useWindowStore((state) => state.windows);
   const newWindow = useWindowStore((state) => state.newWindow);
 
-  // Queries
-  const homeKeyQuery = useQuery(fileQuery.read.home);
-  const trashKeyQuery = useQuery(fileQuery.read.trash);
-
   const handleClick = useCallback(() => {
+    // Restore minimized windows of this type
+    windows
+      .filter((w) => w.type === windowType && w.minimized)
+      .forEach((w) => void restoreWindow(w.key));
+
     switch (windowType) {
       case WindowType.Uploader:
-        if (windowCount === 0 && homeKeyQuery.isSuccess && homeKeyQuery.data) {
+        if (windowCount === 0) {
+          // Open uploader with root path
           newWindow({
-            targetKey: homeKeyQuery.data.data.fileKey,
+            targetKey: "/",
             type: WindowType.Uploader,
             title: "Uploader",
           });
         }
         break;
       case WindowType.Trash:
-        if (
-          windowCount === 0 &&
-          trashKeyQuery.isSuccess &&
-          trashKeyQuery.data
-        ) {
+        if (windowCount === 0) {
+          // Open trash with trash path
           newWindow({
-            targetKey: trashKeyQuery.data.data.fileKey,
+            targetKey: "/.trash",
             type: WindowType.Trash,
             title: "Trash",
           });
@@ -57,18 +56,20 @@ export default function NavbarIcon({
     highlightWindowsByType(windowType);
   }, [
     highlightWindowsByType,
-    homeKeyQuery.data,
-    homeKeyQuery.isSuccess,
     newWindow,
-    trashKeyQuery.data,
-    trashKeyQuery.isSuccess,
+    restoreWindow,
+    windows,
     windowCount,
     windowType,
   ]);
 
   return (
     <div className={styles.container}>
-      <div className={styles.icon_container} onClick={handleClick}>
+      <button
+        type="button"
+        className={styles.icon_container}
+        onClick={handleClick}
+      >
         {windowCount > 0 && <div className={styles.icon_highlight} />}
         {windowType === WindowType.Navigator && (
           <FileIcon icon={FileIconType.Container} size={size} />
@@ -91,7 +92,7 @@ export default function NavbarIcon({
         {windowType === WindowType.Document && (
           <FileIcon icon={FileIconType.Block} size={size} />
         )}
-      </div>
+      </button>
     </div>
   );
 }

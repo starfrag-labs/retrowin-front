@@ -1,0 +1,136 @@
+[     280ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     330ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     397ms] [LOG] %cDocumentation: %chttps://mswjs.io/docs font-weight:bold font-weight:normal @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     397ms] [LOG] Found an issue? https://github.com/mswjs/msw/issues @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     397ms] [LOG] Worker script URL: http://localhost:3000/mockServiceWorker.js @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     397ms] [LOG] Worker scope: http://localhost:3000/ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     397ms] [LOG] Client ID: %s (%s) 5c333fb5-8161-4964-8f0a-b38ab964f4ef top-level @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     714ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     715ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     715ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"user":{"id":"user-123","provider":"keycloak","pr…09.074Z","updatedAt":"2026-04-03T02:53:09.074Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     715ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     715ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     715ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"user":{"id":"user-123","provider":"keycloak","pr…09.075Z","updatedAt":"2026-04-03T02:53:09.075Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     719ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     719ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     719ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"systems":[{"id":"sys-mock-123","name":"Default S…9.079Z","updatedAt":"2026-04-03T02:53:09.079Z"}]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     724ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     724ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     724ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-root-key","systemId":"sys-moc…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     760ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/fs/sys-mock-123/stat?path=%2Fhome%2F.trash:0
+[     761ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"entries":[{"name":"Documents","inodeId":"mock-do…ideo-mp4-1775184788751-dg1pn","fileType":32768}]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Response {status: 404, statusText: Not Found, headers: Object, body: {"error":{"type":"not_found","message":"File not found"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     761ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"entries":[{"name":"Documents","inodeId":"mock-do…ideo-mp4-1775184788751-dg1pn","fileType":32768}]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     762ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     762ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     762ms] [LOG] Response {status: 404, statusText: Not Found, headers: Object, body: {"error":{"type":"not_found","message":"File not found"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     797ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     798ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     799ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     799ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     799ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     823ms] [WARNING] Image with src "/icons/sprites/Up.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    7564ms] [LOG] [DragFileContainer] dragFileEnd called {isDragging: false, pointerMoved: false} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    7566ms] [LOG] [DragFileContainer] dragFileEnd called {isDragging: false, pointerMoved: false} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   65599ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[   65826ms] [LOG] [Fast Refresh] done in 328ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110221ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110563ms] [LOG] [Fast Refresh] done in 315ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110634ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110637ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110637ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110638ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  110639ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117300ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117330ms] [LOG] [Fast Refresh] done in 72ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117340ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117341ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117341ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117341ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117342ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117342ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117342ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117343ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117343ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  117343ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121495ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121526ms] [LOG] [Fast Refresh] done in 52ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121530ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121531ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  121532ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128752ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128778ms] [LOG] [Fast Refresh] done in 59ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-documents-1775184788751-2sy59…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-pictures-1775184788751-7j83ff…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128788ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-music-1775184788751-z4pjpo","…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-readme-md-1775184788751-ok0u1…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  128789ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-sample-video-mp4-177518478875…08.751Z","createdAt":"2026-04-03T02:53:08.751Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431

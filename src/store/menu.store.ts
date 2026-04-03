@@ -1,11 +1,11 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 type State = {
-  menuRef: React.RefObject<HTMLElement> | null;
+  menuRef: React.RefObject<HTMLElement | null> | null;
 };
 
 type Action = {
-  setMenuRef: (ref: React.RefObject<HTMLElement>) => void;
+  setMenuRef: (ref: React.RefObject<HTMLElement | null>) => void;
 };
 
 const initialState: State = {

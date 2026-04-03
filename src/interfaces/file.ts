@@ -15,11 +15,11 @@ export enum FileType {
 }
 
 export enum FileIconType {
-  Container = FileType.Container,
-  Block = FileType.Block,
-  Home = SpecialFileName.Home,
-  Trash = SpecialFileName.Trash,
-  Upload = FileType.Upload,
+  Container = "container",
+  Block = "block",
+  Home = "home",
+  Trash = "trash",
+  Upload = "upload",
   Image = "image",
   Video = "video",
   Audio = "audio",

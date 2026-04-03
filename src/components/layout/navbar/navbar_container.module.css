@@ -2,22 +2,26 @@
   display: flex;
   position: fixed;
   bottom: 0;
-  justify-content: center;
+  left: 0;
+  right: 0;
+  justify-content: flex-start;
   align-items: center;
   width: 100%;
-  height: 50px;
-  margin: 10px;
+  height: 36px;
+  margin: 0;
 }
 
 .navbar {
   display: flex;
   flex-direction: row;
-  background-color: #2e2e2ebb;
-  border: 1px solid #e2e2e233;
-  border-radius: 10px;
-  width: auto;
+  background: linear-gradient(180deg, #245edc 0%, #286ee4 10%, #2257ce 30%, #1941a5 100%);
+  border: 1px solid #0d2c6f;
+  border-top: 1px solid #5da3ff;
+  border-radius: 3px;
+  width: 100%;
   height: 100%;
-  padding: 0 10px;
+  padding: 0;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .icon_container {

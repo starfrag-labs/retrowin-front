@@ -1,23 +1,22 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import MenuList from "./menu_list";
-import { useWindowStore } from "@/store/window.store";
-import { fileQuery, storageQuery } from "@/api/query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { WindowType } from "@/interfaces/window";
+import { useUnlink } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
+import { useWindowStore } from "@/store/window.store";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
-import { url } from "@/api/fetch";
+import MenuList from "./menu_list";
 
 export default function FileMenu({
-  fileKey,
+  path,
   fileType,
   fileName,
   windowKey,
   parentWindowType,
   closeMenu,
 }: {
-  fileKey: string;
+  path: string;
   fileType: FileType;
   fileName: string;
   windowKey: string;
@@ -25,32 +24,28 @@ export default function FileMenu({
   closeMenu: () => void;
 }) {
   // Query client
-  // This is used for actions
-  // By using queryClient, the query will be performed only needed, instead of performing all queries for possible actions
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
-  // Queries
-  const readLinkTargetQuery = useQuery({
-    ...fileQuery.read.linkTarget(fileKey),
-    enabled: fileType === FileType.Link,
-  });
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.key === windowKey);
+  const systemId = currentWindow?.systemId || "";
 
   // Mutations
-  const moveToTrashMutation = useMutation(fileQuery.update.trash);
-  const permanentDeleteMutation = useMutation(fileQuery.delete.permanent);
+  const _unlinkMutation = useUnlink();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
-  const getSelectedFileKeys = useFileStore(
-    (state) => state.getSelectedFileKeys,
+  const _getSelectedFileKeys = useFileStore(
+    (state) => state.getSelectedFileKeys
   );
-  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
+  const _setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
   const openFile = useCallback(
     async (
       fileType: Omit<FileType, FileType.Link>,
       fileName: string,
-      fileKey: string,
+      path: string
     ) => {
       let windowType: WindowType;
       switch (fileType) {
@@ -60,7 +55,7 @@ export default function FileMenu({
         case FileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case FileType.Block:
+        case FileType.Block: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
@@ -77,6 +72,7 @@ export default function FileMenu({
               break;
           }
           break;
+        }
         case FileType.Upload:
           windowType = WindowType.Uploader;
           break;
@@ -85,127 +81,97 @@ export default function FileMenu({
           break;
       }
       newWindow({
-        targetKey: fileKey,
+        targetKey: path,
         type: windowType,
         title: fileName,
+        systemId,
       });
     },
-    [newWindow],
+    [newWindow, systemId]
   );
 
   // Open file action
   const handleOpen = useCallback(async () => {
     closeMenu();
-    if (
-      fileType === FileType.Link &&
-      readLinkTargetQuery.isSuccess &&
-      readLinkTargetQuery.data
-    ) {
-      openFile(
-        readLinkTargetQuery.data.data.type,
-        fileName,
-        readLinkTargetQuery.data.data.fileKey,
-      );
-    } else {
-      openFile(fileType, fileName, fileKey);
-    }
+    openFile(fileType, fileName, path);
   }, [
     closeMenu,
-    fileKey,
+    path,
     fileName,
     fileType,
     openFile,
-    readLinkTargetQuery.data,
-    readLinkTargetQuery.isSuccess,
   ]);
 
-  // Open file location action
-  const handleOpenLinkTargetLocation = useCallback(async () => {
-    closeMenu();
-    if (readLinkTargetQuery.isSuccess && readLinkTargetQuery.data) {
-      const parent = await queryClient.fetchQuery(
-        fileQuery.read.parent(readLinkTargetQuery.data.data.fileKey),
-      );
-      if (parent && parent.data) {
-        newWindow({
-          targetKey: parent.data.fileKey,
-          type: WindowType.Navigator,
-          title: parent.data.fileName,
-        });
-      }
-    }
-  }, [
-    closeMenu,
-    newWindow,
-    queryClient,
-    readLinkTargetQuery.data,
-    readLinkTargetQuery.isSuccess,
-  ]);
-
-  // Update file actions
+  // Update file actions (TODO: Not implemented in new API yet)
   const handleRename = useCallback(() => {
     closeMenu();
-    setRenamingFile({ fileKey, windowKey });
-  }, [closeMenu, fileKey, setRenamingFile, windowKey]);
+    // TODO: Implement rename functionality
+    // setRenamingFile({ path, windowKey });
+    console.warn("Rename not implemented in new API");
+  }, [closeMenu]);
 
   // Download file actions
   const handleDownload = useCallback(async () => {
     closeMenu();
-    await queryClient.fetchQuery(storageQuery.session.read(fileKey));
+    // TODO: Implement download with proper API call
+    console.warn("Download not fully implemented in new API");
+    // Need to call getDownloadUrl API function directly
+  }, [closeMenu]);
 
-    const downloadUrl = `${url.storage.file.readWithName(fileKey, fileName)}`;
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = fileName;
-    a.click();
-  }, [closeMenu, fileKey, fileName, queryClient]);
-
-  // Delete file actions
+  // Delete file actions (TODO: Implement with proper systemId)
   const handleMoveToTrash = useCallback(() => {
     closeMenu();
+    // TODO: Implement move to trash
+    console.warn("Move to trash not implemented in new API");
+    /*
     const selectedFileKeys = getSelectedFileKeys();
     Promise.all(
-      selectedFileKeys.map((fileKey) =>
-        moveToTrashMutation.mutateAsync({ fileKey }),
-      ),
+      selectedFileKeys.map((filePath) =>
+        unlinkMutation.mutateAsync({
+          systemId,
+          data: { path: filePath },
+        })
+      )
     ).finally(() => {
       queryClient.invalidateQueries({
-        queryKey: ["file"],
+        predicate: (query) => query.queryKey[0] === "readDir",
       });
     });
-  }, [closeMenu, getSelectedFileKeys, moveToTrashMutation, queryClient]);
+    */
+  }, [closeMenu]);
 
   const handlePermanentDelete = useCallback(() => {
     closeMenu();
-    const selectedFileKeys = getSelectedFileKeys();
-    Promise.all(
-      selectedFileKeys.map((fileKey) =>
-        permanentDeleteMutation.mutateAsync({ fileKey }),
-      ),
-    ).finally(() => {
-      queryClient.invalidateQueries({
-        queryKey: ["file"],
-      });
-    });
-  }, [closeMenu, getSelectedFileKeys, permanentDeleteMutation, queryClient]);
+    // TODO: Implement permanent delete
+    console.warn("Permanent delete not implemented in new API");
+  }, [closeMenu]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
-    const files = await queryClient.fetchQuery(
-      fileQuery.read.children(fileKey),
+    // TODO: Implement empty trash
+    console.warn("Empty trash not implemented in new API");
+    /*
+    const files = await useReadDir()(
+      systemId,
+      { path },
+      { fetch: { credentials: "include" } }
     );
-    if (files) {
+    if (files.data && "entries" in files.data) {
       Promise.all(
-        files.data.map((file) =>
-          permanentDeleteMutation.mutateAsync({ fileKey: file.fileKey }),
-        ),
+        files.data.entries.map((entry) =>
+          unlinkMutation.mutateAsync({
+            systemId,
+            data: { path: `${path}/${entry.name}` },
+          })
+        )
       ).then(() => {
         queryClient.invalidateQueries({
-          queryKey: ["file", fileKey],
+          predicate: (query) => query.queryKey[0] === "readDir",
         });
       });
     }
-  }, [closeMenu, fileKey, permanentDeleteMutation, queryClient]);
+    */
+  }, [closeMenu]);
 
   // Delete file actions based on parent window type
   const deleteMenu =
@@ -244,10 +210,6 @@ export default function FileMenu({
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
-            {
-              name: "Open Link Target Location",
-              action: handleOpenLinkTargetLocation,
-            },
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,

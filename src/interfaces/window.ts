@@ -14,6 +14,8 @@ export interface AppWindow {
   title: string;
   targetKey: string;
   type: WindowType;
+  systemId?: string;
   targetHistory?: string[];
   historyIndex?: number;
+  minimized?: boolean;
 }

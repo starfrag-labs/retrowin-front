@@ -1,13 +1,13 @@
 "use client";
 
+import { useCallback, useEffect, useRef, useState } from "react";
+import { WindowType } from "@/interfaces/window";
+import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
 import { useMenuStore } from "@/store/menu.store";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
-import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "./select_box_container.module.css";
-import { useEventStore } from "@/store/event.store";
-import { WindowType } from "@/interfaces/window";
 
 export default function SelectBoxContainer({
   children,
@@ -25,7 +25,7 @@ export default function SelectBoxContainer({
   const setRect = useSelectBoxStore((state) => state.setRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
   const setCurrentWindowKey = useSelectBoxStore(
-    (state) => state.setCurrentWindowKey,
+    (state) => state.setCurrentWindowKey
   );
   const findWindow = useWindowStore((state) => state.findWindow);
 
@@ -42,7 +42,7 @@ export default function SelectBoxContainer({
     (e: MouseEvent) => {
       // Check if the click is inside the menu
       const currentMenuRef = menuRef?.current;
-      if (currentMenuRef && currentMenuRef.contains(e.target as Node)) return;
+      if (currentMenuRef?.contains(e.target as Node)) return;
       // Check if the click is inside the highlighted file
       if (highlightedFile) return;
       if (resizingCursor) return;
@@ -65,7 +65,7 @@ export default function SelectBoxContainer({
           setStart({ x: e.clientX, y: e.clientY });
           document.body.style.cursor = "default";
           setTargetWindowRect(
-            currentWindow.windowRef.current.getBoundingClientRect(),
+            currentWindow.windowRef.current.getBoundingClientRect()
           );
           setCurrentWindowKey(currentWindow.key);
           // If the window is a content window
@@ -74,7 +74,7 @@ export default function SelectBoxContainer({
           setStart({ x: e.clientX, y: e.clientY });
           document.body.style.cursor = "default";
           setTargetWindowRect(
-            currentWindow.contentRef.current.getBoundingClientRect(),
+            currentWindow.contentRef.current.getBoundingClientRect()
           );
           setCurrentWindowKey(currentWindow.key);
         }
@@ -90,7 +90,7 @@ export default function SelectBoxContainer({
       unselectAllFiles,
       findWindow,
       mouseEnter,
-    ],
+    ]
   );
 
   const selecting = useCallback(
@@ -105,16 +105,16 @@ export default function SelectBoxContainer({
 
       const left = Math.max(
         Math.min(start.x, e.clientX),
-        targetWindowRect.left,
+        targetWindowRect.left
       );
       const top = Math.max(Math.min(start.y, e.clientY), targetWindowRect.top);
       const right = Math.min(
         Math.max(start.x, e.clientX),
-        targetWindowRect.right,
+        targetWindowRect.right
       );
       const bottom = Math.min(
         Math.max(start.y, e.clientY),
-        targetWindowRect.bottom,
+        targetWindowRect.bottom
       );
       const width = right - left;
       const height = bottom - top;
@@ -133,7 +133,7 @@ export default function SelectBoxContainer({
         bottom,
       });
     },
-    [isSelecting, setRect, start.x, start.y, targetWindowRect],
+    [isSelecting, setRect, start.x, start.y, targetWindowRect]
   );
 
   // Selecting end event listener

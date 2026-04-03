@@ -1,12 +1,11 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import styles from "./window.module.css";
+import { useStatPath } from "@/api/generated";
+import { WindowType } from "@/interfaces/window";
+import { useEventStore } from "@/store/event.store";
+import { useWindowStore } from "@/store/window.store";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
-import { AppWindow, WindowType } from "@/interfaces/window";
-import { useWindowStore } from "@/store/window.store";
-import { useEventStore } from "@/store/event.store";
-import { fileQuery } from "@/api/query";
-import { useQuery } from "@tanstack/react-query";
+import styles from "./window.module.css";
 
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
@@ -16,27 +15,29 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
 
   // States
   const [maximized, setMaximized] = useState(false);
-  const [targetWindow, setTargetWindow] = useState<AppWindow | null>(null);
   const [windowSize, setWindowSize] = useState({ width: 0, height: 0 });
   const [prevWindowSize, setPrevWindowSize] = useState({ width: 0, height: 0 });
   const [windowPosition, setWindowPosition] = useState({ x: 0, y: 0 });
   const [prevWindowPosition, setPrevWindowPosition] = useState({ x: 0, y: 0 });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [defaultWindowButtonColorPallete, setDefaultWindowButtonColorPallete] =
+  const [defaultWindowButtonColorPallete, _setDefaultWindowButtonColorPallete] =
     useState([]);
   const [
     maximizedWindowButtonColorPallete,
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    setMaximizedWindowButtonColorPallete,
+    _setMaximizedWindowButtonColorPallete,
   ] = useState([]);
   const [contentLoading, setContentLoading] = useState(false);
 
-  // Store state
-  const windows = useWindowStore((state) => state.windows);
+  // Store state - select the specific window to react to changes
+  const targetWindow = useWindowStore((state) =>
+    state.windows.find((w) => w.key === windowKey)
+  );
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
-  const findWindow = useWindowStore((state) => state.findWindow);
   const closeWindow = useWindowStore((state) => state.closeWindow);
+  const minimizeWindow = useWindowStore((state) => state.minimizeWindow);
+  const _restoreWindow = useWindowStore((state) => state.restoreWindow);
   const setResizingCursor = useEventStore((state) => state.setResizingCursor);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
@@ -51,21 +52,34 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const windowRef = useRef<HTMLDivElement>(null);
   const windowHeaderRef = useRef<HTMLDivElement>(null);
   const windowContentRef = useRef<HTMLDivElement>(null);
+  const positionInitializedRef = useRef(false);
 
-  // Queries
-  const fileInfo = useQuery(fileQuery.read.info(targetWindow?.targetKey || ""));
+  // Queries - use Orval's generated hook directly
+  const _fileInfo = useStatPath(
+    targetWindow?.systemId || "",
+    { path: targetWindow?.targetKey || "" },
+    {
+      query: {
+        enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background && !!targetWindow?.systemId,
+        select: (data) => (data.status === 200 ? data.data.inode : null),
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   // Set window title
   useEffect(() => {
     if (targetWindow?.type === WindowType.Uploader) {
       setTitle(windowKey, "Uploader");
-    } else if (fileInfo.isSuccess) {
-      setTitle(windowKey, fileInfo.data.data.fileName);
+    } else if (targetWindow?.targetKey) {
+      // Extract filename from path
+      const path = targetWindow.targetKey;
+      const fileName = path.split("/").filter(Boolean).pop() || path;
+      setTitle(windowKey, fileName);
     }
   }, [
-    fileInfo.data,
-    fileInfo.isSuccess,
     setTitle,
+    targetWindow?.targetKey,
     targetWindow?.type,
     windowKey,
   ]);
@@ -85,17 +99,9 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     setCurrentWindow(null);
   }, [setCurrentWindow]);
 
-  // Update window state
+  // Initialize window position and size (only once when window is created)
   useEffect(() => {
-    const window = findWindow(windowKey);
-    if (window) {
-      setTargetWindow(window);
-    }
-  }, [findWindow, windowKey, windows]);
-
-  // Initialize window position and size
-  useEffect(() => {
-    if (windowRef.current && targetWindow) {
+    if (windowRef.current && targetWindow && !positionInitializedRef.current) {
       if (targetWindow.type === WindowType.Uploader) {
         const x = document.body.clientWidth / 2 - windowSize1.width / 2;
         const y = document.body.clientHeight / 2 - windowSize1.height / 2;
@@ -107,6 +113,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         setWindowPosition({ x, y });
         setWindowSize(windowSize2);
       }
+      positionInitializedRef.current = true;
     }
   }, [targetWindow, windowSize1, windowSize2]);
 
@@ -201,7 +208,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         window.addEventListener("mouseup", handleMouseUp);
       }
     },
-    [resizingCursor, windowSize.height, windowSize.width],
+    [resizingCursor, windowSize.height, windowSize.width]
   );
 
   // change cursor on resize
@@ -217,7 +224,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         windowRef.current.style.cursor = "default";
       }
     },
-    [setResizingCursor],
+    [setResizingCursor]
   );
   useEffect(() => {
     const currentWindow = windowRef.current;
@@ -251,7 +258,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         document.addEventListener("mouseup", handleMouseUp);
       }
     },
-    [minWindowSize.width, minWindowSize.height, resizingCursor],
+    [minWindowSize.width, minWindowSize.height, resizingCursor]
   );
   useEffect(() => {
     const currentWindow = windowRef.current;
@@ -262,13 +269,18 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     };
   }, [resizeWindow]);
 
+  // Don't render minimized windows
+  if (targetWindow?.minimized) {
+    return null;
+  }
+
   return (
-    <div
+    <article
       className={`flex-center ${styles.container}`}
       ref={windowRef}
       onMouseDown={() => highlightWindow(windowKey)}
-      onMouseEnter={() => setMouseEnter(true)} // Set mouse enter when the mouse enters the window
-      onMouseLeave={() => setMouseEnter(false)} // Set mouse enter when the mouse leaves the window
+      onMouseEnter={() => setMouseEnter(true)}
+      onMouseLeave={() => setMouseEnter(false)}
     >
       <WindowHeader
         ref={windowHeaderRef}
@@ -280,6 +292,10 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         hasPrevWindow={hasPrevWindow(windowKey)}
         hasNextWindow={hasNextWindow(windowKey)}
         buttonActions={[
+          {
+            action: () => minimizeWindow(windowKey),
+            icon: "minimize",
+          },
           {
             action: maximized ? revertWindowSize : maximizeWindow,
             icon: maximized ? "exit_fullscreen" : "fullscreen",
@@ -304,7 +320,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
-          fileName={fileInfo.data?.data.fileName || ""}
+          fileName={targetWindow.targetKey.split("/").filter(Boolean).pop() || ""}
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}
@@ -312,6 +328,6 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
           onMouseEnter={enterWindow}
         />
       )}
-    </div>
+    </article>
   );
 });

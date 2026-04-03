@@ -1,0 +1,41 @@
+[     347ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     482ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     638ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     700ms] [LOG] %cDocumentation: %chttps://mswjs.io/docs font-weight:bold font-weight:normal @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     700ms] [LOG] Found an issue? https://github.com/mswjs/msw/issues @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     700ms] [LOG] Worker script URL: http://localhost:3000/mockServiceWorker.js @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     700ms] [LOG] Worker scope: http://localhost:3000/ @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[     700ms] [LOG] Client ID: %s (%s) 2c508eb4-707a-492d-ab27-8257b6e9943e top-level @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1040ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1041ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1042ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"user":{"id":"user-123","provider":"keycloak","pr…47.635Z","updatedAt":"2026-04-03T01:43:47.635Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1042ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1042ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1042ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"user":{"id":"user-123","provider":"keycloak","pr…47.641Z","updatedAt":"2026-04-03T01:43:47.641Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1050ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1050ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1050ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"systems":[{"id":"sys-mock-123","name":"Default S…7.650Z","updatedAt":"2026-04-03T01:43:47.651Z"}]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1058ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1058ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1058ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-root-1775180627202-b062h","sy…47.202Z","createdAt":"2026-04-03T01:43:47.202Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1091ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1091ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1091ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"entries":[]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-trash-1775180627204-r66vft","…47.204Z","createdAt":"2026-04-03T01:43:47.204Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"entries":[]}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Request {url: URL, method: GET, headers: Object, body: } @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Handler: HttpHandler @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1092ms] [LOG] Response {status: 200, statusText: OK, headers: Object, body: {"inode":{"id":"mock-trash-1775180627204-r66vft","…47.204Z","createdAt":"2026-04-03T01:43:47.204Z"}}} @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    1140ms] [LOG] [Fast Refresh] done in 604ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[    3170ms] [WARNING] Image with src "/icons/sprites/Up.webp" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  361914ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  362071ms] [LOG] [Fast Refresh] done in 261ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  753450ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  753616ms] [LOG] [Fast Refresh] done in 270ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  753783ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431
+[  753895ms] [LOG] [Fast Refresh] done in 214ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_115brz8._.js:2431

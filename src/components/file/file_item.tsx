@@ -1,19 +1,18 @@
 "use client";
 
-import FileIcon from "./file_icon";
-import FileName from "./file_name";
-import styles from "./file_item.module.css";
-import { useFileStore } from "@/store/file.store";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useStatPath } from "@/api/generated";
+import { FileIconType, FileType } from "@/interfaces/file";
+import { WindowType } from "@/interfaces/window";
+import { useFileStore } from "@/store/file.store";
 import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
-import { WindowType } from "@/interfaces/window";
-import { createSerialKey } from "@/utils/serial_key";
-import { FileType, FileIconType } from "@/interfaces/file";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
-import { useQuery } from "@tanstack/react-query";
-import { fileQuery } from "@/api/query";
+import { createSerialKey } from "@/utils/serial_key";
 import FileDetail from "./file_detail";
+import FileIcon from "./file_icon";
+import styles from "./file_item.module.css";
+import FileName from "./file_name";
 
 /**
  * File item component
@@ -31,12 +30,14 @@ export default memo(function FileItem({
   type,
   fileKey,
   windowKey,
+  systemId,
   backgroundFile = false,
 }: {
   name: string;
   type: FileType;
   fileKey: string;
   windowKey: string;
+  systemId?: string;
   backgroundFile?: boolean;
 }) {
   // constants
@@ -50,7 +51,7 @@ export default memo(function FileItem({
 
   // Store state
   const selectedFileSerials = useFileStore(
-    (state) => state.selectedFileSerials,
+    (state) => state.selectedFileSerials
   );
   const selectBox = useSelectBoxStore((state) => state.rect);
   const targetWindow = useSelectBoxStore((state) => state.currentWindowKey);
@@ -61,21 +62,28 @@ export default memo(function FileItem({
   const unselectFile = useFileStore((state) => state.unselectFile);
   const newWindow = useWindowStore((state) => state.newWindow);
   const getBackgroundWindow = useWindowStore(
-    (state) => state.getBackgroundWindow,
+    (state) => state.getBackgroundWindow
   );
   const updateWindow = useWindowStore((state) => state.updateWindow);
 
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLButtonElement>(null);
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
-  // Queries
-  const linkTargetQuery = useQuery(
-    fileQuery.read.linkTarget(type === FileType.Link ? fileKey : ""),
+  // Queries - use statPath to get file info
+  const fileInfoQuery = useStatPath(
+    systemId || "",
+    { path: fileKey },
+    {
+      query: {
+        select: (data) => (data.status === 200 ? data.data.inode : null),
+        enabled: !!systemId && (type === FileType.Block || type === FileType.Container),
+      },
+      fetch: { credentials: "include" },
+    }
   );
-  const fileInfoQuery = useQuery(fileQuery.read.info(fileKey));
 
   // Get background window key
   const backgroundWindowKey = useMemo(() => {
@@ -175,6 +183,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Navigator,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -188,10 +197,11 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const clickBlock = useCallback(
@@ -203,6 +213,7 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Image,
             title: name,
+            systemId,
           });
           break;
         case ContentTypes.Video:
@@ -210,6 +221,7 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Video,
             title: name,
+            systemId,
           });
           break;
         case ContentTypes.Audio:
@@ -217,11 +229,12 @@ export default memo(function FileItem({
             targetKey: fileKey,
             type: WindowType.Audio,
             title: name,
+            systemId,
           });
           break;
       }
     },
-    [newWindow],
+    [newWindow, systemId]
   );
 
   const clickUpload = useCallback(
@@ -231,6 +244,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Uploader,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -245,10 +259,11 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const clickTrash = useCallback(
@@ -258,6 +273,7 @@ export default memo(function FileItem({
           targetKey: fileKey,
           type: WindowType.Trash,
           title: name,
+          systemId,
         });
       } else {
         setHighlightedFile(null);
@@ -272,10 +288,11 @@ export default memo(function FileItem({
     [
       backgroundWindowKey,
       newWindow,
+      systemId,
       updateWindow,
       setHighlightedFile,
       windowKey,
-    ],
+    ]
   );
 
   const iconClick = useCallback(() => {
@@ -298,21 +315,8 @@ export default memo(function FileItem({
           name,
         });
         break;
-      case FileType.Link:
-        if (linkTargetQuery.data) {
-          const linkTarget = linkTargetQuery.data.data;
-          if (linkTarget && linkTarget.type === FileType.Container) {
-            clickContaienr({
-              fileKey: linkTarget.fileKey,
-              name: linkTarget.fileName,
-            });
-          } else if (linkTarget && linkTarget.type === FileType.Block) {
-            clickBlock({
-              fileKey: linkTarget.fileKey,
-              name: linkTarget.fileName,
-            });
-          }
-        }
+      case FileType.Link: // Link files are not supported in new API
+        // Do nothing for link files
         break;
       case FileType.Home:
         clickContaienr({
@@ -333,7 +337,6 @@ export default memo(function FileItem({
     clickTrash,
     clickUpload,
     fileKey,
-    linkTargetQuery.data,
     name,
     type,
   ]);
@@ -370,7 +373,7 @@ export default memo(function FileItem({
 
   return (
     <div className={`full-size ${styles.container}`}>
-      <div
+      <li
         className={`${styles.item_wrapper}`}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
@@ -390,7 +393,7 @@ export default memo(function FileItem({
             backgroundFile={backgroundFile}
           />
         </div>
-      </div>
+      </li>
       {showDetail &&
         (type === FileType.Block || type === FileType.Container) &&
         fileInfoQuery.isFetched &&
@@ -399,9 +402,9 @@ export default memo(function FileItem({
             ref={detailRef}
             fileName={name}
             fileType={type}
-            bytes={fileInfoQuery.data.data.byteSize}
-            created={fileInfoQuery.data.data.createDate}
-            modified={fileInfoQuery.data.data.updateDate}
+            bytes={fileInfoQuery.data.size || 0}
+            created={new Date(fileInfoQuery.data.createdAt || "")}
+            modified={new Date(fileInfoQuery.data.mtime || "")}
           />
         )}
     </div>

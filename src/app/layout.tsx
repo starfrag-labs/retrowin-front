@@ -14,8 +14,8 @@ const geistMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "IFCLOUD",
-  description: "Save your files in the cloud",
+  title: "RetroWin",
+  description: "Retro-style file manager",
 };
 
 export default function RootLayout({
