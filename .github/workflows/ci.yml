@@ -64,12 +64,3 @@ jobs:
 
       - name: Build
         run: npm run build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v7
-        if: success()
-        with:
-          name: build-output
-          path: .next
-          retention-days: 7
-          if-no-files-found: warn
