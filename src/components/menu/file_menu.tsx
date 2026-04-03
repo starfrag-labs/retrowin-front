@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useUnlink } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
@@ -24,7 +24,7 @@ export default function FileMenu({
   closeMenu: () => void;
 }) {
   // Query client
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Get system ID from window store
   const windows = useWindowStore((state) => state.windows);
@@ -32,14 +32,14 @@ export default function FileMenu({
   const systemId = currentWindow?.systemId || "";
 
   // Mutations
-  const unlinkMutation = useUnlink();
+  const _unlinkMutation = useUnlink();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
-  const getSelectedFileKeys = useFileStore(
+  const _getSelectedFileKeys = useFileStore(
     (state) => state.getSelectedFileKeys
   );
-  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
+  const _setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
   const openFile = useCallback(
     async (
@@ -138,7 +138,7 @@ export default function FileMenu({
       });
     });
     */
-  }, [closeMenu, systemId]);
+  }, [closeMenu]);
 
   const handlePermanentDelete = useCallback(() => {
     closeMenu();
@@ -171,7 +171,7 @@ export default function FileMenu({
       });
     }
     */
-  }, [closeMenu, path, systemId]);
+  }, [closeMenu]);
 
   // Delete file actions based on parent window type
   const deleteMenu =

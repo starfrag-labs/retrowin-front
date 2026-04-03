@@ -13,7 +13,7 @@ export default function Audio({ fileKey: path }: { fileKey: string }) {
     { path },
     {
       query: {
-        select: (data: any) => (data.status === 200 ? data.data.downloadUrl : null),
+        select: (data) => (data.status === 200 ? data.data.downloadUrl : null),
       },
       fetch: { credentials: "include" },
     }

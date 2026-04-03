@@ -23,7 +23,7 @@ export default function Home() {
   // States
   const [homeKey, setHomeKey] = useState<string | null>(null);
   const [currentSystemId, setCurrentSystemId] = useState<string | null>(null);
-  const [currentPath, setCurrentPath] = useState<string>("/home");
+  const [currentPath, _setCurrentPath] = useState<string>("/home");
 
   // Store states
   const windows = useWindowStore((state) => state.windows);
@@ -35,7 +35,7 @@ export default function Home() {
   const backgroundWindowRef = useRef<HTMLDivElement>(null);
 
   // Queries - use Orval's generated hooks directly
-  const queryClient = useQueryClient();
+  const _queryClient = useQueryClient();
 
   // Get current user
   const getUserQuery = useGetUser({
@@ -97,7 +97,7 @@ export default function Home() {
   useEffect(() => {
     if (getUserQuery.isError) {
       const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      const errorStatus = (getUserQuery.error as any)?.status;
+      const errorStatus = (getUserQuery.error as { status?: number })?.status;
       if (errorStatus === 401 && redirectUri) {
         redirect(redirectUri, RedirectType.push);
       } else {

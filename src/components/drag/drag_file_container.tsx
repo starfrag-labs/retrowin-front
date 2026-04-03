@@ -222,14 +222,14 @@ export default function DragFileContainer({
       unselectAllFiles();
     }
   }, [
-    currentWindow,
-    findWindow,
-    highlightedFile,
-    pointerMoved,
-    queryClient,
-    selectedFileSerials,
-    unselectAllFiles,
-    mvMutation,
+    currentWindow, 
+    findWindow, 
+    highlightedFile, 
+    pointerMoved, 
+    queryClient, 
+    selectedFileSerials, 
+    unselectAllFiles, 
+    mvMutation, isDragging
   ]);
 
   // Event listeners

@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useMkdir } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
@@ -46,8 +46,8 @@ export default function BackgroundMenu({
     closeMenu();
 
     // Find a unique folder name
-    let folderName = "New Folder";
-    let counter = 1;
+    const folderName = "New Folder";
+    const _counter = 1;
     // Note: In production, you'd want to check existing folders first
 
     const folderPath = `${path === "/" ? "" : path}/${folderName}`;

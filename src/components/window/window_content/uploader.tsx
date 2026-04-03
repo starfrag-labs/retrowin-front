@@ -57,7 +57,7 @@ export default function Uploader({
     );
   }, []);
 
-  const uploadFile = async (file: File) => {
+  const uploadFile = useCallback(async (file: File) => {
     let objectId: string | null = null;
 
     try {
@@ -134,9 +134,9 @@ export default function Uploader({
         removeUpload(objectId);
       }
     }
-  };
+  }, [systemId, targetPath, initiateUploadMutation, completeUploadMutation, addUpload, updateUpload, removeUpload, queryClient]);
 
-  const uploadFiles = async (files: FileList) => {
+  const uploadFiles = useCallback(async (files: FileList) => {
     // Sort files by size (small to large)
     const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
 
@@ -144,7 +144,7 @@ export default function Uploader({
     for (const file of sortedFiles) {
       await uploadFile(file);
     }
-  };
+  }, [uploadFile]);
 
   const handleUpload = useCallback((e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();

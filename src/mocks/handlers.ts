@@ -6,8 +6,6 @@ import {
   getChildren,
   getFile,
   getFileByPath,
-  getPathFromFileKey,
-  HOME_KEY,
   ROOT_KEY,
   updateFileName,
   updateFileParent,
@@ -540,7 +538,7 @@ export const handlers = [
     }
 
     const url = new URL(request.url);
-    const path = url.searchParams.get("path") || "/";
+    const _path = url.searchParams.get("path") || "/";
 
     return HttpResponse.json({
       downloadUrl: {

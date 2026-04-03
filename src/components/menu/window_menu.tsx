@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { useMkdir, useUnlink } from "@/api/generated";
 import { ls } from "@/api/generated";
@@ -73,7 +73,7 @@ export default function WindowMenu({
 
     if (readDirResult.data && "entries" in readDirResult.data) {
       Promise.all(
-        readDirResult.data.entries.map((entry: any) =>
+        readDirResult.data.entries.map((entry) =>
           unlinkMutation.mutateAsync({
             systemId,
             params: { path: `${path === "/" ? "" : path}/${entry.name}` },

@@ -37,7 +37,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Store actions
   const closeWindow = useWindowStore((state) => state.closeWindow);
   const minimizeWindow = useWindowStore((state) => state.minimizeWindow);
-  const restoreWindow = useWindowStore((state) => state.restoreWindow);
+  const _restoreWindow = useWindowStore((state) => state.restoreWindow);
   const setResizingCursor = useEventStore((state) => state.setResizingCursor);
   const highlightWindow = useWindowStore((state) => state.highlightWindow);
   const prevWindow = useWindowStore((state) => state.prevWindow);
@@ -55,13 +55,13 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   const positionInitializedRef = useRef(false);
 
   // Queries - use Orval's generated hook directly
-  const fileInfo = useStatPath(
+  const _fileInfo = useStatPath(
     targetWindow?.systemId || "",
     { path: targetWindow?.targetKey || "" },
     {
       query: {
         enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background && !!targetWindow?.systemId,
-        select: (data: any) => (data.status === 200 ? data.data.inode : null),
+        select: (data) => (data.status === 200 ? data.data.inode : null),
       },
       fetch: { credentials: "include" },
     }
@@ -320,7 +320,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
-          fileName={fileInfo.data?.fileName || ""}
+          fileName={targetWindow.targetKey.split("/").filter(Boolean).pop() || ""}
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}

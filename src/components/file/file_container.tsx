@@ -23,14 +23,14 @@ const getFileType = (fileType: number): FileType => {
 /**
  * Check if path is trash directory
  */
-const isTrashPath = (path: string): boolean => {
+const _isTrashPath = (path: string): boolean => {
   return path === "/.trash" || path.endsWith("/.trash");
 };
 
 /**
  * Check if path is upload directory
  */
-const isUploadPath = (path: string): boolean => {
+const _isUploadPath = (path: string): boolean => {
   return path === "/.upload" || path.endsWith("/.upload");
 };
 
@@ -70,7 +70,7 @@ export default function FileContainer({
     { path },
     {
       query: {
-        select: (data: any) => (data.status === 200 ? data.data.entries : []),
+        select: (data) => (data.status === 200 ? data.data.entries : []),
         enabled: !!systemId && !!path,
       },
       fetch: { credentials: "include" },
@@ -84,7 +84,7 @@ export default function FileContainer({
     { path: trashPath },
     {
       query: {
-        select: (data: any) => (data.status === 200 ? data.data.inode : null),
+        select: (data) => (data.status === 200 ? data.data.inode : null),
         enabled: trash && !!systemId,
       },
       fetch: { credentials: "include" },
@@ -135,7 +135,7 @@ export default function FileContainer({
   if (readDirQuery.isError && readDirQuery.error) {
     return (
       <div className="flex-center full-size">
-        {(readDirQuery.error as any)?.message || "Error loading files"}
+        {"message" in readDirQuery.error ? readDirQuery.error.message : "Error loading files"}
       </div>
     );
   }

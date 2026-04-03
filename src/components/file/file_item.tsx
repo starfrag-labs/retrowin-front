@@ -1,6 +1,5 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStatPath } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
@@ -69,7 +68,7 @@ export default memo(function FileItem({
 
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
-  const iconRef = useRef<HTMLDivElement>(null);
+  const iconRef = useRef<HTMLButtonElement>(null);
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
@@ -79,7 +78,7 @@ export default memo(function FileItem({
     { path: fileKey },
     {
       query: {
-        select: (data: any) => (data.status === 200 ? data.data.inode : null),
+        select: (data) => (data.status === 200 ? data.data.inode : null),
         enabled: !!systemId && (type === FileType.Block || type === FileType.Container),
       },
       fetch: { credentials: "include" },

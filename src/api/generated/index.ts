@@ -306,7 +306,7 @@ export const useHandleCallback = <TError = Error,
  * @summary Logout
  */
 export type logoutResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -655,7 +655,7 @@ export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError =
  * @summary Delete user
  */
 export type deleteUserResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -1538,7 +1538,7 @@ export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser
  * @summary Remove user from system
  */
 export type deleteSystemUserResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -2042,7 +2042,7 @@ export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGro
  * @summary Delete a group
  */
 export type deleteSystemGroupResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -2150,7 +2150,7 @@ export const useDeleteSystemGroup = <TError = Error,
  * @summary Add user to group
  */
 export type addGroupMemberResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -2260,7 +2260,7 @@ export const useAddGroupMember = <TError = Error,
  * @summary Remove user from group
  */
 export type removeGroupMemberResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 
@@ -3415,7 +3415,7 @@ export const useMv = <TError = Error,
  * @summary Delete file or directory
  */
 export type unlinkResponse204 = {
-  data: void
+  data: undefined
   status: 204
 }
 

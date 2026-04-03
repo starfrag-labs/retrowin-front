@@ -1,4 +1,4 @@
-import { type CSSProperties, forwardRef, memo } from "react";
+import { forwardRef, memo } from "react";
 import { FileIconType } from "@/interfaces/file";
 import { XPImageIcons } from "@/components/icons/xp_image_icons";
 import styles from "./file_icon.module.css";
@@ -19,27 +19,23 @@ export default memo(
       icon,
       onClick,
       hasContent = false,
-      style,
       size = "4rem",
     }: {
       icon: FileIconType;
       onClick?: () => void;
       hasContent?: boolean;
-      style?: CSSProperties;
       size?: string;
     },
-    ref?: React.Ref<HTMLDivElement>
+    ref?: React.Ref<HTMLButtonElement>
   ) {
     return (
-      <div
+      <button
         className={styles.icon_container}
         ref={ref}
-        onDoubleClick={onClick}
-        onKeyDown={(e) => e.key === "Enter" && onClick?.()}
+        onClick={onClick}
         onDragStart={(e) => e.preventDefault()}
         draggable={false}
-        role="button"
-        tabIndex={0}
+        type="button"
         style={{
           width: size,
           height: size,
@@ -58,7 +54,7 @@ export default memo(
           {icon === FileIconType.Image && <XPImageIcons.File />}
           {icon === FileIconType.Video && <XPImageIcons.File />}
         </div>
-      </div>
+      </button>
     );
   })
 );

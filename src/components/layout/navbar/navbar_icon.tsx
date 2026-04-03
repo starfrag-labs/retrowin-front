@@ -28,7 +28,7 @@ export default function NavbarIcon({
     // Restore minimized windows of this type
     windows
       .filter((w) => w.type === windowType && w.minimized)
-      .forEach((w) => restoreWindow(w.key));
+      .forEach((w) => void restoreWindow(w.key));
 
     switch (windowType) {
       case WindowType.Uploader:

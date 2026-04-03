@@ -96,13 +96,19 @@ const initMockFiles = () => {
 initMockFiles();
 
 // Re-initialize on hot reload in development
-if (typeof window !== "undefined" && (window as any).$mswRegistry) {
-  const originalInit = initMockFiles;
-  (window as any).$reinitMockFiles = () => {
-    mockFiles.clear();
-    pathToKeyMap.clear();
-    originalInit();
+if (typeof window !== "undefined") {
+  const win = window as typeof window & {
+    $mswRegistry?: unknown;
+    $reinitMockFiles?: () => void;
   };
+  if (win.$mswRegistry) {
+    const originalInit = initMockFiles;
+    win.$reinitMockFiles = () => {
+      mockFiles.clear();
+      pathToKeyMap.clear();
+      originalInit();
+    };
+  }
 }
 
 // Helper functions
@@ -151,7 +157,7 @@ export const deleteFile = (fileKey: string) => {
   if (file) {
     // Also delete all children
     const children = getChildren(fileKey);
-    children.forEach((child) => deleteFile(child.fileKey));
+    children.forEach((child) => void deleteFile(child.fileKey));
 
     pathToKeyMap.delete(file.path);
     mockFiles.delete(fileKey);

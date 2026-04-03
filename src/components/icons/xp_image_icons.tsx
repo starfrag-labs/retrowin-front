@@ -75,7 +75,7 @@ export const XPImageIcons = {
 
   Upload: () => (
     <Image
-      src={iconMap["Up"]}
+      src={iconMap.Up}
       alt="Upload"
       width={iconSize}
       height={iconSize}

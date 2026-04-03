@@ -1,0 +1,2 @@
+src/api/generated/**
+public/mockServiceWorker.js
