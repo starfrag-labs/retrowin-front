@@ -97,7 +97,7 @@ export const getInitiateLoginUrl = () => {
 
 
 
-  return `/auth/login`
+  return `/api/auth/login`
 }
 
 export const initiateLogin = async ( options?: RequestInit): Promise<initiateLoginResponse> => {
@@ -123,7 +123,7 @@ export const initiateLogin = async ( options?: RequestInit): Promise<initiateLog
 
 export const getInitiateLoginQueryKey = () => {
     return [
-    `/auth/login`
+    `/api/auth/login`
     ] as const;
     }
 
@@ -232,7 +232,7 @@ export const getHandleCallbackUrl = () => {
 
 
 
-  return `/auth/callback`
+  return `/api/auth/callback`
 }
 
 export const handleCallback = async (callbackRequest: CallbackRequest, options?: RequestInit): Promise<handleCallbackResponse> => {
@@ -306,7 +306,7 @@ export const useHandleCallback = <TError = Error,
  * @summary Logout
  */
 export type logoutResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -322,7 +322,7 @@ export const getLogoutUrl = () => {
 
 
 
-  return `/auth/logout`
+  return `/api/auth/logout`
 }
 
 export const logout = async ( options?: RequestInit): Promise<logoutResponse> => {
@@ -418,7 +418,7 @@ export const getGetHealthUrl = () => {
 
 
 
-  return `/health`
+  return `/api/health`
 }
 
 export const getHealth = async ( options?: RequestInit): Promise<getHealthResponse> => {
@@ -444,7 +444,7 @@ export const getHealth = async ( options?: RequestInit): Promise<getHealthRespon
 
 export const getGetHealthQueryKey = () => {
     return [
-    `/health`
+    `/api/health`
     ] as const;
     }
 
@@ -553,7 +553,7 @@ export const getGetUserUrl = () => {
 
 
 
-  return `/user`
+  return `/api/user`
 }
 
 export const getUser = async ( options?: RequestInit): Promise<getUserResponse> => {
@@ -579,7 +579,7 @@ export const getUser = async ( options?: RequestInit): Promise<getUserResponse> 
 
 export const getGetUserQueryKey = () => {
     return [
-    `/user`
+    `/api/user`
     ] as const;
     }
 
@@ -655,7 +655,7 @@ export function useGetUser<TData = Awaited<ReturnType<typeof getUser>>, TError =
  * @summary Delete user
  */
 export type deleteUserResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -688,7 +688,7 @@ export const getDeleteUserUrl = () => {
 
 
 
-  return `/user`
+  return `/api/user`
 }
 
 export const deleteUser = async ( options?: RequestInit): Promise<deleteUserResponse> => {
@@ -794,7 +794,7 @@ export const getCreateSystemUrl = () => {
 
 
 
-  return `/systems`
+  return `/api/systems`
 }
 
 export const createSystem = async (createSystemRequest: CreateSystemRequest, options?: RequestInit): Promise<createSystemResponse> => {
@@ -896,7 +896,7 @@ export const getListSystemsUrl = () => {
 
 
 
-  return `/systems`
+  return `/api/systems`
 }
 
 export const listSystems = async ( options?: RequestInit): Promise<listSystemsResponse> => {
@@ -922,7 +922,7 @@ export const listSystems = async ( options?: RequestInit): Promise<listSystemsRe
 
 export const getListSystemsQueryKey = () => {
     return [
-    `/systems`
+    `/api/systems`
     ] as const;
     }
 
@@ -1031,7 +1031,7 @@ export const getGetSystemUrl = (systemId: string,) => {
 
 
 
-  return `/systems/${systemId}`
+  return `/api/systems/${systemId}`
 }
 
 export const getSystem = async (systemId: string, options?: RequestInit): Promise<getSystemResponse> => {
@@ -1057,7 +1057,7 @@ export const getSystem = async (systemId: string, options?: RequestInit): Promis
 
 export const getGetSystemQueryKey = (systemId: string,) => {
     return [
-    `/systems/${systemId}`
+    `/api/systems/${systemId}`
     ] as const;
     }
 
@@ -1185,7 +1185,7 @@ export const getCreateSystemUserUrl = (systemId: string,) => {
 
 
 
-  return `/systems/${systemId}/users`
+  return `/api/systems/${systemId}/users`
 }
 
 export const createSystemUser = async (systemId: string,
@@ -1293,7 +1293,7 @@ export const getListSystemUsersUrl = (systemId: string,) => {
 
 
 
-  return `/systems/${systemId}/users`
+  return `/api/systems/${systemId}/users`
 }
 
 export const listSystemUsers = async (systemId: string, options?: RequestInit): Promise<listSystemUsersResponse> => {
@@ -1319,7 +1319,7 @@ export const listSystemUsers = async (systemId: string, options?: RequestInit): 
 
 export const getListSystemUsersQueryKey = (systemId: string,) => {
     return [
-    `/systems/${systemId}/users`
+    `/api/systems/${systemId}/users`
     ] as const;
     }
 
@@ -1429,7 +1429,7 @@ export const getGetSystemUserUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/users/${uid}`
+  return `/api/systems/${systemId}/users/${uid}`
 }
 
 export const getSystemUser = async (systemId: string,
@@ -1457,7 +1457,7 @@ export const getSystemUser = async (systemId: string,
 export const getGetSystemUserQueryKey = (systemId: string,
     uid: number,) => {
     return [
-    `/systems/${systemId}/users/${uid}`
+    `/api/systems/${systemId}/users/${uid}`
     ] as const;
     }
 
@@ -1538,7 +1538,7 @@ export function useGetSystemUser<TData = Awaited<ReturnType<typeof getSystemUser
  * @summary Remove user from system
  */
 export type deleteSystemUserResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -1572,7 +1572,7 @@ export const getDeleteSystemUserUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/users/${uid}`
+  return `/api/systems/${systemId}/users/${uid}`
 }
 
 export const deleteSystemUser = async (systemId: string,
@@ -1689,7 +1689,7 @@ export const getCreateSystemGroupUrl = (systemId: string,) => {
 
 
 
-  return `/systems/${systemId}/groups`
+  return `/api/systems/${systemId}/groups`
 }
 
 export const createSystemGroup = async (systemId: string,
@@ -1797,7 +1797,7 @@ export const getListSystemGroupsUrl = (systemId: string,) => {
 
 
 
-  return `/systems/${systemId}/groups`
+  return `/api/systems/${systemId}/groups`
 }
 
 export const listSystemGroups = async (systemId: string, options?: RequestInit): Promise<listSystemGroupsResponse> => {
@@ -1823,7 +1823,7 @@ export const listSystemGroups = async (systemId: string, options?: RequestInit):
 
 export const getListSystemGroupsQueryKey = (systemId: string,) => {
     return [
-    `/systems/${systemId}/groups`
+    `/api/systems/${systemId}/groups`
     ] as const;
     }
 
@@ -1933,7 +1933,7 @@ export const getGetSystemGroupUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/groups/${gid}`
+  return `/api/systems/${systemId}/groups/${gid}`
 }
 
 export const getSystemGroup = async (systemId: string,
@@ -1961,7 +1961,7 @@ export const getSystemGroup = async (systemId: string,
 export const getGetSystemGroupQueryKey = (systemId: string,
     gid: number,) => {
     return [
-    `/systems/${systemId}/groups/${gid}`
+    `/api/systems/${systemId}/groups/${gid}`
     ] as const;
     }
 
@@ -2042,7 +2042,7 @@ export function useGetSystemGroup<TData = Awaited<ReturnType<typeof getSystemGro
  * @summary Delete a group
  */
 export type deleteSystemGroupResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -2076,7 +2076,7 @@ export const getDeleteSystemGroupUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/groups/${gid}`
+  return `/api/systems/${systemId}/groups/${gid}`
 }
 
 export const deleteSystemGroup = async (systemId: string,
@@ -2150,7 +2150,7 @@ export const useDeleteSystemGroup = <TError = Error,
  * @summary Add user to group
  */
 export type addGroupMemberResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -2185,7 +2185,7 @@ export const getAddGroupMemberUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/groups/${gid}/members/${uid}`
+  return `/api/systems/${systemId}/groups/${gid}/members/${uid}`
 }
 
 export const addGroupMember = async (systemId: string,
@@ -2260,7 +2260,7 @@ export const useAddGroupMember = <TError = Error,
  * @summary Remove user from group
  */
 export type removeGroupMemberResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -2295,7 +2295,7 @@ export const getRemoveGroupMemberUrl = (systemId: string,
 
 
 
-  return `/systems/${systemId}/groups/${gid}/members/${uid}`
+  return `/api/systems/${systemId}/groups/${gid}/members/${uid}`
 }
 
 export const removeGroupMember = async (systemId: string,
@@ -2403,7 +2403,7 @@ export const getGetRootDirectoryUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/root`
+  return `/api/fs/${systemId}/root`
 }
 
 export const getRootDirectory = async (systemId: string, options?: RequestInit): Promise<getRootDirectoryResponse> => {
@@ -2429,7 +2429,7 @@ export const getRootDirectory = async (systemId: string, options?: RequestInit):
 
 export const getGetRootDirectoryQueryKey = (systemId: string,) => {
     return [
-    `/fs/${systemId}/root`
+    `/api/fs/${systemId}/root`
     ] as const;
     }
 
@@ -2551,7 +2551,7 @@ export const getStatPathUrl = (systemId: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/fs/${systemId}/stat?${stringifiedParams}` : `/fs/${systemId}/stat`
+  return stringifiedParams.length > 0 ? `/api/fs/${systemId}/stat?${stringifiedParams}` : `/api/fs/${systemId}/stat`
 }
 
 export const statPath = async (systemId: string,
@@ -2579,7 +2579,7 @@ export const statPath = async (systemId: string,
 export const getStatPathQueryKey = (systemId: string,
     params?: StatPathParams,) => {
     return [
-    `/fs/${systemId}/stat`, ...(params ? [params] : [])
+    `/api/fs/${systemId}/stat`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -2706,7 +2706,7 @@ export const getLsUrl = (systemId: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/fs/${systemId}/ls?${stringifiedParams}` : `/fs/${systemId}/ls`
+  return stringifiedParams.length > 0 ? `/api/fs/${systemId}/ls?${stringifiedParams}` : `/api/fs/${systemId}/ls`
 }
 
 export const ls = async (systemId: string,
@@ -2734,7 +2734,7 @@ export const ls = async (systemId: string,
 export const getLsQueryKey = (systemId: string,
     params?: LsParams,) => {
     return [
-    `/fs/${systemId}/ls`, ...(params ? [params] : [])
+    `/api/fs/${systemId}/ls`, ...(params ? [params] : [])
     ] as const;
     }
 
@@ -2858,7 +2858,7 @@ export const getMkdirUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/mkdir`
+  return `/api/fs/${systemId}/mkdir`
 }
 
 export const mkdir = async (systemId: string,
@@ -2976,7 +2976,7 @@ export const getLnUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/ln`
+  return `/api/fs/${systemId}/ln`
 }
 
 export const ln = async (systemId: string,
@@ -3094,7 +3094,7 @@ export const getChmodUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/chmod`
+  return `/api/fs/${systemId}/chmod`
 }
 
 export const chmod = async (systemId: string,
@@ -3217,7 +3217,7 @@ export const getRenameUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/rename`
+  return `/api/fs/${systemId}/rename`
 }
 
 export const rename = async (systemId: string,
@@ -3340,7 +3340,7 @@ export const getMvUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/mv`
+  return `/api/fs/${systemId}/mv`
 }
 
 export const mv = async (systemId: string,
@@ -3415,7 +3415,7 @@ export const useMv = <TError = Error,
  * @summary Delete file or directory
  */
 export type unlinkResponse204 = {
-  data: undefined
+  data: void
   status: 204
 }
 
@@ -3461,7 +3461,7 @@ export const getUnlinkUrl = (systemId: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/fs/${systemId}/unlink?${stringifiedParams}` : `/fs/${systemId}/unlink`
+  return stringifiedParams.length > 0 ? `/api/fs/${systemId}/unlink?${stringifiedParams}` : `/api/fs/${systemId}/unlink`
 }
 
 export const unlink = async (systemId: string,
@@ -3573,7 +3573,7 @@ export const getInitiateUploadUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/upload/initiate`
+  return `/api/fs/${systemId}/upload/initiate`
 }
 
 export const initiateUpload = async (systemId: string,
@@ -3686,7 +3686,7 @@ export const getCompleteUploadUrl = (systemId: string,) => {
 
 
 
-  return `/fs/${systemId}/upload/complete`
+  return `/api/fs/${systemId}/upload/complete`
 }
 
 export const completeUpload = async (systemId: string,
@@ -3807,7 +3807,7 @@ export const getGetDownloadUrlUrl = (systemId: string,
 
   const stringifiedParams = normalizedParams.toString();
 
-  return stringifiedParams.length > 0 ? `/fs/${systemId}/download?${stringifiedParams}` : `/fs/${systemId}/download`
+  return stringifiedParams.length > 0 ? `/api/fs/${systemId}/download?${stringifiedParams}` : `/api/fs/${systemId}/download`
 }
 
 export const getDownloadUrl = async (systemId: string,
@@ -3835,7 +3835,7 @@ export const getDownloadUrl = async (systemId: string,
 export const getGetDownloadUrlQueryKey = (systemId: string,
     params?: GetDownloadUrlParams,) => {
     return [
-    `/fs/${systemId}/download`, ...(params ? [params] : [])
+    `/api/fs/${systemId}/download`, ...(params ? [params] : [])
     ] as const;
     }
 
