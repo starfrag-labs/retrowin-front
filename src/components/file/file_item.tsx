@@ -79,7 +79,9 @@ export default memo(function FileItem({
     {
       query: {
         select: (data) => (data.status === 200 ? data.data.inode : null),
-        enabled: !!systemId && (type === FileType.Block || type === FileType.Container),
+        enabled:
+          !!systemId &&
+          (type === FileType.Block || type === FileType.Container),
       },
       fetch: { credentials: "include" },
     }

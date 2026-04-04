@@ -94,13 +94,7 @@ export default function FileMenu({
   const handleOpen = useCallback(async () => {
     closeMenu();
     openFile(fileType, fileName, path);
-  }, [
-    closeMenu,
-    path,
-    fileName,
-    fileType,
-    openFile,
-  ]);
+  }, [closeMenu, path, fileName, fileType, openFile]);
 
   // Update file actions (TODO: Not implemented in new API yet)
   const handleRename = useCallback(() => {

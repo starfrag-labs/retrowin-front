@@ -60,7 +60,10 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
     { path: targetWindow?.targetKey || "" },
     {
       query: {
-        enabled: !!targetWindow?.targetKey && targetWindow.type !== WindowType.Background && !!targetWindow?.systemId,
+        enabled:
+          !!targetWindow?.targetKey &&
+          targetWindow.type !== WindowType.Background &&
+          !!targetWindow?.systemId,
         select: (data) => (data.status === 200 ? data.data.inode : null),
       },
       fetch: { credentials: "include" },
@@ -77,12 +80,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       const fileName = path.split("/").filter(Boolean).pop() || path;
       setTitle(windowKey, fileName);
     }
-  }, [
-    setTitle,
-    targetWindow?.targetKey,
-    targetWindow?.type,
-    windowKey,
-  ]);
+  }, [setTitle, targetWindow?.targetKey, targetWindow?.type, windowKey]);
 
   // Set current window
   const enterWindow = useCallback(() => {
@@ -320,7 +318,9 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       {targetWindow && (
         <WindowContent
           fileKey={targetWindow.targetKey}
-          fileName={targetWindow.targetKey.split("/").filter(Boolean).pop() || ""}
+          fileName={
+            targetWindow.targetKey.split("/").filter(Boolean).pop() || ""
+          }
           windowKey={windowKey}
           setLoading={setContentLoading}
           type={targetWindow.type}

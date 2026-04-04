@@ -17,7 +17,9 @@ export default function BackgroundMenu({
 
   // Get system ID from window store
   const windows = useWindowStore((state) => state.windows);
-  const backgroundWindow = windows.find((w) => w.type === WindowType.Background);
+  const backgroundWindow = windows.find(
+    (w) => w.type === WindowType.Background
+  );
   const systemId = backgroundWindow?.systemId || "";
 
   // Mutations
@@ -40,7 +42,10 @@ export default function BackgroundMenu({
 
   const handleCreateFolder = useCallback(async () => {
     if (!path || !systemId) {
-      console.error("[BackgroundMenu] Cannot create folder: missing path or systemId", { path, systemId });
+      console.error(
+        "[BackgroundMenu] Cannot create folder: missing path or systemId",
+        { path, systemId }
+      );
       return;
     }
     closeMenu();
@@ -51,7 +56,10 @@ export default function BackgroundMenu({
     // Note: In production, you'd want to check existing folders first
 
     const folderPath = `${path === "/" ? "" : path}/${folderName}`;
-    console.log("[BackgroundMenu] Creating folder:", { systemId, path: folderPath });
+    console.log("[BackgroundMenu] Creating folder:", {
+      systemId,
+      path: folderPath,
+    });
 
     try {
       await mkdirMutation.mutateAsync({

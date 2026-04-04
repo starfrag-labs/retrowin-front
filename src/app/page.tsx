@@ -1,9 +1,13 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import { RedirectType, redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetUser, useListSystems, useGetRootDirectory } from "@/api/generated";
+import {
+  useGetUser,
+  useListSystems,
+  useGetRootDirectory,
+} from "@/api/generated";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
 import Background from "@/components/layout/background";
@@ -17,6 +21,7 @@ import { createWindowKey } from "@/utils/random_key";
 import styles from "./page.module.css";
 
 export default function Home() {
+  const router = useRouter();
   // Constants
   const backgroundWindowKey = useMemo(() => createWindowKey(), []);
 
@@ -37,11 +42,10 @@ export default function Home() {
   // Queries - use Orval's generated hooks directly
   const _queryClient = useQueryClient();
 
-  // Get current user
+  // Get current user (keep full response to check status)
   const getUserQuery = useGetUser({
     query: {
       retry: false,
-      select: (data) => (data.status === 200 ? data.data.user : null),
     },
     fetch: { credentials: "include" },
   });
@@ -51,27 +55,36 @@ export default function Home() {
     query: {
       retry: false,
       select: (data) => (data.status === 200 ? data.data.systems : []),
-      enabled: !!getUserQuery.data,
+      enabled: getUserQuery.data?.status === 200,
     },
     fetch: { credentials: "include" },
   });
 
   // Get root directory for first system
-  const rootDirectoryQuery = useGetRootDirectory(
-    currentSystemId ?? "",
-    {
-      query: {
-        retry: false,
-        select: (data) => (data.status === 200 ? data.data.inode : null),
-        enabled: !!currentSystemId,
-      },
-      fetch: { credentials: "include" },
+  const rootDirectoryQuery = useGetRootDirectory(currentSystemId ?? "", {
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.inode : null),
+      enabled: !!currentSystemId,
+    },
+    fetch: { credentials: "include" },
+  });
+
+  // Redirect to login on auth error (401)
+  useEffect(() => {
+    if (getUserQuery.data?.status === 401) {
+      console.error("Auth failed: 401 Unauthorized");
+      router.push("/login");
     }
-  );
+  }, [getUserQuery.data?.status, router]);
 
   // Set current system ID when systems are loaded
   useEffect(() => {
-    if (listSystemsQuery.isSuccess && listSystemsQuery.data.length > 0 && !currentSystemId) {
+    if (
+      listSystemsQuery.isSuccess &&
+      listSystemsQuery.data.length > 0 &&
+      !currentSystemId
+    ) {
       setCurrentSystemId(listSystemsQuery.data[0].id);
     }
   }, [listSystemsQuery.data, listSystemsQuery.isSuccess, currentSystemId]);
@@ -79,32 +92,26 @@ export default function Home() {
   useEffect(() => {
     if (homeKey && currentSystemId) {
       newBackgroundWindow({
-        targetKey: currentPath, // Use path instead of fileKey for Background window
+        targetKey: currentPath,
         type: WindowType.Background,
         title: "background",
         key: backgroundWindowKey,
         systemId: currentSystemId,
       });
     }
-  }, [backgroundWindowKey, newBackgroundWindow, homeKey, currentSystemId, currentPath]);
+  }, [
+    backgroundWindowKey,
+    newBackgroundWindow,
+    homeKey,
+    currentSystemId,
+    currentPath,
+  ]);
 
   useEffect(() => {
     if (rootDirectoryQuery.isSuccess && rootDirectoryQuery.data) {
       setHomeKey(rootDirectoryQuery.data.id);
     }
   }, [rootDirectoryQuery.data, rootDirectoryQuery.isSuccess]);
-
-  useEffect(() => {
-    if (getUserQuery.isError) {
-      const redirectUri = process.env.NEXT_PUBLIC_REDIRECT_URI;
-      const errorStatus = (getUserQuery.error as { status?: number })?.status;
-      if (errorStatus === 401 && redirectUri) {
-        redirect(redirectUri, RedirectType.push);
-      } else {
-        throw new Error("Failed to get user");
-      }
-    }
-  }, [getUserQuery.error, getUserQuery.isError]);
 
   const onMouseEnter = useCallback(() => {
     setCurrentWindow({
@@ -115,8 +122,14 @@ export default function Home() {
     });
   }, [backgroundWindowKey, setCurrentWindow]);
 
-  if (!homeKey || !currentSystemId) {
-    return <div></div>;
+  // Show loading while checking auth or loading data
+  if (
+    getUserQuery.isLoading ||
+    getUserQuery.isPending ||
+    !homeKey ||
+    !currentSystemId
+  ) {
+    return <div className="flex-center full-size">Loading...</div>;
   }
 
   return (

@@ -5,7 +5,7 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { File } from './file';
+import type { File } from "./file";
 
 export interface FileListResponse {
   files: File[];

@@ -9,17 +9,8 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const [mswReady, setMswReady] = useState(false);
 
   useEffect(() => {
-    if (process.env.NODE_ENV === "development") {
-      import("@/mocks")
-        .then(({ startMockService }) => startMockService())
-        .then(() => setMswReady(true))
-        .catch((err) => {
-          console.error("Failed to start MSW:", err);
-          setMswReady(true);
-        });
-    } else {
-      setMswReady(true);
-    }
+    // MSW temporarily disabled for real API testing
+    setMswReady(true);
   }, []);
 
   if (!mswReady && process.env.NODE_ENV === "development") {

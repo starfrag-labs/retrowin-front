@@ -4,11 +4,7 @@ import { useInitiateUpload, useCompleteUpload } from "@/api/generated";
 import { useWindowStore } from "@/store/window.store";
 import styles from "./uploader.module.css";
 
-export default function Uploader({
-  targetPath,
-}: {
-  targetPath: string;
-}) {
+export default function Uploader({ targetPath }: { targetPath: string }) {
   // Query Client
   const queryClient = useQueryClient();
 
@@ -34,14 +30,17 @@ export default function Uploader({
   >([]);
 
   // Upload state actions
-  const addUpload = useCallback((upload: {
-    objectId: string;
-    fileName: string;
-    totalSize: number;
-    uploadedSize: number;
-  }) => {
-    setUploadState((state) => [...state, upload]);
-  }, []);
+  const addUpload = useCallback(
+    (upload: {
+      objectId: string;
+      fileName: string;
+      totalSize: number;
+      uploadedSize: number;
+    }) => {
+      setUploadState((state) => [...state, upload]);
+    },
+    []
+  );
 
   const updateUpload = useCallback((objectId: string, uploadedSize: number) => {
     setUploadState((state) =>
@@ -57,103 +56,121 @@ export default function Uploader({
     );
   }, []);
 
-  const uploadFile = useCallback(async (file: File) => {
-    let objectId: string | null = null;
+  const uploadFile = useCallback(
+    async (file: File) => {
+      let objectId: string | null = null;
 
-    try {
-      // Step 1: Initiate upload to get presigned URL
-      const initiateResult = await initiateUploadMutation.mutateAsync({
-        systemId,
-        data: {
-          path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
-          contentType: file.type,
-          size: file.size,
-        },
-      });
+      try {
+        // Step 1: Initiate upload to get presigned URL
+        const initiateResult = await initiateUploadMutation.mutateAsync({
+          systemId,
+          data: {
+            path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
+            contentType: file.type,
+            size: file.size,
+          },
+        });
 
-      if (initiateResult.data && "uploadSession" in initiateResult.data) {
-        objectId = initiateResult.data.uploadSession.objectId;
-      }
+        if (initiateResult.data && "uploadSession" in initiateResult.data) {
+          objectId = initiateResult.data.uploadSession.objectId;
+        }
 
-      if (!objectId) {
-        throw new Error("Failed to initiate upload");
-      }
+        if (!objectId) {
+          throw new Error("Failed to initiate upload");
+        }
 
-      // Add to upload state
-      addUpload({
-        objectId,
-        fileName: file.name,
-        totalSize: file.size,
-        uploadedSize: 0,
-      });
-
-      // Step 2: Get presigned URL from response
-      let uploadUrl: string | null = null;
-      if (initiateResult.data && "uploadSession" in initiateResult.data) {
-        uploadUrl = initiateResult.data.uploadSession.uploadUrl;
-      }
-
-      if (!uploadUrl) {
-        throw new Error("Failed to get upload URL");
-      }
-
-      // Step 3: Upload file directly to S3 using presigned URL
-      await fetch(uploadUrl, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type,
-        },
-      });
-
-      // Update upload state to 100%
-      updateUpload(objectId, file.size);
-
-      // Step 4: Complete upload to create inode
-      await completeUploadMutation.mutateAsync({
-        systemId,
-        data: {
+        // Add to upload state
+        addUpload({
           objectId,
-          path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
-        },
-      });
+          fileName: file.name,
+          totalSize: file.size,
+          uploadedSize: 0,
+        });
 
-      // Invalidate queries to refresh file list
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const queryKey = query.queryKey[0] as string;
-          return (
-            queryKey.startsWith("/fs/") &&
-            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-          );
-        },
-      });
-    } finally {
-      // Remove from upload state
-      if (objectId) {
-        removeUpload(objectId);
+        // Step 2: Get presigned URL from response
+        let uploadUrl: string | null = null;
+        if (initiateResult.data && "uploadSession" in initiateResult.data) {
+          uploadUrl = initiateResult.data.uploadSession.uploadUrl;
+        }
+
+        if (!uploadUrl) {
+          throw new Error("Failed to get upload URL");
+        }
+
+        // Step 3: Upload file directly to S3 using presigned URL
+        await fetch(uploadUrl, {
+          method: "PUT",
+          body: file,
+          headers: {
+            "Content-Type": file.type,
+          },
+        });
+
+        // Update upload state to 100%
+        updateUpload(objectId, file.size);
+
+        // Step 4: Complete upload to create inode
+        await completeUploadMutation.mutateAsync({
+          systemId,
+          data: {
+            objectId,
+            path: `${targetPath === "/" ? "" : targetPath}/${file.name}`,
+          },
+        });
+
+        // Invalidate queries to refresh file list
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0] as string;
+            return (
+              queryKey.startsWith("/fs/") &&
+              (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+            );
+          },
+        });
+      } finally {
+        // Remove from upload state
+        if (objectId) {
+          removeUpload(objectId);
+        }
       }
-    }
-  }, [systemId, targetPath, initiateUploadMutation, completeUploadMutation, addUpload, updateUpload, removeUpload, queryClient]);
+    },
+    [
+      systemId,
+      targetPath,
+      initiateUploadMutation,
+      completeUploadMutation,
+      addUpload,
+      updateUpload,
+      removeUpload,
+      queryClient,
+    ]
+  );
 
-  const uploadFiles = useCallback(async (files: FileList) => {
-    // Sort files by size (small to large)
-    const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
+  const uploadFiles = useCallback(
+    async (files: FileList) => {
+      // Sort files by size (small to large)
+      const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
 
-    // Upload files sequentially
-    for (const file of sortedFiles) {
-      await uploadFile(file);
-    }
-  }, [uploadFile]);
+      // Upload files sequentially
+      for (const file of sortedFiles) {
+        await uploadFile(file);
+      }
+    },
+    [uploadFile]
+  );
 
-  const handleUpload = useCallback((e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const files = (e.target as HTMLFormElement).querySelector("input")?.files;
+  const handleUpload = useCallback(
+    (e: React.FormEvent<HTMLFormElement>) => {
+      e.preventDefault();
+      const files = (e.target as HTMLFormElement).querySelector("input")?.files;
 
-    if (files && files.length > 0) {
-      uploadFiles(files);
-    }
-  }, [uploadFiles]);
+      if (files && files.length > 0) {
+        uploadFiles(files);
+      }
+    },
+    [uploadFiles]
+  );
 
   return (
     <div className={`${styles.container} full-size`}>

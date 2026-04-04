@@ -7,8 +7,8 @@
  */
 
 export type ReadDirParams = {
-/**
- * Directory path
- */
-path: string;
+  /**
+   * Directory path
+   */
+  path: string;
 };

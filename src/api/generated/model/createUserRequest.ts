@@ -5,7 +5,7 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { Provider } from './provider';
+import type { Provider } from "./provider";
 
 export interface CreateUserRequest {
   provider: Provider;

@@ -5,7 +5,7 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { StreamToken } from './streamToken';
+import type { StreamToken } from "./streamToken";
 
 export interface StreamTokenResponse {
   streamToken: StreamToken;

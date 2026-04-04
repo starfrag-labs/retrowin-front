@@ -7,7 +7,7 @@ const iconMap = {
   "Recycle Bin (full)": "/icons/sprites/Recycle Bin (full).webp",
   "Generic Document": "/icons/sprites/Generic Document.webp",
   "My Documents": "/icons/sprites/My Documents.webp",
-  "Up": "/icons/sprites/Up.webp",
+  Up: "/icons/sprites/Up.webp",
 } as const;
 
 const iconSize = 48;

@@ -5,7 +5,7 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { UploadToken } from './uploadToken';
+import type { UploadToken } from "./uploadToken";
 
 export interface UploadTokenResponse {
   uploadToken: UploadToken;

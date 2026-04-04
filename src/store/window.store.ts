@@ -101,14 +101,13 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   },
   updateWindow: ({ targetWindowKey, type, targetFileKey, title }) => {
     set((state) => {
-      const windowIndex = state.windows.findIndex((w) => w.key === targetWindowKey);
+      const windowIndex = state.windows.findIndex(
+        (w) => w.key === targetWindowKey
+      );
       if (windowIndex === -1) return state;
 
       const window = state.windows[windowIndex];
-      if (
-        window.targetKey === targetFileKey &&
-        window.type === type
-      ) {
+      if (window.targetKey === targetFileKey && window.type === type) {
         return state;
       }
 

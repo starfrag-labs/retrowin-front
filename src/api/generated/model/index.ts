@@ -20,6 +20,7 @@ export * from './downloadURLResponse';
 export * from './error';
 export * from './errorError';
 export * from './getDownloadUrlParams';
+export * from './handleCallbackParams';
 export * from './healthStatus';
 export * from './healthStatusStatus';
 export * from './initiateUploadRequest';

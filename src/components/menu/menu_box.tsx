@@ -132,10 +132,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
     >
       <div className={styles.menu_box} ref={menuRef} hidden={menuType === null}>
         {menuType === "background" && targetFileKey && (
-          <BackgroundMenu
-            path={targetFileKey}
-            closeMenu={closeMenu}
-          />
+          <BackgroundMenu path={targetFileKey} closeMenu={closeMenu} />
         )}
         {menuType === "file" && targetFile && currentWindow && (
           <FileMenu

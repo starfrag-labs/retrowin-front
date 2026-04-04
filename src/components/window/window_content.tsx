@@ -49,9 +49,7 @@ export default memo(
             setLoading={setLoading}
           />
         )}
-        {type === WindowType.Uploader && (
-          <Uploader targetPath={fileKey} />
-        )}
+        {type === WindowType.Uploader && <Uploader targetPath={fileKey} />}
         {type === WindowType.Image && fileName && (
           <ImageViewer fileKey={fileKey} fileName={fileName} />
         )}
