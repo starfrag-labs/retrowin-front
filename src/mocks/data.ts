@@ -27,9 +27,11 @@ const createMockFile = (
   parentKey: string | null,
   byteSize = 0,
   path: string,
-  overrideFileKey?: string  // Allow overriding the generated fileKey
+  overrideFileKey?: string // Allow overriding the generated fileKey
 ): MockFile => ({
-  fileKey: overrideFileKey || `mock-${fileName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
+  fileKey:
+    overrideFileKey ||
+    `mock-${fileName.toLowerCase().replace(/[^a-z0-9]/g, "-")}-${Date.now()}-${Math.random().toString(36).substring(7)}`,
   fileName,
   type,
   createDate: new Date().toISOString(),
@@ -47,47 +49,110 @@ const initMockFiles = () => {
   pathToKeyMap.clear();
 
   // Root container - use ROOT_KEY as fileKey
-  const root = createMockFile("root", "container" as FileType, null, 0, "/", ROOT_KEY);
+  const root = createMockFile(
+    "root",
+    "container" as FileType,
+    null,
+    0,
+    "/",
+    ROOT_KEY
+  );
   mockFiles.set(ROOT_KEY, root);
   pathToKeyMap.set("/", ROOT_KEY);
 
   // Home container - use HOME_KEY as fileKey
-  const home = createMockFile("home", "container" as FileType, ROOT_KEY, 0, "/home", HOME_KEY);
+  const home = createMockFile(
+    "home",
+    "container" as FileType,
+    ROOT_KEY,
+    0,
+    "/home",
+    HOME_KEY
+  );
   mockFiles.set(HOME_KEY, home);
   pathToKeyMap.set("/home", HOME_KEY);
 
   // Trash container - use TRASH_KEY as fileKey
-  const trash = createMockFile("trash", "container" as FileType, ROOT_KEY, 0, "/.trash", TRASH_KEY);
+  const trash = createMockFile(
+    "trash",
+    "container" as FileType,
+    ROOT_KEY,
+    0,
+    "/.trash",
+    TRASH_KEY
+  );
   mockFiles.set(TRASH_KEY, trash);
   pathToKeyMap.set("/.trash", TRASH_KEY);
 
   // Sample folders in home
-  const documents = createMockFile("Documents", "container" as FileType, HOME_KEY, 0, "/home/Documents");
+  const documents = createMockFile(
+    "Documents",
+    "container" as FileType,
+    HOME_KEY,
+    0,
+    "/home/Documents"
+  );
   mockFiles.set(documents.fileKey, documents);
   pathToKeyMap.set("/home/Documents", documents.fileKey);
 
-  const pictures = createMockFile("Pictures", "container" as FileType, HOME_KEY, 0, "/home/Pictures");
+  const pictures = createMockFile(
+    "Pictures",
+    "container" as FileType,
+    HOME_KEY,
+    0,
+    "/home/Pictures"
+  );
   mockFiles.set(pictures.fileKey, pictures);
   pathToKeyMap.set("/home/Pictures", pictures.fileKey);
 
-  const music = createMockFile("Music", "container" as FileType, HOME_KEY, 0, "/home/Music");
+  const music = createMockFile(
+    "Music",
+    "container" as FileType,
+    HOME_KEY,
+    0,
+    "/home/Music"
+  );
   mockFiles.set(music.fileKey, music);
   pathToKeyMap.set("/home/Music", music.fileKey);
 
   // Sample files
-  const readme = createMockFile("README.md", "block" as FileType, HOME_KEY, 1024, "/home/README.md");
+  const readme = createMockFile(
+    "README.md",
+    "block" as FileType,
+    HOME_KEY,
+    1024,
+    "/home/README.md"
+  );
   mockFiles.set(readme.fileKey, readme);
   pathToKeyMap.set("/home/README.md", readme.fileKey);
 
-  const image = createMockFile("sample-image.png", "block" as FileType, pictures.fileKey, 2048576, "/home/Pictures/sample-image.png");
+  const image = createMockFile(
+    "sample-image.png",
+    "block" as FileType,
+    pictures.fileKey,
+    2048576,
+    "/home/Pictures/sample-image.png"
+  );
   mockFiles.set(image.fileKey, image);
   pathToKeyMap.set("/home/Pictures/sample-image.png", image.fileKey);
 
-  const video = createMockFile("sample-video.mp4", "block" as FileType, HOME_KEY, 10485760, "/home/sample-video.mp4");
+  const video = createMockFile(
+    "sample-video.mp4",
+    "block" as FileType,
+    HOME_KEY,
+    10485760,
+    "/home/sample-video.mp4"
+  );
   mockFiles.set(video.fileKey, video);
   pathToKeyMap.set("/home/sample-video.mp4", video.fileKey);
 
-  const audio = createMockFile("sample-audio.mp3", "block" as FileType, music.fileKey, 5242880, "/home/Music/sample-audio.mp3");
+  const audio = createMockFile(
+    "sample-audio.mp3",
+    "block" as FileType,
+    music.fileKey,
+    5242880,
+    "/home/Music/sample-audio.mp3"
+  );
   mockFiles.set(audio.fileKey, audio);
   pathToKeyMap.set("/home/Music/sample-audio.mp3", audio.fileKey);
 };

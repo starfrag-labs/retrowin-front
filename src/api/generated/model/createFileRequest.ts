@@ -5,15 +5,15 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { FileType } from './fileType';
+import type { FileType } from "./fileType";
 
 export interface CreateFileRequest {
   type: FileType;
   /**
-     * File name
-     * @minLength 1
-     * @maxLength 255
-     */
+   * File name
+   * @minLength 1
+   * @maxLength 255
+   */
   fileName: string;
   /** Parent file key (container) */
   parentKey?: string | null;

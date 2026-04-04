@@ -42,14 +42,12 @@ export default memo(
         }}
       >
         <div className={styles.image_icon}>
-          {icon === FileIconType.Container && (
-            hasContent ? <XPImageIcons.Home /> : <XPImageIcons.Folder />
-          )}
+          {icon === FileIconType.Container &&
+            (hasContent ? <XPImageIcons.Home /> : <XPImageIcons.Folder />)}
           {icon === FileIconType.Block && <XPImageIcons.File />}
           {icon === FileIconType.Home && <XPImageIcons.Home />}
-          {icon === FileIconType.Trash && (
-            hasContent ? <XPImageIcons.TrashFull /> : <XPImageIcons.Trash />
-          )}
+          {icon === FileIconType.Trash &&
+            (hasContent ? <XPImageIcons.TrashFull /> : <XPImageIcons.Trash />)}
           {icon === FileIconType.Upload && <XPImageIcons.Upload />}
           {icon === FileIconType.Image && <XPImageIcons.File />}
           {icon === FileIconType.Video && <XPImageIcons.File />}

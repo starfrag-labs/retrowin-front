@@ -234,10 +234,19 @@ export const handlers = [
       );
     }
 
-    const newFile = createFile(parent.fileKey, dirName, "container" as FileType);
+    const newFile = createFile(
+      parent.fileKey,
+      dirName,
+      "container" as FileType
+    );
     if (!newFile) {
       return HttpResponse.json(
-        { error: { type: "internal_error", message: "Failed to create directory" } },
+        {
+          error: {
+            type: "internal_error",
+            message: "Failed to create directory",
+          },
+        },
         { status: 500 }
       );
     }
@@ -264,7 +273,12 @@ export const handlers = [
 
     if (!fromPath || !newName) {
       return HttpResponse.json(
-        { error: { type: "bad_request", message: "path and newName are required" } },
+        {
+          error: {
+            type: "bad_request",
+            message: "path and newName are required",
+          },
+        },
         { status: 400 }
       );
     }
@@ -300,12 +314,20 @@ export const handlers = [
       );
     }
 
-    const body = (await request.json()) as { path?: string; destination?: string };
+    const body = (await request.json()) as {
+      path?: string;
+      destination?: string;
+    };
     const { path: fromPath, destination } = body;
 
     if (!fromPath || !destination) {
       return HttpResponse.json(
-        { error: { type: "bad_request", message: "path and destination are required" } },
+        {
+          error: {
+            type: "bad_request",
+            message: "path and destination are required",
+          },
+        },
         { status: 400 }
       );
     }
@@ -321,7 +343,8 @@ export const handlers = [
     // Extract target parent and new name from destination
     const destParts = destination.split("/").filter(Boolean);
     const newName = destParts.pop() || sourceFile.fileName;
-    const targetParentPath = destParts.length > 0 ? `/${destParts.join("/")}` : "/";
+    const targetParentPath =
+      destParts.length > 0 ? `/${destParts.join("/")}` : "/";
 
     // Check if destination is a directory or a full path
     const targetParentFile = getFileByPath(destination);
@@ -342,7 +365,12 @@ export const handlers = [
     // Ensure targetParent is not null
     if (!targetParent) {
       return HttpResponse.json(
-        { error: { type: "internal_error", message: "Failed to determine target parent" } },
+        {
+          error: {
+            type: "internal_error",
+            message: "Failed to determine target parent",
+          },
+        },
         { status: 500 }
       );
     }
@@ -367,12 +395,20 @@ export const handlers = [
       );
     }
 
-    const body = (await request.json()) as { target?: string; linkPath?: string };
+    const body = (await request.json()) as {
+      target?: string;
+      linkPath?: string;
+    };
     const { target, linkPath } = body;
 
     if (!target || !linkPath) {
       return HttpResponse.json(
-        { error: { type: "bad_request", message: "target and linkPath are required" } },
+        {
+          error: {
+            type: "bad_request",
+            message: "target and linkPath are required",
+          },
+        },
         { status: 400 }
       );
     }
@@ -402,7 +438,12 @@ export const handlers = [
     const newLink = createFile(parent.fileKey, linkName, "link" as FileType);
     if (!newLink) {
       return HttpResponse.json(
-        { error: { type: "internal_error", message: "Failed to create symlink" } },
+        {
+          error: {
+            type: "internal_error",
+            message: "Failed to create symlink",
+          },
+        },
         { status: 500 }
       );
     }
@@ -487,7 +528,12 @@ export const handlers = [
 
     if (!requestedPath || !objectId) {
       return HttpResponse.json(
-        { error: { type: "bad_request", message: "objectId and path are required" } },
+        {
+          error: {
+            type: "bad_request",
+            message: "objectId and path are required",
+          },
+        },
         { status: 400 }
       );
     }
@@ -507,11 +553,7 @@ export const handlers = [
     }
 
     // Create a new file entry
-    const newFile = createFile(
-      parent.fileKey,
-      fileName,
-      "block" as FileType
-    );
+    const newFile = createFile(parent.fileKey, fileName, "block" as FileType);
 
     if (!newFile) {
       return HttpResponse.json(

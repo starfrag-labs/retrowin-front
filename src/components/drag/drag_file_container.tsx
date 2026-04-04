@@ -144,7 +144,10 @@ export default function DragFileContainer({
 
   // Drag file end
   const dragFileEnd = useCallback(async () => {
-    console.log("[DragFileContainer] dragFileEnd called", { isDragging, pointerMoved });
+    console.log("[DragFileContainer] dragFileEnd called", {
+      isDragging,
+      pointerMoved,
+    });
     setIsDragging(false);
     setIsDraggingReady(false);
     setDisplayDraggingElements(false);
@@ -157,7 +160,8 @@ export default function DragFileContainer({
     // Set target path as the current window key
     if (currentWindow?.windowRef.current) {
       const window = findWindow(currentWindow.key);
-      if (window &&
+      if (
+        window &&
         (window.type === WindowType.Background ||
           window.type === WindowType.Navigator)
       ) {
@@ -195,7 +199,8 @@ export default function DragFileContainer({
       await Promise.all(
         filePaths.map((fromPath) => {
           if (fromPath !== targetPath) {
-            const fileName = fromPath.split("/").filter(Boolean).pop() || "file";
+            const fileName =
+              fromPath.split("/").filter(Boolean).pop() || "file";
             const destination = `${targetPath === "/" ? "" : targetPath}/${fileName}`;
 
             // Call mv API
@@ -222,14 +227,15 @@ export default function DragFileContainer({
       unselectAllFiles();
     }
   }, [
-    currentWindow, 
-    findWindow, 
-    highlightedFile, 
-    pointerMoved, 
-    queryClient, 
-    selectedFileSerials, 
-    unselectAllFiles, 
-    mvMutation, isDragging
+    currentWindow,
+    findWindow,
+    highlightedFile,
+    pointerMoved,
+    queryClient,
+    selectedFileSerials,
+    unselectAllFiles,
+    mvMutation,
+    isDragging,
   ]);
 
   // Event listeners

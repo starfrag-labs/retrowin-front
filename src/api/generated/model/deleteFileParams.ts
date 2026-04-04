@@ -7,8 +7,8 @@
  */
 
 export type DeleteFileParams = {
-/**
- * Permanently delete (bypass trash)
- */
-permanent?: boolean;
+  /**
+   * Permanently delete (bypass trash)
+   */
+  permanent?: boolean;
 };

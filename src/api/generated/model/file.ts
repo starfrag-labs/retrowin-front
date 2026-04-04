@@ -5,8 +5,8 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { FileType } from './fileType';
-import type { Timestamp } from './timestamp';
+import type { FileType } from "./fileType";
+import type { Timestamp } from "./timestamp";
 
 export interface File {
   /** File ID */

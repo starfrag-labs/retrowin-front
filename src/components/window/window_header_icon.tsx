@@ -32,7 +32,9 @@ export default function WindowHeaderIcon({
         <FiMinimize className={className} onClick={onClick} style={baseStyle} />
       );
     case "minimize":
-      return <FaMinus className={className} onClick={onClick} style={baseStyle} />;
+      return (
+        <FaMinus className={className} onClick={onClick} style={baseStyle} />
+      );
     case "close":
       return (
         <IoMdClose className={className} onClick={onClick} style={baseStyle} />

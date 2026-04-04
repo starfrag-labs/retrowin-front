@@ -25,7 +25,6 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
-  CallbackRequest,
   CallbackResponse,
   ChmodRequest,
   CompleteUploadRequest,
@@ -36,6 +35,7 @@ import type {
   DownloadURLResponse,
   Error,
   GetDownloadUrlParams,
+  HandleCallbackParams,
   HealthStatus,
   InitiateUploadRequest,
   InodeResponse,
@@ -227,23 +227,29 @@ export type handleCallbackResponseError = (handleCallbackResponse400 | handleCal
 
 export type handleCallbackResponse = (handleCallbackResponseSuccess | handleCallbackResponseError)
 
-export const getHandleCallbackUrl = () => {
+export const getHandleCallbackUrl = (params: HandleCallbackParams,) => {
+  const normalizedParams = new URLSearchParams();
 
+  Object.entries(params || {}).forEach(([key, value]) => {
 
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
 
+  const stringifiedParams = normalizedParams.toString();
 
-  return `/api/auth/callback`
+  return stringifiedParams.length > 0 ? `/api/auth/callback?${stringifiedParams}` : `/api/auth/callback`
 }
 
-export const handleCallback = async (callbackRequest: CallbackRequest, options?: RequestInit): Promise<handleCallbackResponse> => {
+export const handleCallback = async (params: HandleCallbackParams, options?: RequestInit): Promise<handleCallbackResponse> => {
 
-  const res = await fetch(getHandleCallbackUrl(),
+  const res = await fetch(getHandleCallbackUrl(params),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(
-      callbackRequest,)
+    method: 'GET'
+
+
   }
 )
 
@@ -256,50 +262,79 @@ export const handleCallback = async (callbackRequest: CallbackRequest, options?:
 
 
 
-export const getHandleCallbackMutationOptions = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext> => {
 
-const mutationKey = ['handleCallback'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+export const getHandleCallbackQueryKey = (params?: HandleCallbackParams,) => {
+    return [
+    `/api/auth/callback`, ...(params ? [params] : [])
+    ] as const;
+    }
 
 
+export const getHandleCallbackQueryOptions = <TData = Awaited<ReturnType<typeof handleCallback>>, TError = Error>(params: HandleCallbackParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData>>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getHandleCallbackQueryKey(params);
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof handleCallback>>, {data: CallbackRequest}> = (props) => {
-          const {data} = props ?? {};
 
-          return  handleCallback(data,fetchOptions)
-        }
-
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof handleCallback>>> = ({ signal }) => handleCallback(params, { signal, ...fetchOptions });
 
 
 
 
 
-  return  { mutationFn, ...mutationOptions }}
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData> & { queryKey: DataTag<QueryKey, TData, TError> }
+}
 
-    export type HandleCallbackMutationResult = NonNullable<Awaited<ReturnType<typeof handleCallback>>>
-    export type HandleCallbackMutationBody = CallbackRequest
-    export type HandleCallbackMutationError = Error
+export type HandleCallbackQueryResult = NonNullable<Awaited<ReturnType<typeof handleCallback>>>
+export type HandleCallbackQueryError = Error
 
-    /**
+
+export function useHandleCallback<TData = Awaited<ReturnType<typeof handleCallback>>, TError = Error>(
+ params: HandleCallbackParams, options: { query:Partial<UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData>> & Pick<
+        DefinedInitialDataOptions<
+          Awaited<ReturnType<typeof handleCallback>>,
+          TError,
+          Awaited<ReturnType<typeof handleCallback>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  DefinedUseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHandleCallback<TData = Awaited<ReturnType<typeof handleCallback>>, TError = Error>(
+ params: HandleCallbackParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData>> & Pick<
+        UndefinedInitialDataOptions<
+          Awaited<ReturnType<typeof handleCallback>>,
+          TError,
+          Awaited<ReturnType<typeof handleCallback>>
+        > , 'initialData'
+      >, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+export function useHandleCallback<TData = Awaited<ReturnType<typeof handleCallback>>, TError = Error>(
+ params: HandleCallbackParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+  ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> }
+/**
  * @summary Handle OAuth callback
  */
-export const useHandleCallback = <TError = Error,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof handleCallback>>, TError,{data: CallbackRequest}, TContext>, fetch?: RequestInit}
- , queryClient?: QueryClient): UseMutationResult<
-        Awaited<ReturnType<typeof handleCallback>>,
-        TError,
-        {data: CallbackRequest},
-        TContext
-      > => {
-      return useMutation(getHandleCallbackMutationOptions(options), queryClient);
-    }
+
+export function useHandleCallback<TData = Awaited<ReturnType<typeof handleCallback>>, TError = Error>(
+ params: HandleCallbackParams, options?: { query?:Partial<UseQueryOptions<Awaited<ReturnType<typeof handleCallback>>, TError, TData>>, fetch?: RequestInit}
+ , queryClient?: QueryClient
+ ):  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> } {
+
+  const queryOptions = getHandleCallbackQueryOptions(params,options)
+
+  const query = useQuery(queryOptions, queryClient) as  UseQueryResult<TData, TError> & { queryKey: DataTag<QueryKey, TData, TError> };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
 
 /**
  * Logout and delete session (idempotent - always returns 204)

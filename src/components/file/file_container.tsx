@@ -91,39 +91,36 @@ export default function FileContainer({
     }
   );
 
-  const sortFiles = useCallback(
-    (a: DirEntry, b: DirEntry): number => {
-      // Home > Trash > Upload > Others
-      const specialFileOrder = [
-        SpecialFileName.Root,
-        SpecialFileName.Home,
-        SpecialFileName.Trash,
-        SpecialFileName.Upload,
-      ] as string[];
+  const sortFiles = useCallback((a: DirEntry, b: DirEntry): number => {
+    // Home > Trash > Upload > Others
+    const specialFileOrder = [
+      SpecialFileName.Root,
+      SpecialFileName.Home,
+      SpecialFileName.Trash,
+      SpecialFileName.Upload,
+    ] as string[];
 
-      // Skip hidden files starting with dot
-      if (a.name.startsWith(".")) return 1;
-      if (b.name.startsWith(".")) return -1;
+    // Skip hidden files starting with dot
+    if (a.name.startsWith(".")) return 1;
+    if (b.name.startsWith(".")) return -1;
 
-      const aIndex = specialFileOrder.indexOf(a.name);
-      const bIndex = specialFileOrder.indexOf(b.name);
-      if (aIndex !== -1 && bIndex !== -1) {
-        return aIndex - bIndex;
-      }
-      if (aIndex !== -1) {
-        return -1;
-      }
-      if (bIndex !== -1) {
-        return 1;
-      }
-      // Container > Block > Link
-      const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
-      const aTypeIndex = typeOrder.indexOf(getFileType(a.fileType));
-      const bTypeIndex = typeOrder.indexOf(getFileType(b.fileType));
-      return aTypeIndex - bTypeIndex;
-    },
-    []
-  );
+    const aIndex = specialFileOrder.indexOf(a.name);
+    const bIndex = specialFileOrder.indexOf(b.name);
+    if (aIndex !== -1 && bIndex !== -1) {
+      return aIndex - bIndex;
+    }
+    if (aIndex !== -1) {
+      return -1;
+    }
+    if (bIndex !== -1) {
+      return 1;
+    }
+    // Container > Block > Link
+    const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
+    const aTypeIndex = typeOrder.indexOf(getFileType(a.fileType));
+    const bTypeIndex = typeOrder.indexOf(getFileType(b.fileType));
+    return aTypeIndex - bTypeIndex;
+  }, []);
 
   useEffect(() => {
     if (setLoading) {
@@ -135,7 +132,8 @@ export default function FileContainer({
   if (readDirQuery.isError && readDirQuery.error) {
     return (
       <div className="flex-center full-size">
-        {"message" in readDirQuery.error && typeof readDirQuery.error.message === "string"
+        {"message" in readDirQuery.error &&
+        typeof readDirQuery.error.message === "string"
           ? readDirQuery.error.message
           : "Error loading files"}
       </div>

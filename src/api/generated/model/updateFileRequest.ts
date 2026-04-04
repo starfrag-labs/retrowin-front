@@ -8,9 +8,9 @@
 
 export interface UpdateFileRequest {
   /**
-     * New file name
-     * @minLength 1
-     * @maxLength 255
-     */
+   * New file name
+   * @minLength 1
+   * @maxLength 255
+   */
   fileName?: string;
 }

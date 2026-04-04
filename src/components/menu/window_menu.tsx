@@ -44,24 +44,26 @@ export default function WindowMenu({
   const handleCreateContainer = useCallback(async () => {
     if (!path || !systemId) return;
 
-    await mkdirMutation.mutateAsync({
-      systemId,
-      data: {
-        path: `${path === "/" ? "" : path}/New Folder`,
-        mode: 0o755,
-      },
-    }).then(() => {
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const queryKey = query.queryKey[0] as string;
-          return (
-            queryKey.startsWith("/fs/") &&
-            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-          );
+    await mkdirMutation
+      .mutateAsync({
+        systemId,
+        data: {
+          path: `${path === "/" ? "" : path}/New Folder`,
+          mode: 0o755,
         },
+      })
+      .then(() => {
+        queryClient.invalidateQueries({
+          predicate: (query) => {
+            const queryKey = query.queryKey[0] as string;
+            return (
+              queryKey.startsWith("/fs/") &&
+              (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
+            );
+          },
+        });
+        closeMenu();
       });
-      closeMenu();
-    });
   }, [path, systemId, closeMenu, mkdirMutation, queryClient]);
 
   const handleEmptyTrash = useCallback(async () => {
@@ -69,7 +71,11 @@ export default function WindowMenu({
     closeMenu();
 
     // Get all files in trash directory
-    const readDirResult = await ls(systemId, { path }, { credentials: "include" });
+    const readDirResult = await ls(
+      systemId,
+      { path },
+      { credentials: "include" }
+    );
 
     if (readDirResult.data && "entries" in readDirResult.data) {
       Promise.all(

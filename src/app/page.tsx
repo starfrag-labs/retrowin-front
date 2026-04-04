@@ -3,7 +3,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetUser, useListSystems, useGetRootDirectory } from "@/api/generated";
+import {
+  useGetUser,
+  useListSystems,
+  useGetRootDirectory,
+} from "@/api/generated";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
 import Background from "@/components/layout/background";
@@ -57,17 +61,14 @@ export default function Home() {
   });
 
   // Get root directory for first system
-  const rootDirectoryQuery = useGetRootDirectory(
-    currentSystemId ?? "",
-    {
-      query: {
-        retry: false,
-        select: (data) => (data.status === 200 ? data.data.inode : null),
-        enabled: !!currentSystemId,
-      },
-      fetch: { credentials: "include" },
-    }
-  );
+  const rootDirectoryQuery = useGetRootDirectory(currentSystemId ?? "", {
+    query: {
+      retry: false,
+      select: (data) => (data.status === 200 ? data.data.inode : null),
+      enabled: !!currentSystemId,
+    },
+    fetch: { credentials: "include" },
+  });
 
   // Redirect to login on auth error (401)
   useEffect(() => {
@@ -79,7 +80,11 @@ export default function Home() {
 
   // Set current system ID when systems are loaded
   useEffect(() => {
-    if (listSystemsQuery.isSuccess && listSystemsQuery.data.length > 0 && !currentSystemId) {
+    if (
+      listSystemsQuery.isSuccess &&
+      listSystemsQuery.data.length > 0 &&
+      !currentSystemId
+    ) {
       setCurrentSystemId(listSystemsQuery.data[0].id);
     }
   }, [listSystemsQuery.data, listSystemsQuery.isSuccess, currentSystemId]);
@@ -94,7 +99,13 @@ export default function Home() {
         systemId: currentSystemId,
       });
     }
-  }, [backgroundWindowKey, newBackgroundWindow, homeKey, currentSystemId, currentPath]);
+  }, [
+    backgroundWindowKey,
+    newBackgroundWindow,
+    homeKey,
+    currentSystemId,
+    currentPath,
+  ]);
 
   useEffect(() => {
     if (rootDirectoryQuery.isSuccess && rootDirectoryQuery.data) {
@@ -112,7 +123,12 @@ export default function Home() {
   }, [backgroundWindowKey, setCurrentWindow]);
 
   // Show loading while checking auth or loading data
-  if (getUserQuery.isLoading || getUserQuery.isPending || !homeKey || !currentSystemId) {
+  if (
+    getUserQuery.isLoading ||
+    getUserQuery.isPending ||
+    !homeKey ||
+    !currentSystemId
+  ) {
     return <div className="flex-center full-size">Loading...</div>;
   }
 

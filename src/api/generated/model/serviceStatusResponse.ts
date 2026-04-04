@@ -5,7 +5,7 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.1.0
  */
-import type { ServiceStatus } from './serviceStatus';
+import type { ServiceStatus } from "./serviceStatus";
 
 export interface ServiceStatusResponse {
   status: ServiceStatus;

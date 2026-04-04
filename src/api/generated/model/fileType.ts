@@ -9,10 +9,9 @@
 /**
  * Type of file (container or file)
  */
-export type FileType = typeof FileType[keyof typeof FileType];
-
+export type FileType = (typeof FileType)[keyof typeof FileType];
 
 export const FileType = {
-  container: 'container',
-  file: 'file',
+  container: "container",
+  file: "file",
 } as const;
