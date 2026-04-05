@@ -10,7 +10,7 @@ export default defineConfig({
       baseUrl: "/api",
     },
     input: {
-      target: "https://retrowin-api.starfrag.co/openapi.json",
+      target: "https://api.retrowin.starfrag.co/openapi.json",
     },
   },
 });
