@@ -5,7 +5,7 @@ const nextConfig = {
     return [
       {
         source: "/api/:path*",
-        destination: "https://retrowin-api.starfrag.co/:path*",
+        destination: "https://api.retrowin.starfrag.co/:path*",
       },
     ];
   },
