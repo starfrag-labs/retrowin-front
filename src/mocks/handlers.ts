@@ -238,7 +238,12 @@ export const handlers = [
       entries: children.map((child) => ({
         name: child.fileName,
         inodeId: child.fileKey,
-        fileType: child.type === "container" ? 0o040000 : 0o0100000,
+        fileType:
+          child.type === "container"
+            ? 4 // DT_DIR
+            : child.type === "object"
+              ? 3 // DT_OBJ
+              : 8, // DT_REG
       })),
     });
   }),

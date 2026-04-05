@@ -148,7 +148,12 @@ export default function SystemSelectionPage() {
         {/* Left side - Branding */}
         <div className={styles.left_panel}>
           <div className={styles.windows_logo}>
-            <svg viewBox="0 0 88 88" className={styles.logo_svg} role="img" aria-label="Windows Logo">
+            <svg
+              viewBox="0 0 88 88"
+              className={styles.logo_svg}
+              role="img"
+              aria-label="Windows Logo"
+            >
               <title>Windows Logo</title>
               <path fill="#F25022" d="M0 0h42v42H0z" />
               <path fill="#00A4EF" d="M46 0h42v42H46z" />
@@ -176,7 +181,14 @@ export default function SystemSelectionPage() {
                 onClick={handleLoginClick}
                 type="button"
               >
-                <svg viewBox="0 0 24 24" fill="white" width="32" height="32" role="img" aria-label="User">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="white"
+                  width="32"
+                  height="32"
+                  role="img"
+                  aria-label="User"
+                >
                   <title>User</title>
                   <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                 </svg>
@@ -261,7 +273,14 @@ export default function SystemSelectionPage() {
                 aria-label="Add new system"
               >
                 <div className={styles.user_avatar}>
-                  <svg viewBox="0 0 24 24" fill="white" width="32" height="32" role="img" aria-label="Add">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="white"
+                    width="32"
+                    height="32"
+                    role="img"
+                    aria-label="Add"
+                  >
                     <title>Add</title>
                     <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
                   </svg>
@@ -282,7 +301,12 @@ export default function SystemSelectionPage() {
           disabled={logoutMutation.isPending}
           aria-label="Turn off computer"
         >
-          <svg viewBox="0 0 24 24" fill="currentColor" role="img" aria-label="Power">
+          <svg
+            viewBox="0 0 24 24"
+            fill="currentColor"
+            role="img"
+            aria-label="Power"
+          >
             <title>Power</title>
             <path d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C17.99 7.86 19 9.81 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.19 1.01-4.14 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z" />
           </svg>

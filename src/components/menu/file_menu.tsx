@@ -39,7 +39,7 @@ export default function FileMenu({
   const _getSelectedFileKeys = useFileStore(
     (state) => state.getSelectedFileKeys
   );
-  const _setRenamingFile = useFileStore((state) => state.setRenamingFile);
+  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
   const openFile = useCallback(
     async (
@@ -55,7 +55,7 @@ export default function FileMenu({
         case FileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case FileType.Block: {
+        case FileType.Object: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
@@ -96,13 +96,11 @@ export default function FileMenu({
     openFile(fileType, fileName, path);
   }, [closeMenu, path, fileName, fileType, openFile]);
 
-  // Update file actions (TODO: Not implemented in new API yet)
+  // Update file actions
   const handleRename = useCallback(() => {
     closeMenu();
-    // TODO: Implement rename functionality
-    // setRenamingFile({ path, windowKey });
-    console.warn("Rename not implemented in new API");
-  }, [closeMenu]);
+    setRenamingFile({ fileKey: path, windowKey });
+  }, [closeMenu, path, windowKey, setRenamingFile]);
 
   // Download file actions
   const handleDownload = useCallback(async () => {
@@ -187,12 +185,22 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Block:
+    case FileType.Object:
       return (
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
             { name: "Download", action: handleDownload },
+            { name: "Rename", action: handleRename },
+            { name: "/", action: () => {} },
+            deleteMenu,
+          ]}
+        />
+      );
+    case FileType.Regular:
+      return (
+        <MenuList
+          menuList={[
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,

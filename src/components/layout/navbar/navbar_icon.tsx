@@ -85,7 +85,7 @@ export default function NavbarIcon({
           <FileIcon icon={FileIconType.Video} size={size} asButton={false} />
         )}
         {windowType === WindowType.Audio && (
-          <FileIcon icon={FileIconType.Block} size={size} asButton={false} />
+          <FileIcon icon={FileIconType.Object} size={size} asButton={false} />
         )}
         {windowType === WindowType.Uploader && (
           <FileIcon icon={FileIconType.Upload} size={size} asButton={false} />
@@ -94,7 +94,7 @@ export default function NavbarIcon({
           <FileIcon icon={FileIconType.Trash} size={size} asButton={false} />
         )}
         {windowType === WindowType.Document && (
-          <FileIcon icon={FileIconType.Block} size={size} asButton={false} />
+          <FileIcon icon={FileIconType.Regular} size={size} asButton={false} />
         )}
       </button>
     </div>

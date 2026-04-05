@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { useMkdir } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
+import { isFsQuery } from "@/utils/query_keys";
 import MenuList from "./menu_list";
 
 export default function BackgroundMenu({
@@ -70,13 +71,7 @@ export default function BackgroundMenu({
         },
       });
       queryClient.invalidateQueries({
-        predicate: (query) => {
-          const queryKey = query.queryKey[0] as string;
-          return (
-            queryKey.startsWith("/fs/") &&
-            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-          );
-        },
+        predicate: isFsQuery,
       });
     } catch (error) {
       console.error("[BackgroundMenu] Failed to create folder:", error);
@@ -85,13 +80,7 @@ export default function BackgroundMenu({
 
   const handleRefresh = useCallback(() => {
     queryClient.invalidateQueries({
-      predicate: (query) => {
-        const queryKey = query.queryKey[0] as string;
-        return (
-          queryKey.startsWith("/fs/") &&
-          (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-        );
-      },
+      predicate: isFsQuery,
     });
     closeMenu();
   }, [queryClient, closeMenu]);
