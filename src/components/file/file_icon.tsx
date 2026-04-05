@@ -8,7 +8,8 @@ import styles from "./file_icon.module.css";
  * @param icon - type of the icon
  * @param onClick - on click event
  * @param hasContent - has content (for trash/container type)
- * @param style - style of the icon
+ * @param asButton - render as button element (default: true)
+ * @param size - style of the icon
  * @returns - File icon component
  * @example
  * <FileIcon icon={FileIconType.Container} />
@@ -19,27 +20,40 @@ export default memo(
       icon,
       onClick,
       hasContent = false,
+      asButton = true,
       size = "4rem",
     }: {
       icon: FileIconType;
       onClick?: () => void;
       hasContent?: boolean;
+      asButton?: boolean;
       size?: string;
     },
-    ref?: React.Ref<HTMLButtonElement>
+    ref?: React.Ref<HTMLButtonElement | HTMLDivElement>
   ) {
+    const Wrapper = asButton ? "button" : "div";
+    const wrapperProps = asButton
+      ? {
+          type: "button" as const,
+          onClick,
+          onDragStart: (e: React.DragEvent) => e.preventDefault(),
+          draggable: false as const,
+        }
+      : {
+          onClick,
+          onDragStart: (e: React.DragEvent) => e.preventDefault(),
+          draggable: false as const,
+        };
+
     return (
-      <button
+      <Wrapper
         className={styles.icon_container}
-        ref={ref}
-        onClick={onClick}
-        onDragStart={(e) => e.preventDefault()}
-        draggable={false}
-        type="button"
+        ref={ref as any}
         style={{
           width: size,
           height: size,
         }}
+        {...wrapperProps}
       >
         <div className={styles.image_icon}>
           {icon === FileIconType.Container &&
@@ -52,7 +66,7 @@ export default memo(
           {icon === FileIconType.Image && <XPImageIcons.File />}
           {icon === FileIconType.Video && <XPImageIcons.File />}
         </div>
-      </button>
+      </Wrapper>
     );
   })
 );

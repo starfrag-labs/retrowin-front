@@ -45,7 +45,7 @@ function toInode(mockFile: {
 
 export const handlers = [
   // Health check
-  http.get("/health", () => {
+  http.get("/api/health", () => {
     return HttpResponse.json({
       status: "healthy",
       version: "0.2.0",
@@ -53,14 +53,14 @@ export const handlers = [
   }),
 
   // Auth endpoints
-  http.get("/auth/login", () => {
+  http.get("/api/auth/login", () => {
     return HttpResponse.json({
       authorizationUrl: "https://mock-keycloak.example.com/auth",
       state: "mock-state-123",
     });
   }),
 
-  http.post("/auth/callback", async () => {
+  http.post("/api/auth/callback", async () => {
     return HttpResponse.json({
       sessionId: "mock-session-id",
       userId: "user-123",
@@ -68,12 +68,12 @@ export const handlers = [
     });
   }),
 
-  http.post("/auth/logout", () => {
+  http.post("/api/auth/logout", () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
   // User endpoints
-  http.get("/user", () => {
+  http.get("/api/user", () => {
     return HttpResponse.json({
       user: {
         id: "user-123",
@@ -85,12 +85,12 @@ export const handlers = [
     });
   }),
 
-  http.delete("/user", () => {
+  http.delete("/api/user", () => {
     return new HttpResponse(null, { status: 204 });
   }),
 
   // System endpoints
-  http.get("/systems", () => {
+  http.get("/api/systems", () => {
     return HttpResponse.json({
       systems: [
         {
@@ -105,7 +105,7 @@ export const handlers = [
     });
   }),
 
-  http.get("/systems/:systemId", ({ params }) => {
+  http.get("/api/systems/:systemId", ({ params }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -125,7 +125,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Get root directory
-  http.get("/fs/:systemId/root", ({ params }) => {
+  http.get("/api/fs/:systemId/root", ({ params }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -147,7 +147,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Stat path
-  http.get("/fs/:systemId/stat", ({ params, request }) => {
+  http.get("/api/fs/:systemId/stat", ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -172,7 +172,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - List directory (ls)
-  http.get("/fs/:systemId/ls", ({ params, request }) => {
+  http.get("/api/fs/:systemId/ls", ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -202,7 +202,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Create directory
-  http.post("/fs/:systemId/mkdir", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/mkdir", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -260,7 +260,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Rename (same directory)
-  http.post("/fs/:systemId/rename", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/rename", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -306,7 +306,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Move (mv)
-  http.post("/fs/:systemId/mv", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/mv", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -387,7 +387,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Create symlink (ln)
-  http.post("/fs/:systemId/ln", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/ln", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -457,7 +457,7 @@ export const handlers = [
   }),
 
   // Filesystem endpoints - Delete (unlink)
-  http.delete("/fs/:systemId/unlink", ({ params, request }) => {
+  http.delete("/api/fs/:systemId/unlink", ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -482,7 +482,7 @@ export const handlers = [
   }),
 
   // Upload endpoints - Initiate upload
-  http.post("/fs/:systemId/upload/initiate", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/upload/initiate", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -515,7 +515,7 @@ export const handlers = [
   }),
 
   // Upload endpoints - Complete upload
-  http.post("/fs/:systemId/upload/complete", async ({ params, request }) => {
+  http.post("/api/fs/:systemId/upload/complete", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -571,7 +571,7 @@ export const handlers = [
   }),
 
   // Download endpoints - Get download URL
-  http.get("/fs/:systemId/download", ({ params, request }) => {
+  http.get("/api/fs/:systemId/download", ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
