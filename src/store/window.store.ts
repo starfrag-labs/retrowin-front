@@ -143,7 +143,11 @@ export const useWindowStore = create<State & Action>((set, get) => ({
   closeWindow: (key) => {
     set((state) => {
       state.windows = state.windows.filter((w) => w.key !== key);
-      return { windows: state.windows };
+      const shouldResetCurrent = state.currentWindow?.key === key;
+      return {
+        windows: state.windows,
+        ...(shouldResetCurrent ? { currentWindow: null } : {}),
+      };
     });
   },
   minimizeWindow: (key) => {
