@@ -6,8 +6,9 @@ export enum SpecialFileName {
 }
 export enum FileType {
   Container = "container",
-  Block = "block",
+  Regular = "regular", // Regular file (no functionality)
   Link = "link",
+  Object = "object", // External storage object (S3, etc.) - supports media playback and download
   Upload = "upload",
   Root = "root",
   Trash = "trash",
@@ -16,7 +17,8 @@ export enum FileType {
 
 export enum FileIconType {
   Container = "container",
-  Block = "block",
+  Regular = "regular",
+  Object = "object",
   Home = "home",
   Trash = "trash",
   Upload = "upload",

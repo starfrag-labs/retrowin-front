@@ -19,12 +19,14 @@ export default memo(
     {
       icon,
       onClick,
+      onDoubleClick,
       hasContent = false,
       asButton = true,
       size = "4rem",
     }: {
       icon: FileIconType;
       onClick?: () => void;
+      onDoubleClick?: () => void;
       hasContent?: boolean;
       asButton?: boolean;
       size?: string;
@@ -36,11 +38,13 @@ export default memo(
       ? {
           type: "button" as const,
           onClick,
+          onDoubleClick,
           onDragStart: (e: React.DragEvent) => e.preventDefault(),
           draggable: false as const,
         }
       : {
           onClick,
+          onDoubleClick,
           onDragStart: (e: React.DragEvent) => e.preventDefault(),
           draggable: false as const,
         };
@@ -48,7 +52,7 @@ export default memo(
     return (
       <Wrapper
         className={styles.icon_container}
-        ref={ref as any}
+        ref={ref as React.Ref<HTMLButtonElement> & React.Ref<HTMLDivElement>}
         style={{
           width: size,
           height: size,
@@ -58,7 +62,8 @@ export default memo(
         <div className={styles.image_icon}>
           {icon === FileIconType.Container &&
             (hasContent ? <XPImageIcons.Home /> : <XPImageIcons.Folder />)}
-          {icon === FileIconType.Block && <XPImageIcons.File />}
+          {icon === FileIconType.Regular && <XPImageIcons.File />}
+          {icon === FileIconType.Object && <XPImageIcons.File />}
           {icon === FileIconType.Home && <XPImageIcons.Home />}
           {icon === FileIconType.Trash &&
             (hasContent ? <XPImageIcons.TrashFull /> : <XPImageIcons.Trash />)}

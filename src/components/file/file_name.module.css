@@ -31,12 +31,12 @@
   height: auto;
   min-height: 1.2em;
   max-height: 3em;
-  padding: 0;
+  padding: 0 2px;
   border: none;
   border-bottom: 1px dotted currentColor;
   border-radius: 0;
   box-sizing: border-box;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.85);
   font-family: inherit;
   font-size: 1em;
   color: #000;
@@ -48,17 +48,16 @@
 }
 
 .rename_input:focus {
-  background: transparent;
+  background: rgba(255, 255, 255, 0.95);
 }
 
-/* Background file rename - white text */
+/* Background file rename - keep dark text on light background for readability */
 .rename_input_background {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
+  color: #000;
+  border-bottom-color: #000;
+  background: rgba(255, 255, 255, 0.85);
 }
 
-/* Window file rename - black text */
-.rename_input:not(.rename_input_background) {
-  color: #000000;
-  border-bottom-color: #000000;
+.rename_input_background:focus {
+  background: rgba(255, 255, 255, 0.95);
 }

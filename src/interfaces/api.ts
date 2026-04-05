@@ -22,7 +22,11 @@ export interface QueryError {
   message: string;
 }
 
-export type ApiFileType = FileType.Block | FileType.Container | FileType.Link;
+export type ApiFileType =
+  | FileType.Regular
+  | FileType.Object
+  | FileType.Container
+  | FileType.Link;
 
 export interface CustomStorageResponse<T = unknown> {
   message: string;

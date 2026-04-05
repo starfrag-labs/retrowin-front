@@ -4,6 +4,7 @@ import { useMkdir, useUnlink } from "@/api/generated";
 import { ls } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
+import { isFsQuery } from "@/utils/query_keys";
 import MenuList from "./menu_list";
 
 export default function WindowMenu({
@@ -54,13 +55,7 @@ export default function WindowMenu({
       })
       .then(() => {
         queryClient.invalidateQueries({
-          predicate: (query) => {
-            const queryKey = query.queryKey[0] as string;
-            return (
-              queryKey.startsWith("/fs/") &&
-              (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-            );
-          },
+          predicate: isFsQuery,
         });
         closeMenu();
       });

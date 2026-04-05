@@ -238,7 +238,12 @@ export const handlers = [
       entries: children.map((child) => ({
         name: child.fileName,
         inodeId: child.fileKey,
-        fileType: child.type === "container" ? 0o040000 : 0o0100000,
+        fileType:
+          child.type === "container"
+            ? 4 // DT_DIR
+            : child.type === "object"
+              ? 3 // DT_OBJ
+              : 8, // DT_REG
       })),
     });
   }),
@@ -382,18 +387,22 @@ export const handlers = [
       );
     }
 
-    // Extract target parent and new name from destination
-    const destParts = destination.split("/").filter(Boolean);
-    const newName = destParts.pop() || sourceFile.fileName;
-    const targetParentPath =
-      destParts.length > 0 ? `/${destParts.join("/")}` : "/";
+    // Check if destination is an existing directory
+    const destDir = getFileByPath(destination);
+    let targetParent: ReturnType<typeof getFileByPath>;
+    let newName: string;
 
-    // Check if destination is a directory or a full path
-    const targetParentFile = getFileByPath(destination);
-    let targetParent = targetParentFile;
+    if (destDir) {
+      // Destination is an existing directory — move into it keeping original name
+      targetParent = destDir;
+      newName = sourceFile.fileName;
+    } else {
+      // Destination is a full target path — extract parent dir and new name
+      const destParts = destination.split("/").filter(Boolean);
+      newName = destParts.pop() || sourceFile.fileName;
+      const targetParentPath =
+        destParts.length > 0 ? `/${destParts.join("/")}` : "/";
 
-    if (!targetParentFile) {
-      // Not a direct directory match, check if it's a parent path
       const possibleParent = getFileByPath(targetParentPath);
       if (!possibleParent) {
         return HttpResponse.json(
@@ -402,19 +411,6 @@ export const handlers = [
         );
       }
       targetParent = possibleParent;
-    }
-
-    // Ensure targetParent is not null
-    if (!targetParent) {
-      return HttpResponse.json(
-        {
-          error: {
-            type: "internal_error",
-            message: "Failed to determine target parent",
-          },
-        },
-        { status: 500 }
-      );
     }
 
     // Update file parent and name

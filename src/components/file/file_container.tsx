@@ -8,16 +8,27 @@ import FileItem from "./file_item";
 /**
  * Convert file type from mode to FileType
  */
+// Linux dirent d_type values
+const DT_DIR = 4; // Directory
+const DT_REG = 8; // Regular file
+const DT_LNK = 10; // Symbolic link
+const DT_OBJ = 3; // External storage object (S3, etc.)
+
 const getFileType = (fileType: number): FileType => {
-  // Check if directory (S_IFDIR = 0o040000)
-  if ((fileType & 0o040000) === 0o040000) {
+  // fileType is Linux dirent d_type value
+  if (fileType === DT_DIR) {
     return FileType.Container;
   }
-  // Check if symlink (S_IFLNK = 0o0120000)
-  if ((fileType & 0o0120000) === 0o0120000) {
+  if (fileType === DT_LNK) {
     return FileType.Link;
   }
-  return FileType.Block;
+  if (fileType === DT_OBJ) {
+    return FileType.Object;
+  }
+  if (fileType === DT_REG) {
+    return FileType.Regular;
+  }
+  return FileType.Regular;
 };
 
 /**
@@ -77,8 +88,8 @@ export default function FileContainer({
     }
   );
 
-  // Get trash inode if trash should be shown
-  const trashPath = path === "/" ? "/.trash" : `${path}/.trash`;
+  // Get trash inode if trash should be shown (trash is under home)
+  const trashPath = "/home/.trash";
   const trashStatQuery = useStatPath(
     systemId,
     { path: trashPath },
@@ -115,8 +126,13 @@ export default function FileContainer({
     if (bIndex !== -1) {
       return 1;
     }
-    // Container > Block > Link
-    const typeOrder = [FileType.Container, FileType.Block, FileType.Link];
+    // Container > Object > Regular > Link
+    const typeOrder = [
+      FileType.Container,
+      FileType.Object,
+      FileType.Regular,
+      FileType.Link,
+    ];
     const aTypeIndex = typeOrder.indexOf(getFileType(a.fileType));
     const bTypeIndex = typeOrder.indexOf(getFileType(b.fileType));
     return aTypeIndex - bTypeIndex;

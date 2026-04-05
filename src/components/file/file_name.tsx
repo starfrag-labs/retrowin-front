@@ -1,6 +1,10 @@
-import { memo, useEffect, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { memo, useEffect, useRef, useState } from "react";
+import { useRename } from "@/api/generated";
 import { useFileStore } from "@/store/file.store";
+import { useWindowStore } from "@/store/window.store";
 import { parseSerialKey } from "@/utils/serial_key";
+import { isFsQuery } from "@/utils/query_keys";
 import styles from "./file_name.module.css";
 
 /**
@@ -26,15 +30,52 @@ export default memo(function FileName({
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
 
+  // Refs
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Query client
+  const queryClient = useQueryClient();
+
   // Store state
   const renamingFileSerial = useFileStore((state) => state.renamingFileSerial);
   // Store actions
   const setRenamingFile = useFileStore((state) => state.setRenamingFile);
 
-  // Update file name (not implemented in new API yet)
+  // Get system ID from window store
+  const windows = useWindowStore((state) => state.windows);
+  const currentWindow = windows.find((w) => w.key === windowKey);
+  const systemId = currentWindow?.systemId || "";
+
+  // Mutations
+  const renameMutation = useRename();
+
+  // Update file name via API
   const updateFileName = async () => {
-    // Rename functionality requires API support
-    // For now, just close the rename UI
+    if (!newName.trim() || newName === name) {
+      setIsRenaming(false);
+      setRenamingFile(null);
+      return;
+    }
+
+    try {
+      await renameMutation.mutateAsync({
+        systemId,
+        data: {
+          path: fileKey,
+          newName: newName.trim(),
+        },
+      });
+
+      // Refresh file list
+      queryClient.invalidateQueries({
+        predicate: isFsQuery,
+      });
+    } catch (error) {
+      console.error("[FileName] Rename failed:", error);
+      // Reset to original name on error
+      setNewName(name);
+    }
+
     setIsRenaming(false);
     setRenamingFile(null);
   };
@@ -52,6 +93,14 @@ export default memo(function FileName({
     }
   }, [fileKey, renamingFileSerial, windowKey]);
 
+  // Focus and select all text when renaming starts
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
+
   return (
     <div className={`flex-center full-size`}>
       {isRenaming ? (
@@ -65,8 +114,9 @@ export default memo(function FileName({
           }}
         >
           <input
+            ref={inputRef}
             type="text"
-            className={styles.rename_input}
+            className={`${styles.rename_input} ${backgroundFile ? styles.rename_input_background : ""}`}
             value={newName}
             onChange={(e) => {
               setNewName(e.target.value);

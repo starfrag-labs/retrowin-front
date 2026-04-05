@@ -130,15 +130,15 @@ const initMockFiles = () => {
 
   // Trash container - use TRASH_KEY as fileKey
   const trash = createMockFile(
-    "trash",
+    ".trash",
     "container" as FileType,
-    ROOT_KEY,
+    HOME_KEY,
     0,
-    "/.trash",
+    "/home/.trash",
     TRASH_KEY
   );
   mockFiles.set(TRASH_KEY, trash);
-  pathToKeyMap.set("/.trash", TRASH_KEY);
+  pathToKeyMap.set("/home/.trash", TRASH_KEY);
 
   // Sample folders in home
   const documents = createMockFile(
@@ -336,7 +336,7 @@ export const moveToTrash = (fileKey: string) => {
   if (file) {
     const oldPath = file.path;
     const trashName = `trash-${Date.now()}`;
-    const newPath = `/.trash/${trashName}`;
+    const newPath = `/home/.trash/${trashName}`;
 
     pathToKeyMap.delete(oldPath);
 

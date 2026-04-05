@@ -1,11 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useUnlink } from "@/api/generated";
+import { useUnlink, useMv, ls } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import { isFsQuery } from "@/utils/query_keys";
 import MenuList from "./menu_list";
 
 export default function FileMenu({
@@ -24,7 +25,7 @@ export default function FileMenu({
   closeMenu: () => void;
 }) {
   // Query client
-  const _queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   // Get system ID from window store
   const windows = useWindowStore((state) => state.windows);
@@ -32,14 +33,25 @@ export default function FileMenu({
   const systemId = currentWindow?.systemId || "";
 
   // Mutations
-  const _unlinkMutation = useUnlink();
+  const unlinkMutation = useUnlink();
+  const mvMutation = useMv();
 
   // Store actions
   const newWindow = useWindowStore((state) => state.newWindow);
-  const _getSelectedFileKeys = useFileStore(
+  const getSelectedFileKeys = useFileStore(
     (state) => state.getSelectedFileKeys
   );
-  const _setRenamingFile = useFileStore((state) => state.setRenamingFile);
+  const setRenamingFile = useFileStore((state) => state.setRenamingFile);
+
+  // Get all selected file paths (includes the right-clicked file)
+  const getTargetPaths = useCallback(() => {
+    const selectedKeys = getSelectedFileKeys();
+    // Include the right-clicked file even if not in selection
+    if (!selectedKeys.includes(path)) {
+      return [path];
+    }
+    return selectedKeys;
+  }, [getSelectedFileKeys, path]);
 
   const openFile = useCallback(
     async (
@@ -55,7 +67,7 @@ export default function FileMenu({
         case FileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case FileType.Block: {
+        case FileType.Object: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
@@ -96,13 +108,11 @@ export default function FileMenu({
     openFile(fileType, fileName, path);
   }, [closeMenu, path, fileName, fileType, openFile]);
 
-  // Update file actions (TODO: Not implemented in new API yet)
+  // Update file actions
   const handleRename = useCallback(() => {
     closeMenu();
-    // TODO: Implement rename functionality
-    // setRenamingFile({ path, windowKey });
-    console.warn("Rename not implemented in new API");
-  }, [closeMenu]);
+    setRenamingFile({ fileKey: path, windowKey });
+  }, [closeMenu, path, windowKey, setRenamingFile]);
 
   // Download file actions
   const handleDownload = useCallback(async () => {
@@ -112,60 +122,66 @@ export default function FileMenu({
     // Need to call getDownloadUrl API function directly
   }, [closeMenu]);
 
-  // Delete file actions (TODO: Implement with proper systemId)
-  const handleMoveToTrash = useCallback(() => {
+  // Move to trash action
+  const handleMoveToTrash = useCallback(async () => {
     closeMenu();
-    // TODO: Implement move to trash
-    console.warn("Move to trash not implemented in new API");
-    /*
-    const selectedFileKeys = getSelectedFileKeys();
-    Promise.all(
-      selectedFileKeys.map((filePath) =>
-        unlinkMutation.mutateAsync({
-          systemId,
-          data: { path: filePath },
-        })
-      )
-    ).finally(() => {
-      queryClient.invalidateQueries({
-        predicate: (query) => query.queryKey[0] === "readDir",
-      });
-    });
-    */
-  }, [closeMenu]);
+    try {
+      const paths = getTargetPaths();
+      await Promise.all(
+        paths.map((p) =>
+          mvMutation.mutateAsync({
+            systemId,
+            data: { path: p, destination: "/home/.trash" },
+          })
+        )
+      );
+      queryClient.invalidateQueries({ predicate: isFsQuery });
+    } catch (error) {
+      console.error("[FileMenu] Move to trash failed:", error);
+    }
+  }, [closeMenu, getTargetPaths, systemId, mvMutation, queryClient]);
 
-  const handlePermanentDelete = useCallback(() => {
+  const handlePermanentDelete = useCallback(async () => {
     closeMenu();
-    // TODO: Implement permanent delete
-    console.warn("Permanent delete not implemented in new API");
-  }, [closeMenu]);
+    try {
+      const paths = getTargetPaths();
+      await Promise.all(
+        paths.map((p) =>
+          unlinkMutation.mutateAsync({
+            systemId,
+            params: { path: p },
+          })
+        )
+      );
+      queryClient.invalidateQueries({ predicate: isFsQuery });
+    } catch (error) {
+      console.error("[FileMenu] Permanent delete failed:", error);
+    }
+  }, [closeMenu, getTargetPaths, systemId, unlinkMutation, queryClient]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
-    // TODO: Implement empty trash
-    console.warn("Empty trash not implemented in new API");
-    /*
-    const files = await useReadDir()(
-      systemId,
-      { path },
-      { fetch: { credentials: "include" } }
-    );
-    if (files.data && "entries" in files.data) {
-      Promise.all(
-        files.data.entries.map((entry) =>
-          unlinkMutation.mutateAsync({
-            systemId,
-            data: { path: `${path}/${entry.name}` },
-          })
-        )
-      ).then(() => {
-        queryClient.invalidateQueries({
-          predicate: (query) => query.queryKey[0] === "readDir",
-        });
-      });
+    try {
+      const readDirResult = await ls(
+        systemId,
+        { path },
+        { credentials: "include" }
+      );
+      if (readDirResult.data && "entries" in readDirResult.data) {
+        await Promise.all(
+          readDirResult.data.entries.map((entry) =>
+            unlinkMutation.mutateAsync({
+              systemId,
+              params: { path: `${path === "/" ? "" : path}/${entry.name}` },
+            })
+          )
+        );
+        queryClient.invalidateQueries({ predicate: isFsQuery });
+      }
+    } catch (error) {
+      console.error("[FileMenu] Empty trash failed:", error);
     }
-    */
-  }, [closeMenu]);
+  }, [closeMenu, path, systemId, unlinkMutation, queryClient]);
 
   // Delete file actions based on parent window type
   const deleteMenu =
@@ -187,12 +203,22 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Block:
+    case FileType.Object:
       return (
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
             { name: "Download", action: handleDownload },
+            { name: "Rename", action: handleRename },
+            { name: "/", action: () => {} },
+            deleteMenu,
+          ]}
+        />
+      );
+    case FileType.Regular:
+      return (
+        <MenuList
+          menuList={[
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,

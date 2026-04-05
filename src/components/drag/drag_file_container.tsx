@@ -8,6 +8,7 @@ import { useFileStore } from "@/store/file.store";
 import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
 import { parseSerialKey } from "@/utils/serial_key";
+import { isFsQuery } from "@/utils/query_keys";
 import styles from "./drag_file_container.module.css";
 
 export default function DragFileContainer({
@@ -213,15 +214,9 @@ export default function DragFileContainer({
         })
       );
 
-      // Invalidate queries after move
-      queryClient.invalidateQueries({
-        predicate: (query) => {
-          const queryKey = query.queryKey[0] as string;
-          return (
-            queryKey.startsWith("/fs/") &&
-            (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-          );
-        },
+      // Refetch queries after move to update UI immediately
+      await queryClient.refetchQueries({
+        predicate: isFsQuery,
       });
 
       unselectAllFiles();

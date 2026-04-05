@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
 import { useInitiateUpload, useCompleteUpload } from "@/api/generated";
 import { useWindowStore } from "@/store/window.store";
+import { isFsQuery } from "@/utils/query_keys";
 import styles from "./uploader.module.css";
 
 export default function Uploader({ targetPath }: { targetPath: string }) {
@@ -120,13 +121,7 @@ export default function Uploader({ targetPath }: { targetPath: string }) {
 
         // Invalidate queries to refresh file list
         queryClient.invalidateQueries({
-          predicate: (query) => {
-            const queryKey = query.queryKey[0] as string;
-            return (
-              queryKey.startsWith("/fs/") &&
-              (queryKey.endsWith("/ls") || queryKey.endsWith("/stat"))
-            );
-          },
+          predicate: isFsQuery,
         });
       } finally {
         // Remove from upload state

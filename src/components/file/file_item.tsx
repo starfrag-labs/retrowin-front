@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useStatPath } from "@/api/generated";
+import { useLs, useStatPath } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -72,6 +72,20 @@ export default memo(function FileItem({
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
 
+  // Check if trash has content
+  const trashLsQuery = useLs(
+    systemId || "",
+    { path: fileKey },
+    {
+      query: {
+        select: (data) =>
+          data.status === 200 ? (data.data.entries?.length ?? 0) > 0 : false,
+        enabled: !!systemId && type === FileType.Trash,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
+
   // Queries - use statPath to get file info
   const fileInfoQuery = useStatPath(
     systemId || "",
@@ -81,7 +95,9 @@ export default memo(function FileItem({
         select: (data) => (data.status === 200 ? data.data.inode : null),
         enabled:
           !!systemId &&
-          (type === FileType.Block || type === FileType.Container),
+          (type === FileType.Object ||
+            type === FileType.Regular ||
+            type === FileType.Container),
       },
       fetch: { credentials: "include" },
     }
@@ -123,7 +139,8 @@ export default memo(function FileItem({
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
       (type === FileType.Container ||
-        type === FileType.Block ||
+        type === FileType.Object ||
+        type === FileType.Regular ||
         type === FileType.Link) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
@@ -158,8 +175,11 @@ export default memo(function FileItem({
       case FileType.Upload:
         setIcon(FileIconType.Upload);
         break;
-      case FileType.Block:
-        setIcon(FileIconType.Block);
+      case FileType.Regular:
+        setIcon(FileIconType.Regular);
+        break;
+      case FileType.Object:
+        setIcon(FileIconType.Object);
         break;
       case FileType.Home:
         setIcon(FileIconType.Home);
@@ -168,7 +188,7 @@ export default memo(function FileItem({
         setIcon(FileIconType.Trash);
         break;
       case FileType.Link:
-        setIcon(FileIconType.Block);
+        setIcon(FileIconType.Regular);
         break;
     }
   }, [type]);
@@ -206,7 +226,7 @@ export default memo(function FileItem({
     ]
   );
 
-  const clickBlock = useCallback(
+  const clickObject = useCallback(
     ({ fileKey, name }: { fileKey: string; name: string }) => {
       const contentType = getContentTypes(name);
       switch (contentType) {
@@ -297,7 +317,13 @@ export default memo(function FileItem({
     ]
   );
 
-  const iconClick = useCallback(() => {
+  // Single click: select file
+  const handleSingleClick = useCallback(() => {
+    selectFile(fileKey, windowKey);
+  }, [fileKey, selectFile, windowKey]);
+
+  // Double click: open file
+  const iconDoubleClick = useCallback(() => {
     switch (type) {
       case FileType.Container: // If the file is a container, open the navigator window
         clickContaienr({
@@ -305,8 +331,11 @@ export default memo(function FileItem({
           name,
         });
         break;
-      case FileType.Block: // If the file is a block, open the file by its content type
-        clickBlock({
+      case FileType.Regular: // Regular file - no functionality
+        // Do nothing
+        break;
+      case FileType.Object: // External storage object - supports media playback
+        clickObject({
           fileKey,
           name,
         });
@@ -334,7 +363,7 @@ export default memo(function FileItem({
         break;
     }
   }, [
-    clickBlock,
+    clickObject,
     clickContaienr,
     clickTrash,
     clickUpload,
@@ -387,7 +416,15 @@ export default memo(function FileItem({
         }}
       >
         <div className={`full-size flex-center ${styles.item}`} ref={fileRef}>
-          {icon && <FileIcon ref={iconRef} onClick={iconClick} icon={icon} />}
+          {icon && (
+            <FileIcon
+              ref={iconRef}
+              onClick={handleSingleClick}
+              onDoubleClick={iconDoubleClick}
+              icon={icon}
+              hasContent={type === FileType.Trash ? !!trashLsQuery.data : false}
+            />
+          )}
           <FileName
             name={name}
             fileKey={fileKey}
@@ -397,7 +434,9 @@ export default memo(function FileItem({
         </div>
       </li>
       {showDetail &&
-        (type === FileType.Block || type === FileType.Container) &&
+        (type === FileType.Object ||
+          type === FileType.Regular ||
+          type === FileType.Container) &&
         fileInfoQuery.isFetched &&
         fileInfoQuery.data && (
           <FileDetail
