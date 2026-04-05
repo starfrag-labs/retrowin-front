@@ -3,8 +3,6 @@ export async function startMockService() {
     return;
   }
 
-  const { worker } = await import("./browser");
-  return worker.start({
-    onUnhandledRequest: "bypass",
-  });
+  const { startWorker } = await import("./browser");
+  return startWorker();
 }

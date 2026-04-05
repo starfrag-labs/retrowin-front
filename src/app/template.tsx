@@ -2,6 +2,7 @@
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Suspense, useEffect, useState } from "react";
+import { startMockService } from "@/mocks";
 
 const queryClient = new QueryClient();
 
@@ -9,12 +10,23 @@ export default function Template({ children }: { children: React.ReactNode }) {
   const [mswReady, setMswReady] = useState(false);
 
   useEffect(() => {
-    // MSW temporarily disabled for real API testing
-    setMswReady(true);
+    if (process.env.NODE_ENV === "development") {
+      startMockService()
+        .then(() => {
+          console.log("MSW started successfully");
+          setMswReady(true);
+        })
+        .catch((err) => {
+          console.error("Failed to start MSW:", err);
+          setMswReady(true);
+        });
+    } else {
+      setMswReady(true);
+    }
   }, []);
 
-  if (!mswReady && process.env.NODE_ENV === "development") {
-    return <div className="flex-center full-size">Loading Mock API...</div>;
+  if (!mswReady) {
+    return <div className="flex-center full-size">Loading...</div>;
   }
 
   return (

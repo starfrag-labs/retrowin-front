@@ -72,25 +72,25 @@ export default function NavbarIcon({
       >
         {windowCount > 0 && <div className={styles.icon_highlight} />}
         {windowType === WindowType.Navigator && (
-          <FileIcon icon={FileIconType.Container} size={size} />
+          <FileIcon icon={FileIconType.Container} size={size} asButton={false} />
         )}
         {windowType === WindowType.Image && (
-          <FileIcon icon={FileIconType.Image} size={size} />
+          <FileIcon icon={FileIconType.Image} size={size} asButton={false} />
         )}
         {windowType === WindowType.Video && (
-          <FileIcon icon={FileIconType.Video} size={size} />
+          <FileIcon icon={FileIconType.Video} size={size} asButton={false} />
         )}
         {windowType === WindowType.Audio && (
-          <FileIcon icon={FileIconType.Block} size={size} />
+          <FileIcon icon={FileIconType.Block} size={size} asButton={false} />
         )}
         {windowType === WindowType.Uploader && (
-          <FileIcon icon={FileIconType.Upload} size={size} />
+          <FileIcon icon={FileIconType.Upload} size={size} asButton={false} />
         )}
         {windowType === WindowType.Trash && (
-          <FileIcon icon={FileIconType.Trash} size={size} />
+          <FileIcon icon={FileIconType.Trash} size={size} asButton={false} />
         )}
         {windowType === WindowType.Document && (
-          <FileIcon icon={FileIconType.Block} size={size} />
+          <FileIcon icon={FileIconType.Block} size={size} asButton={false} />
         )}
       </button>
     </div>
