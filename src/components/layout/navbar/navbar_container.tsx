@@ -3,7 +3,13 @@ import { type AppWindow, WindowType } from "@/interfaces/window";
 import styles from "./navbar_container.module.css";
 import NavbarIcon from "./navbar_icon";
 import PowerButton from "@/components/power/power_button";
-export default function Navbar({ windows }: { windows: AppWindow[] }) {
+
+interface NavbarProps {
+  windows: AppWindow[];
+  systemId?: string;
+}
+
+export default function Navbar({ windows, systemId }: NavbarProps) {
   const defaultIcons = useMemo(
     () => [
       { type: WindowType.Navigator, count: 0, fixed: false },
@@ -35,7 +41,7 @@ export default function Navbar({ windows }: { windows: AppWindow[] }) {
   return (
     <div className={styles.container}>
       <nav className={styles.navbar}>
-        <PowerButton />
+        <PowerButton systemId={systemId} />
         {icons.map((icon) => (
           <div key={icon.type} className={styles.icon_container}>
             {(icon.fixed || icon.count > 0) && (

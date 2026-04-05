@@ -1,27 +1,562 @@
-.page {
-  --gray-rgb: 0, 0, 0;
-  --gray-alpha-200: rgba(var(--gray-rgb), 0.08);
-  --gray-alpha-100: rgba(var(--gray-rgb), 0.05);
+/* Windows XP Welcome Screen - Authentic Recreation */
 
-  --button-primary-hover: #383838;
-  --button-secondary-hover: #f2f2f2;
-
-  flex-direction: column;
-  font-family: var(--font-geist-mono);
+.xp_login {
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  font-family: "Tahoma", "Segoe UI", sans-serif;
+  overflow: hidden;
+  position: relative;
+  background: #003399;
 }
 
-@media (prefers-color-scheme: dark) {
-  .page {
-    --gray-rgb: 0, 0, 0;
-    --gray-alpha-200: rgba(var(--gray-rgb), 0.145);
-    --gray-alpha-100: rgba(var(--gray-rgb), 0.06);
+/* Top dark blue bar */
+.top_bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: #012F9E;
+  z-index: 2;
+}
 
+/* Bottom dark blue bar */
+.bottom_bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100px;
+  background: #012F9E;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+}
 
-    --button-primary-hover: #ccc;
-    --button-secondary-hover: #1a1a1a;
+.bottom_hint {
+  color: white;
+  font-size: 13px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+/* Main content wrapper */
+.main_content {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  padding-top: 100px;
+  padding-bottom: 100px;
+  background: #5A7EDC;
+  position: relative;
+  z-index: 1;
+}
+
+/* Sunlight effect on top-left */
+.main_content::before {
+  content: "";
+  position: absolute;
+  top: 100px;
+  left: 0;
+  width: 60%;
+  height: 100%;
+  background: radial-gradient(
+    circle at 5% 5%,
+    rgba(255, 255, 255, 0.5) 0%,
+    rgba(255, 255, 255, 0.35) 5%,
+    rgba(255, 255, 255, 0.2) 10%,
+    transparent 50%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+/* Center divider line */
+.main_content::after {
+  content: "";
+  position: absolute;
+  top: 100px;
+  bottom: 100px;
+  left: 50%;
+  width: 1px;
+  background: linear-gradient(
+    180deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.25) 10%,
+    rgba(255, 255, 255, 0.35) 50%,
+    rgba(255, 255, 255, 0.25) 90%,
+    transparent 100%
+  );
+  z-index: 2;
+}
+
+/* ========== LEFT SIDE - Branding (50%) ========== */
+.left_panel {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  position: relative;
+  z-index: 2;
+  padding: 40px 80px 40px 40px;
+}
+
+.windows_logo {
+  margin-bottom: 20px;
+}
+
+.logo_svg {
+  width: 56px;
+  height: 56px;
+  filter: drop-shadow(2px 3px 4px rgba(0, 0, 0, 0.3));
+}
+
+.welcome_title {
+  font-size: 36px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.4);
+  margin: 0 0 10px 0;
+  color: #ffffff;
+}
+
+.welcome_hint {
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+  margin: 0;
+}
+
+/* ========== RIGHT SIDE - User Accounts (50%) ========== */
+.right_panel {
+  flex: 0 0 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding-left: 80px;
+  position: relative;
+  z-index: 2;
+}
+
+.user_tiles {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* XP User Account Tile */
+.user_tile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: white;
+  font-family: inherit;
+  text-align: left;
+  border-radius: 4px;
+  transition: background 0.08s ease;
+}
+
+.user_tile:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.user_tile:hover .user_avatar {
+  box-shadow: 0 0 12px rgba(100, 200, 255, 0.6);
+}
+
+.user_tile:active {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.user_tile:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* XP user avatar - square frame style */
+.user_avatar {
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  background: linear-gradient(
+    145deg,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(0, 0, 0, 0.08) 100%
+  );
+  border: 2px solid rgba(120, 180, 230, 0.7);
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: box-shadow 0.1s ease;
+  flex-shrink: 0;
+}
+
+.user_avatar img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.2));
+}
+
+.user_name {
+  font-size: 15px;
+  font-weight: 400;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+/* ========== POWER BUTTON - Inside bottom bar ========== */
+.power_button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: linear-gradient(
+    180deg,
+    #FF7744 0%,
+    #E65500 50%,
+    #CC4400 100%
+  );
+  border: none;
+  border-radius: 3px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 400;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+
+.power_button svg {
+  width: 16px;
+  height: 16px;
+}
+
+.power_button:hover {
+  background: linear-gradient(
+    180deg,
+    #FF8855 0%,
+    #F76600 50%,
+    #DD5500 100%
+  );
+}
+
+.power_button:active {
+  transform: translateY(1px);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.power_button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.4);
+}
+
+/* ========== Loading State ========== */
+.loading_text {
+  color: white;
+  font-size: 15px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/* ========== Animation ========== */
+@keyframes tileFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 
-.background_window {
-  overflow: auto;
+.user_tile {
+  opacity: 0;
+  animation: tileFadeIn 0.25s ease forwards;
+}
+
+.user_tile:nth-child(1) { animation-delay: 0.08s; }
+.user_tile:nth-child(2) { animation-delay: 0.16s; }
+.user_tile:nth-child(3) { animation-delay: 0.24s; }
+.user_tile:nth-child(4) { animation-delay: 0.32s; }
+.user_tile:nth-child(5) { animation-delay: 0.40s; }
+
+/* ========== Create System Form ========== */
+.create_form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.form_group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.form_label {
+  color: white;
+  font-size: 13px;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.form_input {
+  padding: 10px 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.15);
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.form_input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.form_input:focus {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.form_input:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form_buttons {
+  display: flex;
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.form_button_primary {
+  flex: 1;
+  padding: 10px 16px;
+  background: linear-gradient(
+    180deg,
+    #5CB85C 0%,
+    #4CAE4C 50%,
+    #3D8B3D 100%
+  );
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+
+.form_button_primary:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    #6DC86D 0%,
+    #5CBE5C 50%,
+    #4D9B4D 100%
+  );
+}
+
+.form_button_primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.form_button_secondary {
+  flex: 1;
+  padding: 10px 16px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+  color: white;
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+  transition: all 0.1s ease;
+}
+
+.form_button_secondary:hover:not(:disabled) {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+}
+
+.form_button_secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========== Login Section (Not Authenticated) ========== */
+.login_section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.login_button {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 20px;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.25) 0%,
+    rgba(255, 255, 255, 0.15) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 6px;
+  color: white;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 16px;
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.35);
+  transition: all 0.15s ease;
+}
+
+.login_button:hover {
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.35) 0%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: scale(1.02);
+}
+
+.login_button:active {
+  transform: scale(0.98);
+}
+
+.login_button svg {
+  filter: drop-shadow(1px 1px 2px rgba(0, 0, 0, 0.3));
+}
+
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .left_panel {
+    padding: 40px 50px 40px 40px;
+  }
+
+  .right_panel {
+    padding-left: 50px;
+  }
+
+  .welcome_title {
+    font-size: 30px;
+  }
+}
+
+@media (max-width: 768px) {
+  .top_bar,
+  .bottom_bar {
+    height: 50px;
+  }
+
+  .main_content {
+    padding-top: 50px;
+    padding-bottom: 50px;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .main_content::after {
+    display: none;
+  }
+
+  .left_panel {
+    flex: none;
+    padding: 24px 20px 16px;
+    align-items: center;
+    text-align: center;
+  }
+
+  .welcome_title {
+    font-size: 24px;
+  }
+
+  .welcome_hint {
+    font-size: 11px;
+  }
+
+  .right_panel {
+    flex: none;
+    padding: 16px;
+    align-items: center;
+  }
+
+  .user_tiles {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .user_tile {
+    flex-direction: column;
+    padding: 10px 12px;
+    gap: 6px;
+    text-align: center;
+  }
+
+  .user_avatar {
+    width: 44px;
+    height: 44px;
+  }
+
+  .user_avatar img {
+    width: 28px;
+    height: 28px;
+  }
+
+  .user_name {
+    font-size: 12px;
+  }
+
+  .power_button {
+    padding: 5px 10px;
+    font-size: 11px;
+  }
+
+  .power_button svg {
+    width: 14px;
+    height: 14px;
+  }
 }

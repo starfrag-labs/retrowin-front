@@ -72,7 +72,11 @@ export default function NavbarIcon({
       >
         {windowCount > 0 && <div className={styles.icon_highlight} />}
         {windowType === WindowType.Navigator && (
-          <FileIcon icon={FileIconType.Container} size={size} asButton={false} />
+          <FileIcon
+            icon={FileIconType.Container}
+            size={size}
+            asButton={false}
+          />
         )}
         {windowType === WindowType.Image && (
           <FileIcon icon={FileIconType.Image} size={size} asButton={false} />
