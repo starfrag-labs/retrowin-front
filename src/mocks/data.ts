@@ -1,5 +1,61 @@
 import type { FileType } from "@/interfaces/file";
 
+// Mock system data structure
+export interface MockSystem {
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// Mock systems storage
+export const mockSystems: Map<string, MockSystem> = new Map();
+
+// Initialize mock systems
+const initMockSystems = () => {
+  mockSystems.clear();
+  mockSystems.set("sys-mock-123", {
+    id: "sys-mock-123",
+    name: "Default System",
+    description: "Mock file system",
+    status: "active",
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  });
+};
+
+initMockSystems();
+
+// Helper functions for systems
+export const getSystem = (systemId: string) => {
+  return mockSystems.get(systemId);
+};
+
+export const deleteSystem = (systemId: string) => {
+  return mockSystems.delete(systemId);
+};
+
+export const listSystems = () => {
+  return Array.from(mockSystems.values());
+};
+
+export const createNewSystem = (name: string, description?: string | null) => {
+  const id = `sys-${Date.now()}-${Math.random().toString(36).substring(7)}`;
+  const now = new Date().toISOString();
+  const newSystem: MockSystem = {
+    id,
+    name,
+    description: description || "",
+    status: "active",
+    createdAt: now,
+    updatedAt: now,
+  };
+  mockSystems.set(id, newSystem);
+  return newSystem;
+};
+
 // Mock file data structure
 export interface MockFile {
   fileKey: string;
