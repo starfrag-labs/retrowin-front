@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useStatPath } from "@/api/generated";
+import { useLs, useStatPath } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -71,6 +71,20 @@ export default memo(function FileItem({
   const iconRef = useRef<HTMLButtonElement>(null);
   const showDetailTimeoutRef = useRef<number | null>(null);
   const detailRef = useRef<HTMLDivElement>(null);
+
+  // Check if trash has content
+  const trashLsQuery = useLs(
+    systemId || "",
+    { path: fileKey },
+    {
+      query: {
+        select: (data) =>
+          data.status === 200 ? (data.data.entries?.length ?? 0) > 0 : false,
+        enabled: !!systemId && type === FileType.Trash,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
 
   // Queries - use statPath to get file info
   const fileInfoQuery = useStatPath(
@@ -408,6 +422,7 @@ export default memo(function FileItem({
               onClick={handleSingleClick}
               onDoubleClick={iconDoubleClick}
               icon={icon}
+              hasContent={type === FileType.Trash ? !!trashLsQuery.data : false}
             />
           )}
           <FileName

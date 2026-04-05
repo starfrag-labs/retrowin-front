@@ -88,8 +88,8 @@ export default function FileContainer({
     }
   );
 
-  // Get trash inode if trash should be shown
-  const trashPath = path === "/" ? "/.trash" : `${path}/.trash`;
+  // Get trash inode if trash should be shown (trash is under home)
+  const trashPath = "/home/.trash";
   const trashStatQuery = useStatPath(
     systemId,
     { path: trashPath },

@@ -1,5 +1,5 @@
 import { useQueryClient } from "@tanstack/react-query";
-import { memo, useEffect, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import { useRename } from "@/api/generated";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
@@ -29,6 +29,9 @@ export default memo(function FileName({
   // States
   const [isRenaming, setIsRenaming] = useState(false);
   const [newName, setNewName] = useState(name);
+
+  // Refs
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Query client
   const queryClient = useQueryClient();
@@ -90,6 +93,14 @@ export default memo(function FileName({
     }
   }, [fileKey, renamingFileSerial, windowKey]);
 
+  // Focus and select all text when renaming starts
+  useEffect(() => {
+    if (isRenaming && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isRenaming]);
+
   return (
     <div className={`flex-center full-size`}>
       {isRenaming ? (
@@ -103,6 +114,7 @@ export default memo(function FileName({
           }}
         >
           <input
+            ref={inputRef}
             type="text"
             className={`${styles.rename_input} ${backgroundFile ? styles.rename_input_background : ""}`}
             value={newName}

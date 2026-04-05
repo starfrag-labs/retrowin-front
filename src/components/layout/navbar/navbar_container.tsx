@@ -45,7 +45,11 @@ export default function Navbar({ windows, systemId }: NavbarProps) {
         {icons.map((icon) => (
           <div key={icon.type} className={styles.icon_container}>
             {(icon.fixed || icon.count > 0) && (
-              <NavbarIcon windowType={icon.type} windowCount={icon.count} />
+              <NavbarIcon
+                windowType={icon.type}
+                windowCount={icon.count}
+                systemId={systemId}
+              />
             )}
           </div>
         ))}

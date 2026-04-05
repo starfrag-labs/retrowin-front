@@ -1,4 +1,5 @@
 import { useCallback } from "react";
+import { useLs } from "@/api/generated";
 import { FileIconType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
@@ -8,10 +9,26 @@ import styles from "./navbar_icon.module.css";
 export default function NavbarIcon({
   windowType,
   windowCount,
+  systemId,
 }: {
   windowType: WindowType;
   windowCount: number;
+  systemId?: string;
 }) {
+  // Check if trash has content
+  const trashLsQuery = useLs(
+    systemId || "",
+    { path: "/home/.trash" },
+    {
+      query: {
+        select: (data) =>
+          data.status === 200 ? (data.data.entries?.length ?? 0) > 0 : false,
+        enabled: !!systemId && windowType === WindowType.Trash,
+      },
+      fetch: { credentials: "include" },
+    }
+  );
+
   // Icon size
   // 5px is the border height and margin
   const size = "calc(100% - 5px)";
@@ -45,7 +62,7 @@ export default function NavbarIcon({
         if (windowCount === 0) {
           // Open trash with trash path
           newWindow({
-            targetKey: "/.trash",
+            targetKey: "/home/.trash",
             type: WindowType.Trash,
             title: "Trash",
           });
@@ -91,7 +108,12 @@ export default function NavbarIcon({
           <FileIcon icon={FileIconType.Upload} size={size} asButton={false} />
         )}
         {windowType === WindowType.Trash && (
-          <FileIcon icon={FileIconType.Trash} size={size} asButton={false} />
+          <FileIcon
+            icon={FileIconType.Trash}
+            size={size}
+            asButton={false}
+            hasContent={!!trashLsQuery.data}
+          />
         )}
         {windowType === WindowType.Document && (
           <FileIcon icon={FileIconType.Regular} size={size} asButton={false} />
