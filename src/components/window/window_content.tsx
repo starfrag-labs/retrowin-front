@@ -7,6 +7,7 @@ import Uploader from "./window_content/uploader";
 import VideoViewer from "./window_content/video";
 import styles from "./window_content.module.css";
 
+// biome-ignore lint/suspicious/noExplicitAny: component props vary by WindowType
 const contentComponents: Partial<Record<WindowType, React.ComponentType<any>>> =
   {
     [WindowType.Navigator]: Navigator,
