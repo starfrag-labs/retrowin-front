@@ -29,6 +29,9 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   const isFileKeySelected = useFileStore((state) => state.isFileKeySelected);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
   const findWindow = useWindowStore((state) => state.findWindow);
+  const getBackgroundWindow = useWindowStore(
+    (state) => state.getBackgroundWindow
+  );
 
   // States
   const [targetFile, setTargetFile] = useState<{
@@ -48,21 +51,23 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
         currentMenuRef.style.top = `${e.clientY}px`;
         // Set menu type to background by default
       }
-      if (currentWindow) {
-        const window = findWindow(currentWindow.key);
-        if (window) {
-          setWindowType(window.type);
-          switch (window.type) {
-            case WindowType.Background:
-              setMenuType("background");
-              setTargetFileKey(window.targetKey);
-              break;
-            case WindowType.Navigator:
-            case WindowType.Trash:
-              setMenuType("window");
-              setTargetFileKey(window.targetKey);
-              break;
-          }
+      // Use currentWindow if valid, otherwise fall back to background window
+      const validWindow =
+        currentWindow && findWindow(currentWindow.key)
+          ? findWindow(currentWindow.key)
+          : getBackgroundWindow();
+      if (validWindow) {
+        setWindowType(validWindow.type);
+        switch (validWindow.type) {
+          case WindowType.Background:
+            setMenuType("background");
+            setTargetFileKey(validWindow.targetKey);
+            break;
+          case WindowType.Navigator:
+          case WindowType.Trash:
+            setMenuType("window");
+            setTargetFileKey(validWindow.targetKey);
+            break;
         }
       }
       if (highlightedFile) {
@@ -83,6 +88,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
     [
       currentWindow,
       findWindow,
+      getBackgroundWindow,
       highlightedFile,
       isFileKeySelected,
       pressedKeys,
@@ -134,16 +140,18 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
         {menuType === "background" && targetFileKey && (
           <BackgroundMenu path={targetFileKey} closeMenu={closeMenu} />
         )}
-        {menuType === "file" && targetFile && currentWindow && (
-          <FileMenu
-            path={targetFile.fileKey}
-            fileName={targetFile.fileName}
-            fileType={targetFile.fileType}
-            windowKey={currentWindow.key}
-            parentWindowType={windowType}
-            closeMenu={closeMenu}
-          />
-        )}
+        {menuType === "file" &&
+          targetFile &&
+          (currentWindow || getBackgroundWindow()) && (
+            <FileMenu
+              path={targetFile.fileKey}
+              fileName={targetFile.fileName}
+              fileType={targetFile.fileType}
+              windowKey={currentWindow?.key || getBackgroundWindow()?.key || ""}
+              parentWindowType={windowType}
+              closeMenu={closeMenu}
+            />
+          )}
         {menuType === "window" && targetFileKey && (
           <WindowMenu
             path={targetFileKey}
