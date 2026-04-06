@@ -629,11 +629,18 @@ export const handlers = [
     }
 
     const url = new URL(request.url);
-    const _path = url.searchParams.get("path") || "/";
+    const filePath = url.searchParams.get("path") || "/";
+
+    // Create a data URL with mock content for the file
+    const fileName = filePath.split("/").pop() || "file";
+    const mockContent = `Mock file content for ${fileName}`;
+    const blob = new Blob([mockContent]);
+    // Use a blob URL that MSW can intercept
+    const dataUrl = `data:application/octet-stream;base64,${btoa(mockContent)}`;
 
     return HttpResponse.json({
       downloadUrl: {
-        downloadUrl: "https://mock-storage.example.com/download",
+        downloadUrl: dataUrl,
         expiresAt: new Date(Date.now() + 3600000).toISOString(),
       },
     });

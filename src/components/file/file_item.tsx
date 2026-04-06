@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLs, useStatPath } from "@/api/generated";
+import { useLs } from "@/api/generated";
 import { FileIconType, FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -9,7 +9,6 @@ import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { ContentTypes, getContentTypes } from "@/utils/content_types";
 import { createSerialKey } from "@/utils/serial_key";
-import FileDetail from "./file_detail";
 import FileIcon from "./file_icon";
 import styles from "./file_item.module.css";
 import FileName from "./file_name";
@@ -47,7 +46,6 @@ export default memo(function FileItem({
 
   // States
   const [icon, setIcon] = useState<FileIconType | null>(null);
-  const [showDetail, setShowDetail] = useState(false);
 
   // Store state
   const selectedFileSerials = useFileStore(
@@ -69,8 +67,6 @@ export default memo(function FileItem({
   // Refs
   const fileRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLButtonElement>(null);
-  const showDetailTimeoutRef = useRef<number | null>(null);
-  const detailRef = useRef<HTMLDivElement>(null);
 
   // Check if trash has content
   const trashLsQuery = useLs(
@@ -81,23 +77,6 @@ export default memo(function FileItem({
         select: (data) =>
           data.status === 200 ? (data.data.entries?.length ?? 0) > 0 : false,
         enabled: !!systemId && type === FileType.Trash,
-      },
-      fetch: { credentials: "include" },
-    }
-  );
-
-  // Queries - use statPath to get file info
-  const fileInfoQuery = useStatPath(
-    systemId || "",
-    { path: fileKey },
-    {
-      query: {
-        select: (data) => (data.status === 200 ? data.data.inode : null),
-        enabled:
-          !!systemId &&
-          (type === FileType.Object ||
-            type === FileType.Regular ||
-            type === FileType.Container),
       },
       fetch: { credentials: "include" },
     }
@@ -117,18 +96,10 @@ export default memo(function FileItem({
       type,
       ref: fileRef,
     });
-    showDetailTimeoutRef.current = window.setTimeout(() => {
-      setShowDetail(true);
-    }, 750);
   }, [setHighlightedFile, fileKey, windowKey, name, type]);
 
   const handleMouseLeave = useCallback(() => {
     setHighlightedFile(null);
-    setShowDetail(false);
-    if (showDetailTimeoutRef.current) {
-      clearTimeout(showDetailTimeoutRef.current);
-    }
-    detailRef.current?.style.setProperty("visibility", "hidden");
   }, [setHighlightedFile]);
 
   // Check if the file is in the select box
@@ -372,36 +343,6 @@ export default memo(function FileItem({
     type,
   ]);
 
-  // Detail position adjustment
-  useEffect(() => {
-    if (
-      showDetail &&
-      detailRef.current &&
-      fileRef.current &&
-      fileInfoQuery.isSuccess &&
-      fileInfoQuery.data
-    ) {
-      const fileRect = fileRef.current.getBoundingClientRect();
-      const detailRect = detailRef.current.getBoundingClientRect();
-      const windowRect = document.body.getBoundingClientRect();
-      if (fileRect.right + detailRect.width > windowRect.right) {
-        detailRef.current.style.left = `-${
-          detailRect.width + fileRect.width / 2
-        }px`;
-      } else {
-        detailRef.current.style.left = `${fileRect.width}px`;
-      }
-      if (fileRect.bottom + detailRect.height > windowRect.bottom) {
-        detailRef.current.style.top = `-${
-          detailRect.height + fileRect.height / 2
-        }px`;
-      } else {
-        detailRef.current.style.top = `${fileRect.height}px`;
-      }
-      detailRef.current.style.visibility = "visible";
-    }
-  }, [fileInfoQuery.data, fileInfoQuery.isSuccess, showDetail]);
-
   return (
     <div className={`full-size ${styles.container}`}>
       <li
@@ -433,21 +374,6 @@ export default memo(function FileItem({
           />
         </div>
       </li>
-      {showDetail &&
-        (type === FileType.Object ||
-          type === FileType.Regular ||
-          type === FileType.Container) &&
-        fileInfoQuery.isFetched &&
-        fileInfoQuery.data && (
-          <FileDetail
-            ref={detailRef}
-            fileName={name}
-            fileType={type}
-            bytes={fileInfoQuery.data.size || 0}
-            created={new Date(fileInfoQuery.data.createdAt || "")}
-            modified={new Date(fileInfoQuery.data.mtime || "")}
-          />
-        )}
     </div>
   );
 });

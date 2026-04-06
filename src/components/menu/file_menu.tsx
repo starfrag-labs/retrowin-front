@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useUnlink, useMv, ls } from "@/api/generated";
+import { useUnlink, useMv, ls, getDownloadUrl } from "@/api/generated";
 import { FileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
@@ -117,10 +117,35 @@ export default function FileMenu({
   // Download file actions
   const handleDownload = useCallback(async () => {
     closeMenu();
-    // TODO: Implement download with proper API call
-    console.warn("Download not fully implemented in new API");
-    // Need to call getDownloadUrl API function directly
-  }, [closeMenu]);
+    try {
+      const result = await getDownloadUrl(
+        systemId,
+        { path },
+        { credentials: "include" }
+      );
+      if (result.status !== 200 || !result.data.downloadUrl?.downloadUrl) {
+        console.error("[FileMenu] Failed to get download URL");
+        return;
+      }
+      const { downloadUrl } = result.data.downloadUrl;
+      const response = await fetch(downloadUrl);
+      if (!response.ok) {
+        console.error("[FileMenu] Download fetch failed:", response.status);
+        return;
+      }
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("[FileMenu] Download failed:", error);
+    }
+  }, [closeMenu, systemId, path, fileName]);
 
   // Move to trash action
   const handleMoveToTrash = useCallback(async () => {
@@ -183,11 +208,24 @@ export default function FileMenu({
     }
   }, [closeMenu, path, systemId, unlinkMutation, queryClient]);
 
+  // Info action
+  const handleInfo = useCallback(() => {
+    closeMenu();
+    newWindow({
+      targetKey: path,
+      type: WindowType.Info,
+      title: `${fileName} Info`,
+      systemId,
+    });
+  }, [closeMenu, newWindow, path, fileName, systemId]);
+
   // Delete file actions based on parent window type
   const deleteMenu =
     parentWindowType === WindowType.Trash
       ? { name: "Permanent Delete", action: handlePermanentDelete }
       : { name: "Move to Trash", action: handleMoveToTrash };
+
+  const infoItem = { name: "Info", action: handleInfo };
 
   switch (fileType) {
     case FileType.Container:
@@ -197,6 +235,7 @@ export default function FileMenu({
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
+            infoItem,
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,
@@ -209,6 +248,7 @@ export default function FileMenu({
           menuList={[
             { name: "Open", action: handleOpen },
             { name: "Download", action: handleDownload },
+            infoItem,
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,
@@ -219,6 +259,7 @@ export default function FileMenu({
       return (
         <MenuList
           menuList={[
+            infoItem,
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,
@@ -230,6 +271,7 @@ export default function FileMenu({
         <MenuList
           menuList={[
             { name: "Open", action: handleOpen },
+            infoItem,
             { name: "Rename", action: handleRename },
             { name: "/", action: () => {} },
             deleteMenu,
