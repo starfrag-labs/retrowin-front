@@ -8,7 +8,7 @@ import {
 export { AudioTypes, ContentTypes, ImageTypes, VideoTypes };
 
 export function getContentTypes(fileName: string) {
-  const extension = fileName.split(".").pop();
+  const extension = fileName.split(".").pop()?.toLowerCase();
   if (!extension) {
     return ContentTypes.Text;
   }

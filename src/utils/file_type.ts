@@ -32,6 +32,7 @@ export function getIconType(
     case BackendFileType.Symlink:
       return FileIconType.Regular;
     case BackendFileType.Object:
+    case BackendFileType.Regular:
       if (fileName) {
         const contentType = getContentTypes(fileName);
         switch (contentType) {
@@ -43,9 +44,9 @@ export function getIconType(
             return FileIconType.Audio;
         }
       }
-      return FileIconType.Object;
-    case BackendFileType.Regular:
-      return FileIconType.Regular;
+      return fileType === BackendFileType.Object
+        ? FileIconType.Object
+        : FileIconType.Regular;
     case VirtualFileType.Home:
       return FileIconType.Home;
     case VirtualFileType.Trash:
@@ -70,7 +71,8 @@ export function getWindowType(
     case VirtualFileType.Root:
     case VirtualFileType.Home:
       return WindowType.Navigator;
-    case BackendFileType.Object: {
+    case BackendFileType.Object:
+    case BackendFileType.Regular: {
       const contentType = getContentTypes(fileName);
       switch (contentType) {
         case ContentTypes.Image:

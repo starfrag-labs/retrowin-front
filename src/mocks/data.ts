@@ -223,6 +223,17 @@ const initMockFiles = () => {
   mockFiles.set(objImage.fileKey, objImage);
   pathToKeyMap.set("/home/Pictures/photo.jpg", objImage.fileKey);
 
+  // Uppercase extension test file
+  const uppercaseJpg = createMockFile(
+    "test.JPG",
+    BackendFileType.Regular,
+    pictures.fileKey,
+    204800,
+    "/home/Pictures/test.JPG"
+  );
+  mockFiles.set(uppercaseJpg.fileKey, uppercaseJpg);
+  pathToKeyMap.set("/home/Pictures/test.JPG", uppercaseJpg.fileKey);
+
   const objDocument = createMockFile(
     "notes.txt",
     BackendFileType.Object,

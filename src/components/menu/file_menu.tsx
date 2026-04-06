@@ -67,7 +67,8 @@ export default function FileMenu({
         case VirtualFileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case BackendFileType.Object: {
+        case BackendFileType.Object:
+        case BackendFileType.Regular: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
