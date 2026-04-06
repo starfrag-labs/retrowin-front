@@ -4,9 +4,11 @@
   align-items: center;
   justify-content: center;
   position: absolute;
-  border: 3px solid #0055E5;
+  border: 2px solid #0055e5;
+  border-top-color: #3a93ff;
   border-radius: 8px 8px 0 0;
   overflow: hidden;
   z-index: 1;
-  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 12px rgba(0, 0, 0, 0.5);
+  background: #ece9d8;
 }
