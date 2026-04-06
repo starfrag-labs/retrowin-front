@@ -162,14 +162,21 @@ export default memo(function FileItem({
         title: name,
         systemId,
       });
-    } else {
-      // In an existing navigator: update the window
+    } else if (winType === WindowType.Navigator) {
+      // Navigator → Navigator: update in place
       setHighlightedFile(null);
       updateWindow({
         targetWindowKey: windowKey,
         targetFileKey: fileKey,
-        ...(winType === WindowType.Navigator ? {} : { type: winType }),
         title: name,
+      });
+    } else {
+      // Non-navigator (image, video, audio, etc.): open a new window
+      newWindow({
+        targetKey: fileKey,
+        type: winType,
+        title: name,
+        systemId,
       });
     }
   }, [
