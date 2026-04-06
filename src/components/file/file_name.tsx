@@ -3,8 +3,8 @@ import { memo, useEffect, useRef, useState } from "react";
 import { useRename } from "@/api/generated";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
-import { parseSerialKey } from "@/utils/serial_key";
 import { isFsQuery } from "@/utils/query_keys";
+import { parseSerialKey } from "@/utils/serial_key";
 import styles from "./file_name.module.css";
 
 /**

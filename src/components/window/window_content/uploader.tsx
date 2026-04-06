@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useState } from "react";
-import { useInitiateUpload, useCompleteUpload } from "@/api/generated";
+import { useCompleteUpload, useInitiateUpload } from "@/api/generated";
 import { useWindowStore } from "@/store/window.store";
 import { isFsQuery } from "@/utils/query_keys";
 import styles from "./uploader.module.css";

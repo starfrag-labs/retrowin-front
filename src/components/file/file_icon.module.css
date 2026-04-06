@@ -14,16 +14,10 @@
   width: 100%;
   height: 100%;
   filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
-  transition: transform 0.15s ease;
 }
 
 .image_icon img {
   width: 100% !important;
   height: 100% !important;
   object-fit: contain;
-}
-
-.icon_container:hover .image_icon {
-  transform: scale(1.08);
-  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.6));
 }

@@ -3,7 +3,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useGetUser, useGetRootDirectory } from "@/api/generated";
+import { useGetRootDirectory, useGetUser } from "@/api/generated";
 import DragFileContainer from "@/components/drag/drag_file_container";
 import FileContainer from "@/components/file/file_container";
 import Background from "@/components/layout/background";

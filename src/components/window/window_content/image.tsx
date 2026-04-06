@@ -1,6 +1,6 @@
+import Image from "next/image";
 import { useGetDownloadUrl } from "@/api/generated";
 import { useWindowStore } from "@/store/window.store";
-import Image from "next/image";
 import mediaStyles from "./media.module.css";
 
 export default function ImageViewer({

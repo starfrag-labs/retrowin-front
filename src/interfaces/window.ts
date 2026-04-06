@@ -7,6 +7,7 @@ export enum WindowType {
   Audio = "audio",
   Document = "document",
   Uploader = "uploader",
+  Info = "info",
   Other = "other",
 }
 export interface AppWindow {

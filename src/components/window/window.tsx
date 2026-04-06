@@ -3,15 +3,16 @@ import { useStatPath } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useWindowStore } from "@/store/window.store";
+import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
-import styles from "./window.module.css";
 
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
-  const minWindowSize = useMemo(() => ({ width: 400, height: 200 }), []); // Minimum window size
-  const windowSize1 = useMemo(() => ({ width: 800, height: 400 }), []); // Large window size
-  const windowSize2 = useMemo(() => ({ width: 600, height: 300 }), []); // Medium window size
+  const minWindowSize = useMemo(() => ({ width: 250, height: 180 }), []); // Minimum window size
+  const windowSize1 = useMemo(() => ({ width: 800, height: 400 }), []); // Large window size (uploader)
+  const windowSize2 = useMemo(() => ({ width: 600, height: 300 }), []); // Medium window size (navigator)
+  const windowSize3 = useMemo(() => ({ width: 300, height: 260 }), []); // Compact window size (info)
 
   // States
   const [maximized, setMaximized] = useState(false);
@@ -105,6 +106,11 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
         const y = document.body.clientHeight / 2 - windowSize1.height / 2;
         setWindowPosition({ x, y });
         setWindowSize(windowSize1);
+      } else if (targetWindow.type === WindowType.Info) {
+        const x = document.body.clientWidth / 2 - windowSize3.width / 2;
+        const y = document.body.clientHeight / 2 - windowSize3.height / 2;
+        setWindowPosition({ x, y });
+        setWindowSize(windowSize3);
       } else {
         const x = document.body.clientWidth / 2 - windowSize2.width / 2;
         const y = document.body.clientHeight / 2 - windowSize2.height / 2;
@@ -113,7 +119,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       }
       positionInitializedRef.current = true;
     }
-  }, [targetWindow, windowSize1, windowSize2]);
+  }, [targetWindow, windowSize1, windowSize2, windowSize3]);
 
   // Set window size
   useEffect(() => {

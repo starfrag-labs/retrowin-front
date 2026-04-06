@@ -1,6 +1,7 @@
 import { forwardRef, memo } from "react";
 import { WindowType } from "@/interfaces/window";
 import ImageViewer from "./window_content/image";
+import InfoViewer from "./window_content/info";
 import Navigator from "./window_content/navigator";
 import Uploader from "./window_content/uploader";
 import VideoViewer from "./window_content/video";
@@ -55,6 +56,9 @@ export default memo(
         )}
         {type === WindowType.Video && fileName && (
           <VideoViewer fileKey={fileKey} />
+        )}
+        {type === WindowType.Info && fileName && (
+          <InfoViewer fileKey={fileKey} fileName={fileName} />
         )}
       </section>
     );

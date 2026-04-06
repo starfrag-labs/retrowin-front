@@ -211,6 +211,27 @@ const initMockFiles = () => {
   );
   mockFiles.set(audio.fileKey, audio);
   pathToKeyMap.set("/home/Music/sample-audio.mp3", audio.fileKey);
+
+  // Object type files (external storage objects)
+  const objImage = createMockFile(
+    "photo.jpg",
+    "object" as FileType,
+    pictures.fileKey,
+    153600,
+    "/home/Pictures/photo.jpg"
+  );
+  mockFiles.set(objImage.fileKey, objImage);
+  pathToKeyMap.set("/home/Pictures/photo.jpg", objImage.fileKey);
+
+  const objDocument = createMockFile(
+    "notes.txt",
+    "object" as FileType,
+    HOME_KEY,
+    256,
+    "/home/notes.txt"
+  );
+  mockFiles.set(objDocument.fileKey, objDocument);
+  pathToKeyMap.set("/home/notes.txt", objDocument.fileKey);
 };
 
 // Initialize mock file system

@@ -1,6 +1,6 @@
 import { forwardRef, memo } from "react";
-import { FileIconType } from "@/interfaces/file";
 import { XPImageIcons } from "@/components/icons/xp_image_icons";
+import { FileIconType } from "@/interfaces/file";
 import styles from "./file_icon.module.css";
 
 /**
