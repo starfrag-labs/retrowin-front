@@ -1,9 +1,9 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStatPath } from "@/api/generated";
-import { getWindowConfig } from "@/config/window_type_config";
-import { WindowType } from "@/interfaces/window";
+import { getWindowConfig } from "@/config/window";
 import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import { WindowType } from "@/types/window";
 import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { FileType } from "@/interfaces/file";
+import type { FileType } from "@/types/file";
 import { createSerialKey, parseSerialKey } from "@/utils/serial_key";
 
 export type State = {

@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import type { FileType } from "@/types/file";
+import { WindowType } from "@/types/window";
 import BackgroundMenu from "./background_menu";
 import FileMenu from "./file_menu";
 import styles from "./menu_box.module.css";

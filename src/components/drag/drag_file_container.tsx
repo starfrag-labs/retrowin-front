@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMv } from "@/api/generated";
-import { isDragTarget } from "@/config/file_type_config";
-import { BackendFileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import { BackendFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { isDragTarget } from "@/utils/file_type";
 import { isFsQuery } from "@/utils/query_keys";
 import { parseSerialKey } from "@/utils/serial_key";
 import styles from "./drag_file_container.module.css";

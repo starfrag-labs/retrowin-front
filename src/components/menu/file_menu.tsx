@@ -1,15 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { getDownloadUrl, ls, useMv, useUnlink } from "@/api/generated";
-import {
-  BackendFileType,
-  type FileType,
-  VirtualFileType,
-} from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
-import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import { BackendFileType, type FileType, VirtualFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { ContentTypes, getContentTypes } from "@/utils/content_type";
 import { isFsQuery } from "@/utils/query_keys";
 import MenuList from "./menu_list";
 

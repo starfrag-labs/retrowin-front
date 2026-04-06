@@ -1,12 +1,8 @@
 import { useCallback, useEffect } from "react";
 import { useLs, useStatPath } from "@/api/generated";
 import type { DirEntry } from "@/api/generated/model";
-import {
-  getFileType,
-  getFileTypeSortOrder,
-  VirtualFileType,
-} from "@/config/file_type_config";
-import { SpecialFileName } from "@/interfaces/file";
+import { SpecialFileName, VirtualFileType } from "@/types/file";
+import { getFileType, getFileTypeSortOrder } from "@/utils/file_type";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
 

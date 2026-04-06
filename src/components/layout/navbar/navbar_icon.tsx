@@ -1,8 +1,8 @@
 import { useCallback } from "react";
 import { useLs } from "@/api/generated";
-import { FileIconType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
+import { FileIconType } from "@/types/file";
+import { WindowType } from "@/types/window";
 import FileIcon from "../../file/file_icon";
 import styles from "./navbar_icon.module.css";
 

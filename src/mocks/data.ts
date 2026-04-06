@@ -1,4 +1,4 @@
-import { BackendFileType, type FileType } from "@/interfaces/file";
+import { BackendFileType, type FileType } from "@/types/file";
 
 // Mock system data structure
 export interface MockSystem {

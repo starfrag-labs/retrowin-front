@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getWindowConfig } from "@/config/window_type_config";
-import { WindowType } from "@/interfaces/window";
+import { getWindowConfig } from "@/config/window";
 import { useFileStore } from "@/store/file.store";
 import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import { WindowType } from "@/types/window";
 import styles from "./select_box_container.module.css";
 
 export default function SelectBoxContainer({

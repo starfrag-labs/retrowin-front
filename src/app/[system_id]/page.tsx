@@ -11,8 +11,8 @@ import Navbar from "@/components/layout/navbar/navbar_container";
 import MenuBox from "@/components/menu/menu_box";
 import SelectBoxContainer from "@/components/select/select_box_container";
 import Window from "@/components/window/window";
-import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
+import { WindowType } from "@/types/window";
 import { createWindowKey } from "@/utils/random_key";
 import styles from "./page.module.css";
 

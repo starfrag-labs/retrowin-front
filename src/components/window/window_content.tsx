@@ -1,5 +1,5 @@
 import { forwardRef, memo } from "react";
-import { WindowType } from "@/interfaces/window";
+import { WindowType } from "@/types/window";
 import ImageViewer from "./window_content/image";
 import InfoViewer from "./window_content/info";
 import Navigator from "./window_content/navigator";

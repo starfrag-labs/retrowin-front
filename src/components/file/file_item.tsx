@@ -2,17 +2,12 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLs } from "@/api/generated";
-import {
-  type FileIconType,
-  type FileType,
-  getIconType,
-  getWindowType,
-  isSelectable,
-  VirtualFileType,
-} from "@/config/file_type_config";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
+import type { FileType } from "@/types/file";
+import { type FileIconType, VirtualFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { getIconType, getWindowType, isSelectable } from "@/utils/file_type";
 import { createSerialKey } from "@/utils/serial_key";
 import FileIcon from "./file_icon";
 import styles from "./file_item.module.css";

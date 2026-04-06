@@ -1,5 +1,5 @@
 import { forwardRef, memo } from "react";
-import type { ApiFileType } from "@/interfaces/api";
+import type { ApiFileType } from "@/types/api";
 import styles from "./file_detail.module.css";
 
 /**

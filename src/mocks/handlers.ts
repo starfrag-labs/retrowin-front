@@ -1,5 +1,5 @@
 import { HttpResponse, http } from "msw";
-import { BackendFileType, type FileType } from "@/interfaces/file";
+import { BackendFileType, type FileType } from "@/types/file";
 import {
   createFile,
   createNewSystem,

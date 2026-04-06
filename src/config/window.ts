@@ -1,11 +1,5 @@
-import { WindowType } from "@/interfaces/window";
-
-export interface WindowConfig {
-  defaultSize: { width: number; height: number };
-  supportsHistory: boolean;
-  supportsSelection: boolean;
-  supportsDragTarget: boolean;
-}
+import type { WindowConfig } from "@/types/window";
+import { WindowType } from "@/types/window";
 
 const windowConfigs: Record<WindowType, WindowConfig> = {
   [WindowType.Background]: {
