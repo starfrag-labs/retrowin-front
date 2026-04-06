@@ -1,12 +1,12 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMv } from "@/api/generated";
-import { FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
-import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
-import { useMenuStore } from "@/store/menu.store";
+import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import { BackendFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { isDragTarget } from "@/utils/file_type";
 import { isFsQuery } from "@/utils/query_keys";
 import { parseSerialKey } from "@/utils/serial_key";
 import styles from "./drag_file_container.module.css";
@@ -31,7 +31,7 @@ export default function DragFileContainer({
 
   // Store states
   const currentWindow = useWindowStore((state) => state.currentWindow);
-  const menuRef = useMenuStore((state) => state.menuRef);
+  const menuRef = useFileStore((state) => state.menuRef);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials
@@ -171,15 +171,12 @@ export default function DragFileContainer({
     }
 
     // Set the target folder path as the highlighted file path
-    if (
-      highlightedFile &&
-      (highlightedFile.type === FileType.Container ||
-        highlightedFile.type === FileType.Root ||
-        highlightedFile.type === FileType.Home ||
-        highlightedFile.type === FileType.Trash)
-    ) {
+    if (highlightedFile && isDragTarget(highlightedFile.type)) {
       targetPath = highlightedFile.fileKey;
-    } else if (highlightedFile && highlightedFile.type === FileType.Link) {
+    } else if (
+      highlightedFile &&
+      highlightedFile.type === BackendFileType.Symlink
+    ) {
       targetPath = null;
     } else if (highlightedFile) {
       targetPath = null;

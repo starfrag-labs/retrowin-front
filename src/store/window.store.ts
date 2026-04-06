@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { type AppWindow, WindowType } from "@/interfaces/window";
+import { type AppWindow, WindowType } from "@/types/window";
 import { createWindowKey } from "@/utils/random_key";
 
 type State = {

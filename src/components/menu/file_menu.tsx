@@ -1,11 +1,11 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { getDownloadUrl, ls, useMv, useUnlink } from "@/api/generated";
-import { FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
-import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import { BackendFileType, type FileType, VirtualFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { ContentTypes, getContentTypes } from "@/utils/content_type";
 import { isFsQuery } from "@/utils/query_keys";
 import MenuList from "./menu_list";
 
@@ -55,19 +55,19 @@ export default function FileMenu({
 
   const openFile = useCallback(
     async (
-      fileType: Omit<FileType, FileType.Link>,
+      fileType: Omit<FileType, BackendFileType.Symlink>,
       fileName: string,
       path: string
     ) => {
       let windowType: WindowType;
       switch (fileType) {
-        case FileType.Container:
-        case FileType.Root:
-        case FileType.Home:
-        case FileType.Trash:
+        case BackendFileType.Directory:
+        case VirtualFileType.Root:
+        case VirtualFileType.Home:
+        case VirtualFileType.Trash:
           windowType = WindowType.Navigator;
           break;
-        case FileType.Object: {
+        case BackendFileType.Object: {
           const contentType = getContentTypes(fileName);
           switch (contentType) {
             case ContentTypes.Image:
@@ -85,7 +85,7 @@ export default function FileMenu({
           }
           break;
         }
-        case FileType.Upload:
+        case VirtualFileType.Upload:
           windowType = WindowType.Uploader;
           break;
         default:
@@ -228,9 +228,9 @@ export default function FileMenu({
   const infoItem = { name: "Info", action: handleInfo };
 
   switch (fileType) {
-    case FileType.Container:
-    case FileType.Root:
-    case FileType.Home:
+    case BackendFileType.Directory:
+    case VirtualFileType.Root:
+    case VirtualFileType.Home:
       return (
         <MenuList
           menuList={[
@@ -242,7 +242,7 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Object:
+    case BackendFileType.Object:
       return (
         <MenuList
           menuList={[
@@ -255,7 +255,7 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Regular:
+    case BackendFileType.Regular:
       return (
         <MenuList
           menuList={[
@@ -266,7 +266,7 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Link:
+    case BackendFileType.Symlink:
       return (
         <MenuList
           menuList={[
@@ -278,9 +278,9 @@ export default function FileMenu({
           ]}
         />
       );
-    case FileType.Upload:
+    case VirtualFileType.Upload:
       return <MenuList menuList={[{ name: "Open", action: handleOpen }]} />;
-    case FileType.Trash:
+    case VirtualFileType.Trash:
       return (
         <MenuList
           menuList={[{ name: "Empty Trash", action: handleEmptyTrash }]}

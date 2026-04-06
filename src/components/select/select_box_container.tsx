@@ -1,12 +1,11 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { WindowType } from "@/interfaces/window";
-import { useEventStore } from "@/store/event.store";
+import { getWindowConfig } from "@/config/window";
 import { useFileStore } from "@/store/file.store";
-import { useMenuStore } from "@/store/menu.store";
-import { useSelectBoxStore } from "@/store/select_box.store";
+import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import { WindowType } from "@/types/window";
 import styles from "./select_box_container.module.css";
 
 export default function SelectBoxContainer({
@@ -16,16 +15,16 @@ export default function SelectBoxContainer({
 }) {
   // Store states
   const highlightedFile = useFileStore((state) => state.highlightedFile);
-  const menuRef = useMenuStore((state) => state.menuRef);
+  const menuRef = useFileStore((state) => state.menuRef);
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const mouseEnter = useWindowStore((state) => state.mouseEnter);
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
-  const setRect = useSelectBoxStore((state) => state.setRect);
+  const setRect = useFileStore((state) => state.setSelectBoxRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
-  const setCurrentWindowKey = useSelectBoxStore(
-    (state) => state.setCurrentWindowKey
+  const setCurrentWindowKey = useFileStore(
+    (state) => state.setSelectBoxWindowKey
   );
   const findWindow = useWindowStore((state) => state.findWindow);
 
@@ -82,10 +81,8 @@ export default function SelectBoxContainer({
         } else if (
           activeWindow.contentRef?.current &&
           mouseEnter &&
-          window?.type !== WindowType.Image &&
-          window?.type !== WindowType.Video &&
-          window?.type !== WindowType.Audio &&
-          window?.type !== WindowType.Info
+          window &&
+          getWindowConfig(window.type).supportsSelection
         ) {
           setIsSelecting(true);
           setStart({ x: e.clientX, y: e.clientY });

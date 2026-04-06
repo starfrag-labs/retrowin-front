@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
-import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
-import { useMenuStore } from "@/store/menu.store";
+import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
+import type { FileType } from "@/types/file";
+import { WindowType } from "@/types/window";
 import BackgroundMenu from "./background_menu";
 import FileMenu from "./file_menu";
 import styles from "./menu_box.module.css";
@@ -25,7 +24,7 @@ export default function MenuBox({ children }: { children: React.ReactNode }) {
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   // Store actions
-  const setMenuRef = useMenuStore((state) => state.setMenuRef);
+  const setMenuRef = useFileStore((state) => state.setMenuRef);
   const isFileKeySelected = useFileStore((state) => state.isFileKeySelected);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
   const findWindow = useWindowStore((state) => state.findWindow);

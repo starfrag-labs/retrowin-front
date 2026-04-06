@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import PowerButton from "@/components/power/power_button";
-import { type AppWindow, WindowType } from "@/interfaces/window";
+import { type AppWindow, WindowType } from "@/types/window";
 import styles from "./navbar_container.module.css";
 import NavbarIcon from "./navbar_icon";
 

@@ -2,12 +2,12 @@
 
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useLs } from "@/api/generated";
-import { FileIconType, FileType } from "@/interfaces/file";
-import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
-import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
-import { ContentTypes, getContentTypes } from "@/utils/content_types";
+import type { FileType } from "@/types/file";
+import { type FileIconType, VirtualFileType } from "@/types/file";
+import { WindowType } from "@/types/window";
+import { getIconType, getWindowType, isSelectable } from "@/utils/file_type";
 import { createSerialKey } from "@/utils/serial_key";
 import FileIcon from "./file_icon";
 import styles from "./file_item.module.css";
@@ -22,7 +22,7 @@ import FileName from "./file_name";
  * @param backgroundFile - Is background file
  * @returns - File item component
  * @example
- * <FileItem name="file" type={FileType.Container} fileKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" windowKey="421b0ad1f948" />
+ * <FileItem name="file" type={BackendFileType.Directory} fileKey="e03431b7-6d67-4ee2-9224-e93dc04f25c4" windowKey="421b0ad1f948" />
  */
 export default memo(function FileItem({
   name,
@@ -51,8 +51,8 @@ export default memo(function FileItem({
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials
   );
-  const selectBox = useSelectBoxStore((state) => state.rect);
-  const targetWindow = useSelectBoxStore((state) => state.currentWindowKey);
+  const selectBox = useFileStore((state) => state.selectBoxRect);
+  const targetWindow = useFileStore((state) => state.selectBoxWindowKey);
   // Store actions
   const setFileIconRef = useFileStore((state) => state.setFileIconRef);
   const setHighlightedFile = useFileStore((state) => state.setHighlightedFile);
@@ -76,7 +76,7 @@ export default memo(function FileItem({
       query: {
         select: (data) =>
           data.status === 200 ? (data.data.entries?.length ?? 0) > 0 : false,
-        enabled: !!systemId && type === FileType.Trash,
+        enabled: !!systemId && type === VirtualFileType.Trash,
       },
       fetch: { credentials: "include" },
     }
@@ -109,10 +109,7 @@ export default memo(function FileItem({
     if (windowKey !== targetWindow) return;
     const fileRect = fileRef.current.getBoundingClientRect();
     if (
-      (type === FileType.Container ||
-        type === FileType.Object ||
-        type === FileType.Regular ||
-        type === FileType.Link) &&
+      isSelectable(type) &&
       fileRect.top < selectBox.bottom &&
       fileRect.bottom > selectBox.top &&
       fileRect.left < selectBox.right &&
@@ -139,154 +136,13 @@ export default memo(function FileItem({
 
   // Set icon type
   useEffect(() => {
-    switch (type) {
-      case FileType.Container:
-        setIcon(FileIconType.Container);
-        break;
-      case FileType.Upload:
-        setIcon(FileIconType.Upload);
-        break;
-      case FileType.Regular:
-        setIcon(FileIconType.Regular);
-        break;
-      case FileType.Object:
-        setIcon(FileIconType.Object);
-        break;
-      case FileType.Home:
-        setIcon(FileIconType.Home);
-        break;
-      case FileType.Trash:
-        setIcon(FileIconType.Trash);
-        break;
-      case FileType.Link:
-        setIcon(FileIconType.Regular);
-        break;
-    }
-  }, [type]);
+    setIcon(getIconType(type, name));
+  }, [type, name]);
 
   // Assign fileRef to store
   useEffect(() => {
     setFileIconRef(fileKey, windowKey, iconRef);
   }, [fileKey, setFileIconRef, windowKey]);
-
-  const clickContaienr = useCallback(
-    ({ fileKey, name }: { fileKey: string; name: string }) => {
-      if (windowKey === backgroundWindowKey) {
-        newWindow({
-          targetKey: fileKey,
-          type: WindowType.Navigator,
-          title: name,
-          systemId,
-        });
-      } else {
-        setHighlightedFile(null);
-        updateWindow({
-          targetWindowKey: windowKey,
-          targetFileKey: fileKey,
-          title: name,
-        });
-      }
-    },
-    [
-      backgroundWindowKey,
-      newWindow,
-      systemId,
-      updateWindow,
-      setHighlightedFile,
-      windowKey,
-    ]
-  );
-
-  const clickObject = useCallback(
-    ({ fileKey, name }: { fileKey: string; name: string }) => {
-      const contentType = getContentTypes(name);
-      switch (contentType) {
-        case ContentTypes.Image:
-          newWindow({
-            targetKey: fileKey,
-            type: WindowType.Image,
-            title: name,
-            systemId,
-          });
-          break;
-        case ContentTypes.Video:
-          newWindow({
-            targetKey: fileKey,
-            type: WindowType.Video,
-            title: name,
-            systemId,
-          });
-          break;
-        case ContentTypes.Audio:
-          newWindow({
-            targetKey: fileKey,
-            type: WindowType.Audio,
-            title: name,
-            systemId,
-          });
-          break;
-      }
-    },
-    [newWindow, systemId]
-  );
-
-  const clickUpload = useCallback(
-    ({ fileKey, name }: { fileKey: string; name: string }) => {
-      if (backgroundWindowKey === windowKey) {
-        newWindow({
-          targetKey: fileKey,
-          type: WindowType.Uploader,
-          title: name,
-          systemId,
-        });
-      } else {
-        setHighlightedFile(null);
-        updateWindow({
-          targetWindowKey: windowKey,
-          targetFileKey: fileKey,
-          type: WindowType.Uploader,
-          title: name,
-        });
-      }
-    },
-    [
-      backgroundWindowKey,
-      newWindow,
-      systemId,
-      updateWindow,
-      setHighlightedFile,
-      windowKey,
-    ]
-  );
-
-  const clickTrash = useCallback(
-    ({ fileKey, name }: { fileKey: string; name: string }) => {
-      if (backgroundWindowKey === windowKey) {
-        newWindow({
-          targetKey: fileKey,
-          type: WindowType.Trash,
-          title: name,
-          systemId,
-        });
-      } else {
-        setHighlightedFile(null);
-        updateWindow({
-          targetWindowKey: windowKey,
-          targetFileKey: fileKey,
-          type: WindowType.Trash,
-          title: name,
-        });
-      }
-    },
-    [
-      backgroundWindowKey,
-      newWindow,
-      systemId,
-      updateWindow,
-      setHighlightedFile,
-      windowKey,
-    ]
-  );
 
   // Single click: select file
   const handleSingleClick = useCallback(() => {
@@ -294,53 +150,38 @@ export default memo(function FileItem({
   }, [fileKey, selectFile, windowKey]);
 
   // Double click: open file
-  const iconDoubleClick = useCallback(() => {
-    switch (type) {
-      case FileType.Container: // If the file is a container, open the navigator window
-        clickContaienr({
-          fileKey,
-          name,
-        });
-        break;
-      case FileType.Regular: // Regular file - no functionality
-        // Do nothing
-        break;
-      case FileType.Object: // External storage object - supports media playback
-        clickObject({
-          fileKey,
-          name,
-        });
-        break;
-      case FileType.Upload: // If the file is an upload, open uploader
-        clickUpload({
-          fileKey,
-          name,
-        });
-        break;
-      case FileType.Link: // Link files are not supported in new API
-        // Do nothing for link files
-        break;
-      case FileType.Home:
-        clickContaienr({
-          fileKey,
-          name,
-        });
-        break;
-      case FileType.Trash:
-        clickTrash({
-          fileKey,
-          name,
-        });
-        break;
+  const handleDoubleClick = useCallback(() => {
+    const winType = getWindowType(type, name);
+    if (winType === null) return;
+
+    if (windowKey === backgroundWindowKey) {
+      // On background window: open a new window
+      newWindow({
+        targetKey: fileKey,
+        type: winType,
+        title: name,
+        systemId,
+      });
+    } else {
+      // In an existing navigator: update the window
+      setHighlightedFile(null);
+      updateWindow({
+        targetWindowKey: windowKey,
+        targetFileKey: fileKey,
+        ...(winType === WindowType.Navigator ? {} : { type: winType }),
+        title: name,
+      });
     }
   }, [
-    clickObject,
-    clickContaienr,
-    clickTrash,
-    clickUpload,
+    backgroundWindowKey,
     fileKey,
     name,
+    newWindow,
+    setHighlightedFile,
+    systemId,
     type,
+    updateWindow,
+    windowKey,
   ]);
 
   return (
@@ -361,9 +202,11 @@ export default memo(function FileItem({
             <FileIcon
               ref={iconRef}
               onClick={handleSingleClick}
-              onDoubleClick={iconDoubleClick}
+              onDoubleClick={handleDoubleClick}
               icon={icon}
-              hasContent={type === FileType.Trash ? !!trashLsQuery.data : false}
+              hasContent={
+                type === VirtualFileType.Trash ? !!trashLsQuery.data : false
+              }
             />
           )}
           <FileName

@@ -1,5 +1,5 @@
 import { HttpResponse, http } from "msw";
-import type { FileType } from "@/interfaces/file";
+import { BackendFileType, type FileType } from "@/types/file";
 import {
   createFile,
   createNewSystem,
@@ -37,7 +37,7 @@ function toInode(mockFile: {
   parentKey: string | null;
 }) {
   // File type: directory (0o040000) or regular file (0o0100000)
-  const isDirectory = mockFile.type === "container";
+  const isDirectory = mockFile.type === BackendFileType.Directory;
   const mode = isDirectory ? 0o040755 : 0o0100644;
 
   return {
@@ -239,9 +239,9 @@ export const handlers = [
         name: child.fileName,
         inodeId: child.fileKey,
         fileType:
-          child.type === "container"
+          child.type === BackendFileType.Directory
             ? 4 // DT_DIR
-            : child.type === "object"
+            : child.type === BackendFileType.Object
               ? 3 // DT_OBJ
               : 8, // DT_REG
       })),
@@ -284,7 +284,7 @@ export const handlers = [
     const newFile = createFile(
       parent.fileKey,
       dirName,
-      "container" as FileType
+      BackendFileType.Directory as FileType
     );
     if (!newFile) {
       return HttpResponse.json(
@@ -473,7 +473,11 @@ export const handlers = [
     }
 
     // Create symlink file
-    const newLink = createFile(parent.fileKey, linkName, "link" as FileType);
+    const newLink = createFile(
+      parent.fileKey,
+      linkName,
+      BackendFileType.Symlink as FileType
+    );
     if (!newLink) {
       return HttpResponse.json(
         {
@@ -599,7 +603,11 @@ export const handlers = [
       }
 
       // Create a new file entry
-      const newFile = createFile(parent.fileKey, fileName, "block" as FileType);
+      const newFile = createFile(
+        parent.fileKey,
+        fileName,
+        BackendFileType.Regular as FileType
+      );
 
       if (!newFile) {
         return HttpResponse.json(
@@ -634,7 +642,12 @@ export const handlers = [
     const ext = fileName.split(".").pop()?.toLowerCase() || "";
 
     // Serve actual mock media files from public directory
-    if ([".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(`.${ext}`) || ext === "png" || ext === "jpg" || ext === "jpeg") {
+    if (
+      [".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(`.${ext}`) ||
+      ext === "png" ||
+      ext === "jpg" ||
+      ext === "jpeg"
+    ) {
       return HttpResponse.json({
         downloadUrl: {
           downloadUrl: "/mock-media/test-image.png",
@@ -642,7 +655,11 @@ export const handlers = [
         },
       });
     }
-    if ([".mp4", ".webm", ".mov"].includes(`.${ext}`) || ext === "mp4" || ext === "webm") {
+    if (
+      [".mp4", ".webm", ".mov"].includes(`.${ext}`) ||
+      ext === "mp4" ||
+      ext === "webm"
+    ) {
       return HttpResponse.json({
         downloadUrl: {
           downloadUrl: "/mock-media/test-video.mp4",

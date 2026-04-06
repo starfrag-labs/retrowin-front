@@ -10,6 +10,7 @@ export enum WindowType {
   Info = "info",
   Other = "other",
 }
+
 export interface AppWindow {
   key: string;
   title: string;
@@ -19,4 +20,11 @@ export interface AppWindow {
   targetHistory?: string[];
   historyIndex?: number;
   minimized?: boolean;
+}
+
+export interface WindowConfig {
+  defaultSize: { width: number; height: number };
+  supportsHistory: boolean;
+  supportsSelection: boolean;
+  supportsDragTarget: boolean;
 }
