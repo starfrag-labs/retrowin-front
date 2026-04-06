@@ -3,9 +3,9 @@ import { useStatPath } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useWindowStore } from "@/store/window.store";
+import styles from "./window.module.css";
 import WindowContent from "./window_content";
 import WindowHeader from "./window_header";
-import styles from "./window.module.css";
 
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
@@ -119,7 +119,7 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
       }
       positionInitializedRef.current = true;
     }
-  }, [targetWindow, windowSize1, windowSize2]);
+  }, [targetWindow, windowSize1, windowSize2, windowSize3]);
 
   // Set window size
   useEffect(() => {

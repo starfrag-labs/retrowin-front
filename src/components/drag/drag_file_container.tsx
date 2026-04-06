@@ -7,8 +7,8 @@ import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
 import { useMenuStore } from "@/store/menu.store";
 import { useWindowStore } from "@/store/window.store";
-import { parseSerialKey } from "@/utils/serial_key";
 import { isFsQuery } from "@/utils/query_keys";
+import { parseSerialKey } from "@/utils/serial_key";
 import styles from "./drag_file_container.module.css";
 
 export default function DragFileContainer({

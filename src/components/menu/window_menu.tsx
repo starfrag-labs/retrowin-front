@@ -1,7 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useMkdir, useUnlink } from "@/api/generated";
-import { ls } from "@/api/generated";
+import { ls, useMkdir, useUnlink } from "@/api/generated";
 import { WindowType } from "@/interfaces/window";
 import { useWindowStore } from "@/store/window.store";
 import { isFsQuery } from "@/utils/query_keys";
