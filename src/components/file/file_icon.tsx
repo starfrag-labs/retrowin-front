@@ -12,7 +12,7 @@ import styles from "./file_icon.module.css";
  * @param size - style of the icon
  * @returns - File icon component
  * @example
- * <FileIcon icon={FileIconType.Container} />
+ * <FileIcon icon={FileIconType.Directory} />
  */
 export default memo(
   forwardRef(function FileIcon(
@@ -60,7 +60,7 @@ export default memo(
         {...wrapperProps}
       >
         <div className={styles.image_icon}>
-          {icon === FileIconType.Container &&
+          {icon === FileIconType.Directory &&
             (hasContent ? <XPImageIcons.Home /> : <XPImageIcons.Folder />)}
           {icon === FileIconType.Regular && <XPImageIcons.File />}
           {icon === FileIconType.Object && <XPImageIcons.File />}

@@ -90,7 +90,7 @@ export default function NavbarIcon({
         {windowCount > 0 && <div className={styles.icon_highlight} />}
         {windowType === WindowType.Navigator && (
           <FileIcon
-            icon={FileIconType.Container}
+            icon={FileIconType.Directory}
             size={size}
             asButton={false}
           />

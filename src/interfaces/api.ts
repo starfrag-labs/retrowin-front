@@ -1,4 +1,4 @@
-import type { FileType } from "./file";
+import type { BackendFileType } from "./file";
 
 export interface CustomFetchResponse<T = unknown> {
   headers: Headers;
@@ -23,10 +23,10 @@ export interface QueryError {
 }
 
 export type ApiFileType =
-  | FileType.Regular
-  | FileType.Object
-  | FileType.Container
-  | FileType.Link;
+  | BackendFileType.Regular
+  | BackendFileType.Object
+  | BackendFileType.Directory
+  | BackendFileType.Symlink;
 
 export interface CustomStorageResponse<T = unknown> {
   message: string;

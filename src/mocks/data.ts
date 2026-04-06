@@ -1,4 +1,4 @@
-import type { FileType } from "@/interfaces/file";
+import { BackendFileType, type FileType } from "@/interfaces/file";
 
 // Mock system data structure
 export interface MockSystem {
@@ -107,7 +107,7 @@ const initMockFiles = () => {
   // Root container - use ROOT_KEY as fileKey
   const root = createMockFile(
     "root",
-    "container" as FileType,
+    BackendFileType.Directory,
     null,
     0,
     "/",
@@ -119,7 +119,7 @@ const initMockFiles = () => {
   // Home container - use HOME_KEY as fileKey
   const home = createMockFile(
     "home",
-    "container" as FileType,
+    BackendFileType.Directory,
     ROOT_KEY,
     0,
     "/home",
@@ -131,7 +131,7 @@ const initMockFiles = () => {
   // Trash container - use TRASH_KEY as fileKey
   const trash = createMockFile(
     ".trash",
-    "container" as FileType,
+    BackendFileType.Directory,
     HOME_KEY,
     0,
     "/home/.trash",
@@ -143,7 +143,7 @@ const initMockFiles = () => {
   // Sample folders in home
   const documents = createMockFile(
     "Documents",
-    "container" as FileType,
+    BackendFileType.Directory,
     HOME_KEY,
     0,
     "/home/Documents"
@@ -153,7 +153,7 @@ const initMockFiles = () => {
 
   const pictures = createMockFile(
     "Pictures",
-    "container" as FileType,
+    BackendFileType.Directory,
     HOME_KEY,
     0,
     "/home/Pictures"
@@ -163,7 +163,7 @@ const initMockFiles = () => {
 
   const music = createMockFile(
     "Music",
-    "container" as FileType,
+    BackendFileType.Directory,
     HOME_KEY,
     0,
     "/home/Music"
@@ -174,7 +174,7 @@ const initMockFiles = () => {
   // Sample files
   const readme = createMockFile(
     "README.md",
-    "block" as FileType,
+    BackendFileType.Regular,
     HOME_KEY,
     1024,
     "/home/README.md"
@@ -184,7 +184,7 @@ const initMockFiles = () => {
 
   const image = createMockFile(
     "sample-image.png",
-    "block" as FileType,
+    BackendFileType.Regular,
     pictures.fileKey,
     2048576,
     "/home/Pictures/sample-image.png"
@@ -194,7 +194,7 @@ const initMockFiles = () => {
 
   const video = createMockFile(
     "sample-video.mp4",
-    "object" as FileType,
+    BackendFileType.Object,
     HOME_KEY,
     10485760,
     "/home/sample-video.mp4"
@@ -204,7 +204,7 @@ const initMockFiles = () => {
 
   const audio = createMockFile(
     "sample-audio.mp3",
-    "block" as FileType,
+    BackendFileType.Regular,
     music.fileKey,
     5242880,
     "/home/Music/sample-audio.mp3"
@@ -215,7 +215,7 @@ const initMockFiles = () => {
   // Object type files (external storage objects)
   const objImage = createMockFile(
     "photo.jpg",
-    "object" as FileType,
+    BackendFileType.Object,
     pictures.fileKey,
     153600,
     "/home/Pictures/photo.jpg"
@@ -225,7 +225,7 @@ const initMockFiles = () => {
 
   const objDocument = createMockFile(
     "notes.txt",
-    "object" as FileType,
+    BackendFileType.Object,
     HOME_KEY,
     256,
     "/home/notes.txt"

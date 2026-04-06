@@ -1,35 +1,14 @@
 import { useCallback, useEffect } from "react";
 import { useLs, useStatPath } from "@/api/generated";
 import type { DirEntry } from "@/api/generated/model";
-import { FileType, SpecialFileName } from "@/interfaces/file";
+import {
+  getFileType,
+  getFileTypeSortOrder,
+  VirtualFileType,
+} from "@/config/file_type_config";
+import { SpecialFileName } from "@/interfaces/file";
 import styles from "./file_container.module.css";
 import FileItem from "./file_item";
-
-/**
- * Convert file type from mode to FileType
- */
-// Linux dirent d_type values
-const DT_DIR = 4; // Directory
-const DT_REG = 8; // Regular file
-const DT_LNK = 10; // Symbolic link
-const DT_OBJ = 3; // External storage object (S3, etc.)
-
-const getFileType = (fileType: number): FileType => {
-  // fileType is Linux dirent d_type value
-  if (fileType === DT_DIR) {
-    return FileType.Container;
-  }
-  if (fileType === DT_LNK) {
-    return FileType.Link;
-  }
-  if (fileType === DT_OBJ) {
-    return FileType.Object;
-  }
-  if (fileType === DT_REG) {
-    return FileType.Regular;
-  }
-  return FileType.Regular;
-};
 
 /**
  * Check if path is trash directory
@@ -127,15 +106,9 @@ export default function FileContainer({
       return 1;
     }
     // Container > Object > Regular > Link
-    const typeOrder = [
-      FileType.Container,
-      FileType.Object,
-      FileType.Regular,
-      FileType.Link,
-    ];
-    const aTypeIndex = typeOrder.indexOf(getFileType(a.fileType));
-    const bTypeIndex = typeOrder.indexOf(getFileType(b.fileType));
-    return aTypeIndex - bTypeIndex;
+    const aTypeOrder = getFileTypeSortOrder(getFileType(a.fileType));
+    const bTypeOrder = getFileTypeSortOrder(getFileType(b.fileType));
+    return aTypeOrder - bTypeOrder;
   }, []);
 
   useEffect(() => {
@@ -161,7 +134,7 @@ export default function FileContainer({
       {upload && (
         <FileItem
           name={SpecialFileName.Upload}
-          type={FileType.Upload}
+          type={VirtualFileType.Upload}
           fileKey={path}
           windowKey={windowKey}
           systemId={systemId}
@@ -171,7 +144,7 @@ export default function FileContainer({
       {trash && trashStatQuery.isSuccess && trashStatQuery.data && (
         <FileItem
           name={SpecialFileName.Trash}
-          type={FileType.Trash}
+          type={VirtualFileType.Trash}
           fileKey={trashPath}
           windowKey={windowKey}
           systemId={systemId}

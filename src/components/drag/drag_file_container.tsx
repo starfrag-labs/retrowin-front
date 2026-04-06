@@ -1,7 +1,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useMv } from "@/api/generated";
-import { FileType } from "@/interfaces/file";
+import { isDragTarget } from "@/config/file_type_config";
+import { BackendFileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
@@ -171,15 +172,12 @@ export default function DragFileContainer({
     }
 
     // Set the target folder path as the highlighted file path
-    if (
-      highlightedFile &&
-      (highlightedFile.type === FileType.Container ||
-        highlightedFile.type === FileType.Root ||
-        highlightedFile.type === FileType.Home ||
-        highlightedFile.type === FileType.Trash)
-    ) {
+    if (highlightedFile && isDragTarget(highlightedFile.type)) {
       targetPath = highlightedFile.fileKey;
-    } else if (highlightedFile && highlightedFile.type === FileType.Link) {
+    } else if (
+      highlightedFile &&
+      highlightedFile.type === BackendFileType.Symlink
+    ) {
       targetPath = null;
     } else if (highlightedFile) {
       targetPath = null;

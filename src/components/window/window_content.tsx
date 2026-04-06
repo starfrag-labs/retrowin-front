@@ -7,6 +7,40 @@ import Uploader from "./window_content/uploader";
 import VideoViewer from "./window_content/video";
 import styles from "./window_content.module.css";
 
+const contentComponents: Partial<Record<WindowType, React.ComponentType<any>>> =
+  {
+    [WindowType.Navigator]: Navigator,
+    [WindowType.Trash]: Navigator,
+    [WindowType.Uploader]: Uploader,
+    [WindowType.Image]: ImageViewer,
+    [WindowType.Video]: VideoViewer,
+    [WindowType.Info]: InfoViewer,
+  };
+
+function getContentProps(
+  type: WindowType,
+  fileKey: string,
+  fileName: string,
+  windowKey: string,
+  setLoading?: React.Dispatch<React.SetStateAction<boolean>>
+) {
+  switch (type) {
+    case WindowType.Navigator:
+    case WindowType.Trash:
+      return { path: fileKey, windowKey, setLoading };
+    case WindowType.Uploader:
+      return { targetPath: fileKey };
+    case WindowType.Image:
+      return { fileKey, fileName };
+    case WindowType.Video:
+      return { fileKey };
+    case WindowType.Info:
+      return { fileKey, fileName };
+    default:
+      return {};
+  }
+}
+
 export default memo(
   forwardRef(function WindowContent(
     {
@@ -28,6 +62,11 @@ export default memo(
     },
     ref: React.Ref<HTMLDivElement>
   ) {
+    const ContentComponent = contentComponents[type];
+    const canRender =
+      ContentComponent &&
+      (type === WindowType.Uploader || setLoading || fileName);
+
     return (
       <section
         className={`flex-center full-size ${styles.container}`}
@@ -36,29 +75,10 @@ export default memo(
         onMouseLeave={onMouseLeave}
         aria-label="window content"
       >
-        {type === WindowType.Navigator && setLoading && (
-          <Navigator
-            path={fileKey}
-            windowKey={windowKey}
-            setLoading={setLoading}
+        {canRender && (
+          <ContentComponent
+            {...getContentProps(type, fileKey, fileName, windowKey, setLoading)}
           />
-        )}
-        {type === WindowType.Trash && setLoading && (
-          <Navigator
-            path={fileKey}
-            windowKey={windowKey}
-            setLoading={setLoading}
-          />
-        )}
-        {type === WindowType.Uploader && <Uploader targetPath={fileKey} />}
-        {type === WindowType.Image && fileName && (
-          <ImageViewer fileKey={fileKey} fileName={fileName} />
-        )}
-        {type === WindowType.Video && fileName && (
-          <VideoViewer fileKey={fileKey} />
-        )}
-        {type === WindowType.Info && fileName && (
-          <InfoViewer fileKey={fileKey} fileName={fileName} />
         )}
       </section>
     );

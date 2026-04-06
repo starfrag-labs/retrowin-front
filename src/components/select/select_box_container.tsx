@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getWindowConfig } from "@/config/window_type_config";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
@@ -82,10 +83,8 @@ export default function SelectBoxContainer({
         } else if (
           activeWindow.contentRef?.current &&
           mouseEnter &&
-          window?.type !== WindowType.Image &&
-          window?.type !== WindowType.Video &&
-          window?.type !== WindowType.Audio &&
-          window?.type !== WindowType.Info
+          window &&
+          getWindowConfig(window.type).supportsSelection
         ) {
           setIsSelecting(true);
           setStart({ x: e.clientX, y: e.clientY });

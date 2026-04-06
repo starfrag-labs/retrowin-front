@@ -1,5 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useStatPath } from "@/api/generated";
+import { getWindowConfig } from "@/config/window_type_config";
 import { WindowType } from "@/interfaces/window";
 import { useEventStore } from "@/store/event.store";
 import { useWindowStore } from "@/store/window.store";
@@ -10,9 +11,6 @@ import WindowHeader from "./window_header";
 export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Constants
   const minWindowSize = useMemo(() => ({ width: 250, height: 180 }), []); // Minimum window size
-  const windowSize1 = useMemo(() => ({ width: 800, height: 400 }), []); // Large window size (uploader)
-  const windowSize2 = useMemo(() => ({ width: 600, height: 300 }), []); // Medium window size (navigator)
-  const windowSize3 = useMemo(() => ({ width: 300, height: 260 }), []); // Compact window size (info)
 
   // States
   const [maximized, setMaximized] = useState(false);
@@ -101,25 +99,14 @@ export default memo(function Window({ windowKey }: { windowKey: string }) {
   // Initialize window position and size (only once when window is created)
   useEffect(() => {
     if (windowRef.current && targetWindow && !positionInitializedRef.current) {
-      if (targetWindow.type === WindowType.Uploader) {
-        const x = document.body.clientWidth / 2 - windowSize1.width / 2;
-        const y = document.body.clientHeight / 2 - windowSize1.height / 2;
-        setWindowPosition({ x, y });
-        setWindowSize(windowSize1);
-      } else if (targetWindow.type === WindowType.Info) {
-        const x = document.body.clientWidth / 2 - windowSize3.width / 2;
-        const y = document.body.clientHeight / 2 - windowSize3.height / 2;
-        setWindowPosition({ x, y });
-        setWindowSize(windowSize3);
-      } else {
-        const x = document.body.clientWidth / 2 - windowSize2.width / 2;
-        const y = document.body.clientHeight / 2 - windowSize2.height / 2;
-        setWindowPosition({ x, y });
-        setWindowSize(windowSize2);
-      }
+      const config = getWindowConfig(targetWindow.type);
+      const x = document.body.clientWidth / 2 - config.defaultSize.width / 2;
+      const y = document.body.clientHeight / 2 - config.defaultSize.height / 2;
+      setWindowPosition({ x, y });
+      setWindowSize(config.defaultSize);
       positionInitializedRef.current = true;
     }
-  }, [targetWindow, windowSize1, windowSize2, windowSize3]);
+  }, [targetWindow]);
 
   // Set window size
   useEffect(() => {
