@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { getWindowConfig } from "@/config/window_type_config";
 import { WindowType } from "@/interfaces/window";
-import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
-import { useMenuStore } from "@/store/menu.store";
-import { useSelectBoxStore } from "@/store/select_box.store";
+import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
 import styles from "./select_box_container.module.css";
 
@@ -17,16 +15,16 @@ export default function SelectBoxContainer({
 }) {
   // Store states
   const highlightedFile = useFileStore((state) => state.highlightedFile);
-  const menuRef = useMenuStore((state) => state.menuRef);
+  const menuRef = useFileStore((state) => state.menuRef);
   const currentWindow = useWindowStore((state) => state.currentWindow);
   const pressedKeys = useEventStore((state) => state.pressedKeys);
   const mouseEnter = useWindowStore((state) => state.mouseEnter);
   const resizingCursor = useEventStore((state) => state.resizingCursor);
   // Store actions
-  const setRect = useSelectBoxStore((state) => state.setRect);
+  const setRect = useFileStore((state) => state.setSelectBoxRect);
   const unselectAllFiles = useFileStore((state) => state.unselectAllFiles);
-  const setCurrentWindowKey = useSelectBoxStore(
-    (state) => state.setCurrentWindowKey
+  const setCurrentWindowKey = useFileStore(
+    (state) => state.setSelectBoxWindowKey
   );
   const findWindow = useWindowStore((state) => state.findWindow);
 

@@ -14,6 +14,11 @@ export type State = {
   } | null;
   fileRefs: Map<string, React.RefObject<HTMLElement | null>>;
   fileIconRefs: Map<string, React.RefObject<HTMLElement | null>>;
+  // Merged from menu.store
+  menuRef: React.RefObject<HTMLElement | null> | null;
+  // Merged from select_box.store
+  selectBoxRect: DOMRect | null;
+  selectBoxWindowKey: string | null;
 };
 
 export type Action = {
@@ -32,6 +37,11 @@ export type Action = {
     ref: React.RefObject<HTMLElement | null>
   ) => void;
   getSelectedFileKeys: () => string[];
+  // Merged from menu.store
+  setMenuRef: (ref: React.RefObject<HTMLElement | null>) => void;
+  // Merged from select_box.store
+  setSelectBoxRect: (rect: DOMRect | null) => void;
+  setSelectBoxWindowKey: (key: string | null) => void;
 };
 
 const initialState: State = {
@@ -40,6 +50,9 @@ const initialState: State = {
   highlightedFile: null,
   fileRefs: new Map(),
   fileIconRefs: new Map(),
+  menuRef: null,
+  selectBoxRect: null,
+  selectBoxWindowKey: null,
 };
 
 export const useFileStore = create<State & Action>((set, get) => ({
@@ -48,6 +61,9 @@ export const useFileStore = create<State & Action>((set, get) => ({
   highlightedFile: initialState.highlightedFile,
   fileRefs: initialState.fileRefs,
   fileIconRefs: initialState.fileIconRefs,
+  menuRef: initialState.menuRef,
+  selectBoxRect: initialState.selectBoxRect,
+  selectBoxWindowKey: initialState.selectBoxWindowKey,
   selectFile: (fileKey, windowKey) => {
     set((state) => {
       const serialKey = createSerialKey(fileKey, windowKey);
@@ -103,5 +119,18 @@ export const useFileStore = create<State & Action>((set, get) => ({
       fileKeys.add(fileKey);
     });
     return Array.from(fileKeys);
+  },
+
+  // Merged from menu.store
+  setMenuRef: (ref) => {
+    set({ menuRef: ref });
+  },
+
+  // Merged from select_box.store
+  setSelectBoxRect: (rect) => {
+    set({ selectBoxRect: rect });
+  },
+  setSelectBoxWindowKey: (key) => {
+    set({ selectBoxWindowKey: key });
   },
 }));

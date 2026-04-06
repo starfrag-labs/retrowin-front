@@ -12,7 +12,6 @@ import {
 } from "@/config/file_type_config";
 import { WindowType } from "@/interfaces/window";
 import { useFileStore } from "@/store/file.store";
-import { useSelectBoxStore } from "@/store/select_box.store";
 import { useWindowStore } from "@/store/window.store";
 import { createSerialKey } from "@/utils/serial_key";
 import FileIcon from "./file_icon";
@@ -57,8 +56,8 @@ export default memo(function FileItem({
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials
   );
-  const selectBox = useSelectBoxStore((state) => state.rect);
-  const targetWindow = useSelectBoxStore((state) => state.currentWindowKey);
+  const selectBox = useFileStore((state) => state.selectBoxRect);
+  const targetWindow = useFileStore((state) => state.selectBoxWindowKey);
   // Store actions
   const setFileIconRef = useFileStore((state) => state.setFileIconRef);
   const setHighlightedFile = useFileStore((state) => state.setHighlightedFile);

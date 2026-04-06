@@ -4,9 +4,8 @@ import { useMv } from "@/api/generated";
 import { isDragTarget } from "@/config/file_type_config";
 import { BackendFileType } from "@/interfaces/file";
 import { WindowType } from "@/interfaces/window";
-import { useEventStore } from "@/store/event.store";
 import { useFileStore } from "@/store/file.store";
-import { useMenuStore } from "@/store/menu.store";
+import { useEventStore } from "@/store/ui.store";
 import { useWindowStore } from "@/store/window.store";
 import { isFsQuery } from "@/utils/query_keys";
 import { parseSerialKey } from "@/utils/serial_key";
@@ -32,7 +31,7 @@ export default function DragFileContainer({
 
   // Store states
   const currentWindow = useWindowStore((state) => state.currentWindow);
-  const menuRef = useMenuStore((state) => state.menuRef);
+  const menuRef = useFileStore((state) => state.menuRef);
   const highlightedFile = useFileStore((state) => state.highlightedFile);
   const selectedFileSerials = useFileStore(
     (state) => state.selectedFileSerials
