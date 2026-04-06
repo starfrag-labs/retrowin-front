@@ -630,14 +630,30 @@ export const handlers = [
 
     const url = new URL(request.url);
     const filePath = url.searchParams.get("path") || "/";
-
-    // Create a data URL with mock content for the file
     const fileName = filePath.split("/").pop() || "file";
-    const mockContent = `Mock file content for ${fileName}`;
-    const _blob = new Blob([mockContent]);
-    // Use a blob URL that MSW can intercept
-    const dataUrl = `data:application/octet-stream;base64,${btoa(mockContent)}`;
+    const ext = fileName.split(".").pop()?.toLowerCase() || "";
 
+    // Serve actual mock media files from public directory
+    if ([".png", ".jpg", ".jpeg", ".gif", ".webp"].includes(`.${ext}`) || ext === "png" || ext === "jpg" || ext === "jpeg") {
+      return HttpResponse.json({
+        downloadUrl: {
+          downloadUrl: "/mock-media/test-image.png",
+          expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        },
+      });
+    }
+    if ([".mp4", ".webm", ".mov"].includes(`.${ext}`) || ext === "mp4" || ext === "webm") {
+      return HttpResponse.json({
+        downloadUrl: {
+          downloadUrl: "/mock-media/test-video.mp4",
+          expiresAt: new Date(Date.now() + 3600000).toISOString(),
+        },
+      });
+    }
+
+    // Default: data URL for other files
+    const mockContent = `Mock file content for ${fileName}`;
+    const dataUrl = `data:application/octet-stream;base64,${btoa(mockContent)}`;
     return HttpResponse.json({
       downloadUrl: {
         downloadUrl: dataUrl,

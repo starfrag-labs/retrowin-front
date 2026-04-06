@@ -194,7 +194,7 @@ const initMockFiles = () => {
 
   const video = createMockFile(
     "sample-video.mp4",
-    "block" as FileType,
+    "object" as FileType,
     HOME_KEY,
     10485760,
     "/home/sample-video.mp4"

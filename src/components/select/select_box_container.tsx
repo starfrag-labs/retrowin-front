@@ -69,7 +69,14 @@ export default function SelectBoxContainer({
           );
           setCurrentWindowKey(currentWindow.key);
           // If the window is a content window
-        } else if (currentWindow.contentRef?.current && mouseEnter) {
+        } else if (
+          currentWindow.contentRef?.current &&
+          mouseEnter &&
+          window?.type !== WindowType.Image &&
+          window?.type !== WindowType.Video &&
+          window?.type !== WindowType.Audio &&
+          window?.type !== WindowType.Info
+        ) {
           setIsSelecting(true);
           setStart({ x: e.clientX, y: e.clientY });
           document.body.style.cursor = "default";
