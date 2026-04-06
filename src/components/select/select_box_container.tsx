@@ -46,6 +46,10 @@ export default function SelectBoxContainer({
       // Check if the click is inside the highlighted file
       if (highlightedFile) return;
       if (resizingCursor) return;
+      // Check if the click is inside a window header (dragging the window)
+      const target = e.target as HTMLElement;
+      const headerEl = target.closest("[role='toolbar']");
+      if (headerEl) return;
 
       // If Shift key not pressed, unselect all files
       if (!pressedKeys.includes("Shift")) {
@@ -54,23 +58,29 @@ export default function SelectBoxContainer({
 
       // Get target window rect and start selecting
       setCurrentWindowKey(null);
-      if (currentWindow) {
-        const window = findWindow(currentWindow.key);
+
+      // Determine the active window: use currentWindow if valid, otherwise
+      // fall back to the background window (e.g. after closing a window)
+      const activeWindow =
+        currentWindow && findWindow(currentWindow.key) ? currentWindow : null;
+
+      if (activeWindow) {
+        const window = findWindow(activeWindow.key);
         // If the window is a background window
         if (
           window?.type === WindowType.Background &&
-          currentWindow.windowRef.current
+          activeWindow.windowRef.current
         ) {
           setIsSelecting(true);
           setStart({ x: e.clientX, y: e.clientY });
           document.body.style.cursor = "default";
           setTargetWindowRect(
-            currentWindow.windowRef.current.getBoundingClientRect()
+            activeWindow.windowRef.current.getBoundingClientRect()
           );
-          setCurrentWindowKey(currentWindow.key);
+          setCurrentWindowKey(activeWindow.key);
           // If the window is a content window
         } else if (
-          currentWindow.contentRef?.current &&
+          activeWindow.contentRef?.current &&
           mouseEnter &&
           window?.type !== WindowType.Image &&
           window?.type !== WindowType.Video &&
@@ -81,9 +91,20 @@ export default function SelectBoxContainer({
           setStart({ x: e.clientX, y: e.clientY });
           document.body.style.cursor = "default";
           setTargetWindowRect(
-            currentWindow.contentRef.current.getBoundingClientRect()
+            activeWindow.contentRef.current.getBoundingClientRect()
           );
-          setCurrentWindowKey(currentWindow.key);
+          setCurrentWindowKey(activeWindow.key);
+        }
+      } else {
+        // Fallback: find background workspace element directly
+        const backgroundEl = containerRef.current?.querySelector(
+          "[aria-label='background workspace']"
+        );
+        if (backgroundEl) {
+          setIsSelecting(true);
+          setStart({ x: e.clientX, y: e.clientY });
+          document.body.style.cursor = "default";
+          setTargetWindowRect(backgroundEl.getBoundingClientRect());
         }
       }
     },
