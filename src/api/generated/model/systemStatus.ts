@@ -9,11 +9,10 @@
 /**
  * System status
  */
-export type SystemStatus = typeof SystemStatus[keyof typeof SystemStatus];
-
+export type SystemStatus = (typeof SystemStatus)[keyof typeof SystemStatus];
 
 export const SystemStatus = {
-  active: 'active',
-  inactive: 'inactive',
-  maintenance: 'maintenance',
+  active: "active",
+  inactive: "inactive",
+  maintenance: "maintenance",
 } as const;

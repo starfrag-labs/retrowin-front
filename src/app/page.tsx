@@ -33,14 +33,19 @@ export default function SystemSelectionPage() {
   // Logout mutation
   const logoutMutation = useLogout({
     mutation: {
-      onSuccess: () => {
-        // Invalidate user query to force refetch
+      onSuccess: (response) => {
+        // Clear local state
         queryClient.invalidateQueries({ queryKey: ["/api/user"] });
         queryClient.removeQueries({ queryKey: ["/api/user"] });
+
+        // If logoutUrl is provided, redirect to Keycloak to terminate SSO session
+        const logoutUrl = response.data?.logoutUrl;
+        if (logoutUrl) {
+          window.location.href = logoutUrl;
+        }
       },
       onError: (error) => {
         console.error("Logout failed:", error);
-        // Still invalidate to try refetching
         queryClient.invalidateQueries({ queryKey: ["/api/user"] });
       },
     },

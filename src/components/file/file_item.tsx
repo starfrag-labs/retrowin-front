@@ -213,7 +213,7 @@ export default memo(function FileItem({
               icon={icon}
               fileName={name}
               hasContent={
-                type === VirtualFileType.Trash? !!trashLsQuery.data : false
+                type === VirtualFileType.Trash ? !!trashLsQuery.data : false
               }
             />
           )}

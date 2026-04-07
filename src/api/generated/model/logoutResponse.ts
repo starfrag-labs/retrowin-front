@@ -5,8 +5,8 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.2.0
  */
-import type { System } from "./system";
 
-export interface SystemResponse {
-  system: System;
+export interface LogoutResponse {
+  /** Keycloak logout URL for RP-initiated logout. Empty if no SSO session exists. */
+  logoutUrl: string;
 }
