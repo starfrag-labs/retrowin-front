@@ -1,25 +1,25 @@
 import Image from "next/image";
 
 const iconMap = {
-  "Folder Closed": "/icons/sprites/Folder Closed.webp",
-  "Folder Opened": "/icons/sprites/Folder Opened.webp",
-  "Recycle Bin (empty)": "/icons/sprites/Recycle Bin (empty).webp",
-  "Recycle Bin (full)": "/icons/sprites/Recycle Bin (full).webp",
-  "Generic Document": "/icons/sprites/Generic Document.webp",
-  "Generic Text Document": "/icons/sprites/Generic Text Document.webp",
-  "Generic Audio": "/icons/sprites/Generic Audio.webp",
-  "Generic Video": "/icons/sprites/Generic Video.webp",
-  "Generic Media": "/icons/sprites/Generic Media.webp",
-  "My Documents": "/icons/sprites/My Documents.webp",
-  "My Music": "/icons/sprites/My Music.webp",
-  "My Pictures": "/icons/sprites/My Pictures.webp",
-  "My Videos": "/icons/sprites/My Videos.webp",
-  Bitmap: "/icons/sprites/Bitmap.webp",
-  GIF: "/icons/sprites/GIF.webp",
-  JPG: "/icons/sprites/JPG.webp",
-  TIFF: "/icons/sprites/TIFF.webp",
-  TXT: "/icons/sprites/TXT.webp",
-  Up: "/icons/sprites/Up.webp",
+  folder_closed: "/icons/sprites/folder_closed.webp",
+  folder_opened: "/icons/sprites/folder_opened.webp",
+  recycle_bin_empty: "/icons/sprites/recycle_bin_empty.webp",
+  recycle_bin_full: "/icons/sprites/recycle_bin_full.webp",
+  generic_document: "/icons/sprites/generic_document.webp",
+  generic_text_document: "/icons/sprites/generic_text_document.webp",
+  generic_audio: "/icons/sprites/generic_audio.webp",
+  generic_video: "/icons/sprites/generic_video.webp",
+  generic_media: "/icons/sprites/generic_media.webp",
+  my_documents: "/icons/sprites/my_documents.webp",
+  my_music: "/icons/sprites/my_music.webp",
+  my_pictures: "/icons/sprites/my_pictures.webp",
+  my_videos: "/icons/sprites/my_videos.webp",
+  bitmap: "/icons/sprites/bitmap.webp",
+  gif: "/icons/sprites/gif.webp",
+  jpg: "/icons/sprites/jpg.webp",
+  tiff: "/icons/sprites/tiff.webp",
+  txt: "/icons/sprites/txt.webp",
+  up: "/icons/sprites/up.webp",
 } as const;
 
 const iconSize = 48;
@@ -27,7 +27,7 @@ const iconSize = 48;
 export const XPImageIcons = {
   Folder: () => (
     <Image
-      src={iconMap["Folder Closed"]}
+      src={iconMap.folder_closed}
       alt="Folder"
       width={iconSize}
       height={iconSize}
@@ -37,7 +37,7 @@ export const XPImageIcons = {
 
   FolderOpen: () => (
     <Image
-      src={iconMap["Folder Opened"]}
+      src={iconMap.folder_opened}
       alt="Folder Open"
       width={iconSize}
       height={iconSize}
@@ -47,7 +47,7 @@ export const XPImageIcons = {
 
   File: () => (
     <Image
-      src={iconMap["Generic Document"]}
+      src={iconMap.generic_document}
       alt="File"
       width={iconSize}
       height={iconSize}
@@ -57,7 +57,7 @@ export const XPImageIcons = {
 
   TextFile: () => (
     <Image
-      src={iconMap["Generic Text Document"]}
+      src={iconMap.generic_text_document}
       alt="Text File"
       width={iconSize}
       height={iconSize}
@@ -67,7 +67,7 @@ export const XPImageIcons = {
 
   Audio: () => (
     <Image
-      src={iconMap["Generic Audio"]}
+      src={iconMap.generic_audio}
       alt="Audio"
       width={iconSize}
       height={iconSize}
@@ -77,7 +77,7 @@ export const XPImageIcons = {
 
   Video: () => (
     <Image
-      src={iconMap["Generic Video"]}
+      src={iconMap.generic_video}
       alt="Video"
       width={iconSize}
       height={iconSize}
@@ -87,7 +87,7 @@ export const XPImageIcons = {
 
   Media: () => (
     <Image
-      src={iconMap["Generic Media"]}
+      src={iconMap.generic_media}
       alt="Media"
       width={iconSize}
       height={iconSize}
@@ -97,7 +97,7 @@ export const XPImageIcons = {
 
   Trash: () => (
     <Image
-      src={iconMap["Recycle Bin (empty)"]}
+      src={iconMap.recycle_bin_empty}
       alt="Trash"
       width={iconSize}
       height={iconSize}
@@ -107,7 +107,7 @@ export const XPImageIcons = {
 
   TrashFull: () => (
     <Image
-      src={iconMap["Recycle Bin (full)"]}
+      src={iconMap.recycle_bin_full}
       alt="Trash Full"
       width={iconSize}
       height={iconSize}
@@ -117,7 +117,7 @@ export const XPImageIcons = {
 
   Home: () => (
     <Image
-      src={iconMap["My Documents"]}
+      src={iconMap.my_documents}
       alt="Home"
       width={iconSize}
       height={iconSize}
@@ -127,7 +127,7 @@ export const XPImageIcons = {
 
   Upload: () => (
     <Image
-      src={iconMap.Up}
+      src={iconMap.up}
       alt="Upload"
       width={iconSize}
       height={iconSize}
@@ -137,7 +137,7 @@ export const XPImageIcons = {
 
   JPG: () => (
     <Image
-      src={iconMap.JPG}
+      src={iconMap.jpg}
       alt="JPG"
       width={iconSize}
       height={iconSize}
@@ -147,7 +147,7 @@ export const XPImageIcons = {
 
   GIF: () => (
     <Image
-      src={iconMap.GIF}
+      src={iconMap.gif}
       alt="GIF"
       width={iconSize}
       height={iconSize}
@@ -157,7 +157,7 @@ export const XPImageIcons = {
 
   Bitmap: () => (
     <Image
-      src={iconMap.Bitmap}
+      src={iconMap.bitmap}
       alt="BMP"
       width={iconSize}
       height={iconSize}
@@ -167,7 +167,7 @@ export const XPImageIcons = {
 
   TIFF: () => (
     <Image
-      src={iconMap.TIFF}
+      src={iconMap.tiff}
       alt="TIFF"
       width={iconSize}
       height={iconSize}
