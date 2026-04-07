@@ -5,8 +5,8 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.2.0
  */
-import type { ErrorError } from './errorError';
 
-export interface Error {
-  error: ErrorError;
-}
+export type MvResultErrorsItem = {
+  path: string;
+  error: string;
+};

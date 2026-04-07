@@ -5,8 +5,11 @@
  * Retrowin File Management System API
  * OpenAPI spec version: 0.2.0
  */
-import type { ErrorError } from './errorError';
 
-export interface Error {
-  error: ErrorError;
+export interface RmRequest {
+  /**
+     * List of paths to remove
+     * @minItems 1
+     */
+  paths: string[];
 }

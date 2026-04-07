@@ -211,8 +211,9 @@ export default memo(function FileItem({
               onClick={handleSingleClick}
               onDoubleClick={handleDoubleClick}
               icon={icon}
+              fileName={name}
               hasContent={
-                type === VirtualFileType.Trash ? !!trashLsQuery.data : false
+                type === VirtualFileType.Trash? !!trashLsQuery.data : false
               }
             />
           )}

@@ -10,10 +10,10 @@ export interface CreateSystemUserRequest {
   /** External user ID */
   userId: string;
   /**
-   * Username within the system
-   * @minLength 1
-   * @maxLength 255
-   */
+     * Username within the system
+     * @minLength 1
+     * @maxLength 255
+     */
   username: string;
   /**
      * Optional UNIX user ID.

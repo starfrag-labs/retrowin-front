@@ -1,6 +1,6 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { getDownloadUrl, ls, useMv, useUnlink } from "@/api/generated";
+import { getDownloadUrl, ls, useMv, useRm } from "@/api/generated";
 import { useFileStore } from "@/store/file.store";
 import { useWindowStore } from "@/store/window.store";
 import { BackendFileType, type FileType, VirtualFileType } from "@/types/file";
@@ -33,7 +33,7 @@ export default function FileMenu({
   const systemId = currentWindow?.systemId || "";
 
   // Mutations
-  const unlinkMutation = useUnlink();
+  const rmMutation = useRm();
   const mvMutation = useMv();
 
   // Store actions
@@ -153,14 +153,10 @@ export default function FileMenu({
     closeMenu();
     try {
       const paths = getTargetPaths();
-      await Promise.all(
-        paths.map((p) =>
-          mvMutation.mutateAsync({
-            systemId,
-            data: { path: p, destination: "/home/.trash" },
-          })
-        )
-      );
+      await mvMutation.mutateAsync({
+        systemId,
+        data: { sources: paths, destination: "/home/.trash" },
+      });
       queryClient.invalidateQueries({ predicate: isFsQuery });
     } catch (error) {
       console.error("[FileMenu] Move to trash failed:", error);
@@ -171,19 +167,15 @@ export default function FileMenu({
     closeMenu();
     try {
       const paths = getTargetPaths();
-      await Promise.all(
-        paths.map((p) =>
-          unlinkMutation.mutateAsync({
-            systemId,
-            params: { path: p },
-          })
-        )
-      );
+      await rmMutation.mutateAsync({
+        systemId,
+        data: { paths },
+      });
       queryClient.invalidateQueries({ predicate: isFsQuery });
     } catch (error) {
       console.error("[FileMenu] Permanent delete failed:", error);
     }
-  }, [closeMenu, getTargetPaths, systemId, unlinkMutation, queryClient]);
+  }, [closeMenu, getTargetPaths, systemId, rmMutation, queryClient]);
 
   const handleEmptyTrash = useCallback(async () => {
     closeMenu();
@@ -194,20 +186,19 @@ export default function FileMenu({
         { credentials: "include" }
       );
       if (readDirResult.data && "entries" in readDirResult.data) {
-        await Promise.all(
-          readDirResult.data.entries.map((entry) =>
-            unlinkMutation.mutateAsync({
-              systemId,
-              params: { path: `${path === "/" ? "" : path}/${entry.name}` },
-            })
-          )
+        const paths = readDirResult.data.entries.map(
+          (entry) => `${path === "/" ? "" : path}/${entry.name}`
         );
+        await rmMutation.mutateAsync({
+          systemId,
+          data: { paths },
+        });
         queryClient.invalidateQueries({ predicate: isFsQuery });
       }
     } catch (error) {
       console.error("[FileMenu] Empty trash failed:", error);
     }
-  }, [closeMenu, path, systemId, unlinkMutation, queryClient]);
+  }, [closeMenu, path, systemId, rmMutation, queryClient]);
 
   // Info action
   const handleInfo = useCallback(() => {
