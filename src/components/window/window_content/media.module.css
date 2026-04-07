@@ -1,4 +1,69 @@
 .container {
-  position: relative;
+  display: flex;
+  flex-direction: column;
   background-color: #000;
+}
+
+.imageArea {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Bottom toolbar - Windows XP Picture and Fax Viewer style */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  height: 32px;
+  min-height: 32px;
+  padding: 0 8px;
+  background-color: #ece9d8;
+  border-top: 1px solid #aca899;
+}
+
+.toolbarGroup {
+  display: flex;
+  align-items: center;
+  gap: 1px;
+}
+
+.toolbarDivider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background-color: #aca899;
+}
+
+.toolButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: #000;
+  cursor: pointer;
+  padding: 0;
+}
+
+.toolButton:hover {
+  background-color: #c1d2ee;
+}
+
+.toolButton:active {
+  background-color: #a7c4e5;
+}
+
+.toolButton:disabled {
+  color: #aca899;
+  cursor: default;
+}
+
+.toolButton:disabled:hover {
+  background: transparent;
 }

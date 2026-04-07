@@ -1,6 +1,6 @@
 import { useGetDownloadUrl } from "@/api/generated";
 import { useWindowStore } from "@/store/window.store";
-import mediaStyles from "./media.module.css";
+import styles from "./video.module.css";
 
 export default function VideoViewer({ fileKey: path }: { fileKey: string }) {
   // Get system ID from window store
@@ -21,7 +21,7 @@ export default function VideoViewer({ fileKey: path }: { fileKey: string }) {
   );
 
   return (
-    <div className={`full-size flex-center ${mediaStyles.container}`}>
+    <div className={`full-size flex-center ${styles.container}`}>
       {downloadQuery.data && (
         <video
           controls
