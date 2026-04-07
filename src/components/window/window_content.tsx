@@ -32,7 +32,7 @@ function getContentProps(
     case WindowType.Uploader:
       return { targetPath: fileKey };
     case WindowType.Image:
-      return { fileKey, fileName };
+      return { fileKey, fileName, windowKey };
     case WindowType.Video:
       return { fileKey };
     case WindowType.Info:
