@@ -5,6 +5,7 @@ import type { Query } from "@tanstack/react-query";
  */
 export const QUERY_KEYS = {
   FS_PREFIX: "/api/fs/",
+  SYSCALL_PREFIX: "/api/syscall/",
   LS_SUFFIX: "/ls",
   STAT_SUFFIX: "/stat",
 } as const;
@@ -17,7 +18,8 @@ export const QUERY_KEYS = {
 export function isFsQuery(query: Query): boolean {
   const queryKey = query.queryKey[0] as string;
   return (
-    queryKey.startsWith(QUERY_KEYS.FS_PREFIX) &&
+    (queryKey.startsWith(QUERY_KEYS.FS_PREFIX) ||
+      queryKey.startsWith(QUERY_KEYS.SYSCALL_PREFIX)) &&
     (queryKey.endsWith(QUERY_KEYS.LS_SUFFIX) ||
       queryKey.endsWith(QUERY_KEYS.STAT_SUFFIX))
   );

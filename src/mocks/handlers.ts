@@ -248,8 +248,8 @@ export const handlers = [
     });
   }),
 
-  // Filesystem endpoints - Create directory
-  http.post("/api/fs/:systemId/mkdir", async ({ params, request }) => {
+  // Syscall endpoints - Create directory
+  http.post("/api/syscall/:systemId/mkdir", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -306,8 +306,8 @@ export const handlers = [
     );
   }),
 
-  // Filesystem endpoints - Rename (same directory)
-  http.post("/api/fs/:systemId/rename", async ({ params, request }) => {
+  // Syscall endpoints - Rename (same directory)
+  http.post("/api/syscall/:systemId/rename", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -352,80 +352,8 @@ export const handlers = [
     });
   }),
 
-  // Filesystem endpoints - Move (mv)
-  http.post("/api/fs/:systemId/mv", async ({ params, request }) => {
-    if (params.systemId !== MOCK_SYSTEM_ID) {
-      return HttpResponse.json(
-        { error: { type: "not_found", message: "System not found" } },
-        { status: 404 }
-      );
-    }
-
-    const body = (await request.json()) as {
-      path?: string;
-      destination?: string;
-    };
-    const { path: fromPath, destination } = body;
-
-    if (!fromPath || !destination) {
-      return HttpResponse.json(
-        {
-          error: {
-            type: "bad_request",
-            message: "path and destination are required",
-          },
-        },
-        { status: 400 }
-      );
-    }
-
-    const sourceFile = getFileByPath(fromPath);
-    if (!sourceFile) {
-      return HttpResponse.json(
-        { error: { type: "not_found", message: "Source file not found" } },
-        { status: 404 }
-      );
-    }
-
-    // Check if destination is an existing directory
-    const destDir = getFileByPath(destination);
-    let targetParent: ReturnType<typeof getFileByPath>;
-    let newName: string;
-
-    if (destDir) {
-      // Destination is an existing directory — move into it keeping original name
-      targetParent = destDir;
-      newName = sourceFile.fileName;
-    } else {
-      // Destination is a full target path — extract parent dir and new name
-      const destParts = destination.split("/").filter(Boolean);
-      newName = destParts.pop() || sourceFile.fileName;
-      const targetParentPath =
-        destParts.length > 0 ? `/${destParts.join("/")}` : "/";
-
-      const possibleParent = getFileByPath(targetParentPath);
-      if (!possibleParent) {
-        return HttpResponse.json(
-          { error: { type: "not_found", message: "Target parent not found" } },
-          { status: 404 }
-        );
-      }
-      targetParent = possibleParent;
-    }
-
-    // Update file parent and name
-    const updated = updateFileParent(sourceFile.fileKey, targetParent.fileKey);
-    if (updated) {
-      updateFileName(updated.fileKey, newName);
-    }
-
-    return HttpResponse.json({
-      inode: toInode(updated || sourceFile),
-    });
-  }),
-
-  // Filesystem endpoints - Create symlink (ln)
-  http.post("/api/fs/:systemId/ln", async ({ params, request }) => {
+  // Syscall endpoints - Create symlink (ln)
+  http.post("/api/syscall/:systemId/ln", async ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -498,8 +426,8 @@ export const handlers = [
     );
   }),
 
-  // Filesystem endpoints - Delete (unlink)
-  http.delete("/api/fs/:systemId/unlink", ({ params, request }) => {
+  // Syscall endpoints - Delete (unlink)
+  http.delete("/api/syscall/:systemId/unlink", ({ params, request }) => {
     if (params.systemId !== MOCK_SYSTEM_ID) {
       return HttpResponse.json(
         { error: { type: "not_found", message: "System not found" } },
@@ -626,6 +554,146 @@ export const handlers = [
       );
     }
   ),
+
+  // Syscall endpoints - List directory (ls)
+  http.get("/api/syscall/:systemId/ls", ({ params, request }) => {
+    if (params.systemId !== MOCK_SYSTEM_ID) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "System not found" } },
+        { status: 404 }
+      );
+    }
+
+    const url = new URL(request.url);
+    const path = url.searchParams.get("path") || "/";
+
+    const file = getFileByPath(path);
+    if (!file) {
+      return HttpResponse.json({
+        entries: [],
+      });
+    }
+
+    const children = getChildren(file.fileKey);
+
+    return HttpResponse.json({
+      entries: children.map((child) => ({
+        name: child.fileName,
+        inodeId: child.fileKey,
+        fileType:
+          child.type === BackendFileType.Directory
+            ? 4
+            : child.type === BackendFileType.Object
+              ? 3
+              : child.type === BackendFileType.Symlink
+                ? 10
+                : 8,
+      })),
+    });
+  }),
+
+  // Syscall endpoints - Batch remove (rm)
+  http.post("/api/syscall/:systemId/rm", async ({ params, request }) => {
+    if (params.systemId !== MOCK_SYSTEM_ID) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "System not found" } },
+        { status: 404 }
+      );
+    }
+
+    const body = (await request.json()) as { paths?: string[] };
+    const paths = body.paths || [];
+
+    const deleted: string[] = [];
+    const errors: { path: string; error: string }[] = [];
+
+    for (const p of paths) {
+      const file = getFileByPath(p);
+      if (file) {
+        deleteFile(file.fileKey);
+        deleted.push(p);
+      } else {
+        errors.push({ path: p, error: "not found" });
+      }
+    }
+
+    return HttpResponse.json({
+      deleted,
+      ...(errors.length > 0 ? { errors } : {}),
+    });
+  }),
+
+  // Syscall endpoints - Batch move (mv)
+  http.post("/api/syscall/:systemId/mv", async ({ params, request }) => {
+    if (params.systemId !== MOCK_SYSTEM_ID) {
+      return HttpResponse.json(
+        { error: { type: "not_found", message: "System not found" } },
+        { status: 404 }
+      );
+    }
+
+    const body = (await request.json()) as {
+      sources?: string[];
+      destination?: string;
+    };
+    const { sources = [], destination } = body;
+
+    if (!destination) {
+      return HttpResponse.json(
+        { error: { type: "bad_request", message: "destination is required" } },
+        { status: 400 }
+      );
+    }
+
+    const moved: string[] = [];
+    const errors: { path: string; error: string }[] = [];
+
+    // Check if destination is an existing directory
+    const destDir = getFileByPath(destination);
+
+    for (const sourcePath of sources) {
+      const sourceFile = getFileByPath(sourcePath);
+      if (!sourceFile) {
+        errors.push({ path: sourcePath, error: "not found" });
+        continue;
+      }
+
+      let targetParent: ReturnType<typeof getFileByPath>;
+      let newName: string;
+
+      if (destDir && destDir.type === BackendFileType.Directory) {
+        targetParent = destDir;
+        newName = sourceFile.fileName;
+      } else {
+        const destParts = destination.split("/").filter(Boolean);
+        newName = destParts.pop() || sourceFile.fileName;
+        const targetParentPath =
+          destParts.length > 0 ? `/${destParts.join("/")}` : "/";
+        const possibleParent = getFileByPath(targetParentPath);
+        if (!possibleParent) {
+          errors.push({ path: sourcePath, error: "target parent not found" });
+          continue;
+        }
+        targetParent = possibleParent;
+      }
+
+      const updated = updateFileParent(
+        sourceFile.fileKey,
+        targetParent.fileKey
+      );
+      if (updated) {
+        updateFileName(updated.fileKey, newName);
+        moved.push(sourcePath);
+      } else {
+        errors.push({ path: sourcePath, error: "move failed" });
+      }
+    }
+
+    return HttpResponse.json({
+      moved,
+      ...(errors.length > 0 ? { errors } : {}),
+    });
+  }),
 
   // Download endpoints - Get download URL
   http.get("/api/fs/:systemId/download", ({ params, request }) => {

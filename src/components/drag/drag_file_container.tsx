@@ -185,36 +185,26 @@ export default function DragFileContainer({
     // Move the selected elements to the target folder
     if (targetPath && pointerMoved) {
       // Get the file paths of the selected files
-      const filePaths = selectedFileSerials.map(
-        (serialKey) => parseSerialKey(serialKey).fileKey
-      );
+      const filePaths = selectedFileSerials
+        .map((serialKey) => parseSerialKey(serialKey).fileKey)
+        .filter((p) => p !== targetPath);
 
-      // Get system ID
-      const window = findWindow(currentWindow?.key || "");
-      const systemId = window?.systemId || "";
+      if (filePaths.length > 0) {
+        // Get system ID
+        const window = findWindow(currentWindow?.key || "");
+        const systemId = window?.systemId || "";
 
-      // Use mv API to move files
-      await Promise.all(
-        filePaths.map((fromPath) => {
-          if (fromPath !== targetPath) {
-            const fileName =
-              fromPath.split("/").filter(Boolean).pop() || "file";
-            const destination = `${targetPath === "/" ? "" : targetPath}/${fileName}`;
+        // Use batch mv API to move all files at once
+        await mvMutation.mutateAsync({
+          systemId,
+          data: { sources: filePaths, destination: targetPath },
+        });
 
-            // Call mv API
-            return mvMutation.mutateAsync({
-              systemId,
-              data: { path: fromPath, destination },
-            });
-          }
-          return Promise.resolve();
-        })
-      );
-
-      // Refetch queries after move to update UI immediately
-      await queryClient.refetchQueries({
-        predicate: isFsQuery,
-      });
+        // Refetch queries after move to update UI immediately
+        await queryClient.refetchQueries({
+          predicate: isFsQuery,
+        });
+      }
 
       unselectAllFiles();
     }

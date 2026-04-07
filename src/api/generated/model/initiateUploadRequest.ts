@@ -12,8 +12,8 @@ export interface InitiateUploadRequest {
   /** MIME content type */
   contentType?: string;
   /**
-   * File size in bytes
-   * @minimum 0
-   */
+     * File size in bytes
+     * @minimum 0
+     */
   size: number;
 }
