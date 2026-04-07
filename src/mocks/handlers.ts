@@ -83,7 +83,7 @@ export const handlers = [
 
   http.post("/api/auth/logout", () => {
     isAuthenticated = false;
-    return new HttpResponse(null, { status: 204 });
+    return HttpResponse.json({ logoutUrl: "" });
   }),
 
   // User endpoints

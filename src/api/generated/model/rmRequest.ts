@@ -8,8 +8,8 @@
 
 export interface RmRequest {
   /**
-     * List of paths to remove
-     * @minItems 1
-     */
+   * List of paths to remove
+   * @minItems 1
+   */
   paths: string[];
 }
