@@ -147,9 +147,13 @@ export default function Uploader({ targetPath }: { targetPath: string }) {
       // Sort files by size (small to large)
       const sortedFiles = Array.from(files).sort((a, b) => a.size - b.size);
 
-      // Upload files sequentially
-      for (const file of sortedFiles) {
-        await uploadFile(file);
+      // Upload files in parallel with concurrency limit
+      const concurrency = Number(
+        process.env.NEXT_PUBLIC_UPLOAD_CONCURRENCY || 10
+      );
+      for (let i = 0; i < sortedFiles.length; i += concurrency) {
+        const batch = sortedFiles.slice(i, i + concurrency);
+        await Promise.allSettled(batch.map((file) => uploadFile(file)));
       }
     },
     [uploadFile]
